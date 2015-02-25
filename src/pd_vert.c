@@ -8,5 +8,5 @@ void pdVertInit(pdVert *vert)
 void pdVertUpdateZeta(pdVert *vert, double z)
 {
   vert->z = z;
-  vert->zeta = sqrt( RK_G / 0.26 );
+  vert->zeta = sqrt( RK_G / vert->z );
 }

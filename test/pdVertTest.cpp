@@ -14,14 +14,10 @@ TEST(pdVertTest, UpdateZeta)
   pdVert vert;
 
   pdVertUpdateZeta( &vert, 0.26 );
+  EXPECT_EQ( 0.26, vert.z );
   EXPECT_EQ( sqrt(RK_G/0.26), vert.zeta );
+
+  pdVertUpdateZeta( &vert, 0.3 );
+  EXPECT_EQ( 0.3, vert.z );
+  EXPECT_EQ( sqrt(RK_G/0.3), vert.zeta );
 }
-
-
-
-// TEST(pdVertTest, UpdateVert)
-// {
-//   pdVert vert;
-
-//   vert.z = 0.26;
-// }

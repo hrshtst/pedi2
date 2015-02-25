@@ -20,9 +20,9 @@ CPPFLAGS += -isystem $(GTEST_INC_DIR)
 CXXFLAGS += -g -Wall -Wextra -pthread
 
 # You need to edit below when you add a new test
-OBJ=pedi2_ctrl.o pd_vert.o
-TESTOBJ=pedi2CtrlTest.o pdVertTest.o
-TESTS=pedi2CtrlTest pdVertTest
+OBJ=pd_vrt.o
+TESTOBJ=pdVrtTest.o
+TESTS=pdVrtTest
 
 LIBOBJ=$(addprefix $(SRCDIR)/, $(OBJ))
 

@@ -1,2 +1,7 @@
 *.o
+*.so
 /test/gtest/*
+G*
+/test/gtest_main.a
+/test/pedi2CtrlTest
+/example/ctrl_test

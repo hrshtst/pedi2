@@ -1,12 +1,12 @@
-#include <pedi2/pd_vert.h>
+#include <pedi2/pd_vrt.h>
 
-void pdVertInit(pdVert *vert)
+void pdVrtInit(pdVrt *vrt)
 {
-  vert->z = 0;
+  vrt->z = 0;
 }
 
-void pdVertUpdateZeta(pdVert *vert, double z)
+void pdVrtUpdateZeta(pdVrt *vrt, double z)
 {
-  vert->z = z;
-  vert->zeta = sqrt( RK_G / vert->z );
+  vrt->z = z;
+  vrt->zeta = sqrt( RK_G / vrt->z );
 }

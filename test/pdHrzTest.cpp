@@ -6,8 +6,9 @@ class pdHrzTest : public testing::Test {
  protected:
   virtual void SetUp() {
     pdVrtInit( &vrt );
-    pdHrzInit( &hrz, &vrt );
+    pdHrzInit( &hrz );
     pdVrtUpdateZeta( &vrt, 0.26 );
+    pdHrzSetup( &hrz, &vrt );
   };
   virtual void TearDown() {};
 
@@ -17,16 +18,25 @@ class pdHrzTest : public testing::Test {
 
 TEST_F(pdHrzTest, Init)
 {
-  pdVrt _vrt;
   pdHrz _hrz;
 
-  pdVrtInit( &_vrt );
-  pdHrzInit( &_hrz, &_vrt );
+  pdHrzInit( &_hrz );
   EXPECT_EQ( 0, _hrz.q1 );
   EXPECT_EQ( 0, _hrz.q2 );
   EXPECT_EQ( 0, _hrz.kappa );
   EXPECT_EQ( 0, _hrz.rho );
   EXPECT_EQ( 0, _hrz.kr );
+  EXPECT_EQ( NULL, _hrz.vrt );
+}
+
+TEST_F(pdHrzTest, Setup)
+{
+  pdVrt _vrt;
+  pdHrz _hrz;
+
+  pdVrtInit( &_vrt );
+  pdHrzInit( &_hrz );
+  pdHrzSetup( &_hrz, &_vrt );
   EXPECT_EQ( &_vrt, _hrz.vrt );
 }
 

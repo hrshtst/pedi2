@@ -14,8 +14,10 @@ typedef struct{
 
 #define pdCtrlInit(c) do{\
   pdVrtInit( &(c)->vrt );\
-  pdHrzInit( &(c)->tan, &(c)->vrt );\
-  pdHrzInit( &(c)->rad, &(c)->vrt );\
+  pdHrzInit( &(c)->tan );\
+  pdHrzInit( &(c)->rad );\
+  pdHrzSetup( &(c)->tan, &(c)->vrt );\
+  pdHrzSetup( &(c)->rad, &(c)->vrt );\
 } while(0)
 #define pdCtrlUpdate(c,z) do{\
   pdVrtUpdateZeta( &(c)->vrt, z );\

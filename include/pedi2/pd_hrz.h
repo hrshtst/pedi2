@@ -20,7 +20,8 @@ typedef struct{
   pdVrt *vrt;
 } pdHrz;
 
-void pdHrzInit(pdHrz *hrz, pdVrt *vrt);
+void pdHrzInit(pdHrz *hrz);
+void pdHrzSetup(pdHrz *hrz, pdVrt *vrt);
 
 double pdHrzK1(pdHrz *hrz);
 double pdHrzK2(pdHrz *hrz);

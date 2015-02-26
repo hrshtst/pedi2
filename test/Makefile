@@ -43,9 +43,12 @@ debug:
 	@echo $(addprefix $(SRCDIR)/, $(OBJ))
 	@echo $(addsuffix .o, $(TESTS))
 
-.PHONY: clean
-clean :
-	rm -f $(TESTS) gtest.a gtest_main.a *.o
+.PHONY: clean cleantest cleangtest
+clean : cleantest cleangtest
+cleantest :
+	rm -f $(TESTS) $(TESTOBJ)
+cleangtest :
+	rm -f gtest.a gtest_main.a gtest.o gtest_main.o
 
 GTEST_SRCS_ = \
 	$(GTEST_SRC_DIR)/*.cc\
@@ -67,10 +70,10 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 LIBOBJ_SRCS_=$(INCDIR)/pedi2/*.h $(SRCDIR)/*.c
 $(LIBOBJ): $(LIBOBJ_SRCS_)
-	@cd $(SRCDIR); make
+	@cd $(SRCDIR); make $@
 
-$(TESTS): $(TESTOBJ) $(LIBOBJ) gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBRARY) $@.o $(LIBOBJ) gtest_main.a -o $@ -lpthread $(LINK)
+%Test: %Test.o $(LIBOBJ) gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBRARY) $^ -o $@ -lpthread $(LINK)
 
 %.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(INCLUDE) $(CXXFLAGS) -c $<

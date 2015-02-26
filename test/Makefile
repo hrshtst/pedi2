@@ -20,9 +20,9 @@ CPPFLAGS += -isystem $(GTEST_INC_DIR)
 CXXFLAGS += -g -Wall -Wextra -pthread
 
 # Edit below when you add a new test
-TESTS=pdVrtTest pdHrzTest
+TESTS=pdVrtTest pdHrzTest pdCtrlTest
 # Add depending objects (make sure $(SRCDIR)/makefile)
-OBJ=pd_vrt.o pd_hrz.o
+OBJ=pd_vrt.o pd_hrz.o pd_ctrl.o
 
 TESTOBJ=$(addsuffix .o, $(TESTS))
 LIBOBJ=$(addprefix $(SRCDIR)/, $(OBJ))

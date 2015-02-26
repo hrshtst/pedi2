@@ -9,7 +9,7 @@ CFLAGS=-ansi -Wall -fPIC -O3 $(INCLUDE) -funroll-loops
 LD=gcc
 LDFLAGS=-shared
 
-OBJ=pedi2_ctrl.o pd_vrt.o pd_hrz.o
+OBJ=pedi2_ctrl.o pd_vrt.o pd_hrz.o pd_ctrl.o
 DLIB=libpedi2.so
 
 TARGET=$(DLIB)

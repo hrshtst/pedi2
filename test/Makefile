@@ -19,11 +19,12 @@ CXX=g++
 CPPFLAGS += -isystem $(GTEST_INC_DIR)
 CXXFLAGS += -g -Wall -Wextra -pthread
 
-# You need to edit below when you add a new test
-OBJ=pd_vrt.o
-TESTOBJ=pdVrtTest.o
-TESTS=pdVrtTest
+# Edit below when you add a new test
+TESTS=pdVrtTest pdHrzTest
+# Add depending objects (make sure $(SRCDIR)/makefile)
+OBJ=pd_vrt.o pd_hrz.o
 
+TESTOBJ=$(addsuffix .o, $(TESTS))
 LIBOBJ=$(addprefix $(SRCDIR)/, $(OBJ))
 
 GTEST_HEADERS =\
@@ -37,9 +38,12 @@ all: $(TESTS)
 test: $(TESTS)
 	@./test_runner.sh
 
+.PHONY: debug
 debug:
 	@echo $(addprefix $(SRCDIR)/, $(OBJ))
+	@echo $(addsuffix .o, $(TESTS))
 
+.PHONY: clean
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 

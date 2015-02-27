@@ -1,26 +1,41 @@
 #include <pedi2/pd_hrz.h>
 
-void pdHrzInit(pdHrz *hrz)
+static pdHrz *(* pd_hrz_setup[])(pdHrz*) = {
+  pdHrzSetupTan,
+  pdHrzSetupRad,
+};
+
+pdHrz *pdHrzSetup(pdHrz *h, pdVrt *v, byte dir)
 {
-  hrz->q1 = 0;
-  hrz->q2 = 0;
-  hrz->kappa = 0;
-  hrz->rho = 0;
-  hrz->kr = 0;
-  hrz->vrt = NULL;
+  if( dir < PD_HRZ_TAN || dir > PD_HRZ_RAD ){
+    ZRUNERROR( "invalid direction specified - %d", dir);
+    return NULL;
+  }
+  pdHrzInit( h );
+  if( !pd_hrz_setup[( (h)->dir = dir )]( h ) ){
+    ZRUNERROR( "cannot setup horizontal controller" );
+    pdHrzDestroy( h );
+    return NULL;
+  }
+  h->vrt = v;
+  pdVrtInit( h->vrt );
+  return h;
 }
 
-void pdHrzSetup(pdHrz *hrz, pdVrt *vrt)
+void pdHrzDestroy(pdHrz *h)
 {
-  hrz->vrt = vrt;
+  zFree( h->prm );
+  pdHrzInit( h );
 }
 
+#if 0
 double pdHrzK1(pdHrz *hrz)
 {
-  return hrz->q1 * hrz->q2;
+  return hrz->prm->q1 * hrz->prm->q2;
 }
 
 double pdHrzK2(pdHrz *hrz)
 {
-  return ( hrz->q1 + hrz->q2 ) / hrz->vrt->zeta;
+  return ( hrz->prm->q1 + hrz->prm->q2 ) / hrz->vrt->zeta;
 }
+#endif

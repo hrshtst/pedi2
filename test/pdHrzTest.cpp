@@ -4,13 +4,18 @@
 
 class pdHrzTest : public testing::Test {
  protected:
-  virtual void SetUp() {};
+  virtual void SetUp() {
+    pdHrzSetup( &tan, &vrt, PD_HRZ_TAN );
+    pdHrzSetup( &rad, &vrt, PD_HRZ_RAD );
+  };
   virtual void TearDown() {
-    pdHrzDestroy( &hrz );
+    pdHrzDestroy( &tan );
+    pdHrzDestroy( &rad );
   };
 
   pdVrt vrt;
-  pdHrz hrz;
+  pdHrz tan;
+  pdHrz rad;
 };
 
 TEST_F(pdHrzTest, Init)
@@ -39,29 +44,29 @@ TEST_F(pdHrzTest, SetupOutOfRange)
 TEST_F(pdHrzTest, SetupHrzTan)
 {
   pdVrt _vrt;
-  pdHrz _hrz;
+  pdHrz _tan;
   pdHrzPrmTan *prm;
 
-  pdHrzSetup( &_hrz, &_vrt, PD_HRZ_TAN );
-  prm = (pdHrzPrmTan *)_hrz.prm;
-  EXPECT_EQ( PD_HRZ_TAN, _hrz.dir );
+  pdHrzSetup( &_tan, &_vrt, PD_HRZ_TAN );
+  prm = (pdHrzPrmTan *)_tan.prm;
+  EXPECT_EQ( (byte)PD_HRZ_TAN, _tan.dir );
   EXPECT_EQ( 0, prm->vd );
   EXPECT_EQ( 0, prm->q1 );
   EXPECT_EQ( 0, prm->q2 );
-  EXPECT_EQ( 0, prm->dist );
-  EXPECT_EQ( &_vrt, _hrz.vrt );
+  EXPECT_EQ( 0, prm->kappa );
+  EXPECT_EQ( &_vrt, _tan.vrt );
   EXPECT_EQ( 0, _vrt.z );
 }
 
 TEST_F(pdHrzTest, SetupHrzRad)
 {
   pdVrt _vrt;
-  pdHrz _hrz;
+  pdHrz _rad;
   pdHrzPrmRad *prm;
 
-  pdHrzSetup( &_hrz, &_vrt, PD_HRZ_RAD );
-  prm = (pdHrzPrmRad *)_hrz.prm;
-  EXPECT_EQ( PD_HRZ_RAD, _hrz.dir );
+  pdHrzSetup( &_rad, &_vrt, PD_HRZ_RAD );
+  prm = (pdHrzPrmRad *)_rad.prm;
+  EXPECT_EQ( (byte)PD_HRZ_RAD, _rad.dir );
   EXPECT_EQ( 0, prm->vd );
   EXPECT_EQ( 0, prm->q1 );
   EXPECT_EQ( 0, prm->q2 );
@@ -69,44 +74,110 @@ TEST_F(pdHrzTest, SetupHrzRad)
   EXPECT_EQ( 0, prm->rho );
   EXPECT_EQ( 0, prm->kr );
   EXPECT_EQ( 0, prm->dist );
-  EXPECT_EQ( &_vrt, _hrz.vrt );
+  EXPECT_EQ( &_vrt, _rad.vrt );
   EXPECT_EQ( 0, _vrt.z );
 }
 
 TEST_F(pdHrzTest, Destroy)
 {
   pdVrt _vrt;
-  pdHrz _hrz;
+  pdHrz _tan;
 
-  pdHrzSetup( &_hrz, &_vrt, PD_HRZ_TAN );
-  pdHrzDestroy( &_hrz );
-  EXPECT_EQ( -1, _hrz.dir );
-  EXPECT_EQ( NULL, _hrz.prm );
-  EXPECT_EQ( NULL, _hrz.com );
-  EXPECT_EQ( NULL, _hrz.vrt );
+  pdHrzSetup( &_tan, &_vrt, PD_HRZ_TAN );
+  pdHrzDestroy( &_tan );
+  EXPECT_EQ( -1, _tan.dir );
+  EXPECT_EQ( NULL, _tan.prm );
+  EXPECT_EQ( NULL, _tan.com );
+  EXPECT_EQ( NULL, _tan.vrt );
 }
 
-// TEST_F(pdHrzTest, SetPrm)
-// {
-//   pdHrzSetup( &hrz, &vrt, PD_HRZ_TAN );
-// }
+TEST_F(pdHrzTest, SetPrmTan)
+{
+  pdHrzPrmTan pt;
 
-// TEST_F(pdHrzTest, ComputeK1)
-// {
-//   hrz.q1 = 1.0;
-//   hrz.q2 = 0.5;
-//   EXPECT_EQ( 0.5, pdHrzK1( &hrz ) );
-//   hrz.q1 = 0.8;
-//   hrz.q2 = 1.3;
-//   EXPECT_EQ( 0.8*1.3, pdHrzK1( &hrz ) );
-// }
+  pt.vd = 1;
+  pt.q1 = 2;
+  pt.q2 = 3;
+  pt.kappa = 4;
+  pdHrzSetPrm( &tan, &pt );
+  EXPECT_EQ( 1, ((pdHrzPrmTan *)pdHrzPrm(&tan))->vd );
+  EXPECT_EQ( 2, ((pdHrzPrmTan *)pdHrzPrm(&tan))->q1 );
+  EXPECT_EQ( 3, ((pdHrzPrmTan *)pdHrzPrm(&tan))->q2 );
+  EXPECT_EQ( 4, ((pdHrzPrmTan *)pdHrzPrm(&tan))->kappa );
 
-// TEST_F(pdHrzTest, ComputeK2)
-// {
-//   hrz.q1 = 1.0;
-//   hrz.q2 = 0.5;
-//   EXPECT_EQ( 1.5/vrt.zeta, pdHrzK2( &hrz ) );
-//   hrz.q1 = 0.8;
-//   hrz.q2 = 1.3;
-//   EXPECT_EQ( 2.1/vrt.zeta, pdHrzK2( &hrz ) );
-// }
+  pt.q1 = 5;
+  pt.q2 = 6;
+  pt.kappa = 7;
+  pdHrzSetPrm( &tan, &pt );
+  EXPECT_EQ( 1, ((pdHrzPrmTan *)pdHrzPrm(&tan))->vd );
+  EXPECT_EQ( 5, ((pdHrzPrmTan *)pdHrzPrm(&tan))->q1 );
+  EXPECT_EQ( 6, ((pdHrzPrmTan *)pdHrzPrm(&tan))->q2 );
+  EXPECT_EQ( 7, ((pdHrzPrmTan *)pdHrzPrm(&tan))->kappa );
+}
+
+TEST_F(pdHrzTest, SetPrmRad)
+{
+  pdHrzPrmRad pr;
+
+  pr.vd    = 1;
+  pr.q1    = 2;
+  pr.q2    = 3;
+  pr.kappa = 4;
+  pr.rho   = 5;
+  pr.kr    = 6;
+  pr.dist  = 7;
+  pdHrzSetPrm( &rad, &pr );
+  EXPECT_EQ( 1, ((pdHrzPrmRad *)pdHrzPrm(&rad))->vd );
+  EXPECT_EQ( 2, ((pdHrzPrmRad *)pdHrzPrm(&rad))->q1 );
+  EXPECT_EQ( 3, ((pdHrzPrmRad *)pdHrzPrm(&rad))->q2 );
+  EXPECT_EQ( 4, ((pdHrzPrmRad *)pdHrzPrm(&rad))->kappa );
+  EXPECT_EQ( 5, ((pdHrzPrmRad *)pdHrzPrm(&rad))->rho );
+  EXPECT_EQ( 6, ((pdHrzPrmRad *)pdHrzPrm(&rad))->kr );
+  EXPECT_EQ( 7, ((pdHrzPrmRad *)pdHrzPrm(&rad))->dist );
+
+  pr.q1 = 8;
+  pr.q2 = 9;
+  pr.kappa = 10;
+  pr.rho   = 11;
+  pr.kr    = 12;
+  pdHrzSetPrm( &rad, &pr );
+  EXPECT_EQ( 1,  ((pdHrzPrmRad *)pdHrzPrm(&rad))->vd );
+  EXPECT_EQ( 8,  ((pdHrzPrmRad *)pdHrzPrm(&rad))->q1 );
+  EXPECT_EQ( 9,  ((pdHrzPrmRad *)pdHrzPrm(&rad))->q2 );
+  EXPECT_EQ( 10, ((pdHrzPrmRad *)pdHrzPrm(&rad))->kappa );
+  EXPECT_EQ( 11, ((pdHrzPrmRad *)pdHrzPrm(&rad))->rho );
+  EXPECT_EQ( 12, ((pdHrzPrmRad *)pdHrzPrm(&rad))->kr );
+  EXPECT_EQ( 7,  ((pdHrzPrmRad *)pdHrzPrm(&rad))->dist );
+}
+
+#if 0
+TEST_F(pdHrzTest, HrzK1Tan)
+{
+  pdHrzPrmTan pt;
+
+  pt.q1 = 1.0;
+  pt.q2 = 0.5;
+  pdHrzSetPrm( &tan, &pt );
+  EXPECT_EQ( 0.5, pdHrzK1( &tan ) );
+
+  // pt.q1 = 0.8;
+  // pt.q2 = 1.3;
+  // pdHrzSetPrm( &tan, &pt );
+  // EXPECT_EQ( 0.8*1.3, pdHrzK1( &tan ) );
+}
+
+TEST_F(pdHrzTest, HrzK2Tan)
+{
+  pdHrzPrmTan pt;
+
+  pt.q1 = 1.0;
+  pt.q2 = 0.5;
+  pdHrzSetPrm( &tan, &pt );
+  EXPECT_EQ( 1.5/vrt.zeta, pdHrzK2( &tan ) );
+
+  // pt.q1 = 0.8;
+  // pt.q2 = 1.3;
+  // pdHrzSetPrm( &tan, &pt );
+  // EXPECT_EQ( 2.1/vrt.zeta, pdHrzK2( &tan ) );
+}
+#endif

@@ -4,11 +4,10 @@
 __BEGIN_DECLS
 
 typedef struct{
-  /* control parameters */
   double vd;           /* desired velocity */
   double q1, q2;       /* system poles */
   double xzmin, xzmax; /* border of supporting region */
-  double dist;         /* canonical distance of feet */
+  double kappa;        /* curvature of referencial path */
 
   double uz;           /* desired ZMP position */
   double ud;           /* desired COM position */

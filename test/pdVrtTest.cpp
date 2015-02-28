@@ -9,6 +9,15 @@ TEST(pdVrtTest, Init)
   EXPECT_EQ( 0, vrt.z );
 }
 
+TEST(pdVrtTest, Destroy)
+{
+  pdVrt vrt;
+
+  pdVrtInit( &vrt );
+  pdVrtDestroy( &vrt );
+  SUCCEED();
+}
+
 TEST(pdVrtTest, Update)
 {
   pdVrt vrt;

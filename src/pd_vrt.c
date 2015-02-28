@@ -5,6 +5,11 @@ void pdVrtInit(pdVrt *vrt)
   vrt->z = 0;
 }
 
+void pdVrtDestroy(pdVrt *vrt)
+{
+  /* dummy */
+}
+
 void pdVrtUpdate(pdVrt *vrt, double z)
 {
   vrt->z = z;

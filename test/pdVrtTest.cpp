@@ -9,16 +9,16 @@ TEST(pdVrtTest, Init)
   EXPECT_EQ( 0, vrt.z );
 }
 
-TEST(pdVrtTest, UpdateZeta)
+TEST(pdVrtTest, Update)
 {
   pdVrt vrt;
 
   pdVrtInit( &vrt );
-  pdVrtUpdateZeta( &vrt, 0.26 );
+  pdVrtUpdate( &vrt, 0.26 );
   EXPECT_EQ( 0.26, vrt.z );
   EXPECT_EQ( sqrt(RK_G/0.26), vrt.zeta );
 
-  pdVrtUpdateZeta( &vrt, 0.3 );
+  pdVrtUpdate( &vrt, 0.3 );
   EXPECT_EQ( 0.3, vrt.z );
   EXPECT_EQ( sqrt(RK_G/0.3), vrt.zeta );
 }

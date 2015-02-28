@@ -12,7 +12,7 @@ typedef struct{
 } pdVrt;
 
 void pdVrtInit(pdVrt *vrt);
-void pdVrtUpdateZeta(pdVrt *vrt, double z);
+void pdVrtUpdate(pdVrt *vrt, double z);
 
 __END_DECLS
 

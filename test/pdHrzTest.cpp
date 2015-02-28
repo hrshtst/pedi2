@@ -5,12 +5,14 @@
 class pdHrzTest : public testing::Test {
  protected:
   virtual void SetUp() {
+    pdVrtInit( &vrt );
     pdHrzSetup( &tan, &vrt, PD_HRZ_TAN );
     pdHrzSetup( &rad, &vrt, PD_HRZ_RAD );
   };
   virtual void TearDown() {
     pdHrzDestroy( &tan );
     pdHrzDestroy( &rad );
+    pdVrtDestroy( &vrt );
   };
 
   pdVrt vrt;

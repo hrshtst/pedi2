@@ -3,6 +3,7 @@
 static void _pdHrzSetPrmRad(void *dst, void *src);
 static double _pdHrzK1Rad(void *prm);
 static double _pdHrzK2Rad(void *prm);
+static double _pdHrzZMPRad(void *prm);
 
 #define _pdc(p) ((pdHrzPrmRad *)p)
 
@@ -27,10 +28,16 @@ double _pdHrzK2Rad(void *prm)
   return ( _pdc(prm)->q1 + _pdc(prm)->q2 ) / _pdc(prm)->vrt->zeta;
 }
 
+double _pdHrzZMPRad(void *prm)
+{
+  return _pdc(prm)->wz;
+}
+
 static pdHrzCom pd_hrz_rad = {
   _pdHrzSetPrmRad,
   _pdHrzK1Rad,
   _pdHrzK2Rad,
+  _pdHrzZMPRad,
 };
 
 pdHrz *pdHrzSetupRad(pdHrz *h, pdVrt *v)

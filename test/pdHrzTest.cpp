@@ -219,3 +219,16 @@ TEST_F(pdHrzTest, HrzK2Rad)
   pdVrtUpdate( &vrt, 0.26 );
   EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdHrzK2( &rad ) );
 }
+
+TEST_F(pdHrzTest, GetZMP)
+{
+  ((pdHrzPrmTan *)tan.prm)->uz = 0;
+  EXPECT_EQ( 0, pdHrzZMP( &tan ) );
+  ((pdHrzPrmTan *)tan.prm)->uz = 0.5;
+  EXPECT_EQ( 0.5, pdHrzZMP( &tan ) );
+
+  ((pdHrzPrmRad *)rad.prm)->wz = 0;
+  EXPECT_EQ( 0, pdHrzZMP( &rad ) );
+  ((pdHrzPrmRad *)rad.prm)->wz = 0.5;
+  EXPECT_EQ( 0.5, pdHrzZMP( &rad ) );
+}

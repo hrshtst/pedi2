@@ -8,7 +8,7 @@ void pdVrtInit(pdVrt *vrt)
 
 void pdVrtDestroy(pdVrt *vrt)
 {
-  /* dummy */
+  pdVrtInit( vrt );
 }
 
 void pdVrtUpdate(pdVrt *vrt, double z)

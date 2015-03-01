@@ -16,6 +16,7 @@ class pdHrzTest : public testing::Test {
   };
 
   void SetDefaultPrmVelocityFollow() {
+    pdVrtSetPrm( &vrt, 0.26 );
     ((pdHrzPrmTan *)tan.prm)->vd = 0.25;
     ((pdHrzPrmTan *)tan.prm)->q1 = 1.0;
     ((pdHrzPrmTan *)tan.prm)->q2 = 0.0;
@@ -176,14 +177,16 @@ TEST_F(pdHrzTest, HrzK1Tan)
 
   pt.q1 = 1.0;
   pt.q2 = 0.5;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.5, pdHrzK1( &tan ) );
 
   pt.q1 = 0.8;
   pt.q2 = 1.3;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.8*1.3, pdHrzK1( &tan ) );
 }
 
@@ -193,14 +196,16 @@ TEST_F(pdHrzTest, HrzK2Tan)
 
   pt.q1 = 1.0;
   pt.q2 = 0.5;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdHrzK2( &tan ) );
 
   pt.q1 = 0.8;
   pt.q2 = 1.3;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdHrzK2( &tan ) );
 }
 
@@ -210,14 +215,16 @@ TEST_F(pdHrzTest, HrzK1Rad)
 
   pr.q1 = 1.0;
   pr.q2 = 0.5;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.5, pdHrzK1( &rad ) );
 
   pr.q1 = 0.8;
   pr.q2 = 1.3;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.8*1.3, pdHrzK1( &rad ) );
 }
 
@@ -227,14 +234,16 @@ TEST_F(pdHrzTest, HrzK2Rad)
 
   pr.q1 = 1.0;
   pr.q2 = 0.5;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdHrzK2( &rad ) );
 
   pr.q1 = 0.8;
   pr.q2 = 1.3;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdHrzK2( &rad ) );
 }
 
@@ -259,8 +268,9 @@ TEST_F(pdHrzTest, CheckZMPTanAllStateZero)
   pt.q1 = 0.0;
   pt.q2 = 0.0;
   pt.kappa = 0.0;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   pdHrzUpdate( &tan, 0, 0, 0, 0 );
   EXPECT_DOUBLE_EQ( 0.0, pdHrzZMP( &tan ) );
 
@@ -268,8 +278,9 @@ TEST_F(pdHrzTest, CheckZMPTanAllStateZero)
   pt.q1 = 1.0;
   pt.q2 = 0.0;
   pt.kappa = 0.0;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   pdHrzUpdate( &tan, 0, 0, 0, 0 );
   EXPECT_DOUBLE_EQ( -0.040706737871602130529602, pdHrzZMP( &tan ) );
 }
@@ -285,8 +296,9 @@ TEST_F(pdHrzTest, CheckZMPRadAllStateZero)
   pr.rho = 1.0;
   pr.kr = 1.0;
   pr.dist = 0.1;
+  pdVrtSetPrm( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   pdHrzUpdate( &rad, 0, 0, 0, 0 );
   EXPECT_DOUBLE_EQ( 0.0, pdHrzZMP( &rad ) );
 }
@@ -294,7 +306,7 @@ TEST_F(pdHrzTest, CheckZMPRadAllStateZero)
 TEST_F(pdHrzTest, CheckZMPTanVelocityFollow)
 {
   SetDefaultPrmVelocityFollow();
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   pdHrzUpdate( &tan, 0.0, 0.2, 0.01, 0.1 );
   EXPECT_DOUBLE_EQ( -0.008141347574320424718142, pdHrzZMP( &tan ) );
 }
@@ -302,7 +314,7 @@ TEST_F(pdHrzTest, CheckZMPTanVelocityFollow)
 TEST_F(pdHrzTest, CheckZMPRadVelocityFollow)
 {
   SetDefaultPrmVelocityFollow();
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   pdHrzUpdate( &rad, 0.0, 0.2, 0.01, 0.1 );
   // EXPECT_DOUBLE_EQ( 0.000310222468637089826560, pdHrzZMP( &rad ) );
   EXPECT_DOUBLE_EQ( 0.000310222468637088091836, pdHrzZMP( &rad ) );
@@ -311,7 +323,7 @@ TEST_F(pdHrzTest, CheckZMPRadVelocityFollow)
 TEST_F(pdHrzTest, CheckZMPTanVelocityFollowCurve)
 {
   SetDefaultPrmVelocityFollowCurve();
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   pdHrzUpdate( &tan, 0.0, 0.2, 0.01, 0.1 );
   EXPECT_DOUBLE_EQ( -0.005162917622573504408678, pdHrzZMP( &tan ) );
 }
@@ -319,7 +331,7 @@ TEST_F(pdHrzTest, CheckZMPTanVelocityFollowCurve)
 TEST_F(pdHrzTest, CheckZMPRadVelocityFollowCurve)
 {
   SetDefaultPrmVelocityFollowCurve();
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   pdHrzUpdate( &rad, 0.0, 0.2, 0.01, 0.1 );
   // EXPECT_DOUBLE_EQ( -0.001854072725677786536574, pdHrzZMP( &rad ) );
   EXPECT_DOUBLE_EQ( -0.001854072725677788271298, pdHrzZMP( &rad ) );

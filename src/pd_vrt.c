@@ -2,6 +2,7 @@
 
 void pdVrtInit(pdVrt *vrt)
 {
+  vrt->zd = 0;
   vrt->z = 0;
   vrt->zeta = 0;
 }
@@ -11,8 +12,13 @@ void pdVrtDestroy(pdVrt *vrt)
   pdVrtInit( vrt );
 }
 
-void pdVrtUpdate(pdVrt *vrt, double z)
+void pdVrtSetPrm(pdVrt *vrt, double zd)
 {
-  vrt->z = z;
-  vrt->zeta = sqrt( RK_G / vrt->z );
+  vrt->zd = zd;
+}
+
+void pdVrtUpdate(pdVrt *vrt)
+{
+  vrt->z = vrt->zd;
+  vrt->zeta = sqrt( RK_G / vrt->zd );
 }

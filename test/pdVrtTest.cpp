@@ -6,7 +6,9 @@ TEST(pdVrtTest, Init)
   pdVrt vrt;
 
   pdVrtInit( &vrt );
+  EXPECT_EQ( 0, vrt.zd );
   EXPECT_EQ( 0, vrt.z );
+  EXPECT_EQ( 0, vrt.zeta );
 }
 
 TEST(pdVrtTest, Destroy)
@@ -15,7 +17,21 @@ TEST(pdVrtTest, Destroy)
 
   pdVrtInit( &vrt );
   pdVrtDestroy( &vrt );
-  SUCCEED();
+  EXPECT_EQ( 0, vrt.zd );
+  EXPECT_EQ( 0, vrt.z );
+  EXPECT_EQ( 0, vrt.zeta );
+}
+
+TEST(pdVrtTest, SetPrm)
+{
+  pdVrt vrt;
+
+  pdVrtInit( &vrt );
+  pdVrtSetPrm( &vrt, 0.26 );
+  EXPECT_EQ( 0.26, vrt.zd );
+
+  pdVrtSetPrm( &vrt, 0.3 );
+  EXPECT_EQ( 0.3, vrt.zd );
 }
 
 TEST(pdVrtTest, Update)
@@ -23,11 +39,15 @@ TEST(pdVrtTest, Update)
   pdVrt vrt;
 
   pdVrtInit( &vrt );
-  pdVrtUpdate( &vrt, 0.26 );
+  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.26, vrt.z );
+  EXPECT_EQ( 0.26, vrt.zd );
   EXPECT_EQ( sqrt(RK_G/0.26), vrt.zeta );
 
-  pdVrtUpdate( &vrt, 0.3 );
+  pdVrtSetPrm( &vrt, 0.3 );
+  pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.3, vrt.z );
+  EXPECT_EQ( 0.3, vrt.zd );
   EXPECT_EQ( sqrt(RK_G/0.3), vrt.zeta );
 }

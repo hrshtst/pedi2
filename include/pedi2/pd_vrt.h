@@ -7,6 +7,7 @@
 __BEGIN_DECLS
 
 typedef struct{
+  double zd;
   double z;
   double zeta;
 } pdVrt;
@@ -14,7 +15,8 @@ typedef struct{
 void pdVrtInit(pdVrt *vrt);
 void pdVrtDestroy(pdVrt *vrt);
 
-void pdVrtUpdate(pdVrt *vrt, double z);
+void pdVrtSetPrm(pdVrt *vrt, double zd);
+void pdVrtUpdate(pdVrt *vrt);
 
 __END_DECLS
 

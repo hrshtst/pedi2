@@ -43,6 +43,7 @@ typedef struct{
   pdCtrlPrmRad(c)->vd = (vwd);\
   pdCtrlPrmRad(c)->dist = (d);\
 } while (0)
+#define pdCtrlKappa(c) pdCtrlPrmTan(c)->kappa
 #define pdCtrlZMPTan(c) pdHrzZMP( &(c)->tan )
 #define pdCtrlZMPRad(c) pdHrzZMP( &(c)->rad )
 #define pdCtrlUpdate(c,du,vu,dw,vw) do{\

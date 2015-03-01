@@ -87,6 +87,14 @@ TEST_F(pdCtrlTest, SetRefHrz)
   EXPECT_EQ( 3, pdCtrlPrmRad(&ctrl)->dist );
 }
 
+TEST_F(pdCtrlTest, Kappa)
+{
+  pdCtrlSetPrm( &ctrl, 1, 2, 3, 4, 5, 6, 7 );
+  EXPECT_EQ( 5, pdCtrlKappa( &ctrl ) );
+  EXPECT_EQ( pdCtrlPrmTan(&ctrl)->kappa, pdCtrlKappa( &ctrl ) );
+  EXPECT_EQ( pdCtrlPrmRad(&ctrl)->kappa, pdCtrlKappa( &ctrl ) );
+}
+
 TEST_F(pdCtrlTest, GetZMP)
 {
   pdCtrlPrmTan(&ctrl)->uz = 0;

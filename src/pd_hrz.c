@@ -25,15 +25,3 @@ void pdHrzDestroy(pdHrz *h)
   zFree( h->prm );
   pdHrzInit( h );
 }
-
-#if 0
-double pdHrzK1(pdHrz *hrz)
-{
-  return hrz->prm->q1 * hrz->prm->q2;
-}
-
-double pdHrzK2(pdHrz *hrz)
-{
-  return ( hrz->prm->q1 + hrz->prm->q2 ) / hrz->vrt->zeta;
-}
-#endif

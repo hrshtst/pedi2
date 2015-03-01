@@ -11,18 +11,6 @@ enum{
   PD_HRZ_TAN=0, /* tangential direction */
   PD_HRZ_RAD,   /* radial direction */
 };
-#if 0
-typedef struct{
-  double xd;           /* desired position */
-  double vd;           /* desired velocity */
-  double q1, q2;       /* system poles */
-  double xzmin, xzmax; /* border of supporting region */
-  double kappa;        /* curvature of referencial path */
-  double rho;          /* degree of activation of nonlinear damping */
-  double kr;           /* degree of initial energy exertion */
-  double dist;         /* canonical distance of feet */
-} pdHrzPrm;
-#endif
 
 typedef struct{
   void (*_setprm)(void*,void*);

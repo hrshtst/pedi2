@@ -14,9 +14,11 @@ typedef struct{
 
   double wz;           /* desired ZMP position */
   double wd;           /* desired COM position */
+
+  pdVrt *vrt;
 } pdHrzPrmRad;
 
-pdHrz *pdHrzSetupRad(pdHrz *hrz);
+pdHrz *pdHrzSetupRad(pdHrz *hrz, pdVrt *vrt);
 
 __END_DECLS
 

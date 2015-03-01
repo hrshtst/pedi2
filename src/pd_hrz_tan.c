@@ -30,7 +30,7 @@ static pdHrzCom pd_hrz_tan = {
   /* _pdHrzK2Tan, */
 };
 
-pdHrz *pdHrzSetupTan(pdHrz *h)
+pdHrz *pdHrzSetupTan(pdHrz *h, pdVrt *v)
 {
   if( !( h->prm = zAlloc( pdHrzPrmTan, 1 ) ) )
     return NULL;
@@ -38,6 +38,7 @@ pdHrz *pdHrzSetupTan(pdHrz *h)
   _pdc(h->prm)->q1 = 0;
   _pdc(h->prm)->q2 = 0;
   _pdc(h->prm)->kappa = 0;
+  _pdc(h->prm)->vrt = v;
   h->com = &pd_hrz_tan;
   return h;
 }

@@ -19,7 +19,7 @@ static pdHrzCom pd_hrz_rad = {
   _pdHrzSetPrmRad,
 };
 
-pdHrz *pdHrzSetupRad(pdHrz *h)
+pdHrz *pdHrzSetupRad(pdHrz *h, pdVrt *v)
 {
   if( !( h->prm = zAlloc( pdHrzPrmRad, 1 ) ) )
     return NULL;
@@ -30,6 +30,7 @@ pdHrz *pdHrzSetupRad(pdHrz *h)
   _pdc(h->prm)->rho = 0;
   _pdc(h->prm)->kr = 0;
   _pdc(h->prm)->dist = 0;
+  _pdc(h->prm)->vrt = v;
   h->com = &pd_hrz_rad;
   return h;
 }

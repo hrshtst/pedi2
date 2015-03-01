@@ -1,6 +1,6 @@
 #include <pedi2/pd_hrz.h>
 
-static pdHrz *(* pd_hrz_setup[])(pdHrz*) = {
+static pdHrz *(* pd_hrz_setup[])(pdHrz*,pdVrt*) = {
   pdHrzSetupTan,
   pdHrzSetupRad,
 };
@@ -12,13 +12,11 @@ pdHrz *pdHrzSetup(pdHrz *h, pdVrt *v, byte dir)
     return NULL;
   }
   pdHrzInit( h );
-  if( !pd_hrz_setup[( (h)->dir = dir )]( h ) ){
+  if( !pd_hrz_setup[( (h)->dir = dir )]( h, v ) ){
     ZRUNERROR( "cannot setup horizontal controller" );
     pdHrzDestroy( h );
     return NULL;
   }
-  h->vrt = v;
-  pdVrtInit( h->vrt );
   return h;
 }
 

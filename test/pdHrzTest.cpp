@@ -28,7 +28,6 @@ TEST_F(pdHrzTest, Init)
   EXPECT_EQ( -1, _hrz.dir );
   EXPECT_EQ( NULL, _hrz.prm );
   EXPECT_EQ( NULL, _hrz.com );
-  EXPECT_EQ( NULL, _hrz.vrt );
 }
 
 TEST_F(pdHrzTest, SetupOutOfRange)
@@ -49,6 +48,7 @@ TEST_F(pdHrzTest, SetupHrzTan)
   pdHrz _tan;
   pdHrzPrmTan *prm;
 
+  pdVrtInit( &_vrt );
   pdHrzSetup( &_tan, &_vrt, PD_HRZ_TAN );
   prm = (pdHrzPrmTan *)_tan.prm;
   EXPECT_EQ( (byte)PD_HRZ_TAN, _tan.dir );
@@ -56,7 +56,7 @@ TEST_F(pdHrzTest, SetupHrzTan)
   EXPECT_EQ( 0, prm->q1 );
   EXPECT_EQ( 0, prm->q2 );
   EXPECT_EQ( 0, prm->kappa );
-  EXPECT_EQ( &_vrt, _tan.vrt );
+  EXPECT_EQ( &_vrt, prm->vrt );
   EXPECT_EQ( 0, _vrt.z );
 }
 
@@ -66,6 +66,7 @@ TEST_F(pdHrzTest, SetupHrzRad)
   pdHrz _rad;
   pdHrzPrmRad *prm;
 
+  pdVrtInit( &_vrt );
   pdHrzSetup( &_rad, &_vrt, PD_HRZ_RAD );
   prm = (pdHrzPrmRad *)_rad.prm;
   EXPECT_EQ( (byte)PD_HRZ_RAD, _rad.dir );
@@ -76,7 +77,7 @@ TEST_F(pdHrzTest, SetupHrzRad)
   EXPECT_EQ( 0, prm->rho );
   EXPECT_EQ( 0, prm->kr );
   EXPECT_EQ( 0, prm->dist );
-  EXPECT_EQ( &_vrt, _rad.vrt );
+  EXPECT_EQ( &_vrt, prm->vrt );
   EXPECT_EQ( 0, _vrt.z );
 }
 
@@ -90,7 +91,6 @@ TEST_F(pdHrzTest, Destroy)
   EXPECT_EQ( -1, _tan.dir );
   EXPECT_EQ( NULL, _tan.prm );
   EXPECT_EQ( NULL, _tan.com );
-  EXPECT_EQ( NULL, _tan.vrt );
 }
 
 TEST_F(pdHrzTest, SetPrmTan)

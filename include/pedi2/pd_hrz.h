@@ -34,14 +34,12 @@ typedef struct{
   byte dir;      /* direction */
   void *prm;
   pdHrzCom *com;
-  pdVrt *vrt;
 } pdHrz;
 
 #define pdHrzInit(h) do{\
   (h)->dir = PD_HRZ_INVALID;\
   (h)->prm = NULL;\
   (h)->com = NULL;\
-  (h)->vrt = NULL;\
 } while(0)
 pdHrz *pdHrzSetup(pdHrz *hrz, pdVrt *vrt, byte dir);
 void pdHrzDestroy(pdHrz *hrz);

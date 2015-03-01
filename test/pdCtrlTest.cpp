@@ -73,9 +73,15 @@ TEST_F(pdCtrlTest, SetPrm)
   EXPECT_EQ( 7, pdCtrlPrmRad(&ctrl)->kr );
 }
 
-TEST_F(pdCtrlTest, SetRef)
+TEST_F(pdCtrlTest, SetRefVrt)
 {
-  pdCtrlSetRef( &ctrl, 1, 2, 3 );
+  pdCtrlSetRefVrt( &ctrl, 1 );
+  EXPECT_EQ( 1, ctrl.vrt.zd );
+}
+
+TEST_F(pdCtrlTest, SetRefHrz)
+{
+  pdCtrlSetRefHrz( &ctrl, 1, 2, 3 );
   EXPECT_EQ( 1, pdCtrlPrmTan(&ctrl)->vd );
   EXPECT_EQ( 2, pdCtrlPrmRad(&ctrl)->vd );
   EXPECT_EQ( 3, pdCtrlPrmRad(&ctrl)->dist );
@@ -97,9 +103,8 @@ TEST_F(pdCtrlTest, GetZMP)
 #if 0
 TEST_F(pdCtrlTest, Update)
 {
-  pdCtrl _ctrl;
-
-  pdCtrlInit( &_ctrl );
+  pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 0.5, 0.0, 1.0, 1.0 );
+  pdCtrlSetRef( &ctrl, 0.25, 0.0, 0.1 );
   pdCtrlUpdate( &_ctrl, 0.26 );
   EXPECT_EQ( 0.26, _ctrl.vrt.z );
   EXPECT_EQ( sqrt(RK_G/0.26), pdCtrlZeta(&_ctrl) );

@@ -40,7 +40,10 @@ typedef struct{
   pdCtrlPrmRad(c)->rho = (r);\
   pdCtrlPrmRad(c)->kr = (k);\
 } while(0)
-#define pdCtrlSetRef(c,vud,vwd,d) do{\
+#define pdCtrlSetRefVrt(c,zd) do{\
+  pdVrtSetRef( &(c)->vrt, zd );\
+} while (0)
+#define pdCtrlSetRefHrz(c,vud,vwd,d) do{\
   pdCtrlPrmTan(c)->vd = (vud);\
   pdCtrlPrmRad(c)->vd = (vwd);\
   pdCtrlPrmRad(c)->dist = (d);\

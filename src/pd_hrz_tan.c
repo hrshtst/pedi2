@@ -1,8 +1,8 @@
 #include <pedi2/pd_hrz.h>
 
 static void _pdHrzSetPrmTan(void *dst, void *src);
-/* static double _pdHrzK1Tan(void *prm); */
-/* static double _pdHrzK2Tan(void *prm); */
+static double _pdHrzK1Tan(void *prm);
+static double _pdHrzK2Tan(void *prm);
 
 #define _pdc(p) ((pdHrzPrmTan *)p)
 
@@ -14,20 +14,20 @@ void _pdHrzSetPrmTan(void *dst, void *src)
   _pdc(dst)->kappa = _pdc(src)->kappa;
 }
 
-/* double _pdHrzK1Tan(void *prm) */
-/* { */
-/*   return 0.5; */
-/* } */
+double _pdHrzK1Tan(void *prm)
+{
+  return _pdc(prm)->q1 * _pdc(prm)->q2;
+}
 
-/* double _pdHrzK2Tan(void *prm) */
-/* { */
-/*   return 1.5; */
-/* } */
+double _pdHrzK2Tan(void *prm)
+{
+  return ( _pdc(prm)->q1 + _pdc(prm)->q2 ) / _pdc(prm)->vrt->zeta;
+}
 
 static pdHrzCom pd_hrz_tan = {
   _pdHrzSetPrmTan,
-  /* _pdHrzK1Tan, */
-  /* _pdHrzK2Tan, */
+  _pdHrzK1Tan,
+  _pdHrzK2Tan,
 };
 
 pdHrz *pdHrzSetupTan(pdHrz *h, pdVrt *v)

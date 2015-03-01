@@ -1,6 +1,8 @@
 #include <pedi2/pd_hrz.h>
 
 static void _pdHrzSetPrmRad(void *dst, void *src);
+static double _pdHrzK1Rad(void *prm);
+static double _pdHrzK2Rad(void *prm);
 
 #define _pdc(p) ((pdHrzPrmRad *)p)
 
@@ -15,8 +17,20 @@ void _pdHrzSetPrmRad(void *dst, void *src)
   _pdc(dst)->dist  = _pdc(src)->dist;
 }
 
+double _pdHrzK1Rad(void *prm)
+{
+  return _pdc(prm)->q1 * _pdc(prm)->q2;
+}
+
+double _pdHrzK2Rad(void *prm)
+{
+  return ( _pdc(prm)->q1 + _pdc(prm)->q2 ) / _pdc(prm)->vrt->zeta;
+}
+
 static pdHrzCom pd_hrz_rad = {
   _pdHrzSetPrmRad,
+  _pdHrzK1Rad,
+  _pdHrzK2Rad,
 };
 
 pdHrz *pdHrzSetupRad(pdHrz *h, pdVrt *v)

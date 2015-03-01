@@ -26,8 +26,8 @@ typedef struct{
 
 typedef struct{
   void (*_setprm)(void*,void*);
-  /* double (*_k1)(void*); */
-  /* double (*_k2)(void*); */
+  double (*_k1)(void*);
+  double (*_k2)(void*);
 } pdHrzCom;
 
 typedef struct{
@@ -47,8 +47,8 @@ void pdHrzDestroy(pdHrz *hrz);
 #define pdHrzPrm(h) (h)->prm
 #define pdHrzSetPrm(h,p) (h)->com->_setprm( (h)->prm, p )
 
-/* #define pdHrzK1(h) (h)->com->_k1( (h)->prm ) */
-/* #define pdHrzK2(h) (h)->com->_k2( (h)->prm ) */
+#define pdHrzK1(h) (h)->com->_k1( (h)->prm )
+#define pdHrzK2(h) (h)->com->_k2( (h)->prm )
 
 __END_DECLS
 

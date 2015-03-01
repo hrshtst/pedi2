@@ -152,7 +152,6 @@ TEST_F(pdHrzTest, SetPrmRad)
   EXPECT_EQ( 7,  ((pdHrzPrmRad *)pdHrzPrm(&rad))->dist );
 }
 
-#if 0
 TEST_F(pdHrzTest, HrzK1Tan)
 {
   pdHrzPrmTan pt;
@@ -160,12 +159,14 @@ TEST_F(pdHrzTest, HrzK1Tan)
   pt.q1 = 1.0;
   pt.q2 = 0.5;
   pdHrzSetPrm( &tan, &pt );
+  pdVrtUpdate( &vrt, 0.26 );
   EXPECT_EQ( 0.5, pdHrzK1( &tan ) );
 
-  // pt.q1 = 0.8;
-  // pt.q2 = 1.3;
-  // pdHrzSetPrm( &tan, &pt );
-  // EXPECT_EQ( 0.8*1.3, pdHrzK1( &tan ) );
+  pt.q1 = 0.8;
+  pt.q2 = 1.3;
+  pdHrzSetPrm( &tan, &pt );
+  pdVrtUpdate( &vrt, 0.26 );
+  EXPECT_EQ( 0.8*1.3, pdHrzK1( &tan ) );
 }
 
 TEST_F(pdHrzTest, HrzK2Tan)
@@ -175,11 +176,46 @@ TEST_F(pdHrzTest, HrzK2Tan)
   pt.q1 = 1.0;
   pt.q2 = 0.5;
   pdHrzSetPrm( &tan, &pt );
-  EXPECT_EQ( 1.5/vrt.zeta, pdHrzK2( &tan ) );
+  pdVrtUpdate( &vrt, 0.26 );
+  EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdHrzK2( &tan ) );
 
-  // pt.q1 = 0.8;
-  // pt.q2 = 1.3;
-  // pdHrzSetPrm( &tan, &pt );
-  // EXPECT_EQ( 2.1/vrt.zeta, pdHrzK2( &tan ) );
+  pt.q1 = 0.8;
+  pt.q2 = 1.3;
+  pdHrzSetPrm( &tan, &pt );
+  pdVrtUpdate( &vrt, 0.26 );
+  EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdHrzK2( &tan ) );
 }
-#endif
+
+TEST_F(pdHrzTest, HrzK1Rad)
+{
+  pdHrzPrmRad pr;
+
+  pr.q1 = 1.0;
+  pr.q2 = 0.5;
+  pdHrzSetPrm( &rad, &pr );
+  pdVrtUpdate( &vrt, 0.26 );
+  EXPECT_EQ( 0.5, pdHrzK1( &rad ) );
+
+  pr.q1 = 0.8;
+  pr.q2 = 1.3;
+  pdHrzSetPrm( &rad, &pr );
+  pdVrtUpdate( &vrt, 0.26 );
+  EXPECT_EQ( 0.8*1.3, pdHrzK1( &rad ) );
+}
+
+TEST_F(pdHrzTest, HrzK2Rad)
+{
+  pdHrzPrmRad pr;
+
+  pr.q1 = 1.0;
+  pr.q2 = 0.5;
+  pdHrzSetPrm( &rad, &pr );
+  pdVrtUpdate( &vrt, 0.26 );
+  EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdHrzK2( &rad ) );
+
+  pr.q1 = 0.8;
+  pr.q2 = 1.3;
+  pdHrzSetPrm( &rad, &pr );
+  pdVrtUpdate( &vrt, 0.26 );
+  EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdHrzK2( &rad ) );
+}

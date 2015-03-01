@@ -16,6 +16,7 @@ typedef struct{
   void (*_setprm)(void*,void*);
   double (*_k1)(void*);
   double (*_k2)(void*);
+  void (*_update)(void*,double,double,double,double);
   double (*_zmp)(void*);
 } pdHrzCom;
 
@@ -38,6 +39,8 @@ void pdHrzDestroy(pdHrz *hrz);
 
 #define pdHrzK1(h) (h)->com->_k1( (h)->prm )
 #define pdHrzK2(h) (h)->com->_k2( (h)->prm )
+#define pdHrzUpdate(h,du,vu,dw,vw) \
+  (h)->com->_update( (h)->prm, du, vu, dw, vw )
 #define pdHrzZMP(h) (h)->com->_zmp( (h)->prm )
 
 __END_DECLS

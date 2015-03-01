@@ -18,9 +18,9 @@ typedef struct{
   pdHrzSetup( &(c)->rad, &(c)->vrt, PD_HRZ_RAD );\
 } while(0)
 #define pdCtrlDestroy(c) do{\
-  pdHrzDestroy( &tan );\
-  pdHrzDestroy( &rad );\
-  pdHrzDestroy( &vrt );\
+  pdHrzDestroy( &(c)->tan );\
+  pdHrzDestroy( &(c)->rad );\
+  pdVrtDestroy( &(c)->vrt );\
 } while(0)
 #define pdCtrlUpdate(c,z) do{\
   pdVrtUpdate( &(c)->vrt, z );\

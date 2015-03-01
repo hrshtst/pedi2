@@ -36,7 +36,39 @@ TEST_F(pdCtrlTest, Init)
   EXPECT_EQ( 0, _ctrl.vrt.z );
 }
 
+TEST_F(pdCtrlTest, Destroy)
+{
+  pdCtrl _ctrl;
+
+  pdCtrlInit( &_ctrl );
+  pdCtrlDestroy( &_ctrl );
+  // vertical
+  EXPECT_EQ( 0, _ctrl.vrt.zd );
+  EXPECT_EQ( 0, _ctrl.vrt.z );
+  EXPECT_EQ( 0, _ctrl.vrt.zeta );
+  // tangential
+  EXPECT_EQ( -1, _ctrl.tan.dir );
+  EXPECT_EQ( NULL, _ctrl.tan.prm );
+  EXPECT_EQ( NULL, _ctrl.tan.com );
+  // radial
+  EXPECT_EQ( -1, _ctrl.rad.dir );
+  EXPECT_EQ( NULL, _ctrl.rad.prm );
+  EXPECT_EQ( NULL, _ctrl.rad.com );
+}
+
 #if 0
+TEST_F(pdCtrlTest, SetParameters)
+{
+  pdCtrlSetParam( &ctrl, 1, 2, 3, 4, 5, 6, 7 );
+  EXPECT_EQ( 1, ctrl.tan.q1 );
+  EXPECT_EQ( 2, ctrl.tan.q2 );
+  EXPECT_EQ( 3, ctrl.rad.q1 );
+  EXPECT_EQ( 4, ctrl.rad.q2 );
+  EXPECT_EQ( 5, ctrl.rad.kappa );
+  EXPECT_EQ( 6, ctrl.rad.rho );
+  EXPECT_EQ( 7, ctrl.rad.kr );
+}
+
 TEST_F(pdCtrlTest, Update)
 {
   pdCtrl _ctrl;
@@ -49,17 +81,5 @@ TEST_F(pdCtrlTest, Update)
   pdCtrlUpdate( &_ctrl, 0.3 );
   EXPECT_EQ( 0.3, _ctrl.vrt.z );
   EXPECT_EQ( sqrt(RK_G/0.3), pdCtrlZeta(&_ctrl) );
-}
-
-TEST_F(pdCtrlTest, SetParameters)
-{
-  pdCtrlSetParam( &ctrl, 1, 2, 3, 4, 5, 6, 7 );
-  EXPECT_EQ( 1, ctrl.tan.q1 );
-  EXPECT_EQ( 2, ctrl.tan.q2 );
-  EXPECT_EQ( 3, ctrl.rad.q1 );
-  EXPECT_EQ( 4, ctrl.rad.q2 );
-  EXPECT_EQ( 5, ctrl.rad.kappa );
-  EXPECT_EQ( 6, ctrl.rad.rho );
-  EXPECT_EQ( 7, ctrl.rad.kr );
 }
 #endif

@@ -12,7 +12,7 @@ void pdVrtDestroy(pdVrt *vrt)
   pdVrtInit( vrt );
 }
 
-void pdVrtSetPrm(pdVrt *vrt, double zd)
+void pdVrtSetRef(pdVrt *vrt, double zd)
 {
   vrt->zd = zd;
 }

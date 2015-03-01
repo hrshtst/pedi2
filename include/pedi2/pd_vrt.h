@@ -15,7 +15,7 @@ typedef struct{
 void pdVrtInit(pdVrt *vrt);
 void pdVrtDestroy(pdVrt *vrt);
 
-void pdVrtSetPrm(pdVrt *vrt, double zd);
+void pdVrtSetRef(pdVrt *vrt, double zd);
 void pdVrtUpdate(pdVrt *vrt);
 
 __END_DECLS

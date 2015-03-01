@@ -3,6 +3,7 @@
 void pdVrtInit(pdVrt *vrt)
 {
   vrt->z = 0;
+  vrt->zeta = 0;
 }
 
 void pdVrtDestroy(pdVrt *vrt)

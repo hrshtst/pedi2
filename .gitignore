@@ -9,3 +9,4 @@ G*
 /test/pdVrtTest
 /test/pdHrzTest
 /test/pdCtrlTest
+*.log

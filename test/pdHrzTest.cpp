@@ -16,7 +16,7 @@ class pdHrzTest : public testing::Test {
   };
 
   void SetDefaultPrmVelocityFollow() {
-    pdVrtSetPrm( &vrt, 0.26 );
+    pdVrtSetRef( &vrt, 0.26 );
     ((pdHrzPrmTan *)tan.prm)->vd = 0.25;
     ((pdHrzPrmTan *)tan.prm)->q1 = 1.0;
     ((pdHrzPrmTan *)tan.prm)->q2 = 0.0;
@@ -177,14 +177,14 @@ TEST_F(pdHrzTest, HrzK1Tan)
 
   pt.q1 = 1.0;
   pt.q2 = 0.5;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.5, pdHrzK1( &tan ) );
 
   pt.q1 = 0.8;
   pt.q2 = 1.3;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.8*1.3, pdHrzK1( &tan ) );
@@ -196,14 +196,14 @@ TEST_F(pdHrzTest, HrzK2Tan)
 
   pt.q1 = 1.0;
   pt.q2 = 0.5;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdHrzK2( &tan ) );
 
   pt.q1 = 0.8;
   pt.q2 = 1.3;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdHrzK2( &tan ) );
@@ -215,14 +215,14 @@ TEST_F(pdHrzTest, HrzK1Rad)
 
   pr.q1 = 1.0;
   pr.q2 = 0.5;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.5, pdHrzK1( &rad ) );
 
   pr.q1 = 0.8;
   pr.q2 = 1.3;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.8*1.3, pdHrzK1( &rad ) );
@@ -234,14 +234,14 @@ TEST_F(pdHrzTest, HrzK2Rad)
 
   pr.q1 = 1.0;
   pr.q2 = 0.5;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdHrzK2( &rad ) );
 
   pr.q1 = 0.8;
   pr.q2 = 1.3;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdHrzK2( &rad ) );
@@ -268,7 +268,7 @@ TEST_F(pdHrzTest, CheckZMPTanAllStateZero)
   pt.q1 = 0.0;
   pt.q2 = 0.0;
   pt.kappa = 0.0;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
   pdVrtUpdate( &vrt );
   pdHrzUpdate( &tan, 0, 0, 0, 0 );
@@ -278,7 +278,7 @@ TEST_F(pdHrzTest, CheckZMPTanAllStateZero)
   pt.q1 = 1.0;
   pt.q2 = 0.0;
   pt.kappa = 0.0;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &tan, &pt );
   pdVrtUpdate( &vrt );
   pdHrzUpdate( &tan, 0, 0, 0, 0 );
@@ -296,7 +296,7 @@ TEST_F(pdHrzTest, CheckZMPRadAllStateZero)
   pr.rho = 1.0;
   pr.kr = 1.0;
   pr.dist = 0.1;
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdHrzSetPrm( &rad, &pr );
   pdVrtUpdate( &vrt );
   pdHrzUpdate( &rad, 0, 0, 0, 0 );

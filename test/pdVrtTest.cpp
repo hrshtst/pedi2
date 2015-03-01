@@ -27,10 +27,10 @@ TEST(pdVrtTest, SetPrm)
   pdVrt vrt;
 
   pdVrtInit( &vrt );
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   EXPECT_EQ( 0.26, vrt.zd );
 
-  pdVrtSetPrm( &vrt, 0.3 );
+  pdVrtSetRef( &vrt, 0.3 );
   EXPECT_EQ( 0.3, vrt.zd );
 }
 
@@ -39,13 +39,13 @@ TEST(pdVrtTest, Update)
   pdVrt vrt;
 
   pdVrtInit( &vrt );
-  pdVrtSetPrm( &vrt, 0.26 );
+  pdVrtSetRef( &vrt, 0.26 );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.26, vrt.z );
   EXPECT_EQ( 0.26, vrt.zd );
   EXPECT_EQ( sqrt(RK_G/0.26), vrt.zeta );
 
-  pdVrtSetPrm( &vrt, 0.3 );
+  pdVrtSetRef( &vrt, 0.3 );
   pdVrtUpdate( &vrt );
   EXPECT_EQ( 0.3, vrt.z );
   EXPECT_EQ( 0.3, vrt.zd );

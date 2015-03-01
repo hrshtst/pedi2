@@ -14,23 +14,27 @@ typedef struct{
 
 #define pdCtrlInit(c) do{\
   pdVrtInit( &(c)->vrt );\
-  pdHrzInit( &(c)->tan );\
-  pdHrzInit( &(c)->rad );\
-  pdHrzSetup( &(c)->tan, &(c)->vrt );\
-  pdHrzSetup( &(c)->rad, &(c)->vrt );\
+  pdHrzSetup( &(c)->tan, &(c)->vrt, PD_HRZ_TAN );\
+  pdHrzSetup( &(c)->rad, &(c)->vrt, PD_HRZ_RAD );\
+} while(0)
+#define pdCtrlDestroy(c) do{\
+  pdHrzDestroy( &tan );\
+  pdHrzDestroy( &rad );\
+  pdHrzDestroy( &vrt );\
 } while(0)
 #define pdCtrlUpdate(c,z) do{\
-  pdVrtUpdateZeta( &(c)->vrt, z );\
+  pdVrtUpdate( &(c)->vrt, z );\
 } while(0)
 #define pdCtrlZeta(c) (c)->vrt.zeta
-#define pdCtrlSetParam(c,qu1,qu2,qw1,qw2,kap,r,k) do{\
-  (c)->tan.q1 = (qu1);\
-  (c)->tan.q2 = (qu2);\
-  (c)->rad.q1 = (qw1);\
-  (c)->rad.q2 = (qw2);\
-  (c)->rad.kappa = (kap);\
-  (c)->rad.rho = (r);\
-  (c)->rad.kr = (k);\
+#define pdCtrlSetPrm(c,qu1,qu2,qw1,qw2,kap,r,k) do{\
+  ((pdHrzPrmTan *)(c)->tan.prm)->q1 = (qu1);\
+  ((pdHrzPrmTan *)(c)->tan.prm)->q2 = (qu2);\
+  ((pdHrzPrmTan *)(c)->tan.prm)->kappa = (kap);\
+  ((pdHrzPrmRad *)(c)->rad.prm)->q1 = (qw1);\
+  ((pdHrzPrmRad *)(c)->rad.prm)->q2 = (qw2);\
+  ((pdHrzPrmRad *)(c)->rad.prm)->kappa = (kap);\
+  ((pdHrzPrmRad *)(c)->rad.prm)->rho = (r);\
+  ((pdHrzPrmRad *)(c)->rad.prm)->kr = (k);\
 } while(0)
 
 __END_DECLS

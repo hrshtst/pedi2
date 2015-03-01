@@ -3,9 +3,7 @@
 
 class pdCtrlTest : public testing::Test {
  protected:
-  virtual void SetUp() {
-    pdCtrlInit( &ctrl );
-  };
+  virtual void SetUp() {};
   virtual void TearDown() {};
 
   pdCtrl ctrl;

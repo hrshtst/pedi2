@@ -48,7 +48,7 @@ clean : cleantest cleangtest
 cleantest :
 	rm -f $(TESTS) $(TESTOBJ)
 cleangtest :
-	rm -f gtest.a gtest_main.a gtest.o gtest_main.o
+	rm -f gtest.a gtest_main.a gtest.o gtest_main.o gtest-all.o
 
 GTEST_SRCS_ = \
 	$(GTEST_SRC_DIR)/*.cc\

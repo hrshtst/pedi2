@@ -45,6 +45,8 @@ typedef struct{
   pdCtrlPrmRad(c)->vd = (vwd);\
   pdCtrlPrmRad(c)->dist = (d);\
 } while (0)
+#define pdCtrlZMPTan(c) pdHrzZMP( &(c)->tan )
+#define pdCtrlZMPRad(c) pdHrzZMP( &(c)->rad )
 
 __END_DECLS
 

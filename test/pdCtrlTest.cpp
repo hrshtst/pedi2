@@ -100,17 +100,40 @@ TEST_F(pdCtrlTest, GetZMP)
   EXPECT_EQ( 0.5, pdCtrlZMPRad(&ctrl) );
 }
 
-#if 0
-TEST_F(pdCtrlTest, Update)
+TEST_F(pdCtrlTest, UpdateAllStateZero)
 {
-  pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 0.5, 0.0, 1.0, 1.0 );
-  pdCtrlSetRef( &ctrl, 0.25, 0.0, 0.1 );
-  pdCtrlUpdate( &_ctrl, 0.26 );
-  EXPECT_EQ( 0.26, _ctrl.vrt.z );
-  EXPECT_EQ( sqrt(RK_G/0.26), pdCtrlZeta(&_ctrl) );
-
-  pdCtrlUpdate( &_ctrl, 0.3 );
-  EXPECT_EQ( 0.3, _ctrl.vrt.z );
-  EXPECT_EQ( sqrt(RK_G/0.3), pdCtrlZeta(&_ctrl) );
+  pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, 0.0, 1.0, 1.0 );
+  pdCtrlSetRefVrt( &ctrl, 0.26 );
+  pdCtrlSetRefHrz( &ctrl, 0.25, 0.0, 0.1 );
+  pdCtrlUpdate( &ctrl, 0.0, 0.0, 0.0, 0.0 );
+  EXPECT_EQ( 0.26, ctrl.vrt.z );
+  EXPECT_EQ( sqrt(RK_G/0.26), pdCtrlZeta(&ctrl) );
+  EXPECT_DOUBLE_EQ( -0.040706737871602130529602, pdCtrlZMPTan(&ctrl) );
+  EXPECT_DOUBLE_EQ( 0.0, pdCtrlZMPRad(&ctrl) );
 }
-#endif
+
+TEST_F(pdCtrlTest, UpdateVelocityFollow)
+{
+  pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, 0.0, 1.0, 1.0 );
+  pdCtrlSetRefVrt( &ctrl, 0.26 );
+  pdCtrlSetRefHrz( &ctrl, 0.25, 0.0, 0.1 );
+  pdCtrlUpdate( &ctrl, 0.0, 0.2, 0.01, 0.1 );
+  EXPECT_EQ( 0.26, ctrl.vrt.z );
+  EXPECT_EQ( sqrt(RK_G/0.26), pdCtrlZeta(&ctrl) );
+  EXPECT_DOUBLE_EQ( -0.008141347574320424718142, pdCtrlZMPTan(&ctrl) );
+  //EXPECT_DOUBLE_EQ( 0.000310222468637089826560, pdCtrlZMPRad(&ctrl));
+  EXPECT_DOUBLE_EQ( 0.000310222468637088091836, pdCtrlZMPRad(&ctrl) );
+}
+
+TEST_F(pdCtrlTest, UpdateVelocityFollowCurve)
+{
+  pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, 2.0, 1.0, 1.0 );
+  pdCtrlSetRefVrt( &ctrl, 0.26 );
+  pdCtrlSetRefHrz( &ctrl, 0.25, 0.0, 0.1 );
+  pdCtrlUpdate( &ctrl, 0.0, 0.2, 0.01, 0.1 );
+  EXPECT_EQ( 0.26, ctrl.vrt.z );
+  EXPECT_EQ( sqrt(RK_G/0.26), pdCtrlZeta(&ctrl) );
+  EXPECT_DOUBLE_EQ( -0.005162917622573504408678, pdCtrlZMPTan(&ctrl) );
+  //EXPECT_DOUBLE_EQ( -0.001854072725677786536574, pdCtrlZMPRad(&ctrl));
+  EXPECT_DOUBLE_EQ( -0.001854072725677788271298, pdCtrlZMPRad(&ctrl) );
+}

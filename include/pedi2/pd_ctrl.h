@@ -22,11 +22,6 @@ typedef struct{
   pdHrzDestroy( &(c)->rad );\
   pdVrtDestroy( &(c)->vrt );\
 } while (0)
-#define pdCtrlUpdate(c,z) do{\
-  pdVrtUpdate( &(c)->vrt );\
-  pdHrzUpdate( &(c)->tan );\
-  pdHrzUpdate( &(c)->rad );\
-} while (0)
 #define pdCtrlZeta(c) (c)->vrt.zeta
 #define pdCtrlPrmTan(c) ((pdHrzPrmTan *)(c)->tan.prm)
 #define pdCtrlPrmRad(c) ((pdHrzPrmRad *)(c)->rad.prm)
@@ -50,6 +45,11 @@ typedef struct{
 } while (0)
 #define pdCtrlZMPTan(c) pdHrzZMP( &(c)->tan )
 #define pdCtrlZMPRad(c) pdHrzZMP( &(c)->rad )
+#define pdCtrlUpdate(c,du,vu,dw,vw) do{\
+  pdVrtUpdate( &(c)->vrt );\
+  pdHrzUpdate( &(c)->tan, du, vu, dw, vw );\
+  pdHrzUpdate( &(c)->rad, du, vu, dw, vw );\
+} while (0)
 
 __END_DECLS
 

@@ -3,8 +3,12 @@
 
 class pdCtrlTest : public testing::Test {
  protected:
-  virtual void SetUp() {};
-  virtual void TearDown() {};
+  virtual void SetUp() {
+    pdCtrlInit( &ctrl );
+  };
+  virtual void TearDown() {
+    pdCtrlDestroy( &ctrl );
+  };
 
   pdCtrl ctrl;
 };
@@ -56,19 +60,28 @@ TEST_F(pdCtrlTest, Destroy)
   EXPECT_EQ( NULL, _ctrl.rad.com );
 }
 
-#if 0
-TEST_F(pdCtrlTest, SetParameters)
+TEST_F(pdCtrlTest, SetPrm)
 {
-  pdCtrlSetParam( &ctrl, 1, 2, 3, 4, 5, 6, 7 );
-  EXPECT_EQ( 1, ctrl.tan.q1 );
-  EXPECT_EQ( 2, ctrl.tan.q2 );
-  EXPECT_EQ( 3, ctrl.rad.q1 );
-  EXPECT_EQ( 4, ctrl.rad.q2 );
-  EXPECT_EQ( 5, ctrl.rad.kappa );
-  EXPECT_EQ( 6, ctrl.rad.rho );
-  EXPECT_EQ( 7, ctrl.rad.kr );
+  pdCtrlSetPrm( &ctrl, 1, 2, 3, 4, 5, 6, 7 );
+  EXPECT_EQ( 1, pdCtrlPrmTan(&ctrl)->q1 );
+  EXPECT_EQ( 2, pdCtrlPrmTan(&ctrl)->q2 );
+  EXPECT_EQ( 5, pdCtrlPrmTan(&ctrl)->kappa );
+  EXPECT_EQ( 3, pdCtrlPrmRad(&ctrl)->q1 );
+  EXPECT_EQ( 4, pdCtrlPrmRad(&ctrl)->q2 );
+  EXPECT_EQ( 5, pdCtrlPrmRad(&ctrl)->kappa );
+  EXPECT_EQ( 6, pdCtrlPrmRad(&ctrl)->rho );
+  EXPECT_EQ( 7, pdCtrlPrmRad(&ctrl)->kr );
 }
 
+TEST_F(pdCtrlTest, SetRef)
+{
+  pdCtrlSetRef( &ctrl, 1, 2, 3 );
+  EXPECT_EQ( 1, pdCtrlPrmTan(&ctrl)->vd );
+  EXPECT_EQ( 2, pdCtrlPrmRad(&ctrl)->vd );
+  EXPECT_EQ( 3, pdCtrlPrmRad(&ctrl)->dist );
+}
+
+#if 0
 TEST_F(pdCtrlTest, Update)
 {
   pdCtrl _ctrl;

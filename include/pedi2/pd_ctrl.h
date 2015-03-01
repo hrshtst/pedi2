@@ -16,26 +16,35 @@ typedef struct{
   pdVrtInit( &(c)->vrt );\
   pdHrzSetup( &(c)->tan, &(c)->vrt, PD_HRZ_TAN );\
   pdHrzSetup( &(c)->rad, &(c)->vrt, PD_HRZ_RAD );\
-} while(0)
+} while (0)
 #define pdCtrlDestroy(c) do{\
   pdHrzDestroy( &(c)->tan );\
   pdHrzDestroy( &(c)->rad );\
   pdVrtDestroy( &(c)->vrt );\
-} while(0)
+} while (0)
 #define pdCtrlUpdate(c,z) do{\
-  pdVrtUpdate( &(c)->vrt, z );\
-} while(0)
+  pdVrtUpdate( &(c)->vrt );\
+  pdHrzUpdate( &(c)->tan );\
+  pdHrzUpdate( &(c)->rad );\
+} while (0)
 #define pdCtrlZeta(c) (c)->vrt.zeta
+#define pdCtrlPrmTan(c) ((pdHrzPrmTan *)(c)->tan.prm)
+#define pdCtrlPrmRad(c) ((pdHrzPrmRad *)(c)->rad.prm)
 #define pdCtrlSetPrm(c,qu1,qu2,qw1,qw2,kap,r,k) do{\
-  ((pdHrzPrmTan *)(c)->tan.prm)->q1 = (qu1);\
-  ((pdHrzPrmTan *)(c)->tan.prm)->q2 = (qu2);\
-  ((pdHrzPrmTan *)(c)->tan.prm)->kappa = (kap);\
-  ((pdHrzPrmRad *)(c)->rad.prm)->q1 = (qw1);\
-  ((pdHrzPrmRad *)(c)->rad.prm)->q2 = (qw2);\
-  ((pdHrzPrmRad *)(c)->rad.prm)->kappa = (kap);\
-  ((pdHrzPrmRad *)(c)->rad.prm)->rho = (r);\
-  ((pdHrzPrmRad *)(c)->rad.prm)->kr = (k);\
+  pdCtrlPrmTan(c)->q1 = (qu1);\
+  pdCtrlPrmTan(c)->q2 = (qu2);\
+  pdCtrlPrmTan(c)->kappa = (kap);\
+  pdCtrlPrmRad(c)->q1 = (qw1);\
+  pdCtrlPrmRad(c)->q2 = (qw2);\
+  pdCtrlPrmRad(c)->kappa = (kap);\
+  pdCtrlPrmRad(c)->rho = (r);\
+  pdCtrlPrmRad(c)->kr = (k);\
 } while(0)
+#define pdCtrlSetRef(c,vud,vwd,d) do{\
+  pdCtrlPrmTan(c)->vd = (vud);\
+  pdCtrlPrmRad(c)->vd = (vwd);\
+  pdCtrlPrmRad(c)->dist = (d);\
+} while (0)
 
 __END_DECLS
 

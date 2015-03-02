@@ -11,3 +11,4 @@ G*
 /test/pdCtrlTest
 *.log
 /todo.org
+/example/ctrl_view_test

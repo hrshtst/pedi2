@@ -125,7 +125,7 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmFlagset *flag)
     if( flag->frame ) flag->frame = false;
     /* udpate state */
     dmSystemUpdateComVal( sys );
-    printf("kappa: %g, vu: %g, dist: %g\n", pdCtrlKappa(&sys->c), pdCtrlPrmTan(&sys->c)->vd, pdCtrlPrmRad(&sys->c)->dist );
+    printf("kappa: %g, vu: %g, dist: %g            \r", pdCtrlKappa(&sys->c), pdCtrlPrmTan(&sys->c)->vd, pdCtrlPrmRad(&sys->c)->dist );
   }
 }
 

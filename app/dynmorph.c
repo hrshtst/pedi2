@@ -6,15 +6,59 @@
 #include <roki/glrk_shape.h>
 #include <pedi2/pd_ctrl.h>
 
+#include "util/dm_console.h"
+
+typedef struct{
+  double qu1, qu2;
+  double qw1, qw2;
+  double kappa, rho, kr;
+  double zd;
+  double vud, vwd, dist;
+  double lfh, rfh;
+} dmComVal;
+
 typedef struct{
   double x[2], y[2];
   pdCtrl c;
   double xz, yz;
+  dmComVal com;
 } dmSystem;
 
-void dmSystemInit(dmSystem *sys)
+void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
+{
+  /* sys->cv.xd = 0.5 * ( sys->cx.xzmin + sys->cx.xzmax ); */
+  /* sys->cv.yd = 0.5 * ( sys->cy.xzmin + sys->cy.xzmax ); */
+  dmConsoleInit( con );
+  dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &sys->com.zd );
+  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &sys->com.vud );
+  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qu1 );
+  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.5, 0, &sys->com.qu2 );
+  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &sys->com.vwd );
+  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qw1 );
+  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 0.5, 0, &sys->com.qw2 );
+  dmConsoleAddEval( con, "Foot dist", 0.02, 0.16, 0.1, 0, &sys->com.dist );
+  dmConsoleAddEval( con, "Kappa", -2.0, 2.0, 0.0, 20, &sys->com.kappa );
+  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &sys->com.rho );
+  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &sys->com.kr );
+  dmConsoleAddEval( con, "L lift height", 0, 0.02, 0.02, 0, &sys->com.lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.02, 0.02, 0, &sys->com.rfh );
+}
+
+void dmSystemUpdateComVal(dmSystem *sys)
+{
+  pdCtrlSetPrm( &sys->c, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr );
+  pdCtrlSetRefVrt( &sys->c, sys->com.zd );
+  pdCtrlSetRefHrz( &sys->c, sys->com.vud, sys->com.vwd, sys->com.dist );
+  /* sys->lf.h   = sys->cv.lfh; */
+  /* sys->rf.h   = sys->cv.rfh; */
+}
+
+void dmSystemInit(dmSystem *sys, dmConsole *con)
 {
   pdCtrlInit( &sys->c );
+
+  dmSystemInitConsole( sys, con );
+  dmSystemUpdateComVal( sys );
   sys->x[0] = sys->x[1] = 0;
   sys->y[0] = sys->y[1] = 0;
   sys->xz = sys->x[0];
@@ -27,13 +71,16 @@ void dmSystemExit(dmSystem *sys)
 }
 
 #define DM_CONSOLE_WIDTH 240
-void resize(zxWindow *win)
+void resize(zxWindow *win, dmConsole *con)
 {
   short w, h;
 
   zxWindowClear( win );
   w = ( zxWindowWidth(win) - DM_CONSOLE_WIDTH ) / 2;
   h = zxWindowHeight(win) / 2;
+
+  dmConsoleMove( con, w*2, 0 );
+  dmConsoleDraw( con, win );
 
   zxwSepBoxLower( win, 6, 6, w-4, 2*h-12 );
   zxwSepBoxLower( win, w+6, 6, w-4, 2*h-12 );
@@ -72,12 +119,18 @@ void dmFlagsetInit(dmFlagset *flag)
   flag->log = false;
 }
 
-void frame_one(zxWindow *win, dmSystem *sys, dmFlagset *flag)
+void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmFlagset *flag)
 {
+  if( !flag->frame || flag->frame ){
+    if( flag->frame ) flag->frame = false;
+    /* udpate state */
+    dmSystemUpdateComVal( sys );
+    printf("kappa: %g, vu: %g, dist: %g\n", pdCtrlKappa(&sys->c), pdCtrlPrmTan(&sys->c)->vd, pdCtrlPrmRad(&sys->c)->dist );
+  }
 }
 
 #define ANIM_SKIP 1000
-void mainloop(zxWindow *win, dmSystem *sys)
+void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys)
 {
   dmFlagset flag;
   int count = ANIM_SKIP;
@@ -88,10 +141,19 @@ void mainloop(zxWindow *win, dmSystem *sys)
     case Expose:
     case ConfigureNotify:
       zxWindowUpdateRegion( win );
-      resize( win );
+      resize( win, con );
       break;
     case ClientMessage:
       if( zxDeleteWindowEvent() ) return;
+      break;
+    case ButtonPress:
+      dmConsoleButtonPress( con );
+      break;
+    case ButtonRelease:
+      dmConsoleButtonRelease( con );
+      break;
+    case MotionNotify:
+      dmConsoleMouseMove( con, win );
       break;
     case KeyPress:
       switch( zxKeySymbol() ){
@@ -104,7 +166,7 @@ void mainloop(zxWindow *win, dmSystem *sys)
     default: ;
     }
     if( ++count > ANIM_SKIP ){
-      frame_one( win, sys, &flag );
+      frame_one( win, con, sys, &flag );
       count = 0;
       if( flag.rec ) capture( win );
     }
@@ -116,6 +178,7 @@ void mainloop(zxWindow *win, dmSystem *sys)
 int main(int argc, char *argv[])
 {
   zxWindow mainwin;
+  dmConsole con;
   dmSystem sys;
 
   glrkInitGLX();
@@ -128,9 +191,11 @@ int main(int argc, char *argv[])
   zxWindowOpen( &mainwin );
   zxWidgetInit( &mainwin );
 
-  dmSystemInit( &sys );
-  mainloop( &mainwin, &sys );
+  dmSystemInit( &sys, &con );
+  mainloop( &mainwin, &con, &sys );
   dmSystemExit( &sys );
+
+  dmConsoleExit( &con );
 
   glrkCloseGLX();
   return 0;

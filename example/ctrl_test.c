@@ -105,7 +105,6 @@ void print_data(double t)
 
 #define DT   0.01
 #define STEP 1500
-/* #define STEP 5 */
 int main(void)
 {
   zODE ode;
@@ -136,7 +135,6 @@ int main(void)
     zODEUpdate( &ode, t, p, DT, &ctrl );
     print_data( t );
     ref_update( &ctrl, zVecElem(p,0), zVecElem(p,2) );
-    /* getchar(); */
   }
   zVecFree( p );
   zODEDestroy( &ode );

@@ -83,10 +83,10 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
 void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
 {
   solver->t += DT;
-  sys->x[0] = zVecElem(solver->p,0);
-  sys->x[1] = zVecElem(solver->p,1);
-  sys->y[0] = zVecElem(solver->p,2);
-  sys->y[1] = zVecElem(solver->p,3);
+  sys->x[0] = sys->nx[0];
+  sys->x[1] = sys->nx[1];
+  sys->y[0] = sys->ny[0];
+  sys->y[1] = sys->ny[1];
   zODEUpdate( &solver->ode, solver->t, solver->p, DT, sys );
   sys->nx[0] = zVecElem(solver->p,0);
   sys->nx[1] = zVecElem(solver->p,1);

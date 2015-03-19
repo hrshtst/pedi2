@@ -14,7 +14,7 @@ typedef struct{
   double zd;
   double vud, vwd, dist;
   double lfh, rfh;
-} dmComVal;
+} dmCommand;
 
 typedef struct{
   double x[2], y[2];
@@ -27,7 +27,7 @@ typedef struct{
   double xd, yd;
   double theta;
   double adx, ady;
-  dmComVal com;
+  dmCommand com;
 } dmSystem;
 
 typedef struct{
@@ -223,7 +223,7 @@ void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
   dmConsoleAddEval( con, "R lift height", 0, 0.02, 0.02, 0, &sys->com.rfh );
 }
 
-void dmSystemUpdateComVal(dmSystem *sys)
+void dmSystemUpdateCommand(dmSystem *sys)
 {
   pdCtrlSetPrm( &sys->c, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr );
   pdCtrlSetRefVrt( &sys->c, sys->com.zd );
@@ -252,7 +252,7 @@ void dmSystemInit(dmSystem *sys, dmConsole *con)
 
   dmSystemUpdateRobot( sys );
   dmSystemInitConsole( sys, con );
-  dmSystemUpdateComVal( sys );
+  dmSystemUpdateCommand( sys );
   dmSystemInitState( sys );
   dmSystemInitFoot( sys );
 }
@@ -335,7 +335,7 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
   if( !flag->frame || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate state */
-    dmSystemUpdateComVal( sys );
+    dmSystemUpdateCommand( sys );
     dmSystemUpdateCtrl( sys, solver );
     dmSystemUpdateFoot( sys );
     dmSystemUpdateRobot( sys );

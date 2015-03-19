@@ -26,6 +26,7 @@ typedef struct{
   double yzmin, yzmax;
   double xd, yd;
   double theta;
+  double adx, ady;
   dmComVal com;
 } dmSystem;
 
@@ -72,9 +73,9 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
   pdCtrlUpdate( &sys->c, du, vu, dw, vw );
   dmSystemCoodTransBodyToWorld( sys, pdCtrlZMPTan(&sys->c), pdCtrlZMPRad(&sys->c), &sys->xz, &sys->yz );
   zVecElem(v,0) = zVecElem(p,1);
-  zVecElem(v,1) = zSqr(pdCtrlZeta(&sys->c)) * ( zVecElem(p,0) - sys->xz );
+  zVecElem(v,1) = zSqr(pdCtrlZeta(&sys->c)) * ( zVecElem(p,0) - sys->xz ) + sys->adx;
   zVecElem(v,2) = zVecElem(p,3);
-  zVecElem(v,3) = zSqr(pdCtrlZeta(&sys->c)) * ( zVecElem(p,2) - sys->yz );
+  zVecElem(v,3) = zSqr(pdCtrlZeta(&sys->c)) * ( zVecElem(p,2) - sys->yz ) + sys->ady;
   return v;
 }
 
@@ -232,6 +233,7 @@ void dmSystemInitState(dmSystem *sys)
   sys->xd = sys->x[0];
   sys->yd = sys->y[0];
   sys->theta = 0;
+  sys->adx = sys->ady = 0;
 }
 
 void dmSystemInit(dmSystem *sys, dmConsole *con)
@@ -318,6 +320,7 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
 {
   zVec3D force = { { 0, 0, 0 } };
 
+  zVec3DCreate( &force, sys->adx, sys->ady, 0 );
   if( !flag->frame || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate state */
@@ -365,8 +368,15 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver,
       case XK_p: flag.pause = 1 - flag.pause; break;
       case XK_f: flag.frame = flag.pause; break;
       case XK_r: flag.rec = 1 - flag.rec; break;
+      case XK_Up: sys->adx = 0.1; break;
+      case XK_Down: sys->adx = -0.1; break;
+      case XK_Left: sys->ady = -0.1; break;
+      case XK_Right: sys->ady = +0.1; break;
       case XK_q: return;
       }
+      break;
+    case KeyRelease:
+      sys->adx = sys->ady = 0;
       break;
     default: ;
     }

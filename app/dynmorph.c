@@ -50,7 +50,7 @@ void dmSystemObserve(dmSystem *sys, double *du, double *vu, double *dw, double *
   zSinCos( sys->theta, &s, &c );
   *du = 0;
   *vu = -sys->x[1]*s + sys->y[1]*c;
-  *dw = ( sys->xd - sys->x[0] )*c +( sys->yd - sys->y[0] )*s;
+  *dw = ( sys->xd - sys->x[0] )*c + ( sys->yd - sys->y[0] )*s;
   *vw = -sys->x[1]*c - sys->y[1]*s;
 }
 
@@ -294,6 +294,15 @@ void dmSystemODESolverExit(dmODESolver *solver)
   zODEDestroy( &solver->ode );
 }
 
+void dmSystemLog(FILE *fp, dmSystem *sys)
+{
+  fprintf( fp, "%f %f %f %f %f %f %f %f %f %f %f %f %f\n",
+           sys->x[0], sys->x[1], sys->nx[0], sys->nx[1],
+           sys->y[0], sys->y[1], sys->ny[0], sys->ny[1],
+           sys->xz, sys->xd, sys->yz, sys->yd,
+           sys->theta );
+}
+
 #define DM_CONSOLE_WIDTH 240
 void resize(zxWindow *win, dmConsole *con, dmScene *sx, dmScene *sy)
 {
@@ -345,7 +354,7 @@ void dmFlagsetInit(dmFlagset *flag)
   flag->log = false;
 }
 
-void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy, dmFlagset *flag)
+void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy, dmFlagset *flag, FILE *fp)
 {
   zVec3D force = { { 0, 0, 0 } };
   double s, c;
@@ -360,6 +369,8 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
     dmSystemUpdateRobot( sys );
     dmSystemUpdateRef( sys );
     /* printf("kappa: %g, vu: %g, dist: %g, zd: %g             \r", pdCtrlKappa(&sys->c), pdCtrlPrmTan(&sys->c)->vd, pdCtrlPrmRad(&sys->c)->dist, sys->c.vrt.zd ); */
+    if( fp )
+      dmSystemLog( fp, sys );
   }
   zSinCos( sys->theta, &s, &c );
   dmSceneLookAt( sx, sys->xd-4*c, sys->yd-4*s, 0.4, sys->xd, sys->yd, 0.3);
@@ -371,6 +382,7 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
 #define ANIM_SKIP 1000
 void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy)
 {
+  FILE *fp = NULL;
   dmFlagset flag;
   int count = ANIM_SKIP;
 
@@ -396,6 +408,13 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver,
       break;
     case KeyPress:
       switch( zxKeySymbol() ){
+      case XK_l:
+        if( ( flag.log = 1 - flag.log ) ){
+          fp = fopen( "dynmorph.log", "w" );
+        } else{
+          fclose( fp );
+        }
+        break;
       case XK_p: flag.pause = 1 - flag.pause; break;
       case XK_f: flag.frame = flag.pause; break;
       case XK_r: flag.rec = 1 - flag.rec; break;
@@ -412,7 +431,7 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver,
     default: ;
     }
     if( ++count > ANIM_SKIP ){
-      frame_one( win, con, sys, solver, sx, sy, &flag );
+      frame_one( win, con, sys, solver, sx, sy, &flag, fp );
       count = 0;
       if( flag.rec ) capture( win );
     }

@@ -379,10 +379,10 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver,
       case XK_p: flag.pause = 1 - flag.pause; break;
       case XK_f: flag.frame = flag.pause; break;
       case XK_r: flag.rec = 1 - flag.rec; break;
-      case XK_Up: sys->adx = 0.1; break;
-      case XK_Down: sys->adx = -0.1; break;
-      case XK_Left: sys->ady = -0.1; break;
-      case XK_Right: sys->ady = +0.1; break;
+      case XK_Up: sys->ady = 0.1; break;
+      case XK_Down: sys->ady = -0.1; break;
+      case XK_Left: sys->adx = -0.1; break;
+      case XK_Right: sys->adx = +0.1; break;
       case XK_q: return;
       }
       break;

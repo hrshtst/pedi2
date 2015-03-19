@@ -17,8 +17,8 @@ zVec3D dm_d_att_body, dm_d_att_lf, dm_d_att_rf;
 #define DM_TOL (1.0e-3)
 
 #define DM_ROBOT_BODY       0
-#define DM_ROBOT_LEFT_FOOT  12
-#define DM_ROBOT_RIGHT_FOOT 24
+#define DM_ROBOT_LEFT_FOOT  9
+#define DM_ROBOT_RIGHT_FOOT 15
 
 zVec3DList dm_sr_lf; /* supporting region on the left sole */
 zVec3DList dm_sr_rf; /* supporting region on the right sole */
@@ -37,7 +37,7 @@ void dmRobotInit(void)
   register int i;
 
   /* robot model */
-  if( !rkChainReadFile( &dm_robot, (char *)"mighty.zkc" ) )
+  if( !rkChainReadFile( &dm_robot, (char *)"hydra.zkc" ) )
     exit( EXIT_FAILURE );
   zVec3DCopy( rkChainWldCOM(&dm_robot), &dm_d_com );
   zVec3DCopy( rkChainLinkWldPos(&dm_robot,DM_ROBOT_LEFT_FOOT), &dm_d_lf );
@@ -54,7 +54,7 @@ void dmRobotInit(void)
   /* IK solver */
   if( !rkIKCreate( &dm_ik, &dm_robot ) )
     exit( EXIT_FAILURE );
-  rkIKConfReadFile( &dm_ik, (char *)"mighty_ik.conf" );
+  rkIKConfReadFile( &dm_ik, (char *)"hydra_ik.conf" );
   for( i=0; i<6; i++ )
     dm_cell[i] = rkIKFindCell( &dm_ik, i );
 

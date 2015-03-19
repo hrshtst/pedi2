@@ -1,11 +1,8 @@
 #include <zx11/zxwidget.h>
 #include <zx11/zximage_dib.h>
-#include <roki/glrk_glx.h>
-#include <roki/glrk_camera.h>
-#include <roki/glrk_optic.h>
-#include <roki/glrk_shape.h>
 #include <pedi2/pd_ctrl.h>
 
+#include "util/dm_scene.h"
 #include "util/dm_console.h"
 
 typedef struct{
@@ -23,6 +20,30 @@ typedef struct{
   double xz, yz;
   dmComVal com;
 } dmSystem;
+
+void dmSystemUpdateRobot(dmSystem *sys)
+{
+  dmRobotSolveIK();
+  dmSupportRegion();
+  /* dmSupportRegionBorder( &sys->cx.xzmin, &sys->cx.xzmax, &sys->cy.xzmin, &sys->cy.xzmax ); */
+}
+
+#define UPDATE_SKEW 1
+void dmSystemUpdateCtrl(dmSystem *sys)
+{
+}
+
+void dmSystemUpdateFoot(dmSystem *sys)
+{
+}
+
+void dmSystemUpdateRef(dmSystem *sys)
+{
+}
+
+void dmSystemInitFoot(dmSystem *sys)
+{
+}
 
 void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
 {
@@ -53,16 +74,23 @@ void dmSystemUpdateComVal(dmSystem *sys)
   /* sys->rf.h   = sys->cv.rfh; */
 }
 
-void dmSystemInit(dmSystem *sys, dmConsole *con)
+void dmSystemInitState(dmSystem *sys)
 {
-  pdCtrlInit( &sys->c );
-
-  dmSystemInitConsole( sys, con );
-  dmSystemUpdateComVal( sys );
   sys->x[0] = sys->x[1] = 0;
   sys->y[0] = sys->y[1] = 0;
   sys->xz = sys->x[0];
   sys->yz = sys->y[0];
+}
+
+void dmSystemInit(dmSystem *sys, dmConsole *con)
+{
+  pdCtrlInit( &sys->c );
+
+  dmSystemUpdateRobot( sys );
+  dmSystemInitConsole( sys, con );
+  dmSystemUpdateComVal( sys );
+  dmSystemInitState( sys );
+  dmSystemInitFoot( sys );
 }
 
 void dmSystemExit(dmSystem *sys)
@@ -71,7 +99,7 @@ void dmSystemExit(dmSystem *sys)
 }
 
 #define DM_CONSOLE_WIDTH 240
-void resize(zxWindow *win, dmConsole *con)
+void resize(zxWindow *win, dmConsole *con, dmScene *sx, dmScene *sy)
 {
   short w, h;
 
@@ -84,6 +112,8 @@ void resize(zxWindow *win, dmConsole *con)
 
   zxwSepBoxLower( win, 6, 6, w-4, 2*h-12 );
   zxwSepBoxLower( win, w+6, 6, w-4, 2*h-12 );
+  dmSceneResize( sx, w, 0, w, h );
+  dmSceneResize( sy, 0, 0, w, h );
 
   zxDequeueEvent(); /* flush unprocessed events */
 }
@@ -119,18 +149,27 @@ void dmFlagsetInit(dmFlagset *flag)
   flag->log = false;
 }
 
-void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmFlagset *flag)
+void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmScene *sx, dmScene *sy, dmFlagset *flag)
 {
+  zVec3D force = { { 0, 0, 0 } };
+
   if( !flag->frame || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate state */
     dmSystemUpdateComVal( sys );
+    dmSystemUpdateCtrl( sys );
+    dmSystemUpdateFoot( sys );
+    dmSystemUpdateRef( sys );
     printf("kappa: %g, vu: %g, dist: %g            \r", pdCtrlKappa(&sys->c), pdCtrlPrmTan(&sys->c)->vd, pdCtrlPrmRad(&sys->c)->dist );
   }
+  dmSceneLookAt( sx, sys->x[0], -4, 0.4, sys->x[0], 0, 0.3);
+  dmSceneLookAt( sy, sys->x[0]+4, 0, 0.4, sys->x[0], 0, 0.3 );
+  dmSceneDraw( sx, &force );
+  dmSceneDraw( sy, &force );
 }
 
 #define ANIM_SKIP 1000
-void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys)
+void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmScene *sx, dmScene *sy)
 {
   dmFlagset flag;
   int count = ANIM_SKIP;
@@ -141,7 +180,7 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys)
     case Expose:
     case ConfigureNotify:
       zxWindowUpdateRegion( win );
-      resize( win, con );
+      resize( win, con, sx, sy );
       break;
     case ClientMessage:
       if( zxDeleteWindowEvent() ) return;
@@ -166,7 +205,7 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys)
     default: ;
     }
     if( ++count > ANIM_SKIP ){
-      frame_one( win, con, sys, &flag );
+      frame_one( win, con, sys, sx, sy, &flag );
       count = 0;
       if( flag.rec ) capture( win );
     }
@@ -180,6 +219,7 @@ int main(int argc, char *argv[])
   zxWindow mainwin;
   dmConsole con;
   dmSystem sys;
+  dmScene sx, sy;
 
   glrkInitGLX();
   zxWindowCreate( &mainwin, 0, 0, WIDTH, HEIGHT );
@@ -191,11 +231,20 @@ int main(int argc, char *argv[])
   zxWindowOpen( &mainwin );
   zxWidgetInit( &mainwin );
 
+  dmSceneInit( &sx, &mainwin );
+  dmSceneInit( &sy, &mainwin );
+
+  dmRobotInit();
+
   dmSystemInit( &sys, &con );
-  mainloop( &mainwin, &con, &sys );
+  mainloop( &mainwin, &con, &sys, &sx, &sy );
   dmSystemExit( &sys );
 
   dmConsoleExit( &con );
+  dmRobotExit();
+
+  dmSceneExit( &sx );
+  dmSceneExit( &sy );
 
   glrkCloseGLX();
   return 0;

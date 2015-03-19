@@ -328,6 +328,7 @@ void dmFlagsetInit(dmFlagset *flag)
 void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy, dmFlagset *flag)
 {
   zVec3D force = { { 0, 0, 0 } };
+  double s, c;
 
   zVec3DCreate( &force, sys->adx, sys->ady, 0 );
   if( !flag->frame || flag->frame ){
@@ -340,8 +341,9 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
     dmSystemUpdateRef( sys );
     /* printf("kappa: %g, vu: %g, dist: %g, zd: %g             \r", pdCtrlKappa(&sys->c), pdCtrlPrmTan(&sys->c)->vd, pdCtrlPrmRad(&sys->c)->dist, sys->c.vrt.zd ); */
   }
-  dmSceneLookAt( sx, sys->x[0], -4, 0.4, sys->x[0], 0, 0.3);
-  dmSceneLookAt( sy, sys->x[0]+4, 0, 0.4, sys->x[0], 0, 0.3 );
+  zSinCos( sys->theta, &s, &c );
+  dmSceneLookAt( sx, sys->xd-4*c, sys->yd-4*s, 0.4, sys->xd, sys->yd, 0.3);
+  dmSceneLookAt( sy, sys->xd+4*s, sys->yd-4*c, 0.4, sys->xd, sys->yd, 0.3 );
   dmSceneDraw( sx, &force );
   dmSceneDraw( sy, &force );
 }

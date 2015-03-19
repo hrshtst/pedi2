@@ -137,7 +137,7 @@ void dmSystemUpdateRef(dmSystem *sys)
 
   /* update IK constraints for COM */
   zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->c.vrt.zd );
-  zVec3DCreate( &dm_d_att_body, sys->theta, 0, 0 );
+  zVec3DCreate( &dm_d_att_body, sys->theta+zPI_2, 0, 0 );
 }
 
 void dmSystemInitFoot(dmSystem *sys)

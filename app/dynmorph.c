@@ -347,7 +347,7 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
   double s, c;
 
   zVec3DCreate( &force, sys->adx, sys->ady, 0 );
-  if( !flag->frame || flag->frame ){
+  if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate state */
     dmSystemUpdateCommand( sys );

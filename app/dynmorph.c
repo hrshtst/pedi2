@@ -1,3 +1,4 @@
+#include <zm/zm_ode.h>
 #include <zx11/zxwidget.h>
 #include <zx11/zximage_dib.h>
 #include <pedi2/pd_ctrl.h>
@@ -17,13 +18,22 @@ typedef struct{
 
 typedef struct{
   double x[2], y[2];
+  double nx[2], ny[2];
   pdCtrl c;
   dmFoot lf, rf;
   double xz, yz;
   double xzmin, xzmax;
   double yzmin, yzmax;
+  double xd, yd;
+  double theta;
   dmComVal com;
 } dmSystem;
+
+typedef struct{
+  double t;
+  zVec p;
+  zODE ode;
+} dmODESolver;
 
 void dmSystemUpdateRobot(dmSystem *sys)
 {
@@ -32,9 +42,55 @@ void dmSystemUpdateRobot(dmSystem *sys)
   dmSupportRegionBorder( &sys->xzmin, &sys->xzmax, &sys->yzmin, &sys->yzmax );
 }
 
-#define UPDATE_SKEW 1
-void dmSystemUpdateCtrl(dmSystem *sys)
+void dmSystemObserve(dmSystem *sys, double *du, double *vu, double *dw, double *vw)
 {
+  double s, c;
+
+  zSinCos( sys->theta, &s, &c );
+  *du = 0;
+  *vu = -sys->x[1]*s + sys->y[1]*c;
+  *dw = ( sys->xd - sys->x[0] )*c +( sys->yd - sys->y[0] )*s;
+  *vw = -sys->x[1]*c - sys->y[1]*s;
+}
+
+void dmSystemCoodTransBodyToWorld(dmSystem *sys, double u, double w, double *x, double *y)
+{
+  double s, c;
+
+  zSinCos( sys->theta, &s, &c );
+  *x = sys->x[0] - u*s - w*c;
+  *y = sys->y[0] + u*c - w*s;
+}
+
+zVec dp(double t, zVec p, void *dummy, zVec v)
+{
+  double du, vu, dw, vw;
+  dmSystem *sys;
+
+  sys = (dmSystem *)dummy;
+  dmSystemObserve( sys, &du, &vu, &dw, &vw );
+  pdCtrlUpdate( &sys->c, du, vu, dw, vw );
+  dmSystemCoodTransBodyToWorld( sys, pdCtrlZMPTan(&sys->c), pdCtrlZMPRad(&sys->c), &sys->xz, &sys->yz );
+  zVecElem(v,0) = zVecElem(p,1);
+  zVecElem(v,1) = zSqr(pdCtrlZeta(&sys->c)) * ( zVecElem(p,0) - sys->xz );
+  zVecElem(v,2) = zVecElem(p,3);
+  zVecElem(v,3) = zSqr(pdCtrlZeta(&sys->c)) * ( zVecElem(p,2) - sys->yz );
+  return v;
+}
+
+#define UPDATE_SKEW 1
+void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
+{
+  solver->t += DT;
+  sys->x[0] = zVecElem(solver->p,0);
+  sys->x[1] = zVecElem(solver->p,1);
+  sys->y[0] = zVecElem(solver->p,2);
+  sys->y[1] = zVecElem(solver->p,3);
+  zODEUpdate( &solver->ode, solver->t, solver->p, DT, sys );
+  sys->nx[0] = zVecElem(solver->p,0);
+  sys->nx[1] = zVecElem(solver->p,1);
+  sys->ny[0] = zVecElem(solver->p,2);
+  sys->ny[1] = zVecElem(solver->p,3);
 }
 
 void dmSystemUpdateFoot(dmSystem *sys)
@@ -139,6 +195,9 @@ void dmSystemInitState(dmSystem *sys)
   sys->y[1] = 0;
   sys->xz = sys->x[0];
   sys->yz = sys->y[0];
+  sys->xd = sys->x[0];
+  sys->yd = sys->y[0];
+  sys->theta = 0;
 }
 
 void dmSystemInit(dmSystem *sys, dmConsole *con)
@@ -155,6 +214,19 @@ void dmSystemInit(dmSystem *sys, dmConsole *con)
 void dmSystemExit(dmSystem *sys)
 {
   pdCtrlDestroy( &sys->c );
+}
+
+void dmSystemODESolverInit(dmODESolver *solver, dmSystem *sys)
+{
+  solver->t = 0;
+  solver->p = zVecCreateList( 4, sys->x[0], sys->x[1], sys->y[0], sys->y[1] );
+  zODEAssign( &solver->ode, RKF45, NULL, NULL );
+  zODEInit( &solver->ode, 4, 0, dp );
+}
+
+void dmSystemODESolverExit(dmODESolver *solver)
+{
+  zODEDestroy( &solver->ode );
 }
 
 #define DM_CONSOLE_WIDTH 240
@@ -208,7 +280,7 @@ void dmFlagsetInit(dmFlagset *flag)
   flag->log = false;
 }
 
-void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmScene *sx, dmScene *sy, dmFlagset *flag)
+void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy, dmFlagset *flag)
 {
   zVec3D force = { { 0, 0, 0 } };
 
@@ -216,7 +288,7 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmScene *sx, dmScen
     if( flag->frame ) flag->frame = false;
     /* udpate state */
     dmSystemUpdateComVal( sys );
-    dmSystemUpdateCtrl( sys );
+    dmSystemUpdateCtrl( sys, solver );
     dmSystemUpdateFoot( sys );
     dmSystemUpdateRobot( sys );
     dmSystemUpdateRef( sys );
@@ -229,7 +301,7 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmScene *sx, dmScen
 }
 
 #define ANIM_SKIP 1000
-void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmScene *sx, dmScene *sy)
+void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy)
 {
   dmFlagset flag;
   int count = ANIM_SKIP;
@@ -265,7 +337,7 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmScene *sx, dmScene
     default: ;
     }
     if( ++count > ANIM_SKIP ){
-      frame_one( win, con, sys, sx, sy, &flag );
+      frame_one( win, con, sys, solver, sx, sy, &flag );
       count = 0;
       if( flag.rec ) capture( win );
     }
@@ -280,6 +352,7 @@ int main(int argc, char *argv[])
   dmConsole con;
   dmSystem sys;
   dmScene sx, sy;
+  dmODESolver solver;
 
   glrkInitGLX();
   zxWindowCreate( &mainwin, 0, 0, WIDTH, HEIGHT );
@@ -297,7 +370,9 @@ int main(int argc, char *argv[])
   dmRobotInit();
 
   dmSystemInit( &sys, &con );
-  mainloop( &mainwin, &con, &sys, &sx, &sy );
+  dmSystemODESolverInit( &solver, &sys );
+  mainloop( &mainwin, &con, &sys, &solver, &sx, &sy );
+  dmSystemODESolverExit( &solver );
   dmSystemExit( &sys );
 
   dmConsoleExit( &con );

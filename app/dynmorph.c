@@ -26,6 +26,8 @@ typedef struct{
   double yzmin, yzmax;
   double xd, yd;
   double theta;
+  double nxd, nyd;
+  double ntheta;
   double adx, ady;
   dmCommand com;
 } dmSystem;
@@ -87,6 +89,9 @@ void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
   sys->x[1] = sys->nx[1];
   sys->y[0] = sys->ny[0];
   sys->y[1] = sys->ny[1];
+  sys->xd = sys->nxd;
+  sys->yd = sys->nyd;
+  sys->theta = sys->ntheta;
   zODEUpdate( &solver->ode, solver->t, solver->p, DT, sys );
   sys->nx[0] = zVecElem(solver->p,0);
   sys->nx[1] = zVecElem(solver->p,1);
@@ -134,9 +139,10 @@ void _dmSystemUpdateRefPosTheta(dmSystem *sys)
   if( !zIsTiny(kappa) )
     ndw += ( 1 - cos_d ) / ( kappa * cos_d );
   kw = 1.0 + kappa * ndw;
-  sys->xd = sys->xd + (sys->nx[0]-sys->xd)/kw - ndw*c/kw;
-  sys->yd = sys->yd + (sys->ny[0]-sys->yd)/kw - ndw*s/kw;
-  sys->theta = atan2( (kappa*(sys->ny[0]-sys->yd)+s)/kw, (kappa*(sys->nx[0]-sys->xd)+c)/kw );
+  sys->nxd = ( kappa*ndw*sys->xd + sys->nx[0] - ndw*c )/kw;
+  sys->nyd = ( kappa*ndw*sys->yd + sys->ny[0] - ndw*s )/kw;
+  sys->ntheta = atan2( ( kappa*(sys->ny[0]-sys->yd) + s )/kw,
+                      ( kappa*(sys->nx[0]-sys->xd) + c )/kw );
 }
 
 void dmSystemUpdateRef(dmSystem *sys)
@@ -154,7 +160,6 @@ void dmSystemUpdateRef(dmSystem *sys)
   /* update IK constraints for COM */
   zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->c.vrt.zd );
   zVec3DCreate( &dm_d_att_body, sys->theta+zPI_2, 0, 0 );
-  printf( "theta: %g\n", sys->theta );
 }
 
 void dmSystemInitFoot(dmSystem *sys)
@@ -255,13 +260,13 @@ void dmSystemInitState(dmSystem *sys)
   sys->y[1] = 0;
   sys->xz = sys->x[0];
   sys->yz = sys->y[0];
-  sys->xd = sys->x[0];
-  sys->yd = sys->y[0];
+  sys->xd = sys->nxd = sys->x[0];
+  sys->yd = sys->nyd = sys->y[0];
   sys->nx[0] = sys->x[0];
   sys->nx[1] = sys->x[1];
   sys->ny[0] = sys->y[0];
   sys->ny[1] = sys->y[1];
-  sys->theta = 0;
+  sys->theta = sys->ntheta = 0;
   sys->adx = sys->ady = 0;
 }
 
@@ -368,7 +373,6 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
     dmSystemUpdateFoot( sys );
     dmSystemUpdateRobot( sys );
     dmSystemUpdateRef( sys );
-    /* printf("kappa: %g, vu: %g, dist: %g, zd: %g             \r", pdCtrlKappa(&sys->c), pdCtrlPrmTan(&sys->c)->vd, pdCtrlPrmRad(&sys->c)->dist, sys->c.vrt.zd ); */
     if( fp )
       dmSystemLog( fp, sys );
   }

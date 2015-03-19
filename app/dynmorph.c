@@ -201,10 +201,10 @@ void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
   dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &sys->com.zd );
   dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &sys->com.vud );
   dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qu1 );
-  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.5, 0, &sys->com.qu2 );
+  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &sys->com.qu2 );
   dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &sys->com.vwd );
   dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qw1 );
-  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 0.5, 0, &sys->com.qw2 );
+  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &sys->com.qw2 );
   dmConsoleAddEval( con, "Foot dist", 0.02, 0.16, 0.1, 0, &sys->com.dist );
   dmConsoleAddEval( con, "Kappa", -2.0, 2.0, 0.0, 20, &sys->com.kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &sys->com.rho );

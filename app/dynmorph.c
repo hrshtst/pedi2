@@ -96,14 +96,23 @@ void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
 
 void dmSystemUpdateFoot(dmSystem *sys)
 {
+  double d;
+  double s, c;
+
+  d = 0.5 * pdCtrlPrmRad(&sys->c)->dist;
+  zSinCos( sys->theta, &s, &c );
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
 
   /* update IK constraints for feet */
-  zVec3DCopy( &sys->lf.ps, &dm_d_lf );
-  zVec3DCopy( &sys->rf.ps, &dm_d_rf );
-  zVec3DCopy( &sys->lf.as, &dm_d_att_lf );
-  zVec3DCopy( &sys->rf.as, &dm_d_att_rf );
+  /* zVec3DCopy( &sys->lf.ps, &dm_d_lf ); */
+  /* zVec3DCopy( &sys->rf.ps, &dm_d_rf ); */
+  /* zVec3DCopy( &sys->lf.as, &dm_d_att_lf ); */
+  /* zVec3DCopy( &sys->rf.as, &dm_d_att_rf ); */
+  zVec3DCreate( &dm_d_lf, sys->xd-d*c, sys->yd-d*s, 0);
+  zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0);
+  zVec3DCreate( &dm_d_att_lf, sys->theta+zPI_2, 0, 0 );
+  zVec3DCreate( &dm_d_att_rf, sys->theta+zPI_2, 0, 0 );
 }
 
 void _dmSystemUpdateRefPosTheta(dmSystem *sys)

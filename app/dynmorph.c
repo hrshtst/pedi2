@@ -102,10 +102,37 @@ void dmSystemUpdateFoot(dmSystem *sys)
   zVec3DCopy( &sys->rf.pds, &dm_d_rf );
 }
 
+void _dmSystemUpdateRefPosTheta(dmSystem *sys)
+{
+  double kappa;
+  double dw, ndw;
+  double s, c;
+  double cos_d;
+  double kx, ky, kw;
+
+  kappa = pdCtrlKappa(&sys->c);
+  zSinCos( sys->theta, &s, &c );
+  dw = -( sys->xd - sys->x[0] )*c - ( sys->yd - sys->y[0])*s;
+
+  kx = kappa * ( sys->nx[0] - sys->x[0] );
+  ky = kappa * ( sys->ny[0] - sys->y[0] );
+  cos_d = ( kx*c + ky*s + 1 ) / sqrt( zSqr(kx+c) + zSqr(ky+s) );
+  ndw = ( dw + (sys->nx[0]-sys->x[0])*c + (sys->ny[0]-sys->y[0])*s ) / cos_d;
+  if( !zIsTiny(kappa) )
+    ndw += ( 1 - cos_d ) / ( kappa * cos_d );
+  kw = 1.0 + kappa * ndw;
+  sys->xd = sys->xd + (sys->nx[0]-sys->xd)/kw - ndw*c/kw;
+  sys->yd = sys->yd + (sys->ny[0]-sys->yd)/kw - ndw*s/kw;
+  sys->theta = atan2( (kappa*(sys->ny[0]-sys->yd)+s)/kw, (kappa*(sys->nx[0]-sys->xd)+c)/kw );
+}
+
 void dmSystemUpdateRef(dmSystem *sys)
 {
+  /* automatic update of referential position and orientation */
+  /* _dmSystemUpdateRefPosTheta( sys ); */
+
   /* update IK constraints for COM */
-  zVec3DCreate( &dm_d_com, sys->x[0], sys->y[0], sys->c.vrt.zd );
+  zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->c.vrt.zd );
 }
 
 void dmSystemInitFoot(dmSystem *sys)

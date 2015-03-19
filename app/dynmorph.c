@@ -125,7 +125,7 @@ void _dmSystemUpdateRefPosTheta(dmSystem *sys)
 
   kappa = pdCtrlKappa(&sys->c);
   zSinCos( sys->theta, &s, &c );
-  dw = -( sys->xd - sys->x[0] )*c - ( sys->yd - sys->y[0])*s;
+  dw = -( sys->xd - sys->x[0] )*c - ( sys->yd - sys->y[0] )*s;
 
   kx = kappa * ( sys->nx[0] - sys->x[0] );
   ky = kappa * ( sys->ny[0] - sys->y[0] );
@@ -147,6 +147,7 @@ void dmSystemUpdateRef(dmSystem *sys)
   /* update IK constraints for COM */
   zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->c.vrt.zd );
   zVec3DCreate( &dm_d_att_body, sys->theta+zPI_2, 0, 0 );
+  printf( "theta: %g\n", sys->theta );
 }
 
 void dmSystemInitFoot(dmSystem *sys)
@@ -215,7 +216,7 @@ void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
   dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qw1 );
   dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &sys->com.qw2 );
   dmConsoleAddEval( con, "Foot dist", 0.02, 0.16, 0.1, 0, &sys->com.dist );
-  dmConsoleAddEval( con, "Kappa", -2.0, 2.0, 0.0, 20, &sys->com.kappa );
+  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &sys->com.kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &sys->com.rho );
   dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &sys->com.kr );
   dmConsoleAddEval( con, "L lift height", 0, 0.02, 0.02, 0, &sys->com.lfh );
@@ -227,8 +228,8 @@ void dmSystemUpdateComVal(dmSystem *sys)
   pdCtrlSetPrm( &sys->c, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr );
   pdCtrlSetRefVrt( &sys->c, sys->com.zd );
   pdCtrlSetRefHrz( &sys->c, sys->com.vud, sys->com.vwd, sys->com.dist );
-  /* sys->lf.h   = sys->cv.lfh; */
-  /* sys->rf.h   = sys->cv.rfh; */
+  sys->lf.h   = sys->com.lfh;
+  sys->rf.h   = sys->com.rfh;
 }
 
 void dmSystemInitState(dmSystem *sys)

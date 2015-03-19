@@ -141,6 +141,13 @@ void _dmSystemUpdateRefPosTheta(dmSystem *sys)
 
 void dmSystemUpdateRef(dmSystem *sys)
 {
+  /* automatic activation when walking */
+  if( !zIsTiny( sys->com.vud ) ){
+    pdCtrlPrmRad(&sys->c)->rho = 1.0;
+  } else {
+    pdCtrlPrmRad(&sys->c)->rho = sys->com.rho;
+  }
+
   /* automatic update of referential position and orientation */
   _dmSystemUpdateRefPosTheta( sys );
 
@@ -225,7 +232,15 @@ void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
 
 void dmSystemUpdateCommand(dmSystem *sys)
 {
-  pdCtrlSetPrm( &sys->c, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr );
+  /* pdCtrlSetPrm( &sys->c, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr ); */
+  pdCtrlPrmTan(&sys->c)->q1 = sys->com.qu1;
+  pdCtrlPrmTan(&sys->c)->q2 = sys->com.qu2;
+  pdCtrlPrmTan(&sys->c)->kappa = sys->com.kappa;
+  pdCtrlPrmRad(&sys->c)->q1 = sys->com.qw1;
+  pdCtrlPrmRad(&sys->c)->q2 = sys->com.qw2;
+  pdCtrlPrmRad(&sys->c)->kappa = sys->com.kappa;
+  /* pdCtrlPrmRad(&sys->c)->rho = sys->com.rho; */
+  pdCtrlPrmRad(&sys->c)->kr = sys->com.kr;
   pdCtrlSetRefVrt( &sys->c, sys->com.zd );
   pdCtrlSetRefHrz( &sys->c, sys->com.vud, sys->com.vwd, sys->com.dist );
   sys->lf.h   = sys->com.lfh;

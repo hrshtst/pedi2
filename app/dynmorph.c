@@ -142,7 +142,7 @@ void _dmSystemUpdateRefPosTheta(dmSystem *sys)
 void dmSystemUpdateRef(dmSystem *sys)
 {
   /* automatic update of referential position and orientation */
-  /* _dmSystemUpdateRefPosTheta( sys ); */
+  _dmSystemUpdateRefPosTheta( sys );
 
   /* update IK constraints for COM */
   zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->c.vrt.zd );

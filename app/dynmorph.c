@@ -81,7 +81,7 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
   return v;
 }
 
-#define UPDATE_SKEW 1
+#define DT 0.01
 void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
 {
   solver->t += DT;
@@ -101,23 +101,25 @@ void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
 
 void dmSystemUpdateFoot(dmSystem *sys)
 {
-  double d;
+  double vw;
   double s, c;
+  zComplex pz;
 
-  d = 0.5 * pdCtrlPrmRad(&sys->c)->dist;
   zSinCos( sys->theta, &s, &c );
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
+  vw = -sys->x[1]*c - sys->y[1]*s;
+  dmCtrlZMPPhase( &sys->c, vw, &pz );
+  dmRobotFootRegion( &sys->lf.yout, &sys->lf.yin, &sys->lf.dy, &sys->rf.yout, &sys->rf.yin, &sys->rf.dy );
+  dmFootLift( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta, &pz );
+  dmFootMove( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta );
+  dmFootUpdatePos( &sys->lf, &sys->rf );
 
   /* update IK constraints for feet */
-  /* zVec3DCopy( &sys->lf.ps, &dm_d_lf ); */
-  /* zVec3DCopy( &sys->rf.ps, &dm_d_rf ); */
-  /* zVec3DCopy( &sys->lf.as, &dm_d_att_lf ); */
-  /* zVec3DCopy( &sys->rf.as, &dm_d_att_rf ); */
-  zVec3DCreate( &dm_d_lf, sys->xd-d*c, sys->yd-d*s, 0);
-  zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0);
-  zVec3DCreate( &dm_d_att_lf, sys->theta+zPI_2, 0, 0 );
-  zVec3DCreate( &dm_d_att_rf, sys->theta+zPI_2, 0, 0 );
+  zVec3DCopy( &sys->lf.ps, &dm_d_lf );
+  zVec3DCopy( &sys->rf.ps, &dm_d_rf );
+  zVec3DCopy( &sys->lf.as, &dm_d_att_lf );
+  zVec3DCopy( &sys->rf.as, &dm_d_att_rf );
 }
 
 void _dmSystemUpdateRefPosTheta(dmSystem *sys)
@@ -164,11 +166,21 @@ void dmSystemUpdateRef(dmSystem *sys)
 
 void dmSystemInitFoot(dmSystem *sys)
 {
+  double d;
+  double s, c;
+
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootPos( &sys->lf.pd, &sys->rf.pd );
   dmRobotFootPos( &sys->lf.ps, &sys->rf.ps );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
   dmRobotFootAtt( &sys->lf.as, &sys->rf.as );
+
+  d = 0.5 * pdCtrlPrmRad(&sys->c)->dist;
+  zSinCos( sys->theta, &s, &c );
+  zVec3DCreate( &dm_d_lf, sys->xd-d*c, sys->yd-d*s, 0 );
+  zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0 );
+  zVec3DCreate( &dm_d_att_lf, sys->theta+zPI_2, 0, 0 );
+  zVec3DCreate( &dm_d_att_rf, sys->theta+zPI_2, 0, 0 );
 
   /* spring-damper tracking */
   sys->lf.stride_x = 1;
@@ -231,8 +243,8 @@ void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
   dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &sys->com.kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &sys->com.rho );
   dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &sys->com.kr );
-  dmConsoleAddEval( con, "L lift height", 0, 0.02, 0.02, 0, &sys->com.lfh );
-  dmConsoleAddEval( con, "R lift height", 0, 0.02, 0.02, 0, &sys->com.rfh );
+  dmConsoleAddEval( con, "L lift height", 0, 0.04, 0.04, 0, &sys->com.lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.04, 0.04, 0, &sys->com.rfh );
 }
 
 void dmSystemUpdateCommand(dmSystem *sys)
@@ -274,11 +286,11 @@ void dmSystemInit(dmSystem *sys, dmConsole *con)
 {
   pdCtrlInit( &sys->c );
 
-  dmSystemUpdateRobot( sys );
   dmSystemInitConsole( sys, con );
   dmSystemUpdateCommand( sys );
   dmSystemInitState( sys );
   dmSystemInitFoot( sys );
+  dmSystemUpdateRobot( sys );
 }
 
 void dmSystemExit(dmSystem *sys)

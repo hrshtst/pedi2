@@ -4,6 +4,8 @@
 #include <zeo/zeo_vec3d.h>
 #include <pedi2/pd_ctrl.h>
 
+void dmCtrlZMPPhase(pdCtrl *c, double vw, zComplex *pz);
+
 /* foot property (sideway properties only) */
 typedef struct{
   double h;           /* maximum lifting height */
@@ -25,18 +27,13 @@ typedef struct{
   bool is_ff, is_bf;  /* boolean if the foot is following or braking */
 } dmFoot;
 
-void dmCtrlFootPhase(pdCtrl *c, dmFoot *lf, dmFoot *rf, zComplex *pz);
-void dmCtrlFootLift(pdCtrl *c, dmFoot *lf, dmFoot *rf, zComplex *pz);
-bool dmCtrlIsCurrentFootFloating(dmFoot *f);
-bool dmCtrlIsDesiredFootFloating(dmFoot *f);
-bool dmCtrlIsDesiredFootForSeedFloating(dmFoot *f);
-void dmCtrlFootStep(pdCtrl *cx, pdCtrl *cy, dmFoot *pf, dmFoot *kf, double sxz, double syz, double y, double vy);
-void dmCtrlFootStepMidpoint(pdCtrl *cx, pdCtrl *cy, dmFoot *pf, dmFoot *kf, double sxz, double syz);
-void dmCtrlFootStepCanonical(pdCtrl *cx, pdCtrl *cy, dmFoot *pf, dmFoot *kf, double sxz, double syz);
-void dmCtrlFootStepAsymptotic(pdCtrl *cx, pdCtrl *cy, dmFoot *pf, dmFoot *kf, double sxz, double syz, double y, double vy);
-void dmCtrlFootMove(pdCtrl *cx, pdCtrl *cy, dmFoot *lf, dmFoot *rf, double sxz, double syz, double y, double vy);
-void dmCtrlFootUpdatePos(dmFoot *lf, dmFoot *rf);
-
-#define DT 0.01
+void dmFootPhase(dmFoot *pf, dmFoot *kf, double xd, double yd, double theta, zComplex *pz);
+void dmFootLift(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta, zComplex *pz);
+bool dmFootIsCurrentFootFloating(dmFoot *f);
+bool dmFootIsDesiredFootFloating(dmFoot *f);
+bool dmFootIsDesiredFootForSeedFloating(dmFoot *f);
+void dmFootStep(pdCtrl *ctrl, dmFoot *pf, dmFoot *kf, double xd, double yd, double theta);
+void dmFootMove(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta);
+void dmFootUpdatePos(dmFoot *lf, dmFoot *rf);
 
 #endif /* __DM_FOOT_H__ */

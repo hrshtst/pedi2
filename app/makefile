@@ -9,7 +9,7 @@ LINK=-lpedi2 `glroki-config`
 CC=gcc
 CFLAGS=-Wall -O3 $(LIB) $(INCLUDE) -funroll-loops
 
-OBJS=dm_robot.o dm_scene.o dm_console.o
+OBJS=dm_robot.o dm_scene.o dm_console.o dm_foot.o
 TARGET=dynmorph
 
 VPATH=util

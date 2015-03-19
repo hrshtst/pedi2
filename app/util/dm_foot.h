@@ -8,8 +8,10 @@
 typedef struct{
   double h;           /* maximum lifting height */
   zVec3D p;           /* current position */
-  zVec3D pds;         /* desired position for IK seeds */
+  zVec3D ps;          /* desired position for IK seeds */
   zVec3D pd;          /* desired position */
+  zVec3D a;           /* current attitude */
+  zVec3D as;          /* desired attitude for IK seeds */
   double stride_x, track_kx, track_cx, track_xold;
   double stride_y, track_ky, track_cy, track_yold;
   double track_kz, track_cz, track_zold;

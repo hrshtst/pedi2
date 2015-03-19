@@ -96,10 +96,13 @@ void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
 void dmSystemUpdateFoot(dmSystem *sys)
 {
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
+  dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
 
   /* update IK constraints for feet */
-  zVec3DCopy( &sys->lf.pds, &dm_d_lf );
-  zVec3DCopy( &sys->rf.pds, &dm_d_rf );
+  zVec3DCopy( &sys->lf.ps, &dm_d_lf );
+  zVec3DCopy( &sys->rf.ps, &dm_d_rf );
+  zVec3DCopy( &sys->lf.as, &dm_d_att_lf );
+  zVec3DCopy( &sys->rf.as, &dm_d_att_rf );
 }
 
 void _dmSystemUpdateRefPosTheta(dmSystem *sys)
@@ -133,13 +136,17 @@ void dmSystemUpdateRef(dmSystem *sys)
 
   /* update IK constraints for COM */
   zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->c.vrt.zd );
+  zVec3DCreate( &dm_d_att_body, sys->theta, 0, 0 );
 }
 
 void dmSystemInitFoot(dmSystem *sys)
 {
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootPos( &sys->lf.pd, &sys->rf.pd );
-  dmRobotFootPos( &sys->lf.pds, &sys->rf.pds );
+  dmRobotFootPos( &sys->lf.ps, &sys->rf.ps );
+  dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
+  dmRobotFootAtt( &sys->lf.as, &sys->rf.as );
+
   /* spring-damper tracking */
   sys->lf.stride_x = 1;
   sys->lf.track_kx = 3000;

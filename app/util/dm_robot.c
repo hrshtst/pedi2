@@ -10,11 +10,13 @@ static zVec dm_dis;
 
 /* IK seeds */
 zVec3D dm_d_com, dm_d_lf, dm_d_rf;
+zVec3D dm_d_att_body, dm_d_att_lf, dm_d_att_rf;
 
 /* supporting region */
 
 #define DM_TOL (1.0e-3)
 
+#define DM_ROBOT_BODY       0
 #define DM_ROBOT_LEFT_FOOT  12
 #define DM_ROBOT_RIGHT_FOOT 24
 
@@ -40,6 +42,9 @@ void dmRobotInit(void)
   zVec3DCopy( rkChainWldCOM(&dm_robot), &dm_d_com );
   zVec3DCopy( rkChainLinkWldPos(&dm_robot,DM_ROBOT_LEFT_FOOT), &dm_d_lf );
   zVec3DCopy( rkChainLinkWldPos(&dm_robot,DM_ROBOT_RIGHT_FOOT), &dm_d_rf );
+  zMat3DToZYX( rkChainLinkWldAtt(&dm_robot,DM_ROBOT_BODY), &dm_d_att_body );
+  zMat3DToZYX( rkChainLinkWldAtt(&dm_robot,DM_ROBOT_LEFT_FOOT), &dm_d_att_lf );
+  zMat3DToZYX( rkChainLinkWldAtt(&dm_robot,DM_ROBOT_RIGHT_FOOT), &dm_d_att_rf );
 
   /* supporting region */
   zListInit( &dm_sr_lf );
@@ -82,11 +87,11 @@ void dmRobotSolveIK(void)
 {
   rkIKDeactivate( &dm_ik );
   rkIKCellSetRefVec( dm_cell[0], &dm_d_com );
-  rkIKCellSetRefVec( dm_cell[1], Z_ZEROVEC3D );
+  rkIKCellSetRefVec( dm_cell[1], &dm_d_att_body );
   rkIKCellSetRefVec( dm_cell[2], &dm_d_lf );
-  rkIKCellSetRefVec( dm_cell[3], Z_ZEROVEC3D );
+  rkIKCellSetRefVec( dm_cell[3], &dm_d_att_lf );
   rkIKCellSetRefVec( dm_cell[4], &dm_d_rf );
-  rkIKCellSetRefVec( dm_cell[5], Z_ZEROVEC3D );
+  rkIKCellSetRefVec( dm_cell[5], &dm_d_att_rf );
   rkIKSolve( &dm_ik, dm_dis, zTOL, 0 );
 }
 
@@ -150,6 +155,12 @@ void dmRobotFootPos(zVec3D *lf, zVec3D *rf)
 {
   zVec3DCopy( rkChainLinkWldPos(&dm_robot,DM_ROBOT_LEFT_FOOT), lf );
   zVec3DCopy( rkChainLinkWldPos(&dm_robot,DM_ROBOT_RIGHT_FOOT), rf );
+}
+
+void dmRobotFootAtt(zVec3D *lf, zVec3D *rf)
+{
+  zMat3DToZYX( rkChainLinkWldAtt(&dm_robot,DM_ROBOT_LEFT_FOOT), lf );
+  zMat3DToZYX( rkChainLinkWldAtt(&dm_robot,DM_ROBOT_RIGHT_FOOT), rf );
 }
 
 void dmRobotFootRegion(double *ylout, double *ylin, double *dyl, double *yrout, double *yrin, double *dyr)

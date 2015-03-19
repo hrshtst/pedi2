@@ -9,6 +9,7 @@ extern rkChain dm_robot;
 
 /* IK seeds */
 extern zVec3D dm_d_com, dm_d_lf, dm_d_rf;
+extern zVec3D dm_d_att_body, dm_d_att_lf, dm_d_att_rf;
 
 void dmRobotInit(void);
 void dmRobotExit(void);
@@ -20,6 +21,7 @@ void dmSupportRegionBorder(double *xmin, double *xmax, double *ymin, double *yma
 
 /* dummy --- should handle 2D phase estimation */
 void dmRobotFootPos(zVec3D *lf, zVec3D *rf);
+void dmRobotFootAtt(zVec3D *lf, zVec3D *rf);
 void dmRobotFootRegion(double *ylout, double *ylin, double *dyl, double *yrout, double *yrin, double *dyr);
 
 /* scene */

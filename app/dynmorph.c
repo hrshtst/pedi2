@@ -251,12 +251,16 @@ void dmSystemInitState(dmSystem *sys)
 {
   sys->x[0] = 0.5 * ( sys->xzmin + sys->xzmax );
   sys->y[0] = 0.5 * ( sys->yzmin + sys->yzmax );
-  sys->x[1] = 0;
+  sys->x[1] = 0.001;
   sys->y[1] = 0;
   sys->xz = sys->x[0];
   sys->yz = sys->y[0];
   sys->xd = sys->x[0];
   sys->yd = sys->y[0];
+  sys->nx[0] = sys->x[0];
+  sys->nx[1] = sys->x[1];
+  sys->ny[0] = sys->y[0];
+  sys->ny[1] = sys->y[1];
   sys->theta = 0;
   sys->adx = sys->ady = 0;
 }

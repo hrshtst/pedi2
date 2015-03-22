@@ -17,8 +17,8 @@ zVec3D dm_d_att_body, dm_d_att_lf, dm_d_att_rf;
 #define DM_TOL (1.0e-3)
 
 #define DM_ROBOT_BODY       0
-#define DM_ROBOT_LEFT_FOOT  9
-#define DM_ROBOT_RIGHT_FOOT 15
+#define DM_ROBOT_LEFT_FOOT  10
+#define DM_ROBOT_RIGHT_FOOT 17
 
 zVec3DList dm_sr_lf; /* supporting region on the left sole */
 zVec3DList dm_sr_rf; /* supporting region on the right sole */

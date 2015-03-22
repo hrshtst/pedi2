@@ -1,30 +1,30 @@
 #ifndef __PD_CZ_H__
 #define __PD_CZ_H__
 
-#include <pedi2/pd_vrt.h>
-#include <pedi2/pd_hrz.h>
+#include <pedi2/pd_cz_vrt.h>
+#include <pedi2/pd_cz_hrz.h>
 
 __BEGIN_DECLS
 
 typedef struct{
-  pdVrt vrt;
-  pdHrz tan;
-  pdHrz rad;
+  pdCZVrt vrt;
+  pdCZHrz tan;
+  pdCZHrz rad;
 } pdCZ;
 
 #define pdCZInit(c) do{\
-  pdVrtInit( &(c)->vrt );\
-  pdHrzSetup( &(c)->tan, &(c)->vrt, PD_HRZ_TAN );\
-  pdHrzSetup( &(c)->rad, &(c)->vrt, PD_HRZ_RAD );\
+  pdCZVrtInit( &(c)->vrt );\
+  pdCZHrzSetup( &(c)->tan, &(c)->vrt, PD_CZ_HRZ_TAN );\
+  pdCZHrzSetup( &(c)->rad, &(c)->vrt, PD_CZ_HRZ_RAD );\
 } while (0)
 #define pdCZDestroy(c) do{\
-  pdHrzDestroy( &(c)->tan );\
-  pdHrzDestroy( &(c)->rad );\
-  pdVrtDestroy( &(c)->vrt );\
+  pdCZHrzDestroy( &(c)->tan );\
+  pdCZHrzDestroy( &(c)->rad );\
+  pdCZVrtDestroy( &(c)->vrt );\
 } while (0)
 #define pdCZZeta(c) (c)->vrt.zeta
-#define pdCZPrmTan(c) ((pdHrzPrmTan *)(c)->tan.prm)
-#define pdCZPrmRad(c) ((pdHrzPrmRad *)(c)->rad.prm)
+#define pdCZPrmTan(c) ((pdCZHrzPrmTan *)(c)->tan.prm)
+#define pdCZPrmRad(c) ((pdCZHrzPrmRad *)(c)->rad.prm)
 #define pdCZSetPrm(c,qu1,qu2,qw1,qw2,kap,r,k) do{\
   pdCZPrmTan(c)->q1 = (qu1);\
   pdCZPrmTan(c)->q2 = (qu2);\
@@ -36,7 +36,7 @@ typedef struct{
   pdCZPrmRad(c)->kr = (k);\
 } while(0)
 #define pdCZSetRefVrt(c,zd) do{\
-  pdVrtSetRef( &(c)->vrt, zd );\
+  pdCZVrtSetRef( &(c)->vrt, zd );\
 } while (0)
 #define pdCZSetRefHrz(c,vud,vwd,d) do{\
   pdCZPrmTan(c)->vd = (vud);\
@@ -44,12 +44,12 @@ typedef struct{
   pdCZPrmRad(c)->dist = (d);\
 } while (0)
 #define pdCZKappa(c) pdCZPrmTan(c)->kappa
-#define pdCZZMPTan(c) pdHrzZMP( &(c)->tan )
-#define pdCZZMPRad(c) pdHrzZMP( &(c)->rad )
+#define pdCZZMPTan(c) pdCZHrzZMP( &(c)->tan )
+#define pdCZZMPRad(c) pdCZHrzZMP( &(c)->rad )
 #define pdCZUpdate(c,du,vu,dw,vw) do{\
-  pdVrtUpdate( &(c)->vrt );\
-  pdHrzUpdate( &(c)->tan, du, vu, dw, vw );\
-  pdHrzUpdate( &(c)->rad, du, vu, dw, vw );\
+  pdCZVrtUpdate( &(c)->vrt );\
+  pdCZHrzUpdate( &(c)->tan, du, vu, dw, vw );\
+  pdCZHrzUpdate( &(c)->rad, du, vu, dw, vw );\
 } while (0)
 
 __END_DECLS

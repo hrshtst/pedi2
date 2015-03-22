@@ -1,5 +1,5 @@
-#ifndef __PD_HRZ_TAN_H__
-#define __PD_HRZ_TAN_H__
+#ifndef __PD_CZ_HRZ_TAN_H__
+#define __PD_CZ_HRZ_TAN_H__
 
 __BEGIN_DECLS
 
@@ -12,11 +12,11 @@ typedef struct{
   double uz;           /* desired ZMP position */
   double ud;           /* desired COM position */
 
-  pdVrt *vrt;
-} pdHrzPrmTan;
+  pdCZVrt *vrt;
+} pdCZHrzPrmTan;
 
-pdHrz *pdHrzSetupTan(pdHrz *hrz, pdVrt *vrt);
+pdCZHrz *pdCZHrzSetupTan(pdCZHrz *hrz, pdCZVrt *vrt);
 
 __END_DECLS
 
-#endif /* __PD_HRZ_TAN_H__ */
+#endif /* __PD_CZ_HRZ_TAN_H__ */

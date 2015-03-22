@@ -1,52 +1,52 @@
 #include "gtest/gtest.h"
-#include <pedi2/pd_vrt.h>
+#include <pedi2/pd_cz_vrt.h>
 
-TEST(pdVrtTest, Init)
+TEST(pdCZVrtTest, Init)
 {
-  pdVrt vrt;
+  pdCZVrt vrt;
 
-  pdVrtInit( &vrt );
+  pdCZVrtInit( &vrt );
   EXPECT_EQ( 0, vrt.zd );
   EXPECT_EQ( 0, vrt.z );
   EXPECT_EQ( 0, vrt.zeta );
 }
 
-TEST(pdVrtTest, Destroy)
+TEST(pdCZVrtTest, Destroy)
 {
-  pdVrt vrt;
+  pdCZVrt vrt;
 
-  pdVrtInit( &vrt );
-  pdVrtDestroy( &vrt );
+  pdCZVrtInit( &vrt );
+  pdCZVrtDestroy( &vrt );
   EXPECT_EQ( 0, vrt.zd );
   EXPECT_EQ( 0, vrt.z );
   EXPECT_EQ( 0, vrt.zeta );
 }
 
-TEST(pdVrtTest, SetPrm)
+TEST(pdCZVrtTest, SetPrm)
 {
-  pdVrt vrt;
+  pdCZVrt vrt;
 
-  pdVrtInit( &vrt );
-  pdVrtSetRef( &vrt, 0.26 );
+  pdCZVrtInit( &vrt );
+  pdCZVrtSetRef( &vrt, 0.26 );
   EXPECT_EQ( 0.26, vrt.zd );
 
-  pdVrtSetRef( &vrt, 0.3 );
+  pdCZVrtSetRef( &vrt, 0.3 );
   EXPECT_EQ( 0.3, vrt.zd );
 }
 
-TEST(pdVrtTest, Update)
+TEST(pdCZVrtTest, Update)
 {
-  pdVrt vrt;
+  pdCZVrt vrt;
 
-  pdVrtInit( &vrt );
-  pdVrtSetRef( &vrt, 0.26 );
-  pdVrtUpdate( &vrt );
+  pdCZVrtInit( &vrt );
+  pdCZVrtSetRef( &vrt, 0.26 );
+  pdCZVrtUpdate( &vrt );
   EXPECT_EQ( 0.26, vrt.z );
   EXPECT_EQ( 0.26, vrt.zd );
   EXPECT_EQ( sqrt(RK_G/0.26), vrt.zeta );
 
-  pdVrtSetRef( &vrt, 0.3 );
-  pdVrtUpdate( &vrt );
+  pdCZVrtSetRef( &vrt, 0.3 );
+  pdCZVrtUpdate( &vrt );
   EXPECT_EQ( 0.3, vrt.z );
   EXPECT_EQ( 0.3, vrt.zd );
   EXPECT_EQ( sqrt(RK_G/0.3), vrt.zeta );

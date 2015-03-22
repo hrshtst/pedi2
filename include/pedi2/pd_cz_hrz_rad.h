@@ -1,5 +1,5 @@
-#ifndef __PD_HRZ_RAD_H__
-#define __PD_HRZ_RAD_H__
+#ifndef __PD_CZ_HRZ_RAD_H__
+#define __PD_CZ_HRZ_RAD_H__
 
 __BEGIN_DECLS
 
@@ -15,11 +15,11 @@ typedef struct{
   double wz;           /* desired ZMP position */
   double wd;           /* desired COM position */
 
-  pdVrt *vrt;
-} pdHrzPrmRad;
+  pdCZVrt *vrt;
+} pdCZHrzPrmRad;
 
-pdHrz *pdHrzSetupRad(pdHrz *hrz, pdVrt *vrt);
+pdCZHrz *pdCZHrzSetupRad(pdCZHrz *hrz, pdCZVrt *vrt);
 
 __END_DECLS
 
-#endif /* __PD_HRZ_RAD_H__ */
+#endif /* __PD_CZ_HRZ_RAD_H__ */

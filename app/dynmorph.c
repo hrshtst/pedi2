@@ -41,7 +41,7 @@ typedef struct{
 void dmSystemUpdateRobot(dmSystem *sys)
 {
   dmRobotSolveIK();
-  dmSupportRegion();
+  /* dmSupportRegion(); */
   dmSupportRegionBorder( &sys->xzmin, &sys->xzmax, &sys->yzmin, &sys->yzmax );
 }
 
@@ -171,16 +171,39 @@ void dmSystemInitFoot(dmSystem *sys)
 
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootPos( &sys->lf.pd, &sys->rf.pd );
-  dmRobotFootPos( &sys->lf.ps, &sys->rf.ps );
+  /* dmRobotFootPos( &sys->lf.ps, &sys->rf.ps ); */
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
-  dmRobotFootAtt( &sys->lf.as, &sys->rf.as );
+  /* dmRobotFootAtt( &sys->lf.as, &sys->rf.as ); */
+  /* zVec3DElem( &sys->lf.as, zX ) += zPI_2; */
+  /* zVec3DElem( &sys->rf.as, zX ) += zPI_2; */
 
   d = 0.5 * pdCtrlPrmRad(&sys->c)->dist;
   zSinCos( sys->theta, &s, &c );
-  zVec3DCreate( &dm_d_lf, sys->xd-d*c, sys->yd-d*s, 0 );
-  zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0 );
-  zVec3DCreate( &dm_d_att_lf, sys->theta+zPI_2, 0, 0 );
-  zVec3DCreate( &dm_d_att_rf, sys->theta+zPI_2, 0, 0 );
+  /* zVec3DCreate( &dm_d_lf, sys->xd-d*c, sys->yd-d*s, 0.1 ); */
+  /* zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0.1 ); */
+  /* zVec3DCreate( &dm_d_att_lf, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
+  /* zVec3DCreate( &dm_d_att_rf, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
+  zVec3DCreate( &sys->lf.ps, sys->xd-d*c, sys->yd-d*s, 0.1 );
+  zVec3DCreate( &sys->rf.ps, sys->xd+d*c, sys->yd+d*s, 0.1 );
+  /* zVec3DCreate( &sys->lf.as, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
+  /* zVec3DCreate( &sys->rf.as, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
+  zVec3DCreate( &sys->lf.as, sys->theta+zPI_2, 0, 0 );
+  zVec3DCreate( &sys->rf.as, sys->theta+zPI_2, 0, 0 );
+
+  /* ****************************************************** */
+  /* zVec3DCreate( &dm_d_com, 0.04970412975, -0.05237794313, -0.1204609422 ); */
+  /* zVec3DCreate( &dm_d_lf, 0.0115, 0.125, -0.997 ); */
+  /* zVec3DCreate( &dm_d_rf, 0.0115, -0.125, -0.997 ); */
+  /* zVec3DCreate( &dm_d_att_body, 0, 0, 0 ); */
+  /* zVec3DCreate( &dm_d_att_lf, 0, -zPI_2, -zPI_2 ); */
+  /* zVec3DCreate( &dm_d_att_rf, 0, -zPI_2, -zPI_2 ); */
+  /* zVec3DCreate( &dm_d_com, 0.04970412975, 0, 0.8 ); */
+  /* zVec3DCreate( &dm_d_lf, 0.0115, 0.125, 0.1 ); */
+  /* zVec3DCreate( &dm_d_rf, 0.0115, -0.125, 0.1 ); */
+  /* zVec3DCreate( &dm_d_att_body, zPI_2, 0, 0 ); */
+  /* zVec3DCreate( &dm_d_att_lf,   zPI_2, -zPI_2, -zPI_2 ); */
+  /* zVec3DCreate( &dm_d_att_rf,   zPI_2, -zPI_2, -zPI_2 ); */
+  /* ****************************************************** */
 
   /* spring-damper tracking */
   sys->lf.stride_x = 1;
@@ -232,14 +255,14 @@ void dmSystemInitFoot(dmSystem *sys)
 void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
 {
   dmConsoleInit( con );
-  dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &sys->com.zd );
+  dmConsoleAddEval( con, "COM height", 0.7, 0.95, 0.85, 0, &sys->com.zd );
   dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &sys->com.vud );
   dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qu1 );
   dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &sys->com.qu2 );
   dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &sys->com.vwd );
   dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qw1 );
   dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &sys->com.qw2 );
-  dmConsoleAddEval( con, "Foot dist", 0.02, 0.16, 0.1, 0, &sys->com.dist );
+  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.25, 0, &sys->com.dist );
   dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &sys->com.kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &sys->com.rho );
   dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &sys->com.kr );
@@ -363,7 +386,7 @@ typedef struct{
 
 void dmFlagsetInit(dmFlagset *flag)
 {
-  flag->pause = false;
+  flag->pause = true;
   flag->frame = false;
   flag->perturb_x = false;
   flag->perturb_y = false;
@@ -389,8 +412,9 @@ void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver
       dmSystemLog( fp, sys );
   }
   zSinCos( sys->theta, &s, &c );
-  dmSceneLookAt( sx, sys->xd-4*c, sys->yd-4*s, 0.4, sys->xd, sys->yd, 0.3);
-  dmSceneLookAt( sy, sys->xd+4*s, sys->yd-4*c, 0.4, sys->xd, sys->yd, 0.3 );
+  dmSceneLookAt( sx, sys->xd-10*c, sys->yd-10*s, 1, sys->xd, sys->yd, 0.8 );
+  /* dmSceneLookAt( sx, sys->xd-3*c, sys->yd-3*s, 0.0001, sys->xd, sys->yd, 0 ); */
+  dmSceneLookAt( sy, sys->xd+10*s, sys->yd-10*c, 1, sys->xd, sys->yd, 0.8 );
   dmSceneDraw( sx, &force );
   dmSceneDraw( sy, &force );
 }

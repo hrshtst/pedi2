@@ -2,9 +2,9 @@
 #define __DM_FOOT_H__
 
 #include <zeo/zeo_vec3d.h>
-#include <pedi2/pd_ctrl.h>
+#include <pedi2/pd_cz.h>
 
-void dmCtrlZMPPhase(pdCtrl *c, double vw, zComplex *pz);
+void dmCtrlZMPPhase(pdCZ *c, double vw, zComplex *pz);
 
 /* foot property (sideway properties only) */
 typedef struct{
@@ -28,12 +28,12 @@ typedef struct{
 } dmFoot;
 
 void dmFootPhase(dmFoot *pf, dmFoot *kf, double xd, double yd, double theta, zComplex *pz);
-void dmFootLift(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta, zComplex *pz);
+void dmFootLift(pdCZ *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta, zComplex *pz);
 bool dmFootIsCurrentFootFloating(dmFoot *f);
 bool dmFootIsDesiredFootFloating(dmFoot *f);
 bool dmFootIsDesiredFootForSeedFloating(dmFoot *f);
-void dmFootStep(pdCtrl *ctrl, dmFoot *pf, dmFoot *kf, double xd, double yd, double theta);
-void dmFootMove(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta);
+void dmFootStep(pdCZ *ctrl, dmFoot *pf, dmFoot *kf, double xd, double yd, double theta);
+void dmFootMove(pdCZ *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta);
 void dmFootUpdatePos(dmFoot *lf, dmFoot *rf);
 
 #endif /* __DM_FOOT_H__ */

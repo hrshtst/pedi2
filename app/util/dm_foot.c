@@ -1,8 +1,8 @@
 #include "dm_foot.h"
 
-void dmCtrlZMPPhase(pdCtrl *c, double vw, zComplex *pz)
+void dmCtrlZMPPhase(pdCZ *c, double vw, zComplex *pz)
 {
-  zComplexCreate( pz, pdCtrlZMPRad(c), -(pdCtrlPrmRad(c)->q1*pdCtrlPrmRad(c)->q2+1)*vw/(pdCtrlZeta(c)*sqrt(pdCtrlPrmRad(c)->q1*pdCtrlPrmRad(c)->q2)) );
+  zComplexCreate( pz, pdCZZMPRad(c), -(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2+1)*vw/(pdCZZeta(c)*sqrt(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2)) );
 }
 
 #define DM_FOOT_TOL (1.0e-3)
@@ -27,7 +27,7 @@ void dmFootPhase(dmFoot *pf, dmFoot *kf, double xd, double yd, double theta, zCo
 }
 
 #define LMAX 0.27
-void dmFootLift(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta, zComplex *pz)
+void dmFootLift(pdCZ *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta, zComplex *pz)
 {
   double dh;
   double l;
@@ -43,7 +43,7 @@ void dmFootLift(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, doub
     l = sqrt( zSqr(zVec3DElem(&rf->p,zX)-xd) + zSqr(zVec3DElem(&rf->p,zY)-yd) + zSqr(ctrl->vrt.z) );
   }
   /* dh = zComplexAbs(pz) / c->r * zLimit( (c->rho_bar*zE-1)/(zE-1), 0, 1 ) * zLimit( (LMAX-l)/(LMAX-c->vert->z), 0, 1 ); */
-  dh = 2.0*zComplexAbs(pz) / pdCtrlPrmRad(ctrl)->dist * zLimit( (pdCtrlPrmRad(ctrl)->rho*zE-1)/(zE-1), 0, 1 );
+  dh = 2.0*zComplexAbs(pz) / pdCZPrmRad(ctrl)->dist * zLimit( (pdCZPrmRad(ctrl)->rho*zE-1)/(zE-1), 0, 1 );
   zVec3DElem(&lf->pd,zZ) = zCycloidY( 0, lf->h * dh, lf->phase );
   zVec3DElem(&rf->pd,zZ) = zCycloidY( 0, rf->h * dh, rf->phase );
 }
@@ -66,12 +66,12 @@ bool dmFootIsDesiredFootForSeedFloating(dmFoot *f)
   return  zVec3DElem(&f->ps,zZ) > DM_FOOT_TOL;
 }
 
-void dmFootStep(pdCtrl *ctrl, dmFoot *pf, dmFoot *kf, double xd, double yd, double theta)
+void dmFootStep(pdCZ *ctrl, dmFoot *pf, dmFoot *kf, double xd, double yd, double theta)
 {
   double d;
   double s, c;
 
-  d = 0.5 * pdCtrlPrmRad(ctrl)->dist;
+  d = 0.5 * pdCZPrmRad(ctrl)->dist;
   zSinCos( theta, &s, &c );
 
   zVec3DElem(&kf->pd,zX) = xd - kf->dy * d * c;
@@ -79,7 +79,7 @@ void dmFootStep(pdCtrl *ctrl, dmFoot *pf, dmFoot *kf, double xd, double yd, doub
   zVec3DCreate( &kf->as, theta+zPI_2, 0, 0 );
 }
 
-void dmFootMove(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta)
+void dmFootMove(pdCZ *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta)
 {
   if( dmFootIsCurrentFootFloating( lf ) || ( lf->phase > 0 && zVec3DElem(&lf->pd,zZ) > DM_FOOT_TOL ) ){
     dmFootStep( ctrl, rf, lf, xd, yd, theta );

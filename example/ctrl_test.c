@@ -47,7 +47,7 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
   /* printf("du: %g, vu: %g, dw: %g, vw: %g\n", du, vu, dw, vw); */
   pdCZUpdate( ctrl, du, vu, dw, vw );
   /* printf("uz: %g, wz: %g\n", pdCZZMPTan(ctrl), pdCZZMPRad(ctrl)); */
-  world_zmp( pdCZZMPTan(ctrl), pdCZZMPRad(ctrl) );
+  world_zmp( pdCZZMPTan(ctrl,du,vu,dw,vw), pdCZZMPRad(ctrl,du,vu,dw,vw) );
   zVecElem(v,0) = zVecElem(p,1);
   zVecElem(v,1) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,0) - zVec3DElem(&zmp,zX) );
   zVecElem(v,2) = zVecElem(p,3);

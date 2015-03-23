@@ -73,7 +73,7 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
   sys = (dmSystem *)dummy;
   dmSystemObserve( sys, &du, &vu, &dw, &vw );
   pdCZUpdate( &sys->c, du, vu, dw, vw );
-  dmSystemCoodTransBodyToWorld( sys, pdCZZMPTan(&sys->c), pdCZZMPRad(&sys->c), &sys->xz, &sys->yz );
+  dmSystemCoodTransBodyToWorld( sys, pdCZZMPTan(&sys->c,du,vu,dw,vw), pdCZZMPRad(&sys->c,du,vu,dw,vw), &sys->xz, &sys->yz );
   zVecElem(v,0) = zVecElem(p,1);
   zVecElem(v,1) = zSqr(pdCZZeta(&sys->c)) * ( zVecElem(p,0) - sys->xz ) + sys->adx;
   zVecElem(v,2) = zVecElem(p,3);
@@ -101,15 +101,16 @@ void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
 
 void dmSystemUpdateFoot(dmSystem *sys)
 {
-  double vw;
+  double du, vu, dw, vw;
   double s, c;
   zComplex pz;
 
   zSinCos( sys->theta, &s, &c );
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
-  vw = -sys->x[1]*c - sys->y[1]*s;
-  dmCtrlZMPPhase( &sys->c, vw, &pz );
+  /* vw = -sys->x[1]*c - sys->y[1]*s; */
+  dmSystemObserve(sys, &du, &vu, &dw, &vw);
+  dmCtrlZMPPhase( &sys->c, du, vu, dw, vw, &pz );
   dmRobotFootRegion( &sys->lf.yout, &sys->lf.yin, &sys->lf.dy, &sys->rf.yout, &sys->rf.yin, &sys->rf.dy );
   dmFootLift( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta, &pz );
   dmFootMove( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta );

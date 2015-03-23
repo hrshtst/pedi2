@@ -4,7 +4,7 @@
 #include <zeo/zeo_vec3d.h>
 #include <pedi2/pd_cz.h>
 
-void dmCtrlZMPPhase(pdCZ *c, double vw, zComplex *pz);
+void dmCtrlZMPPhase(pdCZ *c, double du, double vu, double dw, double vw, zComplex *pz);
 
 /* foot property (sideway properties only) */
 typedef struct{

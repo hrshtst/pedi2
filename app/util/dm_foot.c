@@ -1,8 +1,8 @@
 #include "dm_foot.h"
 
-void dmCtrlZMPPhase(pdCZ *c, double vw, zComplex *pz)
+void dmCtrlZMPPhase(pdCZ *c, double du, double vu, double dw, double vw, zComplex *pz)
 {
-  zComplexCreate( pz, pdCZZMPRad(c), -(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2+1)*vw/(pdCZZeta(c)*sqrt(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2)) );
+  zComplexCreate( pz, pdCZZMPRad(c,du,vu,dw,vw), -(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2+1)*vw/(pdCZZeta(c)*sqrt(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2)) );
 }
 
 #define DM_FOOT_TOL (1.0e-3)

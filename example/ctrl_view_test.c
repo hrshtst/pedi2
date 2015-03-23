@@ -52,7 +52,7 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
   zVec3DElem(&com,zY) = zVecElem(p,2);
   measure( ctrl, zVecElem(p,1), zVecElem(p,3), &du, &vu, &dw, &vw );
   pdCZUpdate( ctrl, du, vu, dw, vw );
-  world_zmp( pdCZZMPTan(ctrl), pdCZZMPRad(ctrl) );
+  world_zmp( pdCZZMPTan(ctrl,du,vu,dw,vw), pdCZZMPRad(ctrl,du,vu,dw,vw) );
   zVecElem(v,0) = zVecElem(p,1);
   zVecElem(v,1) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,0) - zVec3DElem(&zmp,zX) );
   zVecElem(v,2) = zVecElem(p,3);

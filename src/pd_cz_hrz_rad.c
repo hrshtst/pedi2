@@ -4,8 +4,9 @@ static void _pdCZHrzSetPrmRad(void *dst, void *src);
 static double _pdCZHrzK1Rad(void *prm);
 static double _pdCZHrzK2Rad(void *prm);
 static double _pdCZHrzAct(void *prm, double dw, double vw);
+static double _pdCZHrzZMPRad(void *prm, double du, double vu, double dw, double vw);
+static double _pdCZHrzAccRad(void *prm, double du, double vu, double dw, double vw);
 static void _pdCZHrzUpdateRad(void *prm, double du, double vu, double dw, double vw);
-static double _pdCZHrzZMPRad(void *prm);
 
 #define _pdc(p) ((pdCZHrzPrmRad *)p)
 
@@ -41,25 +42,34 @@ double _pdCZHrzAct(void *prm, double dw, double vw)
   return ret;
 }
 
-void _pdCZHrzUpdateRad(void *prm, double du, double vu, double dw, double vw)
+double _pdCZHrzZMPRad(void *prm, double du, double vu, double dw, double vw)
 {
   double r;
 
   r = 1.0 - _pdc(prm)->kappa * dw;
-  _pdc(prm)->wz = _pdCZHrzK1Rad(prm)*dw + _pdCZHrzK2Rad(prm)*_pdCZHrzAct(prm,dw,vw)*vw - (_pdc(prm)->kappa/r)*zSqr(vu/_pdc(prm)->vrt->zeta);
+  return _pdCZHrzK1Rad(prm)*dw + _pdCZHrzK2Rad(prm)*_pdCZHrzAct(prm,dw,vw)*vw - (_pdc(prm)->kappa/r)*zSqr(vu/_pdc(prm)->vrt->zeta);
 }
 
-double _pdCZHrzZMPRad(void *prm)
+double _pdCZHrzAccRad(void *prm, double du, double vu, double dw, double vw)
 {
-  return _pdc(prm)->wz;
+  double r;
+
+  r = 1.0 - _pdc(prm)->kappa * dw;
+  return zSqr(_pdc(prm)->vrt->zeta) * _pdCZHrzZMPRad(prm,du,vu,dw,vw) + (_pdc(prm)->kappa/r)*zSqr(vu);
+}
+
+void _pdCZHrzUpdateRad(void *prm, double du, double vu, double dw, double vw)
+{
+  _pdc(prm)->wz = _pdCZHrzZMPRad( prm , du, vu, dw, vw );
 }
 
 static pdCZHrzCom pd_hrz_rad = {
   _pdCZHrzSetPrmRad,
   _pdCZHrzK1Rad,
   _pdCZHrzK2Rad,
-  _pdCZHrzUpdateRad,
   _pdCZHrzZMPRad,
+  _pdCZHrzAccRad,
+  _pdCZHrzUpdateRad,
 };
 
 pdCZHrz *pdCZHrzSetupRad(pdCZHrz *h, pdCZVrt *v)

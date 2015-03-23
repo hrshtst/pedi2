@@ -3,8 +3,9 @@
 static void _pdCZHrzSetPrmTan(void *dst, void *src);
 static double _pdCZHrzK1Tan(void *prm);
 static double _pdCZHrzK2Tan(void *prm);
+static double _pdCZHrzZMPTan(void *prm, double du, double vu, double dw, double vw);
+static double _pdCZHrzAccTan(void *prm, double du, double vu, double dw, double vw);
 static void _pdCZHrzUpdateTan(void *prm, double du, double vu, double dw, double vw);
-static double _pdCZHrzZMPTan(void *prm);
 
 #define _pdc(p) ((pdCZHrzPrmTan *)p)
 
@@ -26,25 +27,34 @@ double _pdCZHrzK2Tan(void *prm)
   return ( _pdc(prm)->q1 + _pdc(prm)->q2 ) / _pdc(prm)->vrt->zeta;
 }
 
-void _pdCZHrzUpdateTan(void *prm, double du, double vu, double dw, double vw)
+double _pdCZHrzZMPTan(void *prm, double du, double vu, double dw, double vw)
 {
   double r;
 
   r = 1.0 - _pdc(prm)->kappa * dw;
-  _pdc(prm)->uz = -_pdCZHrzK1Tan(prm)*r*du + _pdCZHrzK2Tan(prm)*(vu-r*_pdc(prm)->vd) + 2*_pdc(prm)->kappa*vu*vw/(zSqr(_pdc(prm)->vrt->zeta)*r);
+  return -_pdCZHrzK1Tan(prm)*r*du + _pdCZHrzK2Tan(prm)*(vu-r*_pdc(prm)->vd) + 2*_pdc(prm)->kappa*vu*vw/(zSqr(_pdc(prm)->vrt->zeta)*r);
 }
 
-double _pdCZHrzZMPTan(void *prm)
+double _pdCZHrzAccTan(void *prm, double du, double vu, double dw, double vw)
 {
-  return _pdc(prm)->uz;
+  double r;
+
+  r = 1.0 - _pdc(prm)->kappa * dw;
+  return -zSqr(_pdc(prm)->vrt->zeta) * _pdCZHrzZMPTan(prm,du,vu,dw,vw) + 2.0 * _pdc(prm)->kappa * vu * vw / r;
+}
+
+void _pdCZHrzUpdateTan(void *prm, double du, double vu, double dw, double vw)
+{
+  _pdc(prm)->uz = _pdCZHrzZMPTan( prm, du, vu, dw, vw );
 }
 
 static pdCZHrzCom pd_hrz_tan = {
   _pdCZHrzSetPrmTan,
   _pdCZHrzK1Tan,
   _pdCZHrzK2Tan,
-  _pdCZHrzUpdateTan,
   _pdCZHrzZMPTan,
+  _pdCZHrzAccTan,
+  _pdCZHrzUpdateTan,
 };
 
 pdCZHrz *pdCZHrzSetupTan(pdCZHrz *h, pdCZVrt *v)

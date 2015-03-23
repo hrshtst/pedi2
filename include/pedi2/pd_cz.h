@@ -44,8 +44,14 @@ typedef struct{
   pdCZPrmRad(c)->dist = (d);\
 } while (0)
 #define pdCZKappa(c) pdCZPrmTan(c)->kappa
-#define pdCZZMPTan(c) pdCZHrzZMP( &(c)->tan )
-#define pdCZZMPRad(c) pdCZHrzZMP( &(c)->rad )
+#define pdCZZMPTan(c,du,vu,dw,vw) \
+  pdCZHrzZMP( &(c)->tan, du, vu, dw, vw )
+#define pdCZZMPRad(c,du,vu,dw,vw) \
+  pdCZHrzZMP( &(c)->rad, du, vu, dw, vw )
+#define pdCZAccTan(c,du,vu,dw,vw) \
+  pdCZHrzAcc( &(c)->tan, du, vu, dw, vw )
+#define pdCZAccRad(c,du,vu,dw,vw) \
+  pdCZHrzAcc( &(c)->rad, du, vu, dw, vw )
 #define pdCZUpdate(c,du,vu,dw,vw) do{\
   pdCZVrtUpdate( &(c)->vrt );\
   pdCZHrzUpdate( &(c)->tan, du, vu, dw, vw );\

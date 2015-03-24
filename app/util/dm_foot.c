@@ -16,7 +16,7 @@ void dmFootPhase(dmFoot *pf, dmFoot *kf, double xd, double yd, double theta, zCo
   r2 = zComplexSqrAbs(pz);
   r  = sqrt(r2);
   /* for periodic stepping (I don't know why...) */
-  dr = -(zVec3DElem(&pf->p,zX)-xd)*c-(zVec3DElem(&pf->p,zY)-yd)*s - pf->dy*0.035;
+  dr = -(zVec3DElem(&pf->p,zX)-xd)*c-(zVec3DElem(&pf->p,zY)-yd)*s - pf->dy*0.1;
   da = acos( dr / r );
   if( ( d = r2 - zSqr(dr) ) > 0 ){
     zComplexCreate( &plim, pf->dy*dr, -pf->dy*sqrt(d) );
@@ -83,6 +83,12 @@ void dmFootStep(pdCtrl *ctrl, dmFoot *pf, dmFoot *kf, double xd, double yd, doub
 
 void dmFootMove(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, double theta)
 {
+  printf("lf floating?:%d, ", dmFootIsCurrentFootFloating( lf ));
+  printf("lf->phase:%f, ", lf->phase);
+  printf("lfd floating?:%d\n", dmFootIsDesiredFootFloating( lf ));
+  printf("rf floating?:%d, ", dmFootIsCurrentFootFloating( rf ));
+  printf("rf->phase:%f, ", rf->phase);
+  printf("rfd floating?:%d\n", dmFootIsDesiredFootFloating( rf ));
   if( dmFootIsCurrentFootFloating( lf ) || ( lf->phase > 0 && zVec3DElem(&lf->pd,zZ) > DM_FOOT_TOL ) ){
     dmFootStep( ctrl, rf, lf, xd, yd, theta );
   } else {
@@ -100,7 +106,11 @@ void dmFootMove(pdCtrl *ctrl, dmFoot *lf, dmFoot *rf, double xd, double yd, doub
 #define DT 0.01
 void dmFootUpdatePos(dmFoot *lf, dmFoot *rf)
 {
-  if( dmFootIsCurrentFootFloating( lf ) || ( lf->phase > 0 && zVec3DElem(&lf->pd,zZ) > DM_FOOT_TOL ) ){
+  printf("lf.p"); zVec3DWrite( &lf->p );
+  printf("rf.p"); zVec3DWrite( &rf->p );
+  printf("lf.pd"); zVec3DWrite( &lf->pd );
+  printf("rf.pd"); zVec3DWrite( &rf->pd );
+  /* if( dmFootIsCurrentFootFloating( lf ) || ( lf->phase > 0 && zVec3DElem(&lf->pd,zZ) > DM_FOOT_TOL ) ){ */
     zVec3DElem(&lf->ps,zX) =
         ( lf->track_kx*DT*DT* zVec3DElem(&lf->pd,zX) + ( lf->track_cx*DT+2 )* zVec3DElem(&lf->p,zX) - lf->track_xold ) / ( 1 + lf->track_cx*DT + lf->track_kx*DT*DT );
     lf->track_xold = zVec3DElem(&lf->p,zX);
@@ -111,8 +121,8 @@ void dmFootUpdatePos(dmFoot *lf, dmFoot *rf)
         ( lf->track_kz*DT*DT* zVec3DElem(&lf->pd,zZ) + ( lf->track_cz*DT+2 )* zVec3DElem(&lf->p,zZ) - lf->track_zold ) / ( 1 + lf->track_cz*DT + lf->track_kz*DT*DT );
     /* zVec3DElem(&lf->ps,zZ) = 0.1; */
     lf->track_zold = zVec3DElem(&lf->p,zZ);
-  }
-  if( dmFootIsCurrentFootFloating( rf ) || ( rf->phase > 0 && zVec3DElem(&rf->pd,zZ) > DM_FOOT_TOL ) ){
+  /* } */
+  /* if( dmFootIsCurrentFootFloating( rf ) || ( rf->phase > 0 && zVec3DElem(&rf->pd,zZ) > DM_FOOT_TOL ) ){ */
     zVec3DElem(&rf->ps,zX) =
         ( rf->track_kx*DT*DT* zVec3DElem(&rf->pd,zX) + ( rf->track_cx*DT+2 )* zVec3DElem(&rf->p,zX) - rf->track_xold ) / ( 1 + rf->track_cx*DT + rf->track_kx*DT*DT );
     rf->track_xold = zVec3DElem(&rf->p,zX);
@@ -123,5 +133,7 @@ void dmFootUpdatePos(dmFoot *lf, dmFoot *rf)
         ( rf->track_kz*DT*DT* zVec3DElem(&rf->pd,zZ) + ( rf->track_cz*DT+2 )* zVec3DElem(&rf->p,zZ) - rf->track_zold ) / ( 1 + rf->track_cz*DT + rf->track_kz*DT*DT );
     /* zVec3DElem(&rf->ps,zZ) = 0.1; */
     rf->track_zold = zVec3DElem(&rf->p,zZ);
-  }
+  /* } */
+  printf("lf.ps"); zVec3DWrite( &lf->ps );
+  printf("rf.ps"); zVec3DWrite( &rf->ps );
 }

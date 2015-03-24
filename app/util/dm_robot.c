@@ -46,12 +46,16 @@ void dmRobotInit(void)
   zMat3DToZYX( rkChainLinkWldAtt(&dm_robot,DM_ROBOT_LEFT_FOOT), &dm_d_att_lf );
   zMat3DToZYX( rkChainLinkWldAtt(&dm_robot,DM_ROBOT_RIGHT_FOOT), &dm_d_att_rf );
   printf("init:\n");
+  printf("com:");zVec3DWrite( rkChainWldCOM(&dm_robot) );
+  printf("lf.p:");zVec3DWrite( rkChainLinkWldPos(&dm_robot,DM_ROBOT_LEFT_FOOT) );
+  printf("rf.p:");zVec3DWrite( rkChainLinkWldPos(&dm_robot,DM_ROBOT_RIGHT_FOOT) );
   printf("dm_d_com: ");zVec3DWrite(&dm_d_com);
   printf("dm_d_lf: ");zVec3DWrite(&dm_d_lf);
   printf("dm_d_rf: ");zVec3DWrite(&dm_d_rf);
   printf("dm_d_att_body: ");zVec3DWrite(&dm_d_att_body);
   printf("dm_d_att_lf: ");zVec3DWrite(&dm_d_att_lf);
   printf("dm_d_att_rf: ");zVec3DWrite(&dm_d_att_rf);
+  printf("\n");
 
   /* supporting region */
   zListInit( &dm_sr_lf );
@@ -98,6 +102,7 @@ void dmRobotSolveIK(void)
   printf("dm_d_att_body"); zVec3DWrite( &dm_d_att_body );
   printf("dm_d_att_lf"); zVec3DWrite( &dm_d_att_lf );
   printf("dm_d_att_rf"); zVec3DWrite( &dm_d_att_rf );
+  printf("\n");
   rkIKDeactivate( &dm_ik );
   rkIKCellSetRefVec( dm_cell[0], &dm_d_com );
   rkIKCellSetRefVec( dm_cell[1], &dm_d_att_body );
@@ -172,8 +177,8 @@ void dmRobotFootPos(zVec3D *lf, zVec3D *rf)
 {
   zVec3DCopy( rkChainLinkWldPos(&dm_robot,DM_ROBOT_LEFT_FOOT), lf );
   zVec3DCopy( rkChainLinkWldPos(&dm_robot,DM_ROBOT_RIGHT_FOOT), rf );
-  zVec3DElem( lf, zZ ) -= 0.1;
-  zVec3DElem( rf, zZ ) -= 0.1;
+  /* zVec3DElem( lf, zZ ) -= 0.1; */
+  /* zVec3DElem( rf, zZ ) -= 0.1; */
   /* printf("lf");zVec3DWrite( lf ); */
   /* printf("rf");zVec3DWrite( rf ); */
 }

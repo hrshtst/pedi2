@@ -183,12 +183,14 @@ void dmSystemInitFoot(dmSystem *sys)
   /* zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0.1 ); */
   /* zVec3DCreate( &dm_d_att_lf, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
   /* zVec3DCreate( &dm_d_att_rf, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
-  zVec3DCreate( &sys->lf.ps, sys->xd-d*c, sys->yd-d*s, 0.1 );
-  zVec3DCreate( &sys->rf.ps, sys->xd+d*c, sys->yd+d*s, 0.1 );
+  zVec3DCreate( &sys->lf.ps, sys->xd-d*c, sys->yd-d*s, 0 );
+  zVec3DCreate( &sys->rf.ps, sys->xd+d*c, sys->yd+d*s, 0 );
   /* zVec3DCreate( &sys->lf.as, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
   /* zVec3DCreate( &sys->rf.as, sys->theta+zPI_2, -zPI_2, -zPI_2 ); */
   zVec3DCreate( &sys->lf.as, sys->theta+zPI_2, 0, 0 );
   zVec3DCreate( &sys->rf.as, sys->theta+zPI_2, 0, 0 );
+  zVec3DCopy( &sys->lf.ps, &sys->lf.pd );
+  zVec3DCopy( &sys->rf.ps, &sys->rf.pd );
 
   /* ****************************************************** */
   /* zVec3DCreate( &dm_d_com, 0.04970412975, -0.05237794313, -0.1204609422 ); */
@@ -266,8 +268,8 @@ void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
   dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &sys->com.kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &sys->com.rho );
   dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &sys->com.kr );
-  dmConsoleAddEval( con, "L lift height", 0, 0.04, 0.04, 0, &sys->com.lfh );
-  dmConsoleAddEval( con, "R lift height", 0, 0.04, 0.04, 0, &sys->com.rfh );
+  dmConsoleAddEval( con, "L lift height", 0, 0.1, 0.1, 0, &sys->com.lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.1, 0.1, 0, &sys->com.rfh );
 }
 
 void dmSystemUpdateCommand(dmSystem *sys)
@@ -314,6 +316,8 @@ void dmSystemInit(dmSystem *sys, dmConsole *con)
   dmSystemInitState( sys );
   dmSystemInitFoot( sys );
   dmSystemUpdateRobot( sys );
+  zVec3DCreate( &dm_d_com, 0, 0, sys->com.zd );
+  zVec3DCreate( &dm_d_att_body, zPI_2, 0, 0 );
 }
 
 void dmSystemExit(dmSystem *sys)

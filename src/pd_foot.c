@@ -31,9 +31,9 @@ void pdFootLift(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double
 }
 
 #define PD_FOOT_TOL (1.0e-3)
-bool pdFootIsOn(pdFoot *f)
+bool pdFootIsOff(pdFoot *f)
 {
-  return zVec3DElem(&f->p,zZ) < PD_FOOT_TOL;
+  return zVec3DElem(&f->p,zZ) > PD_FOOT_TOL;
 }
 
 bool pdFootDoesAttemptToLift(pdFoot *f)

@@ -29,4 +29,16 @@ TEST_F(pdFootTest, CalcFootPhaseDoubleSupport)
   pdFootPhase( &rf, &lf, 0, 0, 0, &pz );
   EXPECT_EQ( 0, lf.phase );
   EXPECT_EQ( 0, rf.phase );
+
+  zComplexCreate(&pz, 0, 1 );
+  pdFootPhase( &lf, &rf, 0, 0, 0, &pz );
+  pdFootPhase( &rf, &lf, 0, 0, 0, &pz );
+  EXPECT_EQ( 0, lf.phase );
+  EXPECT_EQ( 0, rf.phase );
+
+  zComplexCreate(&pz, 1, 0 );
+  pdFootPhase( &lf, &rf, 0, 0, 0, &pz );
+  pdFootPhase( &rf, &lf, 0, 0, 0, &pz );
+  EXPECT_EQ( 0, lf.phase );
+  EXPECT_EQ( 0, rf.phase );
 }

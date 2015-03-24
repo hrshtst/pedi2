@@ -29,3 +29,14 @@ void pdFootLift(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double
   zVec3DElem(&lf->pd,zZ) = zCycloidY( 0, lf->h * dh, lf->phase );
   zVec3DElem(&rf->pd,zZ) = zCycloidY( 0, rf->h * dh, rf->phase );
 }
+
+#define PD_FOOT_TOL (1.0e-3)
+bool pdFootIsOn(pdFoot *f)
+{
+  return zVec3DElem(&f->p,zZ) < PD_FOOT_TOL;
+}
+
+bool pdFootDoesAttemptToLift(pdFoot *f)
+{
+  return zVec3DElem(&f->pd,zZ) > PD_FOOT_TOL;
+}

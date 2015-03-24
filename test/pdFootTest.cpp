@@ -105,3 +105,32 @@ TEST_F(pdFootTest, FootLiftRhoIsZero)
   EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
   EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
 }
+
+// TODO: add test for calculation of foot phase
+//       when (dx, dy) != (0, 0) and theta != 0
+
+TEST_F(pdFootTest, FootIsOn)
+{
+  zVec3DElem(&lf.p,zZ) = 0;
+  zVec3DElem(&rf.p,zZ) = 0;
+  EXPECT_TRUE( pdFootIsOn( &lf ) );
+  EXPECT_TRUE( pdFootIsOn( &rf ) );
+
+  zVec3DElem(&lf.p,zZ) = 0.1;
+  zVec3DElem(&rf.p,zZ) = 0.1;
+  EXPECT_FALSE( pdFootIsOn( &lf ) );
+  EXPECT_FALSE( pdFootIsOn( &rf ) );
+}
+
+TEST_F(pdFootTest, FootDoesAttemptToLift)
+{
+  zVec3DElem(&lf.pd,zZ) = 0;
+  zVec3DElem(&rf.pd,zZ) = 0;
+  EXPECT_FALSE( pdFootDoesAttemptToLift( &lf ) );
+  EXPECT_FALSE( pdFootDoesAttemptToLift( &rf ) );
+
+  zVec3DElem(&lf.pd,zZ) = 0.1;
+  zVec3DElem(&rf.pd,zZ) = 0.1;
+  EXPECT_TRUE( pdFootDoesAttemptToLift( &lf ) );
+  EXPECT_TRUE( pdFootDoesAttemptToLift( &rf ) );
+}

@@ -23,6 +23,7 @@ typedef struct{
 } pdFoot;
 
 void pdFootPhase(pdFoot *pf, pdFoot *kf, double xd, double yd, double theta, zComplex *pz);
+void pdFootLift(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double theta, zComplex *pz);
 
 __END_DECLS
 

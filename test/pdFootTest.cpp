@@ -7,14 +7,22 @@ class pdFootTest : public testing::Test {
 protected:
   virtual void SetUp() {
     pdCZInit( &ctrl );
+    pdCZPrmRad(&ctrl)->rho = 1;
+    pdCZPrmRad(&ctrl)->dist = 2;
     // left foot
     zVec3DCreate( &lf.p, -1, 0, 0 );
     lf.dy = 1;
     lf.sole_w = 0.07;
+    lf.h = 1;
     // right foot
     zVec3DCreate( &rf.p,  1, 0, 0 );
     rf.dy = -1;
     rf.sole_w = 0.07;
+    rf.h = 1;
+    // set dummy values
+    lf.phase = rf.phase = 100;
+    zVec3DElem(&lf.pd,zZ) = 100;
+    zVec3DElem(&rf.pd,zZ) = 100;
   };
   virtual void TearDown() {};
 
@@ -56,3 +64,44 @@ TEST_F(pdFootTest, CalcFootPhaseSingleSupport)
 
 // TODO: add test for calculation of foot phase
 //       when (dx, dy) != (0, 0) and theta != 0
+
+TEST_F(pdFootTest, FootLiftDoubleSupport)
+{
+  zComplexCreate(&pz, 0, 1 );
+  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+
+  zComplexCreate(&pz, 0, -1 );
+  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+}
+
+TEST_F(pdFootTest, FootLiftSingleSupport)
+{
+  zComplexCreate(&pz, 1, 0 );
+  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
+  EXPECT_DOUBLE_EQ( 1, zVec3DElem(&rf.pd,zZ) );
+
+  zComplexCreate(&pz, -1, 0 );
+  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
+  EXPECT_DOUBLE_EQ( 1, zVec3DElem(&lf.pd,zZ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+}
+
+TEST_F(pdFootTest, FootLiftRhoIsZero)
+{
+  pdCZPrmRad(&ctrl)->rho = 0;
+
+  zComplexCreate(&pz, 1, 0 );
+  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+
+  zComplexCreate(&pz, -1, 0 );
+  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+}

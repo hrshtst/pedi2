@@ -18,3 +18,14 @@ void pdFootPhase(pdFoot *pf, pdFoot *kf, double xd, double yd, double theta, zCo
   } else
     kf->phase = 0;
 }
+
+void pdFootLift(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double theta, zComplex *pz)
+{
+  double dh;
+
+  pdFootPhase( rf, lf, xd, yd, theta, pz );
+  pdFootPhase( lf, rf, xd, yd, theta, pz );
+  dh = 2.0 * zComplexAbs(pz) / pdCZPrmRad(ctrl)->dist * zLimit( (pdCZPrmRad(ctrl)->rho*zE-1)/(zE-1), 0, 1 );
+  zVec3DElem(&lf->pd,zZ) = zCycloidY( 0, lf->h * dh, lf->phase );
+  zVec3DElem(&rf->pd,zZ) = zCycloidY( 0, rf->h * dh, rf->phase );
+}

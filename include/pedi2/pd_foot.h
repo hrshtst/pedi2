@@ -14,9 +14,8 @@ typedef struct{
   zVec3D pd;          /* desired position */
   zVec3D a;           /* current attitude */
   zVec3D as;          /* desired attitude for IK seeds */
-  double track_kx, track_cx, track_xold;
-  double track_ky, track_cy, track_yold;
-  double track_kz, track_cz, track_zold;
+  double track_k[3], track_c[3], track_old[3];
+                      /* second-order lag system for foot motion */
   double dy;          /* direction from inner side to outer side */
   double sole_w;      /* sole width */
   double phase;       /* lifting phase */
@@ -28,6 +27,7 @@ bool pdFootIsOff(pdFoot *f);
 #define pdFootIsOn(f) !pdFootIsOff(f)
 bool pdFootDoesAttemptToLift(pdFoot *f);
 void pdFootMove(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double theta);
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, double dt);
 
 __END_DECLS
 

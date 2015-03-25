@@ -345,3 +345,7 @@ TEST_F(pdFootTest, FootMoveRightFootFloatingRotate)
   EXPECT_DOUBLE_EQ( -0.5-cosPI_4, zVec3DElem(&rf.pd,zY) );
   EXPECT_DOUBLE_EQ( 0.5*zPI_2, zVec3DElem(&rf.as,zX) );
 }
+
+// TODO: add test for pdFootUpdate
+// TEST_F(pdFootTest, FootUpdate)
+// {}

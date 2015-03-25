@@ -65,3 +65,26 @@ void pdFootMove(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double
     _pdFootMoveKick( ctrl, lf, rf, xd, yd, theta );
   }
 }
+
+static void _pdFootUpdateSOL(pdFoot *f, zAxis i, double dt);
+
+void _pdFootUpdateSOL(pdFoot *f, zAxis i, double dt)
+{
+  zVec3DElem(&f->ps,i) =
+      ( f->track_k[i]*dt*dt * zVec3DElem(&f->pd,i) + ( f->track_c[i]*dt+2 ) * zVec3DElem(&f->p,i) - f->track_old[i] ) / ( 1 + f->track_c[i]*dt + f->track_k[i]*dt*dt );
+  f->track_old[i] = zVec3DElem(&f->p,i);
+}
+
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, double dt)
+{
+  if( pdFootIsOff( lf ) || pdFootDoesAttemptToLift( lf ) ){
+    _pdFootUpdateSOL( lf, zX, dt );
+    _pdFootUpdateSOL( lf, zY, dt );
+    _pdFootUpdateSOL( lf, zZ, dt );
+  }
+  if( pdFootIsOff( rf ) || pdFootDoesAttemptToLift( rf ) ){
+    _pdFootUpdateSOL( rf, zX, dt );
+    _pdFootUpdateSOL( rf, zY, dt );
+    _pdFootUpdateSOL( rf, zZ, dt );
+  }
+}

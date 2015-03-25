@@ -115,3 +115,15 @@ void pdRobotSupportRegion(pdRobot *robot)
   if( nr > 0 ) zCH2D( &robot->sr_rf, robot->sr_rf_vert, nr );
   if( n  > 0 ) zCH2D( &robot->sr, robot->sr_vert, n );
 }
+
+void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf)
+{
+  zVec3DCopy( rkChainLinkWldPos(&robot->chain,robot->lf_id), lf );
+  zVec3DCopy( rkChainLinkWldPos(&robot->chain,robot->rf_id), rf );
+}
+
+void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf)
+{
+  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->lf_id), lf );
+  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->rf_id), rf );
+}

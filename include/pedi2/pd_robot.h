@@ -32,6 +32,9 @@ void pdRobotExit(pdRobot *robot);
 void pdRobotSolveIK(pdRobot *robot);
 void pdRobotSupportRegion(pdRobot *robot);
 
+void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);
+void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf);
+
 __END_DECLS
 
 #endif /* __PD_ROBOT_H__ */

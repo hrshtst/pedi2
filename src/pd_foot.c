@@ -40,3 +40,28 @@ bool pdFootDoesAttemptToLift(pdFoot *f)
 {
   return zVec3DElem(&f->pd,zZ) > PD_FOOT_TOL;
 }
+
+static void _pdFootMoveKick(pdCZ *ctrl, pdFoot *pf, pdFoot *kf, double xd, double yd, double theta);
+
+void _pdFootMoveKick(pdCZ *ctrl, pdFoot *pf, pdFoot *kf, double xd, double yd, double theta)
+{
+  double d;
+  double s, c;
+
+  d = 0.5 * pdCZPrmRad(ctrl)->dist;
+  zSinCos( theta, &s, &c );
+
+  zVec3DElem(&kf->pd,zX) = xd - kf->dy * d * c;
+  zVec3DElem(&kf->pd,zY) = yd - kf->dy * d * s;
+  zVec3DCreate( &kf->as, theta+zPI_2, 0, 0 );
+}
+
+void pdFootMove(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double theta)
+{
+  if( pdFootIsOff( lf ) || pdFootDoesAttemptToLift( lf ) ){
+    _pdFootMoveKick( ctrl, rf, lf, xd, yd, theta );
+  }
+  if( pdFootIsOff( rf ) || pdFootDoesAttemptToLift( rf ) ){
+    _pdFootMoveKick( ctrl, lf, rf, xd, yd, theta );
+  }
+}

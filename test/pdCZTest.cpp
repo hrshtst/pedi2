@@ -136,3 +136,28 @@ TEST_F(pdCZTest, UpdateVelocityFollowCurve)
   EXPECT_DOUBLE_EQ( 0.276367023942938716540851, pdCZAccTan( &cz ) );
   EXPECT_DOUBLE_EQ( 0.011700937663480154293794, pdCZAccRad( &cz ) );
 }
+
+TEST_F(pdCZTest, ZMPPhase)
+{
+  zComplex pz;
+
+  zComplexCreate( &pz, 0, 0 );
+  pdCZPrmRad(&cz)->q1 = 1;
+  pdCZPrmRad(&cz)->q2 = 1;
+  pdCZZeta(&cz) = 1;
+
+  pdCZPrmRad(&cz)->zmp = 0;
+  pdCZZMPPhase( &cz, 0.0, 0.1, &pz );
+  EXPECT_EQ( 0, pz.re );
+  EXPECT_EQ( -0.2, pz.im );
+
+  pdCZPrmRad(&cz)->zmp = 0;
+  pdCZZMPPhase( &cz, 0.1, 0.0, &pz );
+  EXPECT_EQ( -0.1, pz.re );
+  EXPECT_EQ( 0, pz.im );
+
+  pdCZPrmRad(&cz)->zmp = 0.3;
+  pdCZZMPPhase( &cz, -0.1, -0.15, &pz );
+  EXPECT_EQ( 0.4, pz.re );
+  EXPECT_EQ( 0.3, pz.im );
+}

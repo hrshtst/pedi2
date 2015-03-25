@@ -58,6 +58,8 @@ typedef struct{
   pdCZHrzUpdate( &(c)->rad, du, vu, dw, vw );\
 } while (0)
 
+void pdCZZMPPhase(pdCZ *c, double dw, double vw, zComplex *pz);
+
 __END_DECLS
 
 #endif /* __PD_CZ_H__ */

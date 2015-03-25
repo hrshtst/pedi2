@@ -77,3 +77,41 @@ void pdRobotSolveIK(pdRobot *robot)
   rkIKCellSetRefVec( robot->cell[5], &robot->d_rf_att );
   rkIKSolve( &robot->ik, robot->dis, zTOL, 0 );
 }
+
+#define PD_ROBOT_TOL (1.0e-3)
+void pdRobotSupportRegion(pdRobot *robot)
+{
+  int i, nl, nr, n;
+  rkLink *foot;
+  zShape3D *sole;
+  zVec3D v;
+
+  nl = nr = n = 0;
+  /* left foot */
+  foot = rkChainLink( &robot->chain, robot->lf_id );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  for( i=0; i<4; i++ ){
+    zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
+    if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){
+      zVec3DCopy( &v, &robot->sr_lf_vert[nl++] );
+      zVec3DCopy( &v, &robot->sr_vert[n++] );
+    }
+  }
+  /* right foot */
+  foot = rkChainLink( &robot->chain, robot->rf_id );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  for( i=0; i<4; i++ ){
+    zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
+    if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){
+      zVec3DCopy( &v, &robot->sr_rf_vert[nr++] );
+      zVec3DCopy( &v, &robot->sr_vert[n++] );
+    }
+  }
+  /* supporting region */
+  zVec3DListDestroy( &robot->sr_lf, false );
+  zVec3DListDestroy( &robot->sr_rf, false );
+  zVec3DListDestroy( &robot->sr, false );
+  if( nl > 0 ) zCH2D( &robot->sr_lf, robot->sr_lf_vert, nl );
+  if( nr > 0 ) zCH2D( &robot->sr_rf, robot->sr_rf_vert, nr );
+  if( n  > 0 ) zCH2D( &robot->sr, robot->sr_vert, n );
+}

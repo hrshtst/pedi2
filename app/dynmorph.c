@@ -19,7 +19,7 @@ typedef struct{
 typedef struct{
   double x[2], y[2];
   double nx[2], ny[2];
-  pdCZ c;
+  pdCZ cz;
   pdFoot lf, rf;
   double xz, yz;
   double xzmin, xzmax;
@@ -72,12 +72,12 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
 
   sys = (dmSystem *)dummy;
   dmSystemObserve( sys, &du, &vu, &dw, &vw );
-  pdCZUpdate( &sys->c, du, vu, dw, vw );
-  dmSystemCoodTransBodyToWorld( sys, pdCZZMPTan(&sys->c), pdCZZMPRad(&sys->c), &sys->xz, &sys->yz );
+  pdCZUpdate( &sys->cz, du, vu, dw, vw );
+  dmSystemCoodTransBodyToWorld( sys, pdCZZMPTan(&sys->cz), pdCZZMPRad(&sys->cz), &sys->xz, &sys->yz );
   zVecElem(v,0) = zVecElem(p,1);
-  zVecElem(v,1) = zSqr(pdCZZeta(&sys->c)) * ( zVecElem(p,0) - sys->xz ) + sys->adx;
+  zVecElem(v,1) = zSqr(pdCZZeta(&sys->cz)) * ( zVecElem(p,0) - sys->xz ) + sys->adx;
   zVecElem(v,2) = zVecElem(p,3);
-  zVecElem(v,3) = zSqr(pdCZZeta(&sys->c)) * ( zVecElem(p,2) - sys->yz ) + sys->ady;
+  zVecElem(v,3) = zSqr(pdCZZeta(&sys->cz)) * ( zVecElem(p,2) - sys->yz ) + sys->ady;
   return v;
 }
 
@@ -109,10 +109,10 @@ void dmSystemUpdateFoot(dmSystem *sys)
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
   dmSystemObserve(sys, &du, &vu, &dw, &vw);
-  pdCZZMPPhase( &sys->c, dw, vw, &pz );
+  pdCZZMPPhase( &sys->cz, dw, vw, &pz );
   /* dmRobotFootRegion( &sys->lf.yout, &sys->lf.yin, &sys->lf.dy, &sys->rf.yout, &sys->rf.yin, &sys->rf.dy ); */
-  pdFootLift( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta, &pz );
-  pdFootMove( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta );
+  pdFootLift( &sys->cz, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta, &pz );
+  pdFootMove( &sys->cz, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta );
   pdFootUpdate( &sys->lf, &sys->rf, DT );
 
   /* update IK constraints for feet */
@@ -130,7 +130,7 @@ void _dmSystemUpdateRefPosTheta(dmSystem *sys)
   double cos_d;
   double kx, ky, kw;
 
-  kappa = pdCZKappa(&sys->c);
+  kappa = pdCZKappa(&sys->cz);
   zSinCos( sys->theta, &s, &c );
   dw = -( sys->xd - sys->x[0] )*c - ( sys->yd - sys->y[0] )*s;
 
@@ -151,16 +151,16 @@ void dmSystemUpdateRef(dmSystem *sys)
 {
   /* automatic activation when walking */
   if( !zIsTiny( sys->com.vud ) ){
-    pdCZPrmRad(&sys->c)->rho = 1.0;
+    pdCZPrmRad(&sys->cz)->rho = 1.0;
   } else {
-    pdCZPrmRad(&sys->c)->rho = sys->com.rho;
+    pdCZPrmRad(&sys->cz)->rho = sys->com.rho;
   }
 
   /* automatic update of referential position and orientation */
   _dmSystemUpdateRefPosTheta( sys );
 
   /* update IK constraints for COM */
-  zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->c.vrt.zd );
+  zVec3DCreate( &dm_d_com, sys->nx[0], sys->ny[0], sys->cz.vrt.zd );
   zVec3DCreate( &dm_d_att_body, sys->theta+zPI_2, 0, 0 );
 }
 
@@ -172,7 +172,7 @@ void dmSystemInitFoot(dmSystem *sys)
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
 
-  d = 0.5 * pdCZPrmRad(&sys->c)->dist;
+  d = 0.5 * pdCZPrmRad(&sys->cz)->dist;
   zSinCos( sys->theta, &s, &c );
   zVec3DCreate( &dm_d_lf, sys->xd-d*c, sys->yd-d*s, 0 );
   zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0 );
@@ -232,17 +232,17 @@ void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
 
 void dmSystemUpdateCommand(dmSystem *sys)
 {
-  /* pdCZSetPrm( &sys->c, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr ); */
-  pdCZPrmTan(&sys->c)->q1 = sys->com.qu1;
-  pdCZPrmTan(&sys->c)->q2 = sys->com.qu2;
-  pdCZPrmTan(&sys->c)->kappa = sys->com.kappa;
-  pdCZPrmRad(&sys->c)->q1 = sys->com.qw1;
-  pdCZPrmRad(&sys->c)->q2 = sys->com.qw2;
-  pdCZPrmRad(&sys->c)->kappa = sys->com.kappa;
-  /* pdCZPrmRad(&sys->c)->rho = sys->com.rho; */
-  pdCZPrmRad(&sys->c)->kr = sys->com.kr;
-  pdCZSetRefVrt( &sys->c, sys->com.zd );
-  pdCZSetRefHrz( &sys->c, sys->com.vud, sys->com.vwd, sys->com.dist );
+  /* pdCZSetPrm( &sys->cz, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr ); */
+  pdCZPrmTan(&sys->cz)->q1 = sys->com.qu1;
+  pdCZPrmTan(&sys->cz)->q2 = sys->com.qu2;
+  pdCZPrmTan(&sys->cz)->kappa = sys->com.kappa;
+  pdCZPrmRad(&sys->cz)->q1 = sys->com.qw1;
+  pdCZPrmRad(&sys->cz)->q2 = sys->com.qw2;
+  pdCZPrmRad(&sys->cz)->kappa = sys->com.kappa;
+  /* pdCZPrmRad(&sys->cz)->rho = sys->com.rho; */
+  pdCZPrmRad(&sys->cz)->kr = sys->com.kr;
+  pdCZSetRefVrt( &sys->cz, sys->com.zd );
+  pdCZSetRefHrz( &sys->cz, sys->com.vud, sys->com.vwd, sys->com.dist );
   sys->lf.h   = sys->com.lfh;
   sys->rf.h   = sys->com.rfh;
 }
@@ -267,7 +267,7 @@ void dmSystemInitState(dmSystem *sys)
 
 void dmSystemInit(dmSystem *sys, dmConsole *con)
 {
-  pdCZInit( &sys->c );
+  pdCZInit( &sys->cz );
 
   dmSystemInitConsole( sys, con );
   dmSystemUpdateCommand( sys );
@@ -278,7 +278,7 @@ void dmSystemInit(dmSystem *sys, dmConsole *con)
 
 void dmSystemExit(dmSystem *sys)
 {
-  pdCZDestroy( &sys->c );
+  pdCZDestroy( &sys->cz );
 }
 
 void dmSystemODESolverInit(dmODESolver *solver, dmSystem *sys)

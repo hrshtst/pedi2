@@ -36,7 +36,7 @@ void dmSceneResize(dmScene *scene, int x, int y, int w, int h)
   glrkFrustum( &scene->cam, -wx, wx, -wy, wy, 1, 20 );
 }
 
-void dmSceneDraw(dmScene *scene, zVec3D *force)
+void dmSceneDraw(dmScene *scene, pdRobot *robot, zVec3D *force)
 {
   glrkActivateGLX( scene->canvas );
   glrkClear();
@@ -44,11 +44,60 @@ void dmSceneDraw(dmScene *scene, zVec3D *force)
   dmGLGauge();
   glrkLightPut( &scene->light );
   dmGLRobot();
-  dmGLSupportRegion();
+  dmGLSupportRegion( robot );
   if( !zVec3DIsTiny( force ) ){
     GLfloat color[4] = { 0.1, 0.3, 0.8, 0.5 };
-    glrkArrow( rkChainWldCOM(&dm_robot), force, 0.3, color );
+    glrkArrow( rkChainWldCOM(&robot->chain), force, 0.3, color );
   }
   glrkSwapBuffersGLX( scene->canvas );
   glrkFlushGLX();
+}
+
+/* scene stuff */
+static glrkChain dm_gl_robot;
+static int dm_gl_gauge;
+static zOpticalInfo dm_gl_sr_oi;
+
+void dmGLInit(pdRobot *robot)
+{
+  GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
+
+  /* scene stuff */
+  if( !glrkChainLoad( &dm_gl_robot, &robot->chain, NULL ) ){
+    ZRUNERROR( "unable to load robot model" );
+    exit( EXIT_FAILURE );
+  }
+  dm_gl_gauge = glrkGauge( zX, 6.0, zY, 6.0, 1.0, 0.2, white );
+  zOpticalInfoCreateSimple( &dm_gl_sr_oi, 1.0, 0.4, 0.8, NULL );
+}
+
+void dmGLExit(void)
+{
+  glrkChainUnload( &dm_gl_robot );
+  glDeleteLists( dm_gl_gauge, 1 );
+}
+
+void dmGLGauge(void)
+{
+  glDisable( GL_LIGHTING );
+  glCallList( dm_gl_gauge );
+  glEnable( GL_LIGHTING );
+}
+
+void dmGLRobot(void)
+{
+  glrkChainDraw( &dm_gl_robot );
+}
+
+void dmGLSupportRegion(pdRobot *robot)
+{
+  zVec3DListCell *vc;
+
+  glBegin( GL_POLYGON );
+    glShadeModel( GL_FLAT );
+    glrkMaterial( &dm_gl_sr_oi );
+    glrkNormal( Z_UNITZVEC3D );
+    zListForEachRew( &robot->sr, vc )
+      glrkVertex( vc->data );
+  glEnd();
 }

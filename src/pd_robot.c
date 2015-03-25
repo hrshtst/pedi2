@@ -56,7 +56,7 @@ void pdRobotLoad(pdRobot *robot, const char* model_file, const char* conf_file)
     exit( EXIT_FAILURE );
 }
 
-void dmRobotExit(pdRobot *robot)
+void pdRobotExit(pdRobot *robot)
 {
   zVecFree( robot->dis );
   rkIKDestroy( &robot->ik );
@@ -64,4 +64,16 @@ void dmRobotExit(pdRobot *robot)
   zVec3DListDestroy( &robot->sr_rf, false );
   zVec3DListDestroy( &robot->sr, false );
   rkChainDestroy( &robot->chain );
+}
+
+void pdRobotSolveIK(pdRobot *robot)
+{
+  rkIKDeactivate( &robot->ik );
+  rkIKCellSetRefVec( robot->cell[0], &robot->d_com_pos );
+  rkIKCellSetRefVec( robot->cell[1], &robot->d_body_att );
+  rkIKCellSetRefVec( robot->cell[2], &robot->d_lf_pos );
+  rkIKCellSetRefVec( robot->cell[3], &robot->d_lf_att );
+  rkIKCellSetRefVec( robot->cell[4], &robot->d_rf_pos );
+  rkIKCellSetRefVec( robot->cell[5], &robot->d_rf_att );
+  rkIKSolve( &robot->ik, robot->dis, zTOL, 0 );
 }

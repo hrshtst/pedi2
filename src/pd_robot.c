@@ -55,3 +55,13 @@ void pdRobotLoad(pdRobot *robot, const char* model_file, const char* conf_file)
   if( !( robot->dis = zVecAlloc( rkChainJointSize(&robot->chain) ) ) )
     exit( EXIT_FAILURE );
 }
+
+void dmRobotExit(pdRobot *robot)
+{
+  zVecFree( robot->dis );
+  rkIKDestroy( &robot->ik );
+  zVec3DListDestroy( &robot->sr_lf, false );
+  zVec3DListDestroy( &robot->sr_rf, false );
+  zVec3DListDestroy( &robot->sr, false );
+  rkChainDestroy( &robot->chain );
+}

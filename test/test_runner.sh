@@ -1,10 +1,27 @@
-# find all executable files (excluding script files etc.)
-found_bins=`find . -maxdepth 1 -type f -executable -exec file -i '{}' \; | grep 'x-executable; charset=binary' | sed -e "s/:.*$//g"`
+#!/bin/sh
 
-# run all binaries
-for i in $found_bins
+# find all executable files (excluding script files etc.)
+# make sure only tests in the working directory
+FOUND_BINS=`find . -maxdepth 1 -type f -executable -exec file -i '{}' \; | grep 'x-executable; charset=binary' | sed -e "s/:.*$//g"`
+
+# run all tests
+SUM_RET=0
+for i in $FOUND_BINS
 do
-    name=`echo $i | sed -e "s/^..//g"`
-    echo "Running $name...."
+    NAME=`echo $i | sed -e "s/^..//g"`
+    echo "Running $NAME...."
     $i
+    RET=$?
+    SUM_RET=`expr $SUM_RET + $RET`
+    if [ $RET -gt 0 ]; then
+	set -- "$@" $NAME
+    fi
 done
+
+if [ $SUM_RET -gt 0 ]; then
+    printf "\n"
+    printf "\033[31m==============================\n"
+    printf "\033[31m There are some failed tests!\n"
+    printf "\033[31m   * %s\n" "$@"
+    printf "\033[31m==============================\n"
+fi

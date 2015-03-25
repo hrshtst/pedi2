@@ -4,7 +4,8 @@
 __BEGIN_DECLS
 
 typedef struct{
-  double vd;           /* desired velocity */
+  double xd;           /* desired COM position */
+  double vd;           /* desired COM velocity */
   double q1, q2;       /* system poles */
   double xzmin, xzmax; /* border of supporting region */
   double kappa;        /* curvature of referencial path */
@@ -12,8 +13,8 @@ typedef struct{
   double kr;           /* degree of initial energy exertion */
   double dist;         /* canonical distance of feet */
 
-  double wz;           /* desired ZMP position */
-  double wd;           /* desired COM position */
+  double zmp;          /* ZMP position */
+  double acc;          /* COM acceleration */
 
   pdCZVrt *vrt;
 } pdCZHrzPrmRad;

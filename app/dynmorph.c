@@ -73,7 +73,7 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
   sys = (dmSystem *)dummy;
   dmSystemObserve( sys, &du, &vu, &dw, &vw );
   pdCZUpdate( &sys->c, du, vu, dw, vw );
-  dmSystemCoodTransBodyToWorld( sys, pdCZZMPTan(&sys->c,du,vu,dw,vw), pdCZZMPRad(&sys->c,du,vu,dw,vw), &sys->xz, &sys->yz );
+  dmSystemCoodTransBodyToWorld( sys, pdCZZMPTan(&sys->c), pdCZZMPRad(&sys->c), &sys->xz, &sys->yz );
   zVecElem(v,0) = zVecElem(p,1);
   zVecElem(v,1) = zSqr(pdCZZeta(&sys->c)) * ( zVecElem(p,0) - sys->xz ) + sys->adx;
   zVecElem(v,2) = zVecElem(p,3);

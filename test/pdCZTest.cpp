@@ -153,11 +153,11 @@ TEST_F(pdCZTest, ZMPPhase)
 
   pdCZPrmRad(&cz)->zmp = 0;
   pdCZZMPPhase( &cz, 0.1, 0.0, &pz );
-  EXPECT_EQ( -0.1, pz.re );
+  EXPECT_EQ( 0, pz.re );
   EXPECT_EQ( 0, pz.im );
 
   pdCZPrmRad(&cz)->zmp = 0.3;
   pdCZZMPPhase( &cz, -0.1, -0.15, &pz );
-  EXPECT_EQ( 0.4, pz.re );
+  EXPECT_EQ( 0.3, pz.re );
   EXPECT_EQ( 0.3, pz.im );
 }

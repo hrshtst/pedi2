@@ -2,10 +2,10 @@
 #include <zx11/zxwidget.h>
 #include <zx11/zximage_dib.h>
 #include <pedi2/pd_cz.h>
+#include <pedi2/pd_foot.h>
 
 #include "util/dm_scene.h"
 #include "util/dm_console.h"
-#include "util/dm_foot.h"
 
 typedef struct{
   double qu1, qu2;
@@ -20,7 +20,7 @@ typedef struct{
   double x[2], y[2];
   double nx[2], ny[2];
   pdCZ c;
-  dmFoot lf, rf;
+  pdFoot lf, rf;
   double xz, yz;
   double xzmin, xzmax;
   double yzmin, yzmax;
@@ -108,13 +108,12 @@ void dmSystemUpdateFoot(dmSystem *sys)
   zSinCos( sys->theta, &s, &c );
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
-  /* vw = -sys->x[1]*c - sys->y[1]*s; */
   dmSystemObserve(sys, &du, &vu, &dw, &vw);
-  dmCtrlZMPPhase( &sys->c, du, vu, dw, vw, &pz );
-  dmRobotFootRegion( &sys->lf.yout, &sys->lf.yin, &sys->lf.dy, &sys->rf.yout, &sys->rf.yin, &sys->rf.dy );
-  dmFootLift( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta, &pz );
-  dmFootMove( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta );
-  dmFootUpdatePos( &sys->lf, &sys->rf );
+  pdCZZMPPhase( &sys->c, dw, vw, &pz );
+  /* dmRobotFootRegion( &sys->lf.yout, &sys->lf.yin, &sys->lf.dy, &sys->rf.yout, &sys->rf.yin, &sys->rf.dy ); */
+  pdFootLift( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta, &pz );
+  pdFootMove( &sys->c, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta );
+  pdFootUpdate( &sys->lf, &sys->rf, DT );
 
   /* update IK constraints for feet */
   zVec3DCopy( &sys->lf.ps, &dm_d_lf );
@@ -171,10 +170,7 @@ void dmSystemInitFoot(dmSystem *sys)
   double s, c;
 
   dmRobotFootPos( &sys->lf.p, &sys->rf.p );
-  dmRobotFootPos( &sys->lf.pd, &sys->rf.pd );
-  dmRobotFootPos( &sys->lf.ps, &sys->rf.ps );
   dmRobotFootAtt( &sys->lf.a, &sys->rf.a );
-  dmRobotFootAtt( &sys->lf.as, &sys->rf.as );
 
   d = 0.5 * pdCZPrmRad(&sys->c)->dist;
   zSinCos( sys->theta, &s, &c );
@@ -182,52 +178,38 @@ void dmSystemInitFoot(dmSystem *sys)
   zVec3DCreate( &dm_d_rf, sys->xd+d*c, sys->yd+d*s, 0 );
   zVec3DCreate( &dm_d_att_lf, sys->theta+zPI_2, 0, 0 );
   zVec3DCreate( &dm_d_att_rf, sys->theta+zPI_2, 0, 0 );
+  zVec3DCopy( &dm_d_lf, &sys->lf.pd );
+  zVec3DCopy( &dm_d_lf, &sys->lf.ps );
+  zVec3DCopy( &dm_d_rf, &sys->rf.pd );
+  zVec3DCopy( &dm_d_rf, &sys->rf.ps );
+  zVec3DCopy( &dm_d_att_lf, &sys->lf.as );
+  zVec3DCopy( &dm_d_att_rf, &sys->rf.as );
 
   /* spring-damper tracking */
-  sys->lf.stride_x = 1;
-  sys->lf.track_kx = 3000;
-  sys->lf.track_cx = 50;
-  sys->lf.track_xold = zVec3DElem(&sys->lf.p,zX);
-  sys->lf.stride_y = 1;
-  sys->lf.track_ky = 3000;
-  sys->lf.track_cy = 50;
-  sys->lf.track_yold = zVec3DElem(&sys->lf.p,zY);
-  sys->lf.track_kz = 3000;
-  sys->lf.track_cz = 50;
-  sys->lf.track_zold = zVec3DElem(&sys->lf.p,zZ);
-  sys->rf.stride_x = 1;
-  sys->rf.track_kx = 3000;
-  sys->rf.track_cx = 50;
-  sys->rf.track_xold = zVec3DElem(&sys->rf.p,zX);
-  sys->rf.stride_y = 1;
-  sys->rf.track_ky = 3000;
-  sys->rf.track_cy = 50;
-  sys->rf.track_yold = zVec3DElem(&sys->rf.p,zY);
-  sys->rf.track_kz = 3000;
-  sys->rf.track_cz = 50;
-  sys->rf.track_zold = zVec3DElem(&sys->rf.p,zZ);
-  /* stepping range */
-  sys->lf.xsfor = 0.2;
-  sys->lf.xsaft =-0.2;
-  sys->lf.ysin  = zVec3DElem(&sys->lf.pd,zY) + 0.042;
-  sys->lf.ysout = 0.2;
-  sys->lf.xfc   = 0.0;
-  sys->lf.yfc   = 0.042;
-  sys->rf.xsfor = 0.2;
-  sys->rf.xsaft =-0.2;
-  sys->rf.ysin  = zVec3DElem(&sys->rf.pd,zY) - 0.042;
-  sys->rf.ysout =-0.2;
-  sys->rf.xfc   = 0.0;
-  sys->rf.yfc   = 0.042;
-  /* initial position of swing foot */
-  sys->lf.xk0 = zVec3DElem(&sys->lf.p,zX);
-  sys->lf.yk0 = zVec3DElem(&sys->lf.p,zY);
-  sys->rf.xk0 = zVec3DElem(&sys->rf.p,zX);
-  sys->rf.yk0 = zVec3DElem(&sys->rf.p,zY);
-  sys->lf.is_bf = false;
-  sys->lf.is_ff = false;
-  sys->rf.is_bf = false;
-  sys->rf.is_ff = false;
+  sys->lf.track_k[0] = 3000;
+  sys->lf.track_c[0] = 50;
+  sys->lf.track_old[0] = zVec3DElem(&sys->lf.p,zX);
+  sys->lf.track_k[1] = 3000;
+  sys->lf.track_c[1] = 50;
+  sys->lf.track_old[1] = zVec3DElem(&sys->lf.p,zY);
+  sys->lf.track_k[2] = 3000;
+  sys->lf.track_c[2] = 50;
+  sys->lf.track_old[2] = zVec3DElem(&sys->lf.p,zZ);
+  sys->rf.track_k[0] = 3000;
+  sys->rf.track_c[0] = 50;
+  sys->rf.track_old[0] = zVec3DElem(&sys->rf.p,zX);
+  sys->rf.track_k[1] = 3000;
+  sys->rf.track_c[1] = 50;
+  sys->rf.track_old[1] = zVec3DElem(&sys->rf.p,zY);
+  sys->rf.track_k[2] = 3000;
+  sys->rf.track_c[2] = 50;
+  sys->rf.track_old[2] = zVec3DElem(&sys->rf.p,zZ);
+  /* sole widht */
+  sys->lf.sole_w = 0.07;
+  sys->rf.sole_w = 0.07;
+  /* direction */
+  sys->lf.dy = 1;
+  sys->rf.dy = -1;
 }
 
 void dmSystemInitConsole(dmSystem *sys, dmConsole *con)

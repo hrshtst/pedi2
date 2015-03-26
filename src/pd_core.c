@@ -8,6 +8,7 @@ static double _pdCoreCalcSoleWidth(zVec3DList *sr);
 static void _pdCorePoseInit(pdCore *core);
 static void _pdCoreCoodTransWtoM(pdCore *core, double *du, double *vu, double *dw, double *vw);
 static void _pdCoreCoodTransMtoW(pdCore *core, double u, double w, double *x, double *y);
+static void _pdCoreUpdateCommand(pdCore *core);
 static void _pdCoreUpdateCZ(pdCore *core, double dt);
 static void _pdCoreUpdateFoot(pdCore *core, double dt);
 static void _pdCoreUpdateRobot(pdCore *core);
@@ -179,6 +180,23 @@ void _pdCoreCoodTransMtoW(pdCore *core, double u, double w, double *x, double *y
   *y = core->y[0] + u*c - w*s;
 }
 
+void _pdCoreUpdateCommand(pdCore *core)
+{
+  /* pdCZSetPrm( &core->cz, core->com->qu1, core->com->qu2, core->com->qw1, core->com->qw2, core->com->kappa, core->com->rho, core->com->kr ); */
+  pdCZPrmTan(&core->cz)->q1 = core->com->qu1;
+  pdCZPrmTan(&core->cz)->q2 = core->com->qu2;
+  pdCZPrmTan(&core->cz)->kappa = core->com->kappa;
+  pdCZPrmRad(&core->cz)->q1 = core->com->qw1;
+  pdCZPrmRad(&core->cz)->q2 = core->com->qw2;
+  pdCZPrmRad(&core->cz)->kappa = core->com->kappa;
+  /* pdCZPrmRad(&core->cz)->rho = core->com->rho; */
+  pdCZPrmRad(&core->cz)->kr = core->com->kr;
+  pdCZSetRefVrt( &core->cz, core->com->zd );
+  pdCZSetRefHrz( &core->cz, core->com->vud, core->com->vwd, core->com->dist );
+  core->lf.h   = core->com->lfh;
+  core->rf.h   = core->com->rfh;
+}
+
 void _pdCoreUpdateCZ(pdCore *core, double dt)
 {
   core->solver.t += dt;
@@ -270,6 +288,7 @@ void _pdCoreUpdateRef(pdCore *core)
 
 void pdCoreUpdate(pdCore *core, double dt)
 {
+  _pdCoreUpdateCommand( core );
   _pdCoreUpdateCZ( core, dt );
   _pdCoreUpdateFoot( core, dt );
   _pdCoreUpdateRobot( core );

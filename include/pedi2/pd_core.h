@@ -8,7 +8,33 @@
 __BEGIN_DECLS
 
 typedef struct{
-  double x[2];
+  double qu1, qu2;
+  double qw1, qw2;
+  double kappa, rho, kr;
+  double zd;
+  double vud, vwd, dist;
+  double lfh, rfh;
+} pdCommand;
+
+typedef struct{
+  double t;
+  zVec p;
+  zODE ode;
+} pdODESolver;
+
+typedef struct{
+  double x[2], y[2];
+  double nx[2], ny[2];
+  pdCZ cz;
+  pdFoot lf, rf;
+  double xz, yz;
+  double xd, yd;
+  double theta;
+  double nxd, nyd;
+  double ntheta;
+  double adx, ady;
+  pdCommand com;
+  pdRobot robot;
 } pdCore;
 
 __END_DECLS

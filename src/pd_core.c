@@ -58,6 +58,17 @@ void _pdCoreInitFoot(pdCore *core)
 
 zVec _pd_dp(double t, zVec p, void *dummy, zVec v)
 {
+  double du, vu, dw, vw;
+  pdCore *core;
+
+  core = (pdCore *)dummy;
+  _pdCoreCoodTransWtoM( core, &du, &vu, &dw, &vw );
+  pdCZUpdate( &core->cz, du, vu, dw, vw );
+  _pdCoreCoodTransMtoW( core, pdCZZMPTan(&core->cz), pdCZZMPRad(&core->cz), &core->xz, &core->yz );
+  zVecElem(v,0) = zVecElem(p,1);
+  zVecElem(v,1) = zSqr(pdCZZeta(&core->cz)) * ( zVecElem(p,0) - core->xz ) + core->adx;
+  zVecElem(v,2) = zVecElem(p,3);
+  zVecElem(v,3) = zSqr(pdCZZeta(&core->cz)) * ( zVecElem(p,2) - core->yz ) + core->ady;
   return v;
 }
 

@@ -44,7 +44,7 @@ void pdCoreExit(pdCore *core);
 
 void pdCoreSetCommand(pdCore *core, pdCommand *com);
 void pdCoreSetState(pdCore *core, double *x, double *y, double theta);
-void pdCoreUpdate(pdCore *core);
+void pdCoreUpdate(pdCore *core, double dt);
 
 void pdCoreFWrite(pdCore *core, FILE *fp);
 

@@ -1,5 +1,16 @@
 #include <pedi2/pd_robot.h>
 
+void _pdRobotWriteRefVec(pdRobot *robot)
+{
+  /* for debug */
+  printf("d_com_pos:");zVec3DWrite(&robot->d_com_pos);
+  printf("d_lf_pos :");zVec3DWrite(&robot->d_lf_pos);
+  printf("d_rf_pos :");zVec3DWrite(&robot->d_rf_pos);
+  printf("d_bod_att:");zVec3DWrite(&robot->d_body_att);
+  printf("d_lf_att :");zVec3DWrite(&robot->d_lf_att);
+  printf("d_rf_att :");zVec3DWrite(&robot->d_rf_att);
+}
+
 void pdRobotInit(pdRobot *robot)
 {
   rkChainInit( &robot->chain );
@@ -68,6 +79,7 @@ void pdRobotExit(pdRobot *robot)
 
 void pdRobotSolveIK(pdRobot *robot)
 {
+  /* _pdRobotWriteRefVec( robot ); */
   rkIKDeactivate( &robot->ik );
   rkIKCellSetRefVec( robot->cell[0], &robot->d_com_pos );
   rkIKCellSetRefVec( robot->cell[1], &robot->d_body_att );

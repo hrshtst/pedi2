@@ -5,6 +5,7 @@ static void _pdCoreInitFoot(pdCore *core);
 static void _pdCoreInitODESolver(pdCore *core);
 static zVec _pd_dp(double t, zVec p, void *dummy, zVec v);
 static double _pdCoreCalcSoleWidth(zVec3DList *sr);
+static void _pdCorePoseInit(pdCore *core);
 static void _pdCoreCoodTransWtoM(pdCore *core, double *du, double *vu, double *dw, double *vw);
 static void _pdCoreCoodTransMtoW(pdCore *core, double u, double w, double *x, double *y);
 static void _pdCoreUpdateCZ(pdCore *core, double dt);
@@ -91,6 +92,29 @@ double _pdCoreCalcSoleWidth(zVec3DList *sr)
   return ymax - ymin;
 }
 
+void _pdCorePoseInit(pdCore *core)
+{
+  double d;
+  double s, c;
+
+  d = 0.5 * pdCZPrmRad(&core->cz)->dist;
+  zSinCos( core->theta, &s, &c );
+  /* feet */
+  zVec3DCreate( &core->robot.d_lf_pos, core->xd-d*c, core->yd-d*s, 0 );
+  zVec3DCreate( &core->robot.d_rf_pos, core->xd+d*c, core->yd+d*s, 0 );
+  zVec3DCreate( &core->robot.d_lf_att, core->theta+zPI_2, 0, 0 );
+  zVec3DCreate( &core->robot.d_rf_att, core->theta+zPI_2, 0, 0 );
+  zVec3DCopy( &core->robot.d_lf_pos, &core->lf.pd );
+  zVec3DCopy( &core->robot.d_lf_pos, &core->lf.ps );
+  zVec3DCopy( &core->robot.d_rf_pos, &core->rf.pd );
+  zVec3DCopy( &core->robot.d_rf_pos, &core->rf.ps );
+  zVec3DCopy( &core->robot.d_lf_att, &core->lf.as );
+  zVec3DCopy( &core->robot.d_rf_att, &core->rf.as );
+  /* body */
+  zVec3DCreate( &core->robot.d_com_pos, core->xd, core->yd, core->cz.vrt.zd );
+  zVec3DCreate( &core->robot.d_body_att, core->theta+zPI_2, 0, 0 );
+}
+
 void pdCoreLoad(pdCore *core, char *model_file, char *conf_file)
 {
   pdRobotLoad( &core->robot, model_file, conf_file );
@@ -103,6 +127,8 @@ void pdCoreLoad(pdCore *core, char *model_file, char *conf_file)
   /* COM height */
   core->cz.vrt.zd = zVec3DElem(&core->robot.d_com_pos,zZ) - zVec3DElem(&core->lf.p,zZ);
   core->cz.vrt.zd = 0.9 * core->cz.vrt.zd;
+
+  _pdCorePoseInit( core );
 }
 
 void pdCoreExit(pdCore *core)

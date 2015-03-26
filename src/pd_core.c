@@ -277,4 +277,10 @@ void pdCoreUpdate(pdCore *core, double dt)
 
 
 void pdCoreFWrite(pdCore *core, FILE *fp)
-{}
+{
+  fprintf( fp, "%f %f %f %f %f %f %f %f %f %f %f %f %f\n",
+           core->x[0], core->x[1], core->nx[0], core->nx[1],
+           core->y[0], core->y[1], core->ny[0], core->ny[1],
+           core->xz, core->xd, core->yz, core->yd,
+           core->theta );
+}

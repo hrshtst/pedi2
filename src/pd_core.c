@@ -87,6 +87,7 @@ void pdCoreInit(pdCore *core)
   _pdCoreInitState( core );
   _pdCoreInitFoot( core );
   _pdCoreInitODESolver( core );
+  core->com = NULL;
 }
 
 double _pdCoreCalcSoleWidth(zVec3DList *sr)

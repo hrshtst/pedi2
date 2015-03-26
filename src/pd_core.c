@@ -114,9 +114,6 @@ void pdCoreExit(pdCore *core)
 }
 
 
-void pdCoreSetCommand(pdCore *core, pdCommand *com)
-{}
-
 void pdCoreSetState(pdCore *core, double *x, double *y)
 {}
 

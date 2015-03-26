@@ -34,7 +34,7 @@ typedef struct{
   double ntheta;
   double adx, ady;
   pdRobot robot;
-  pdCommand com;
+  pdCommand *com;
   pdODESolver solver;
 } pdCore;
 

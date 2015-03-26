@@ -1,6 +1,7 @@
 #ifndef __PD_CORE_H__
 #define __PD_CORE_H__
 
+#include <zm/zm_ode.h>
 #include <pedi2/pd_cz.h>
 #include <pedi2/pd_foot.h>
 #include <pedi2/pd_robot.h>

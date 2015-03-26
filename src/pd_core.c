@@ -81,14 +81,14 @@ void _pdCoreInitODESolver(pdCore *core)
   zODEInit( &core->solver.ode, 4, 0, _pd_dp );
 }
 
-void pdCoreInit(pdCore *core)
+void pdCoreInit(pdCore *core, pdCommand *com)
 {
   pdRobotInit( &core->robot );
   pdCZInit( &core->cz );
   _pdCoreInitState( core );
   _pdCoreInitFoot( core );
   _pdCoreInitODESolver( core );
-  core->com = NULL;
+  core->com = com;
 }
 
 double _pdCoreCalcSoleWidth(zVec3DList *sr)

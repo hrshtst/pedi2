@@ -39,7 +39,7 @@ typedef struct{
   pdODESolver solver;
 } pdCore;
 
-void pdCoreInit(pdCore *core);
+void pdCoreInit(pdCore *core, pdCommand *com);
 void pdCoreLoad(pdCore *core, char *model_file, char *conf_file);
 void pdCoreExit(pdCore *core);
 

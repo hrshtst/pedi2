@@ -4,8 +4,15 @@ static void _pdCoreInitState(pdCore *core);
 static void _pdCoreInitFoot(pdCore *core);
 static void _pdCoreInitODESolver(pdCore *core);
 static zVec _pd_dp(double t, zVec p, void *dummy, zVec v);
-static void _pdCoreUpdateRobot(pdCore *core);
 static double _pdCoreCalcSoleWidth(zVec3DList *sr);
+static void _pdCoreCoodTransWtoM(pdCore *core, double *du, double *vu, double *dw, double *vw);
+static void _pdCoreCoodTransMtoW(pdCore *core, double u, double w, double *x, double *y);
+static void _pdCoreUpdateCZ(pdCore *core, double dt);
+static void _pdCoreUpdateFoot(pdCore *core, double dt);
+static void _pdCoreUpdateRobot(pdCore *core);
+static void _pdCoreUpdateRefPosTheta(pdCore *core);
+static void _pdCoreUpdateRef(pdCore *core);
+
 
 void _pdCoreInitState(pdCore *core)
 {
@@ -70,14 +77,6 @@ void pdCoreInit(pdCore *core)
   _pdCoreInitODESolver( core );
 }
 
-void _pdCoreUpdateRobot(pdCore *core)
-{
-  pdRobotSolveIK( &core->robot );
-  pdRobotSupportRegion( &core->robot );
-  pdRobotFootPos( &core->robot, &core->lf.p, &core->rf.p );
-  pdRobotFootAtt( &core->robot, &core->lf.a, &core->rf.a );
-}
-
 double _pdCoreCalcSoleWidth(zVec3DList *sr)
 {
   zVec3DListCell *vc;
@@ -122,8 +121,122 @@ void pdCoreSetState(pdCore *core, double *x, double *y, double theta)
   core->theta = theta;
 }
 
-void pdCoreUpdate(pdCore *core)
-{}
+void _pdCoreCoodTransWtoM(pdCore *core, double *du, double *vu, double *dw, double *vw)
+{
+  double s, c;
+
+  zSinCos( core->theta, &s, &c );
+  *du = 0;
+  *vu = -core->x[1]*s + core->y[1]*c;
+  *dw = ( core->xd - core->x[0] )*c + ( core->yd - core->y[0] )*s;
+  *vw = -core->x[1]*c - core->y[1]*s;
+}
+
+void _pdCoreCoodTransMtoW(pdCore *core, double u, double w, double *x, double *y)
+{
+  double s, c;
+
+  zSinCos( core->theta, &s, &c );
+  *x = core->x[0] - u*s - w*c;
+  *y = core->y[0] + u*c - w*s;
+}
+
+void _pdCoreUpdateCZ(pdCore *core, double dt)
+{
+  core->solver.t += dt;
+  core->x[0] = core->nx[0];
+  core->x[1] = core->nx[1];
+  core->y[0] = core->ny[0];
+  core->y[1] = core->ny[1];
+  core->xd = core->nxd;
+  core->yd = core->nyd;
+  core->theta = core->ntheta;
+  zODEUpdate( &core->solver.ode, core->solver.t, core->solver.p, dt, core );
+  core->nx[0] = zVecElem(core->solver.p,0);
+  core->nx[1] = zVecElem(core->solver.p,1);
+  core->ny[0] = zVecElem(core->solver.p,2);
+  core->ny[1] = zVecElem(core->solver.p,3);
+}
+
+void _pdCoreUpdateFoot(pdCore *core, double dt)
+{
+  double du, vu, dw, vw;
+  double s, c;
+  zComplex pz;
+
+  zSinCos( core->theta, &s, &c );
+  pdRobotFootPos( &core->robot, &core->lf.p, &core->rf.p );
+  pdRobotFootAtt( &core->robot, &core->lf.a, &core->rf.a );
+  _pdCoreCoodTransWtoM( core, &du, &vu, &dw, &vw );
+  pdCZZMPPhase( &core->cz, dw, vw, &pz );
+  pdFootLift( &core->cz, &core->lf, &core->rf, core->xd, core->yd, core->theta, &pz );
+  pdFootMove( &core->cz, &core->lf, &core->rf, core->xd, core->yd, core->theta );
+  pdFootUpdate( &core->lf, &core->rf, dt );
+
+  /* update IK constraints for feet */
+  zVec3DCopy( &core->lf.ps, &core->robot.d_lf_pos );
+  zVec3DCopy( &core->rf.ps, &core->robot.d_rf_pos );
+  zVec3DCopy( &core->lf.as, &core->robot.d_lf_att);
+  zVec3DCopy( &core->rf.as, &core->robot.d_rf_att);
+}
+
+void _pdCoreUpdateRobot(pdCore *core)
+{
+  pdRobotSolveIK( &core->robot );
+  pdRobotSupportRegion( &core->robot );
+  pdRobotFootPos( &core->robot, &core->lf.p, &core->rf.p );
+  pdRobotFootAtt( &core->robot, &core->lf.a, &core->rf.a );
+}
+
+void _pdCoreUpdateRefPosTheta(pdCore *core)
+{
+  double kappa;
+  double dw, ndw;
+  double s, c;
+  double cos_d;
+  double kx, ky, kw;
+
+  kappa = pdCZKappa(&core->cz);
+  zSinCos( core->theta, &s, &c );
+  dw = -( core->xd - core->x[0] )*c - ( core->yd - core->y[0] )*s;
+
+  kx = kappa * ( core->nx[0] - core->x[0] );
+  ky = kappa * ( core->ny[0] - core->y[0] );
+  cos_d = ( kx*c + ky*s + 1 ) / sqrt( zSqr(kx+c) + zSqr(ky+s) );
+  ndw = ( dw + (core->nx[0]-core->x[0])*c + (core->ny[0]-core->y[0])*s ) / cos_d;
+  if( !zIsTiny(kappa) )
+    ndw += ( 1 - cos_d ) / ( kappa * cos_d );
+  kw = 1.0 + kappa * ndw;
+  core->nxd = ( kappa*ndw*core->xd + core->nx[0] - ndw*c )/kw;
+  core->nyd = ( kappa*ndw*core->yd + core->ny[0] - ndw*s )/kw;
+  core->ntheta = atan2( ( kappa*(core->ny[0]-core->yd) + s )/kw,
+                      ( kappa*(core->nx[0]-core->xd) + c )/kw );
+}
+
+void _pdCoreUpdateRef(pdCore *core)
+{
+  /* automatic activation when walking */
+  if( !zIsTiny( core->com->vud ) ){
+    pdCZPrmRad(&core->cz)->rho = 1.0;
+  } else {
+    pdCZPrmRad(&core->cz)->rho = core->com->rho;
+  }
+
+  /* automatic update of referential position and orientation */
+  _pdCoreUpdateRefPosTheta( core );
+
+  /* update IK constraints for COM */
+  zVec3DCreate( &core->robot.d_com_pos, core->nx[0], core->ny[0], core->cz.vrt.zd );
+  zVec3DCreate( &core->robot.d_body_att, core->theta+zPI_2, 0, 0 );
+}
+
+void pdCoreUpdate(pdCore *core, double dt)
+{
+  _pdCoreUpdateCZ( core, dt );
+  _pdCoreUpdateFoot( core, dt );
+  _pdCoreUpdateRobot( core );
+  _pdCoreUpdateRef( core );
+}
 
 
 void pdCoreFWrite(pdCore *core, FILE *fp)

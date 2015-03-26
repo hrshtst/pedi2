@@ -1,7 +1,5 @@
 #include <pedi2/pd_robot.h>
 
-static void _pdRobotWriteRefVec(pdRobot *robot);
-
 void _pdRobotWriteRefVec(pdRobot *robot)
 {
   /* for debug */
@@ -81,7 +79,7 @@ void pdRobotExit(pdRobot *robot)
 
 void pdRobotSolveIK(pdRobot *robot)
 {
-  _pdRobotWriteRefVec( robot );
+  /* _pdRobotWriteRefVec( robot ); */
   rkIKDeactivate( &robot->ik );
   rkIKCellSetRefVec( robot->cell[0], &robot->d_com_pos );
   rkIKCellSetRefVec( robot->cell[1], &robot->d_body_att );

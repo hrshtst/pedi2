@@ -186,7 +186,6 @@ int main(int argc, char *argv[])
   pdCoreExit( &core );
 
   dmConsoleExit( &con );
-
   dmSceneExit( &sx );
   dmSceneExit( &sy );
 

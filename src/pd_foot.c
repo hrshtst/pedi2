@@ -1,5 +1,19 @@
 #include <pedi2/pd_foot.h>
 
+void _pdFootWritePosAtt(pdFoot *f)
+{
+  /* for debug */
+  char buf[20];
+
+  if( f->dy > 0 ) sprintf( buf, "lf" );
+  else sprintf( buf, "rf" );
+  printf( "%s.p :", buf ); zVec3DWrite( &f->p );
+  printf( "%s.pd:", buf ); zVec3DWrite( &f->pd );
+  printf( "%s.ps:", buf ); zVec3DWrite( &f->ps );
+  printf( "%s.a :", buf ); zVec3DWrite( &f->a );
+  printf( "%s.as:", buf ); zVec3DWrite( &f->as );
+}
+
 void pdFootPhase(pdFoot *pf, pdFoot *kf, double xd, double yd, double theta, zComplex *pz)
 {
   double dr, d, da, r2, r;
@@ -87,4 +101,6 @@ void pdFootUpdate(pdFoot *lf, pdFoot *rf, double dt)
     _pdFootUpdateSOL( rf, zY, dt );
     _pdFootUpdateSOL( rf, zZ, dt );
   }
+  /* _pdFootWritePosAtt( lf ); */
+  /* _pdFootWritePosAtt( rf ); */
 }

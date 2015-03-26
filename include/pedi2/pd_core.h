@@ -33,9 +33,20 @@ typedef struct{
   double nxd, nyd;
   double ntheta;
   double adx, ady;
-  pdCommand com;
   pdRobot robot;
+  pdCommand com;
+  pdODESolver solver;
 } pdCore;
+
+void pdCoreInit(pdCore *core);
+void pdCoreLoad(pdCore *core, char *model_file, char *conf_file);
+void pdCoreExit(pdCore *core);
+
+void pdCoreSetCommand(pdCore *core, pdCommand *com);
+void pdCoreSetState(pdCore *core, double *x, double *y);
+void pdCoreUpdate(pdCore *core);
+
+void pdCoreFWrite(pdCore *core, FILE *fp);
 
 __END_DECLS
 

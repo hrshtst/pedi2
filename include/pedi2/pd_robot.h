@@ -30,6 +30,8 @@ void pdRobotLoad(pdRobot *robot, const char* model_file, const char* conf_file);
 void pdRobotExit(pdRobot *robot);
 
 void pdRobotSolveIK(pdRobot *robot);
+#define pdRobotGetJointSize(r) rkChainJointSize(&(r)->chain)
+#define pdRobotGetJointDis(r,v) zVecCopy((r)->dis,v)
 void pdRobotSupportRegion(pdRobot *robot);
 
 void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);

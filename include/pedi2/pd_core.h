@@ -46,6 +46,8 @@ void pdCoreExit(pdCore *core);
 void pdCoreSetCommand(pdCore *core, pdCommand *com);
 void pdCoreSetState(pdCore *core, double *x, double *y, double theta);
 void pdCoreUpdate(pdCore *core, double dt);
+#define pdCoreGetJointSize(c) pdRobotGetJointSize(&(c)->robot)
+#define pdCoreGetJointDis(c,v) pdRobotGetJointDis(&(c)->robot,v)
 
 void pdCoreFWrite(pdCore *core, FILE *fp);
 

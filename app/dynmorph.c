@@ -1,314 +1,28 @@
-#include <zm/zm_ode.h>
 #include <zx11/zxwidget.h>
 #include <zx11/zximage_dib.h>
-#include <pedi2/pd_cz.h>
-#include <pedi2/pd_foot.h>
-#include <pedi2/pd_robot.h>
+#include <pedi2/pd_core.h>
 
 #include "util/dm_scene.h"
 #include "util/dm_console.h"
 
-typedef struct{
-  double qu1, qu2;
-  double qw1, qw2;
-  double kappa, rho, kr;
-  double zd;
-  double vud, vwd, dist;
-  double lfh, rfh;
-} dmCommand;
-
-typedef struct{
-  double x[2], y[2];
-  double nx[2], ny[2];
-  pdCZ cz;
-  pdFoot lf, rf;
-  double xz, yz;
-  double xzmin, xzmax;
-  double yzmin, yzmax;
-  double xd, yd;
-  double theta;
-  double nxd, nyd;
-  double ntheta;
-  double adx, ady;
-  dmCommand com;
-  pdRobot robot;
-} dmSystem;
-
-typedef struct{
-  double t;
-  zVec p;
-  zODE ode;
-} dmODESolver;
-
-void dmSystemUpdateRobot(dmSystem *sys)
-{
-  pdRobotSolveIK( &sys->robot );
-  pdRobotSupportRegion( &sys->robot );
-  /* dmSupportRegionBorder( &sys->xzmin, &sys->xzmax, &sys->yzmin, &sys->yzmax ); */
-}
-
-void dmSystemObserve(dmSystem *sys, double *du, double *vu, double *dw, double *vw)
-{
-  double s, c;
-
-  zSinCos( sys->theta, &s, &c );
-  *du = 0;
-  *vu = -sys->x[1]*s + sys->y[1]*c;
-  *dw = ( sys->xd - sys->x[0] )*c + ( sys->yd - sys->y[0] )*s;
-  *vw = -sys->x[1]*c - sys->y[1]*s;
-}
-
-void dmSystemCoodTransBodyToWorld(dmSystem *sys, double u, double w, double *x, double *y)
-{
-  double s, c;
-
-  zSinCos( sys->theta, &s, &c );
-  *x = sys->x[0] - u*s - w*c;
-  *y = sys->y[0] + u*c - w*s;
-}
-
-zVec dp(double t, zVec p, void *dummy, zVec v)
-{
-  double du, vu, dw, vw;
-  dmSystem *sys;
-
-  sys = (dmSystem *)dummy;
-  dmSystemObserve( sys, &du, &vu, &dw, &vw );
-  pdCZUpdate( &sys->cz, du, vu, dw, vw );
-  dmSystemCoodTransBodyToWorld( sys, pdCZZMPTan(&sys->cz), pdCZZMPRad(&sys->cz), &sys->xz, &sys->yz );
-  zVecElem(v,0) = zVecElem(p,1);
-  zVecElem(v,1) = zSqr(pdCZZeta(&sys->cz)) * ( zVecElem(p,0) - sys->xz ) + sys->adx;
-  zVecElem(v,2) = zVecElem(p,3);
-  zVecElem(v,3) = zSqr(pdCZZeta(&sys->cz)) * ( zVecElem(p,2) - sys->yz ) + sys->ady;
-  return v;
-}
-
-#define DT 0.01
-void dmSystemUpdateCtrl(dmSystem *sys, dmODESolver *solver)
-{
-  solver->t += DT;
-  sys->x[0] = sys->nx[0];
-  sys->x[1] = sys->nx[1];
-  sys->y[0] = sys->ny[0];
-  sys->y[1] = sys->ny[1];
-  sys->xd = sys->nxd;
-  sys->yd = sys->nyd;
-  sys->theta = sys->ntheta;
-  zODEUpdate( &solver->ode, solver->t, solver->p, DT, sys );
-  sys->nx[0] = zVecElem(solver->p,0);
-  sys->nx[1] = zVecElem(solver->p,1);
-  sys->ny[0] = zVecElem(solver->p,2);
-  sys->ny[1] = zVecElem(solver->p,3);
-}
-
-void dmSystemUpdateFoot(dmSystem *sys)
-{
-  double du, vu, dw, vw;
-  double s, c;
-  zComplex pz;
-
-  zSinCos( sys->theta, &s, &c );
-  pdRobotFootPos( &sys->robot, &sys->lf.p, &sys->rf.p );
-  pdRobotFootAtt( &sys->robot, &sys->lf.a, &sys->rf.a );
-  dmSystemObserve(sys, &du, &vu, &dw, &vw);
-  pdCZZMPPhase( &sys->cz, dw, vw, &pz );
-  /* dmRobotFootRegion( &sys->lf.yout, &sys->lf.yin, &sys->lf.dy, &sys->rf.yout, &sys->rf.yin, &sys->rf.dy ); */
-  pdFootLift( &sys->cz, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta, &pz );
-  pdFootMove( &sys->cz, &sys->lf, &sys->rf, sys->xd, sys->yd, sys->theta );
-  pdFootUpdate( &sys->lf, &sys->rf, DT );
-
-  /* update IK constraints for feet */
-  zVec3DCopy( &sys->lf.ps, &sys->robot.d_lf_pos );
-  zVec3DCopy( &sys->rf.ps, &sys->robot.d_rf_pos );
-  zVec3DCopy( &sys->lf.as, &sys->robot.d_lf_att);
-  zVec3DCopy( &sys->rf.as, &sys->robot.d_rf_att);
-}
-
-void _dmSystemUpdateRefPosTheta(dmSystem *sys)
-{
-  double kappa;
-  double dw, ndw;
-  double s, c;
-  double cos_d;
-  double kx, ky, kw;
-
-  kappa = pdCZKappa(&sys->cz);
-  zSinCos( sys->theta, &s, &c );
-  dw = -( sys->xd - sys->x[0] )*c - ( sys->yd - sys->y[0] )*s;
-
-  kx = kappa * ( sys->nx[0] - sys->x[0] );
-  ky = kappa * ( sys->ny[0] - sys->y[0] );
-  cos_d = ( kx*c + ky*s + 1 ) / sqrt( zSqr(kx+c) + zSqr(ky+s) );
-  ndw = ( dw + (sys->nx[0]-sys->x[0])*c + (sys->ny[0]-sys->y[0])*s ) / cos_d;
-  if( !zIsTiny(kappa) )
-    ndw += ( 1 - cos_d ) / ( kappa * cos_d );
-  kw = 1.0 + kappa * ndw;
-  sys->nxd = ( kappa*ndw*sys->xd + sys->nx[0] - ndw*c )/kw;
-  sys->nyd = ( kappa*ndw*sys->yd + sys->ny[0] - ndw*s )/kw;
-  sys->ntheta = atan2( ( kappa*(sys->ny[0]-sys->yd) + s )/kw,
-                      ( kappa*(sys->nx[0]-sys->xd) + c )/kw );
-}
-
-void dmSystemUpdateRef(dmSystem *sys)
-{
-  /* automatic activation when walking */
-  if( !zIsTiny( sys->com.vud ) ){
-    pdCZPrmRad(&sys->cz)->rho = 1.0;
-  } else {
-    pdCZPrmRad(&sys->cz)->rho = sys->com.rho;
-  }
-
-  /* automatic update of referential position and orientation */
-  _dmSystemUpdateRefPosTheta( sys );
-
-  /* update IK constraints for COM */
-  zVec3DCreate( &sys->robot.d_com_pos, sys->nx[0], sys->ny[0], sys->cz.vrt.zd );
-  zVec3DCreate( &sys->robot.d_body_att, sys->theta+zPI_2, 0, 0 );
-}
-
-void dmSystemInitFoot(dmSystem *sys)
-{
-  double d;
-  double s, c;
-
-  pdRobotFootPos( &sys->robot, &sys->lf.p, &sys->rf.p );
-  pdRobotFootAtt( &sys->robot, &sys->lf.a, &sys->rf.a );
-
-  d = 0.5 * pdCZPrmRad(&sys->cz)->dist;
-  zSinCos( sys->theta, &s, &c );
-  zVec3DCreate( &sys->robot.d_lf_pos, sys->xd-d*c, sys->yd-d*s, 0 );
-  zVec3DCreate( &sys->robot.d_rf_pos, sys->xd+d*c, sys->yd+d*s, 0 );
-  zVec3DCreate( &sys->robot.d_lf_att, sys->theta+zPI_2, 0, 0 );
-  zVec3DCreate( &sys->robot.d_rf_att, sys->theta+zPI_2, 0, 0 );
-  zVec3DCopy( &sys->robot.d_lf_pos, &sys->lf.pd );
-  zVec3DCopy( &sys->robot.d_lf_pos, &sys->lf.ps );
-  zVec3DCopy( &sys->robot.d_rf_pos, &sys->rf.pd );
-  zVec3DCopy( &sys->robot.d_rf_pos, &sys->rf.ps );
-  zVec3DCopy( &sys->robot.d_lf_att, &sys->lf.as );
-  zVec3DCopy( &sys->robot.d_rf_att, &sys->rf.as );
-
-  /* spring-damper tracking */
-  sys->lf.track_k[0] = 3000;
-  sys->lf.track_c[0] = 50;
-  sys->lf.track_old[0] = zVec3DElem(&sys->lf.p,zX);
-  sys->lf.track_k[1] = 3000;
-  sys->lf.track_c[1] = 50;
-  sys->lf.track_old[1] = zVec3DElem(&sys->lf.p,zY);
-  sys->lf.track_k[2] = 3000;
-  sys->lf.track_c[2] = 50;
-  sys->lf.track_old[2] = zVec3DElem(&sys->lf.p,zZ);
-  sys->rf.track_k[0] = 3000;
-  sys->rf.track_c[0] = 50;
-  sys->rf.track_old[0] = zVec3DElem(&sys->rf.p,zX);
-  sys->rf.track_k[1] = 3000;
-  sys->rf.track_c[1] = 50;
-  sys->rf.track_old[1] = zVec3DElem(&sys->rf.p,zY);
-  sys->rf.track_k[2] = 3000;
-  sys->rf.track_c[2] = 50;
-  sys->rf.track_old[2] = zVec3DElem(&sys->rf.p,zZ);
-  /* sole widht */
-  sys->lf.sole_w = 0.07;
-  sys->rf.sole_w = 0.07;
-  /* direction */
-  sys->lf.dy = 1;
-  sys->rf.dy = -1;
-}
-
-void dmSystemInitConsole(dmSystem *sys, dmConsole *con)
+void init_console(dmConsole *con, pdCommand *com)
 {
   dmConsoleInit( con );
-  dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &sys->com.zd );
-  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &sys->com.vud );
-  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qu1 );
-  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &sys->com.qu2 );
-  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &sys->com.vwd );
-  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &sys->com.qw1 );
-  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &sys->com.qw2 );
-  dmConsoleAddEval( con, "Foot dist", 0.02, 0.16, 0.1, 0, &sys->com.dist );
-  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &sys->com.kappa );
-  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &sys->com.rho );
-  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &sys->com.kr );
-  dmConsoleAddEval( con, "L lift height", 0, 0.04, 0.04, 0, &sys->com.lfh );
-  dmConsoleAddEval( con, "R lift height", 0, 0.04, 0.04, 0, &sys->com.rfh );
+  dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &com->zd );
+  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &com->vud );
+  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &com->qu1 );
+  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &com->qu2 );
+  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &com->vwd );
+  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &com->qw1 );
+  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &com->qw2 );
+  dmConsoleAddEval( con, "Foot dist", 0.02, 0.16, 0.1, 0, &com->dist );
+  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &com->kappa );
+  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &com->rho );
+  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &com->kr );
+  dmConsoleAddEval( con, "L lift height", 0, 0.04, 0.04, 0, &com->lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.04, 0.04, 0, &com->rfh );
 }
 
-void dmSystemUpdateCommand(dmSystem *sys)
-{
-  /* pdCZSetPrm( &sys->cz, sys->com.qu1, sys->com.qu2, sys->com.qw1, sys->com.qw2, sys->com.kappa, sys->com.rho, sys->com.kr ); */
-  pdCZPrmTan(&sys->cz)->q1 = sys->com.qu1;
-  pdCZPrmTan(&sys->cz)->q2 = sys->com.qu2;
-  pdCZPrmTan(&sys->cz)->kappa = sys->com.kappa;
-  pdCZPrmRad(&sys->cz)->q1 = sys->com.qw1;
-  pdCZPrmRad(&sys->cz)->q2 = sys->com.qw2;
-  pdCZPrmRad(&sys->cz)->kappa = sys->com.kappa;
-  /* pdCZPrmRad(&sys->cz)->rho = sys->com.rho; */
-  pdCZPrmRad(&sys->cz)->kr = sys->com.kr;
-  pdCZSetRefVrt( &sys->cz, sys->com.zd );
-  pdCZSetRefHrz( &sys->cz, sys->com.vud, sys->com.vwd, sys->com.dist );
-  sys->lf.h   = sys->com.lfh;
-  sys->rf.h   = sys->com.rfh;
-}
-
-void dmSystemInitState(dmSystem *sys)
-{
-  sys->x[0] = 0.5 * ( sys->xzmin + sys->xzmax );
-  sys->y[0] = 0.5 * ( sys->yzmin + sys->yzmax );
-  sys->x[1] = 0.001;
-  sys->y[1] = 0;
-  sys->xz = sys->x[0];
-  sys->yz = sys->y[0];
-  sys->xd = sys->nxd = sys->x[0];
-  sys->yd = sys->nyd = sys->y[0];
-  sys->nx[0] = sys->x[0];
-  sys->nx[1] = sys->x[1];
-  sys->ny[0] = sys->y[0];
-  sys->ny[1] = sys->y[1];
-  sys->theta = sys->ntheta = 0;
-  sys->adx = sys->ady = 0;
-}
-
-void dmSystemInit(dmSystem *sys, dmConsole *con)
-{
-  pdRobotInit( &sys->robot );
-  pdRobotLoad( &sys->robot, "mighty.zkc", "mighty_ik.conf" );
-  pdCZInit( &sys->cz );
-
-  dmSystemInitConsole( sys, con );
-  dmSystemUpdateCommand( sys );
-  dmSystemInitState( sys );
-  dmSystemInitFoot( sys );
-  dmSystemUpdateRobot( sys );
-}
-
-void dmSystemExit(dmSystem *sys)
-{
-  pdCZDestroy( &sys->cz );
-  pdRobotExit( &sys->robot );
-}
-
-void dmSystemODESolverInit(dmODESolver *solver, dmSystem *sys)
-{
-  solver->t = 0;
-  solver->p = zVecCreateList( 4, sys->x[0], sys->x[1], sys->y[0], sys->y[1] );
-  zODEAssign( &solver->ode, RKF45, NULL, NULL );
-  zODEInit( &solver->ode, 4, 0, dp );
-}
-
-void dmSystemODESolverExit(dmODESolver *solver)
-{
-  zODEDestroy( &solver->ode );
-}
-
-void dmSystemLog(FILE *fp, dmSystem *sys)
-{
-  fprintf( fp, "%f %f %f %f %f %f %f %f %f %f %f %f %f\n",
-           sys->x[0], sys->x[1], sys->nx[0], sys->nx[1],
-           sys->y[0], sys->y[1], sys->ny[0], sys->ny[1],
-           sys->xz, sys->xd, sys->yz, sys->yd,
-           sys->theta );
-}
-
-#define DM_CONSOLE_WIDTH 240
 void resize(zxWindow *win, dmConsole *con, dmScene *sx, dmScene *sy)
 {
   short w, h;
@@ -359,38 +73,36 @@ void dmFlagsetInit(dmFlagset *flag)
   flag->log = false;
 }
 
-void frame_one(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy, dmFlagset *flag, FILE *fp)
+#define DT 0.01
+void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmFlagset *flag, FILE *fp)
 {
   zVec3D force = { { 0, 0, 0 } };
   double s, c;
 
-  zVec3DCreate( &force, sys->adx, sys->ady, 0 );
+  zVec3DCreate( &force, core->adx, core->ady, 0 );
   if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate state */
-    dmSystemUpdateCommand( sys );
-    dmSystemUpdateCtrl( sys, solver );
-    dmSystemUpdateFoot( sys );
-    dmSystemUpdateRobot( sys );
-    dmSystemUpdateRef( sys );
+    pdCoreUpdate( core, DT );
     if( fp )
-      dmSystemLog( fp, sys );
+      pdCoreFWrite( core, fp );
   }
-  zSinCos( sys->theta, &s, &c );
-  dmSceneLookAt( sx, sys->xd-4*c, sys->yd-4*s, 0.4, sys->xd, sys->yd, 0.3);
-  dmSceneLookAt( sy, sys->xd+4*s, sys->yd-4*c, 0.4, sys->xd, sys->yd, 0.3 );
-  dmSceneDraw( sx, &sys->robot, &force );
-  dmSceneDraw( sy, &sys->robot, &force );
+  zSinCos( core->theta, &s, &c );
+  dmSceneLookAt( sx, core->xd-4*c, core->yd-4*s, 0.4, core->xd, core->yd, 0.3);
+  dmSceneLookAt( sy, core->xd+4*s, core->yd-4*c, 0.4, core->xd, core->yd, 0.3 );
+  dmSceneDraw( sx, &core->robot, &force );
+  dmSceneDraw( sy, &core->robot, &force );
 }
 
 #define ANIM_SKIP 1000
-void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver, dmScene *sx, dmScene *sy)
+void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy)
 {
   FILE *fp = NULL;
   dmFlagset flag;
   int count = ANIM_SKIP;
 
   dmFlagsetInit( &flag );
+  zxGetEvent();
   while( 1 ){
     switch( zxGetEvent() ){
     case Expose:
@@ -422,20 +134,20 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver,
       case XK_p: flag.pause = 1 - flag.pause; break;
       case XK_f: flag.frame = flag.pause; break;
       case XK_r: flag.rec = 1 - flag.rec; break;
-      case XK_Up: sys->ady = 0.1; break;
-      case XK_Down: sys->ady = -0.1; break;
-      case XK_Left: sys->adx = -0.1; break;
-      case XK_Right: sys->adx = +0.1; break;
+      case XK_Up: core->ady = 0.1; break;
+      case XK_Down: core->ady = -0.1; break;
+      case XK_Left: core->adx = -0.1; break;
+      case XK_Right: core->adx = +0.1; break;
       case XK_q: return;
       }
       break;
     case KeyRelease:
-      sys->adx = sys->ady = 0;
+      core->adx = core->ady = 0;
       break;
     default: ;
     }
     if( ++count > ANIM_SKIP ){
-      frame_one( win, con, sys, solver, sx, sy, &flag, fp );
+      frame_one( win, core, con, sx, sy, &flag, fp );
       count = 0;
       if( flag.rec ) capture( win );
     }
@@ -447,10 +159,10 @@ void mainloop(zxWindow *win, dmConsole *con, dmSystem *sys, dmODESolver *solver,
 int main(int argc, char *argv[])
 {
   zxWindow mainwin;
+  pdCommand com;
+  pdCore core;
   dmConsole con;
-  dmSystem sys;
   dmScene sx, sy;
-  dmODESolver solver;
 
   glrkInitGLX();
   zxWindowCreate( &mainwin, 0, 0, WIDTH, HEIGHT );
@@ -464,14 +176,14 @@ int main(int argc, char *argv[])
 
   dmSceneInit( &sx, &mainwin );
   dmSceneInit( &sy, &mainwin );
+  init_console( &con, &com );
 
-  dmSystemInit( &sys, &con );
-  dmSystemODESolverInit( &solver, &sys );
-  dmGLInit( &sys.robot );
-  mainloop( &mainwin, &con, &sys, &solver, &sx, &sy );
+  pdCoreInit( &core, &com );
+  pdCoreLoad( &core, "mighty.zkc", "mighty_ik.conf" );
+  dmGLInit( &core.robot );
+  mainloop( &mainwin, &core, &con, &sx, &sy );
   dmGLExit();
-  dmSystemODESolverExit( &solver );
-  dmSystemExit( &sys );
+  pdCoreExit( &core );
 
   dmConsoleExit( &con );
 

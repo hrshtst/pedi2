@@ -113,9 +113,14 @@ void pdCoreExit(pdCore *core)
   pdRobotExit( &core->robot );
 }
 
-
-void pdCoreSetState(pdCore *core, double *x, double *y)
-{}
+void pdCoreSetState(pdCore *core, double *x, double *y, double theta)
+{
+  core->x[0] = x[0];
+  core->x[1] = x[1];
+  core->y[0] = y[0];
+  core->y[1] = y[1];
+  core->theta = theta;
+}
 
 void pdCoreUpdate(pdCore *core)
 {}

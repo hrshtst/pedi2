@@ -43,7 +43,7 @@ void pdCoreLoad(pdCore *core, char *model_file, char *conf_file);
 void pdCoreExit(pdCore *core);
 
 void pdCoreSetCommand(pdCore *core, pdCommand *com);
-void pdCoreSetState(pdCore *core, double *x, double *y);
+void pdCoreSetState(pdCore *core, double *x, double *y, double theta);
 void pdCoreUpdate(pdCore *core);
 
 void pdCoreFWrite(pdCore *core, FILE *fp);

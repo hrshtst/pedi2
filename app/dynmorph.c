@@ -78,7 +78,10 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
 {
   zVec3D force = { { 0, 0, 0 } };
   double s, c;
+  zVec dis;
 
+  dis = zVecAlloc( pdCoreGetJointSize(core) );
+  pdCoreGetJointDis( core, dis );
   zVec3DCreate( &force, core->adx, core->ady, 0 );
   if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
@@ -90,8 +93,9 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
   zSinCos( core->theta, &s, &c );
   dmSceneLookAt( sx, core->xd-4*c, core->yd-4*s, 0.4, core->xd, core->yd, 0.3);
   dmSceneLookAt( sy, core->xd+4*s, core->yd-4*c, 0.4, core->xd, core->yd, 0.3 );
-  dmSceneDraw( sx, &core->robot, &force );
-  dmSceneDraw( sy, &core->robot, &force );
+  dmSceneDraw( sx, dis, &force );
+  dmSceneDraw( sy, dis, &force );
+  zVecFree( dis );
 }
 
 #define ANIM_SKIP 1000
@@ -180,7 +184,7 @@ int main(int argc, char *argv[])
 
   pdCoreInit( &core, &com );
   pdCoreLoad( &core, "mighty.zkc", "mighty_ik.conf" );
-  dmGLInit( &core.robot );
+  dmGLInit( "mighty.zkc" );
   mainloop( &mainwin, &core, &con, &sx, &sy );
   dmGLExit();
   pdCoreExit( &core );

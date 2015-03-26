@@ -126,6 +126,15 @@ void _pdCorePoseInit(pdCore *core)
   /* body */
   zVec3DCreate( &core->robot.d_com_pos, core->xd, core->yd, core->cz.vrt.zd );
   zVec3DCreate( &core->robot.d_body_att, core->theta+zPI_2, 0, 0 );
+  /* update */
+  _pdCoreUpdateRobot( core );
+  /* spring-damper tracking */
+  core->lf.track_old[0] = zVec3DElem( &core->lf.p, zX );
+  core->lf.track_old[1] = zVec3DElem( &core->lf.p, zY );
+  core->lf.track_old[2] = zVec3DElem( &core->lf.p, zZ );
+  core->rf.track_old[0] = zVec3DElem( &core->rf.p, zX );
+  core->rf.track_old[1] = zVec3DElem( &core->rf.p, zY );
+  core->rf.track_old[2] = zVec3DElem( &core->rf.p, zZ );
 }
 
 void pdCoreLoad(pdCore *core, char *model_file, char *conf_file)

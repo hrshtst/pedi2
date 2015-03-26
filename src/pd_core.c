@@ -5,7 +5,6 @@ static void _pdCoreInitFoot(pdCore *core);
 static void _pdCoreInitODESolver(pdCore *core);
 static zVec _pd_dp(double t, zVec p, void *dummy, zVec v);
 static double _pdCoreCalcSoleWidth(zVec3DList *sr);
-static void _pdCorePoseInit(pdCore *core);
 static void _pdCoreCoodTransWtoM(pdCore *core, double *du, double *vu, double *dw, double *vw);
 static void _pdCoreCoodTransMtoW(pdCore *core, double u, double w, double *x, double *y);
 static void _pdCoreUpdateCommand(pdCore *core);
@@ -15,6 +14,8 @@ static void _pdCoreUpdateRobot(pdCore *core);
 static void _pdCoreUpdateRefPosTheta(pdCore *core);
 static void _pdCoreUpdateRef(pdCore *core);
 
+void _pdCoreLoad(pdCore *core, const char* model_file, const char* conf_file);
+void _pdCorePoseInit(pdCore *core);
 
 void _pdCoreInitState(pdCore *core)
 {
@@ -105,6 +106,20 @@ double _pdCoreCalcSoleWidth(zVec3DList *sr)
   return ymax - ymin;
 }
 
+void _pdCoreLoad(pdCore *core, const char* model_file, const char* conf_file)
+{
+  pdRobotLoad( &core->robot, model_file, conf_file );
+  _pdCoreUpdateRobot( core );
+  /* sole width */
+  core->lf.sole_w = _pdCoreCalcSoleWidth( &core->robot.sr_lf );
+  core->rf.sole_w = _pdCoreCalcSoleWidth( &core->robot.sr_rf );
+  /* feet distance */
+  pdCZPrmRad(&core->cz)->dist = zVec3DElem(&core->lf.p,zY) - zVec3DElem(&core->rf.p,zY);
+  /* COM height */
+  core->cz.vrt.zd = zVec3DElem(&core->robot.d_com_pos,zZ) - zVec3DElem(&core->lf.p,zZ);
+  core->cz.vrt.zd = 0.9 * core->cz.vrt.zd;
+}
+
 void _pdCorePoseInit(pdCore *core)
 {
   double d;
@@ -139,17 +154,7 @@ void _pdCorePoseInit(pdCore *core)
 
 void pdCoreLoad(pdCore *core, char *model_file, char *conf_file)
 {
-  pdRobotLoad( &core->robot, model_file, conf_file );
-  _pdCoreUpdateRobot( core );
-  /* sole width */
-  core->lf.sole_w = _pdCoreCalcSoleWidth( &core->robot.sr_lf );
-  core->rf.sole_w = _pdCoreCalcSoleWidth( &core->robot.sr_rf );
-  /* feet distance */
-  pdCZPrmRad(&core->cz)->dist = zVec3DElem(&core->lf.p,zY) - zVec3DElem(&core->rf.p,zY);
-  /* COM height */
-  core->cz.vrt.zd = zVec3DElem(&core->robot.d_com_pos,zZ) - zVec3DElem(&core->lf.p,zZ);
-  core->cz.vrt.zd = 0.9 * core->cz.vrt.zd;
-
+  _pdCoreLoad( core, model_file, conf_file );
   _pdCorePoseInit( core );
 }
 

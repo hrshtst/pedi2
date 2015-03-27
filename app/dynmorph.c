@@ -188,8 +188,10 @@ int main(int argc, char *argv[])
   init_console( &con, &com );
 
   pdCoreInit( &core, &com );
-  pdCoreLoad( &core, "mighty.zkc", "mighty_ik.conf" );
-  dmGLInit( "mighty.zkc" );
+  pdCoreLoad( &core, "hydra.zkc", "hydra_ik.conf" );
+  dmGLInit( "hydra.zkc" );
+  /* pdCoreLoad( &core, "mighty.zkc", "mighty_ik.conf" ); */
+  /* dmGLInit( "mighty.zkc" ); */
   mainloop( &mainwin, &core, &con, &sx, &sy );
   dmGLExit();
   pdCoreExit( &core );

@@ -22,8 +22,8 @@ int main(void)
 
   /* set referential values */
   com.zd = 0.8;             /* COM height */
-  com.dist = 0.3;           /* distance of both feet */
-  com.lfh = com.rfh = 0.5;  /* (maximal) foot lifting height */
+  com.dist = 0.35;           /* distance of both feet */
+  com.lfh = com.rfh = 0.2;  /* (maximal) foot lifting height */
   com.vud = 0.0;    /* referential velocity (longitudinal) */
   com.kappa = 0.0;  /* referential curvature for rotation */
 

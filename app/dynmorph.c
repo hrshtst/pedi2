@@ -37,7 +37,7 @@ void init_console_hydra(dmConsole *con, pdCommand *com)
   dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &com->vwd );
   dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &com->qw1 );
   dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &com->qw2 );
-  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.25, 0, &com->dist );
+  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.35, 0, &com->dist );
   dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &com->kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &com->rho );
   dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &com->kr );

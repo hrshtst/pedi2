@@ -5,11 +5,8 @@ G*
 /test/gtest_main.a
 /test/pedi2CtrlTest
 /example/ctrl_test
-/test/pdVertTest
-/test/pdVrtTest
-/test/pdHrzTest
-/test/pdCtrlTest
 *.log
 /todo.org
 /example/ctrl_view_test
 /app/dynmorph
+/test/*Test

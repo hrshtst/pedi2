@@ -5,7 +5,7 @@
 #include <roki/glrk_camera.h>
 #include <roki/glrk_optic.h>
 #include <roki/glrk_shape.h>
-#include "dm_robot.h"
+#include <roki/glrk_chain.h>
 
 typedef struct{
   glrkCamera cam;
@@ -20,6 +20,13 @@ void dmSceneExit(dmScene *scene);
 void dmSceneLookAt(dmScene *scene, double cx, double cy, double cz, double fx, double fy, double fz);
 
 void dmSceneResize(dmScene *scene, int x, int y, int w, int h);
-void dmSceneDraw(dmScene *scene, zVec3D *force);
+void dmSceneDraw(dmScene *scene, zVec dis, zVec3D *force);
+
+/* scene */
+void dmGLInit(const char* model_file);
+void dmGLExit(void);
+void dmGLGauge(void);
+void dmGLRobot(void);
+void dmGLSupportRegion(void);
 
 #endif /* __DM_SCENE_H__ */

@@ -1,0 +1,34 @@
+#ifndef __PD_FOOT_H__
+#define __PD_FOOT_H__
+
+#include <zeo/zeo_vec3d.h>
+#include <pedi2/pd_cz.h>
+
+__BEGIN_DECLS
+
+/* foot property (sideway properties only) */
+typedef struct{
+  double h;           /* maximum lifting height */
+  zVec3D p;           /* current position */
+  zVec3D ps;          /* desired position for IK seeds */
+  zVec3D pd;          /* desired position */
+  zVec3D a;           /* current attitude */
+  zVec3D as;          /* desired attitude for IK seeds */
+  double track_k[3], track_c[3], track_old[3];
+                      /* second-order lag system for foot motion */
+  double dy;          /* direction from inner side to outer side */
+  double sole_w;      /* sole width */
+  double phase;       /* lifting phase */
+} pdFoot;
+
+void pdFootPhase(pdFoot *pf, pdFoot *kf, double xd, double yd, double theta, zComplex *pz);
+void pdFootLift(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double theta, zComplex *pz);
+bool pdFootIsOff(pdFoot *f);
+#define pdFootIsOn(f) !pdFootIsOff(f)
+bool pdFootDoesAttemptToLift(pdFoot *f);
+void pdFootMove(pdCZ *ctrl, pdFoot *lf, pdFoot *rf, double xd, double yd, double theta);
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, double dt);
+
+__END_DECLS
+
+#endif /* __PD_FOOT_H__ */

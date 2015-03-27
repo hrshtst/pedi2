@@ -1,6 +1,6 @@
 #include <zm/zm_ode.h>
 #include <zeo/zeo_vec3d.h>
-#include <pedi2/pd_ctrl.h>
+#include <pedi2/pd_cz.h>
 
 /* state vector
  * p = [ x  dx/dt  y  dy/dt ]^T
@@ -40,18 +40,18 @@ void world_zmp(double uz, double wz)
 zVec dp(double t, zVec p, void *dummy, zVec v)
 {
   double du, vu, dw, vw;
-  pdCtrl *ctrl;
+  pdCZ *ctrl;
 
-  ctrl = (pdCtrl *)dummy;
+  ctrl = (pdCZ *)dummy;
   measure( &du, &vu, &dw, &vw );
   /* printf("du: %g, vu: %g, dw: %g, vw: %g\n", du, vu, dw, vw); */
-  pdCtrlUpdate( ctrl, du, vu, dw, vw );
-  /* printf("uz: %g, wz: %g\n", pdCtrlZMPTan(ctrl), pdCtrlZMPRad(ctrl)); */
-  world_zmp( pdCtrlZMPTan(ctrl), pdCtrlZMPRad(ctrl) );
+  pdCZUpdate( ctrl, du, vu, dw, vw );
+  /* printf("uz: %g, wz: %g\n", pdCZZMPTan(ctrl), pdCZZMPRad(ctrl)); */
+  world_zmp( pdCZZMPTan(ctrl), pdCZZMPRad(ctrl) );
   zVecElem(v,0) = zVecElem(p,1);
-  zVecElem(v,1) = zSqr(pdCtrlZeta(ctrl)) * ( zVecElem(p,0) - zVec3DElem(&zmp,zX) );
+  zVecElem(v,1) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,0) - zVec3DElem(&zmp,zX) );
   zVecElem(v,2) = zVecElem(p,3);
-  zVecElem(v,3) = zSqr(pdCtrlZeta(ctrl)) * ( zVecElem(p,2) - zVec3DElem(&zmp,zY) );
+  zVecElem(v,3) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,2) - zVec3DElem(&zmp,zY) );
   return v;
 }
 
@@ -63,7 +63,7 @@ void state_update(zVec p)
   zVec3DElem(&vel,zY) = zVecElem(p,3);
 }
 
-void ref_update(pdCtrl *ctrl, double xs, double ys)
+void ref_update(pdCZ *ctrl, double xs, double ys)
 {
   double x, y;
   double xd, yd;
@@ -77,7 +77,7 @@ void ref_update(pdCtrl *ctrl, double xs, double ys)
   y  = zVec3DElem(&com,zY);
   xd = zVec3DElem(&ref,zX);
   yd = zVec3DElem(&ref,zY);
-  kappa = pdCtrlKappa(ctrl);
+  kappa = pdCZKappa(ctrl);
   zSinCos( theta, &s, &c );
   dw = -( xd - x ) * c - ( yd - y ) * s;
 
@@ -109,16 +109,16 @@ int main(void)
 {
   zODE ode;
   zVec p;
-  pdCtrl ctrl;
+  pdCZ ctrl;
   double t;
   register int i;
 
   zODEAssign( &ode, RKF45, NULL, NULL );
   zODEInit( &ode, 4, 0, dp );
-  pdCtrlInit( &ctrl );
-  pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, 2.0, 1.0, 1.0 );
-  pdCtrlSetRefVrt( &ctrl, 0.26 );
-  pdCtrlSetRefHrz( &ctrl, 0.25, 0.0, 0.1 );
+  pdCZInit( &ctrl );
+  pdCZSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, 2.0, 1.0, 1.0 );
+  pdCZSetRefVrt( &ctrl, 0.26 );
+  pdCZSetRefHrz( &ctrl, 0.25, 0.0, 0.1 );
   p = zVecCreateList( 4, 0.55, 0.0, 0.0, 0.0 );
   zVec3DCreate( &com, zVecElem(p,0), zVecElem(p,2), 0.26 );
   zVec3DCreate( &vel, zVecElem(p,1), zVecElem(p,3), 0 );
@@ -128,9 +128,9 @@ int main(void)
   for( i=0; i<=STEP; i++ ){
     t = DT * i;
     if( i == 500 )
-      pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, 0.0, 1.0, 1.0 );
+      pdCZSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, 0.0, 1.0, 1.0 );
     if( i == 1000 )
-      pdCtrlSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, -2.0, 1.0, 1.0 );
+      pdCZSetPrm( &ctrl, 1.0, 0.0, 1.0, 1.5, -2.0, 1.0, 1.0 );
     state_update( p );
     zODEUpdate( &ode, t, p, DT, &ctrl );
     print_data( t );

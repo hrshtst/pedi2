@@ -2,7 +2,7 @@
 #include <zm/zm_ode.h>
 #include <zeo/zeo_vec3d.h>
 #include <zx11/zxutil.h>
-#include <pedi2/pd_ctrl.h>
+#include <pedi2/pd_cz.h>
 #include <liw/liw_time.h>
 #include "util/scene.h"
 
@@ -15,14 +15,14 @@ void polar(double *r, double *theta)
   *theta = atan2( zVec3DElem(&com,zY), zVec3DElem(&com,zX) );
 }
 
-void measure(pdCtrl *ctrl, double vx, double vy, double *du, double *vu, double *dw, double *vw)
+void measure(pdCZ *ctrl, double vx, double vy, double *du, double *vu, double *dw, double *vw)
 {
   double r, rd;
   double theta, thetad;
   double s, c;
 
   polar( &r, &theta );
-  rd = 1.0 / pdCtrlKappa( ctrl );
+  rd = 1.0 / pdCZKappa( ctrl );
   thetad = theta;
   zSinCos( theta, &s, &c );
   *du = rd * ( thetad - theta );
@@ -45,30 +45,30 @@ void world_zmp(double uz, double wz)
 zVec dp(double t, zVec p, void *dummy, zVec v)
 {
   double du, vu, dw, vw;
-  pdCtrl *ctrl;
+  pdCZ *ctrl;
 
-  ctrl = (pdCtrl *)dummy;
+  ctrl = (pdCZ *)dummy;
   zVec3DElem(&com,zX) = zVecElem(p,0);
   zVec3DElem(&com,zY) = zVecElem(p,2);
   measure( ctrl, zVecElem(p,1), zVecElem(p,3), &du, &vu, &dw, &vw );
-  pdCtrlUpdate( ctrl, du, vu, dw, vw );
-  world_zmp( pdCtrlZMPTan(ctrl), pdCtrlZMPRad(ctrl) );
+  pdCZUpdate( ctrl, du, vu, dw, vw );
+  world_zmp( pdCZZMPTan(ctrl), pdCZZMPRad(ctrl) );
   zVecElem(v,0) = zVecElem(p,1);
-  zVecElem(v,1) = zSqr(pdCtrlZeta(ctrl)) * ( zVecElem(p,0) - zVec3DElem(&zmp,zX) );
+  zVecElem(v,1) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,0) - zVec3DElem(&zmp,zX) );
   zVecElem(v,2) = zVecElem(p,3);
-  zVecElem(v,3) = zSqr(pdCtrlZeta(ctrl)) * ( zVecElem(p,2) - zVec3DElem(&zmp,zY) );
+  zVecElem(v,3) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,2) - zVec3DElem(&zmp,zY) );
   return v;
 }
 
-void init_ctrl(pdCtrl *ctrl)
+void init_ctrl(pdCZ *ctrl)
 {
-  pdCtrlInit( ctrl );
+  pdCZInit( ctrl );
   /*                qu1, qu2, qw1, qw2, kappa, rho, kr */
-  pdCtrlSetPrm( ctrl, 1,   0,   1, 1.5,     2,   1,  1 );
+  pdCZSetPrm( ctrl, 1,   0,   1, 1.5,     2,   1,  1 );
   /*                     zd */
-  pdCtrlSetRefVrt( ctrl, 0.26 );
+  pdCZSetRefVrt( ctrl, 0.26 );
   /*                      vud, vwd, dist */
-  pdCtrlSetRefHrz( ctrl, 0.25, 0.0, 0.1 );
+  pdCZSetRefHrz( ctrl, 0.25, 0.0, 0.1 );
   zVec3DCreate( &com, 0.6, 0, 0.26 );
   zVec3DCreate( &zmp, 0.6, 0, 0 );
 }
@@ -84,7 +84,7 @@ void resize(zxWindow *win, Scene *sc)
 }
 
 #define DT     0.01
-void mainloop(zxWindow *win, Scene *sc, zODE *ode, pdCtrl *ctrl)
+void mainloop(zxWindow *win, Scene *sc, zODE *ode, pdCZ *ctrl)
 {
   int count = 0;
   int t;
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
   zxWindow win;
   zODE ode;
   Scene sc;
-  pdCtrl ctrl;
+  pdCZ ctrl;
 
   glrkInitGLX();
   zxWindowCreate( &win, 0, 0, WIDTH, HEIGHT );
@@ -141,6 +141,6 @@ int main(int argc, char *argv[])
   mainloop( &win, &sc, &ode, &ctrl );
 
   exitScene( &sc );
-  pdCtrlDestroy( &ctrl );
+  pdCZDestroy( &ctrl );
   return 0;
 }

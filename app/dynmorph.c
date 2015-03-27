@@ -5,9 +5,14 @@
 #include "util/dm_scene.h"
 #include "util/dm_console.h"
 
-void init_console(dmConsole *con, pdCommand *com)
+typedef enum{
+  DM_MODEL_INVALID=-1,
+  DM_MODEL_MIGHTY=0,
+  DM_MODEL_HYDRA,
+} dmModel;
+
+void init_console_mighty(dmConsole *con, pdCommand *com)
 {
-  dmConsoleInit( con );
   dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &com->zd );
   dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &com->vud );
   dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &com->qu1 );
@@ -22,6 +27,37 @@ void init_console(dmConsole *con, pdCommand *com)
   dmConsoleAddEval( con, "L lift height", 0, 0.04, 0.04, 0, &com->lfh );
   dmConsoleAddEval( con, "R lift height", 0, 0.04, 0.04, 0, &com->rfh );
 }
+
+void init_console_hydra(dmConsole *con, pdCommand *com)
+{
+  dmConsoleAddEval( con, "COM height", 0.7, 0.95, 0.85, 0, &com->zd );
+  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &com->vud );
+  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &com->qu1 );
+  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &com->qu2 );
+  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &com->vwd );
+  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &com->qw1 );
+  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &com->qw2 );
+  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.25, 0, &com->dist );
+  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &com->kappa );
+  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &com->rho );
+  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &com->kr );
+  dmConsoleAddEval( con, "L lift height", 0, 0.1, 0.1, 0, &com->lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.1, 0.1, 0, &com->rfh );
+}
+
+void init_console(dmConsole *con, pdCommand *com, dmModel model)
+{
+  dmConsoleInit( con );
+  if( model == DM_MODEL_MIGHTY )
+    init_console_mighty( con, com );
+  else if( model == DM_MODEL_HYDRA )
+    init_console_hydra( con, com );
+  else {
+    ZRUNERROR( "invalid model" );
+    exit( EXIT_FAILURE );
+  }
+}
+
 
 void resize(zxWindow *win, dmConsole *con, dmScene *sx, dmScene *sy)
 {
@@ -74,7 +110,7 @@ void dmFlagsetInit(dmFlagset *flag)
 }
 
 #define DT 0.01
-void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmFlagset *flag, FILE *fp)
+void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmFlagset *flag, dmModel model, FILE *fp)
 {
   zVec3D force = { { 0, 0, 0 } };
   double s, c;
@@ -91,15 +127,20 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
       pdCoreFWrite( core, fp );
   }
   zSinCos( core->theta, &s, &c );
-  dmSceneLookAt( sx, core->xd-4*c, core->yd-4*s, 0.4, core->xd, core->yd, 0.3);
-  dmSceneLookAt( sy, core->xd+4*s, core->yd-4*c, 0.4, core->xd, core->yd, 0.3 );
+  if( model == DM_MODEL_MIGHTY ){
+    dmSceneLookAt( sx, core->xd-4*c, core->yd-4*s, 0.4, core->xd, core->yd, 0.3);
+    dmSceneLookAt( sy, core->xd+4*s, core->yd-4*c, 0.4, core->xd, core->yd, 0.3 );
+  } else if ( model == DM_MODEL_HYDRA ) {
+    dmSceneLookAt( sx, core->xd-10*c, core->yd-10*s, 1, core->xd, core->yd, 0.8 );
+    dmSceneLookAt( sy, core->xd+10*s, core->yd-10*c, 1, core->xd, core->yd, 0.8 );
+  }
   dmSceneDraw( sx, dis, &force );
   dmSceneDraw( sy, dis, &force );
   zVecFree( dis );
 }
 
 #define ANIM_SKIP 1000
-void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy)
+void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmModel model)
 {
   FILE *fp = NULL;
   dmFlagset flag;
@@ -151,7 +192,7 @@ void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene 
     default: ;
     }
     if( ++count > ANIM_SKIP ){
-      frame_one( win, core, con, sx, sy, &flag, fp );
+      frame_one( win, core, con, sx, sy, &flag, model, fp );
       count = 0;
       if( flag.rec ) capture( win );
     }
@@ -167,6 +208,20 @@ int main(int argc, char *argv[])
   pdCore core;
   dmConsole con;
   dmScene sx, sy;
+  dmModel model;
+
+  model = DM_MODEL_INVALID;
+  if( argc > 1 ){
+    if( !strcmp( argv[1], "mighty" ) )
+      model = DM_MODEL_MIGHTY;
+    else if( !strcmp( argv[1], "hydra" ) )
+      model = DM_MODEL_HYDRA;
+    else {
+      ZRUNERROR( "invalid argument: %s ", argv[1] );
+      exit( EXIT_FAILURE );
+    }
+  } else
+    model = DM_MODEL_MIGHTY;
 
   glrkInitGLX();
   zxWindowCreate( &mainwin, 0, 0, WIDTH, HEIGHT );
@@ -180,12 +235,20 @@ int main(int argc, char *argv[])
 
   dmSceneInit( &sx, &mainwin );
   dmSceneInit( &sy, &mainwin );
-  init_console( &con, &com );
+  init_console( &con, &com, model );
 
   pdCoreInit( &core, &com );
-  pdCoreLoad( &core, "mighty.zkc", "mighty_ik.conf" );
-  dmGLInit( "mighty.zkc" );
-  mainloop( &mainwin, &core, &con, &sx, &sy );
+  if( model == DM_MODEL_MIGHTY ){
+    pdCoreLoad( &core, "model/mighty.zkc", "model/mighty_ik.conf" );
+    dmGLInit( "model/mighty.zkc" );
+  } else if ( model == DM_MODEL_HYDRA ) {
+    pdCoreLoad( &core, "model/hydra.zkc", "model/hydra_ik.conf" );
+    dmGLInit( "model/hydra.zkc" );
+  } else {
+    ZRUNERROR( "invalid model" );
+    exit( EXIT_FAILURE );
+  }
+  mainloop( &mainwin, &core, &con, &sx, &sy, model );
   dmGLExit();
   pdCoreExit( &core );
 

@@ -15,7 +15,7 @@ int main(void)
 
   /* load kinematics/dynamics model file (.zkc) */
   /* and inverse kinematics configuration file (.conf) */
-  pdCoreLoad( &ctrl, "hydra.zkc", "hydra_ik.conf" );
+  pdCoreLoad( &ctrl, "model/hydra.zkc", "model/hydra_ik.conf" );
 
   /* prepare joint displacement vector */
   dis = zVecAlloc( pdCoreGetJointSize(&ctrl) );

@@ -1,5 +1,34 @@
 #include <pedi2/pd_core.h>
 
+void pdCommandInit(pdCommand *com)
+{
+  com->qu1 = com->qu2 = 0;
+  com->qw1 = com->qw2 = 0;
+  com->kappa = 0;
+  com->rho = 0;
+  com->kr = 0;
+  com->zd = 0;
+  com->vud = com->vwd = 0;
+  com->dist = 0;
+  com->lfh = com->rfh = 0;
+}
+
+void pdCommandDefaultInit(pdCommand *com)
+{
+  pdCommandInit( com );
+  com->qu1 = 1.0;
+  com->qu2 = 0.0;
+  com->qw1 = 1.0;
+  com->qw2 = 1.5;
+  com->rho = 0.0;
+  com->kr = 1.0;
+}
+
+void pdCommandExit(pdCommand *com)
+{
+  pdCommandInit( com );
+}
+
 static void _pdCoreInitState(pdCore *core);
 static void _pdCoreInitFoot(pdCore *core);
 static void _pdCoreInitODESolver(pdCore *core);

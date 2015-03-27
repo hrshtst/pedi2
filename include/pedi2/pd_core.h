@@ -17,6 +17,10 @@ typedef struct{
   double lfh, rfh;
 } pdCommand;
 
+void pdCommandInit(pdCommand *com);
+void pdCommandDefaultInit(pdCommand *com);
+void pdCommandExit(pdCommand *com);
+
 typedef struct{
   double t;
   zVec p;

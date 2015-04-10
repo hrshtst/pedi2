@@ -126,9 +126,9 @@ double _pdCoreCalcSoleWidth(zVec3DList *sr)
   zVec3DListCell *vc;
   double ymin, ymax, y;
 
-  ymin = ymax = zVec3DInnerProd( Z_UNITYVEC3D, zListTail(sr)->data );
+  ymin = ymax = zVec3DInnerProd( ZVEC3DY, zListTail(sr)->data );
   zListForEach( sr, vc ){
-    y = zVec3DInnerProd( Z_UNITYVEC3D, vc->data );
+    y = zVec3DInnerProd( ZVEC3DY, vc->data );
     if( y < ymin ) ymin = y;
     if( y > ymax ) ymax = y;
   }

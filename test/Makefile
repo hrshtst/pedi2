@@ -6,7 +6,7 @@ SRCDIR=$(ROOTDIR)/src
 LIBDIR=$(ROOTDIR)/lib
 INCLUDE=-I$(INCDIR) -I$(PREFIX)/include
 LIBRARY=-L$(LIBDIR)/lib -L$(PREFIX)/lib
-LINK = `roki-config`
+LINK = `roki-config -l`
 
 TESTDIR=.
 MOCKDIR=$(TESTDIR)/mocks

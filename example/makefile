@@ -4,7 +4,7 @@ ROOTDIR=..
 
 INCLUDE=-I$(ROOTDIR)/include -I$(PREFIX)/include
 LIB=-L$(ROOTDIR)/lib -L$(PREFIX)/lib
-LINK=-lpedi2 -lm `glroki-config`
+LINK=-lpedi2 -lm `rokigl-config -l`
 
 CC=gcc
 CFLAGS=-Wall -O3 $(LIB) $(INCLUDE) -funroll-loops

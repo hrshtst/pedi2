@@ -14061,8 +14061,44 @@ face 0 3 4
 face 0 4 1
 face 1 4 7
 
+
+% 0: waist_base
+% 1: rhip_y
+% 2: rhip_p
+% 3: rhip_r
+% 4: rknee_p
+% 5: rankle_r
+% 6: rankle_p
+% 7: lhip_y
+% 8: lhip_p
+% 9: lhip_r
+%10: lknee_p
+%11: lankle_r
+%12: lankle_p
+%13: waist_p
+%14: waist_r
+%15: neck_p
+%16: rscaplae_y
+%17: rshoulder_p
+%18: rshoulder_r
+%19: rshoulder_y
+%20: relbow_p
+%21: rwrist_y
+%22: rwrist_r
+%23: rwrist_p
+%24: lscaplae_y
+%25: lshoulder_p
+%26: lshoulder_r
+%27: lshoulder_y
+%28: lelbow_p
+%29: lwrist_y
+%30: lwrist_r
+%31: lwrist_p
+%32: right_foot
+%33: left_foot
+
 [link]
-name: body
+name: waist_base
 jointtype: float
 frame: {
  1.0, 0.0, 0.0, 0.0
@@ -14095,7 +14131,7 @@ inertia: {
  -8.33432200000001e-05, 0.00533888663, -0.00049910953
  0.00034794546, -0.00049910953, 0.00304326124
 }
-parent: body
+parent: waist_base
 shape: whole_body_geo_v2_z_yaw_-_rhip_simple_geo-2-mesh
 
 [link]
@@ -14213,7 +14249,7 @@ inertia: {
  8.33432200000001e-05, 0.00533888663, 0.00049910953
  0.00034794546, 0.00049910953, 0.00304326124
 }
-parent: body
+parent: waist_base
 shape: whole_body_geo_v2_z_yaw_-_lhip_simple_geo-1-mesh
 
 [link]
@@ -14331,7 +14367,7 @@ inertia: {
  0.0, 1e-05, 0.0
  0.0, 0.0, 1e-05
 }
-parent: body
+parent: waist_base
 
 [link]
 name: waist_r
@@ -14710,3 +14746,4 @@ frame: {
 }
 parent: lankle_p
 shape: left_sole
+

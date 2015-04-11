@@ -36,9 +36,11 @@ void pdRobotLoad(pdRobot *robot, const char* model_file, const char* conf_file)
   for( i=0; i<rkChainNum(&robot->chain); i++ ){
     if( !strcmp( "body", rkChainLinkName(&robot->chain,i) ) )
       robot->body_id = i;
-    if( !strcmp( "left_foot", rkChainLinkName(&robot->chain,i) ) )
+    else if( !strcmp( "waist_base", rkChainLinkName(&robot->chain,i) ) )
+      robot->body_id = i;       /* for hydra */
+    else if( !strcmp( "left_foot", rkChainLinkName(&robot->chain,i) ) )
       robot->lf_id = i;
-    if( !strcmp( "right_foot", rkChainLinkName(&robot->chain,i) ) )
+    else if( !strcmp( "right_foot", rkChainLinkName(&robot->chain,i) ) )
       robot->rf_id = i;
   }
   if( robot->body_id < 0 || robot->lf_id < 0 || robot->rf_id < 0 ){

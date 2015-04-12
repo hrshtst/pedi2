@@ -101,6 +101,7 @@ void pdFootUpdate(pdFoot *lf, pdFoot *rf, double dt)
     _pdFootUpdateSOL( rf, zY, dt );
     _pdFootUpdateSOL( rf, zZ, dt );
   }
+  /* printf("--\n"); */
   /* _pdFootWritePosAtt( lf ); */
   /* _pdFootWritePosAtt( rf ); */
 }

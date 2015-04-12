@@ -34,6 +34,8 @@ void pdRobotSolveIK(pdRobot *robot);
 #define pdRobotGetJointDis(r,v) zVecCopy((r)->dis,v)
 void pdRobotSupportRegion(pdRobot *robot);
 
+void pdRobotCOMPos(pdRobot *robot, zVec3D *com);
+void pdRobotBodyAtt(pdRobot *robot, zVec3D *att);
 void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);
 void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf);
 

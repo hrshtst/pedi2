@@ -130,6 +130,16 @@ void pdRobotSupportRegion(pdRobot *robot)
   if( n  > 0 ) zCH2D( &robot->sr, robot->sr_vert, n );
 }
 
+void pdRobotCOMPos(pdRobot *robot, zVec3D *com)
+{
+  zVec3DCopy( rkChainWldCOM(&robot->chain), com );
+}
+
+void pdRobotBodyAtt(pdRobot *robot, zVec3D *att)
+{
+  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->body_id), att );
+}
+
 void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf)
 {
   zVec3DCopy( rkChainLinkWldPos(&robot->chain,robot->lf_id), lf );

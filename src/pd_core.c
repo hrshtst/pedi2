@@ -46,6 +46,25 @@ static void _pdCoreUpdateRef(pdCore *core);
 void _pdCoreLoad(pdCore *core, const char* model_file, const char* conf_file);
 void _pdCorePoseInit(pdCore *core);
 
+void _pdCoreWritePosAtt(pdCore *core)
+{
+  /* for debug */
+  zVec3D com_p, body_a;
+  zVec3D lf_p, lf_a;
+  zVec3D rf_p, rf_a;
+
+  pdRobotCOMPos( &core->robot, &com_p );
+  pdRobotBodyAtt( &core->robot, &body_a );
+  pdRobotFootPos( &core->robot, &lf_p, &rf_p );
+  pdRobotFootAtt( &core->robot, &lf_a, &rf_a );
+  printf( "com_pos:" );zVec3DWrite( &com_p );
+  printf( "lf_pos :");zVec3DWrite( &lf_p );
+  printf( "rf_pos :");zVec3DWrite( &rf_p );
+  printf( "bod_att:" );zVec3DWrite( &body_a );
+  printf( "lf_att :");zVec3DWrite( &lf_a );
+  printf( "rf_att :");zVec3DWrite( &rf_a );
+}
+
 void _pdCoreInitState(pdCore *core)
 {
   core->x[0] = 0;
@@ -281,10 +300,13 @@ void _pdCoreUpdateFoot(pdCore *core, double dt)
 
 void _pdCoreUpdateRobot(pdCore *core)
 {
+  /* printf( "--\n" ); */
+  /* _pdCoreWritePosAtt( core ); */
   pdRobotSolveIK( &core->robot );
   pdRobotSupportRegion( &core->robot );
   pdRobotFootPos( &core->robot, &core->lf.p, &core->rf.p );
   pdRobotFootAtt( &core->robot, &core->lf.a, &core->rf.a );
+  /* _pdCoreWritePosAtt( core ); */
 }
 
 void _pdCoreUpdateRefPosTheta(pdCore *core)

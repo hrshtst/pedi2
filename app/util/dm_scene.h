@@ -1,15 +1,15 @@
 #ifndef __DM_SCENE_H__
 #define __DM_SCENE_H__
 
-#include <roki/glrk_glx.h>
-#include <roki/glrk_camera.h>
-#include <roki/glrk_optic.h>
-#include <roki/glrk_shape.h>
-#include <roki/glrk_chain.h>
+#include <roki/rkgl_glx.h>
+#include <roki/rkgl_camera.h>
+#include <roki/rkgl_optic.h>
+#include <roki/rkgl_shape.h>
+#include <roki/rkgl_chain.h>
 
 typedef struct{
-  glrkCamera cam;
-  glrkLight light;
+  rkglCamera cam;
+  rkglLight light;
   Window canvas;
   zxRegion reg;
 } dmScene;

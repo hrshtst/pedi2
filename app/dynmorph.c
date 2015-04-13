@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
   } else
     model = DM_MODEL_MIGHTY;
 
-  glrkInitGLX();
+  rkglInitGLX();
   zxWindowCreate( &mainwin, 0, 0, WIDTH, HEIGHT );
   zxWindowSetBG( &mainwin, (char *)"lightgray" );
   zxWindowClear( &mainwin );
@@ -256,6 +256,6 @@ int main(int argc, char *argv[])
   dmSceneExit( &sx );
   dmSceneExit( &sy );
 
-  glrkCloseGLX();
+  rkglCloseGLX();
   return 0;
 }

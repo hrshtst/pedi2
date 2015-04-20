@@ -25,16 +25,21 @@ void pdCZVrtDestroy(pdCZVrt *vrt);
 
 /* methods to set parameters */
 #define pdCZVrtSetRef(v,zd) (v)->_zd = zd
-#define pdCZVrtSetMass(v,m) (v)->mass = m
 #define pdCZVrtSetQ1(v,q1) (v)->_q1 = q1
 #define pdCZVrtSetQ2(v,q2) (v)->_q2 = q2
+#define pdCZVrtSetMass(v,m) (v)->mass = m
+#define pdCZVrtSetPrm(v,zd,q1,q2,m) do{\
+  pdCZVrtSetRef( v, zd );\
+  pdCZVrtSetQ1( v, q1 );\
+  pdCZVrtSetQ2( v, q2 );\
+  pdCZVrtSetMass( v, m );\
+} while(0)
 
 /* methods to get parameters */
 #define pdCZVrtGetRef(v) (v)->_zd
-#define pdCZVrtGetMass(v) (v)->mass
 #define pdCZVrtGetQ1(v) (v)->_q1
 #define pdCZVrtGetQ2(v) (v)->_q2
-
+#define pdCZVrtGetMass(v) (v)->mass
 
 void pdCZVrtUpdate(pdCZVrt *vrt);
 

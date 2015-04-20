@@ -1,10 +1,21 @@
 #include "gtest/gtest.h"
 #include <pedi2/pd_cz_vrt.h>
 
-TEST(pdCZVrtTest, Init)
-{
-  pdCZVrt vrt;
+class pdCZVrtTest : public testing::Test {
+ protected:
+  virtual void SetUp() {
+    pdCZVrtInit( &vrt );
+  };
 
+  virtual void TearDown() {
+    pdCZVrtDestroy( &vrt );
+  };
+
+  pdCZVrt vrt;
+};
+
+TEST_F(pdCZVrtTest, Init)
+{
   pdCZVrtInit( &vrt );
   EXPECT_EQ( 0, vrt.zd );
   EXPECT_EQ( 0, vrt.q1 );
@@ -15,7 +26,7 @@ TEST(pdCZVrtTest, Init)
   EXPECT_EQ( 0, vrt.zeta );
 }
 
-TEST(pdCZVrtTest, Destroy)
+TEST_F(pdCZVrtTest, Destroy)
 {
   pdCZVrt vrt;
 
@@ -34,7 +45,7 @@ TEST(pdCZVrtTest, Destroy)
   EXPECT_EQ( 0, vrt.zeta );
 }
 
-TEST(pdCZVrtTest, SetPrm)
+TEST_F(pdCZVrtTest, SetPrm)
 {
   pdCZVrt vrt;
 
@@ -46,7 +57,7 @@ TEST(pdCZVrtTest, SetPrm)
   EXPECT_EQ( 0.3, vrt.zd );
 }
 
-TEST(pdCZVrtTest, Update)
+TEST_F(pdCZVrtTest, Update)
 {
   pdCZVrt vrt;
 

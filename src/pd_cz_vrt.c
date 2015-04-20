@@ -5,7 +5,7 @@ void pdCZVrtInit(pdCZVrt *vrt)
   vrt->zd = 0;
   vrt->q1 = 0;
   vrt->q2 = 0;
-  vrt->m  = 0;
+  vrt->mass  = 0;
   vrt->fz = 0;
 
   vrt->acc = 0;
@@ -15,11 +15,6 @@ void pdCZVrtInit(pdCZVrt *vrt)
 void pdCZVrtDestroy(pdCZVrt *vrt)
 {
   pdCZVrtInit( vrt );
-}
-
-void pdCZVrtSetRef(pdCZVrt *vrt, double zd)
-{
-  vrt->zd = zd;
 }
 
 void pdCZVrtUpdate(pdCZVrt *vrt)

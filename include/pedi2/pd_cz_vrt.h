@@ -20,8 +20,8 @@ typedef struct{
 } pdCZVrt;
 
 /* c'tor and d'tor */
-void pdCZVrtInit(pdCZVrt *vrt);
-void pdCZVrtDestroy(pdCZVrt *vrt);
+__EXPORT void pdCZVrtInit(pdCZVrt *vrt);
+__EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 
 /* methods to set parameters */
 #define pdCZVrtSetRef(v,zd) (v)->_zd = zd

@@ -36,10 +36,10 @@ __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 } while(0)
 
 /* methods to get parameters */
-#define pdCZVrtGetRef(v) (v)->_zd
-#define pdCZVrtGetQ1(v) (v)->_q1
-#define pdCZVrtGetQ2(v) (v)->_q2
-#define pdCZVrtGetMass(v) (v)->mass
+#define pdCZVrtRef(v) (v)->_zd
+#define pdCZVrtQ1(v) (v)->_q1
+#define pdCZVrtQ2(v) (v)->_q2
+#define pdCZVrtMass(v) (v)->mass
 
 void pdCZVrtUpdate(pdCZVrt *vrt);
 

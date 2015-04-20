@@ -2,13 +2,13 @@
 
 void pdCZVrtInit(pdCZVrt *vrt)
 {
-  vrt->zd = 0;
-  vrt->q1 = 0;
-  vrt->q2 = 0;
+  vrt->_zd = 0;
+  vrt->_q1 = 0;
+  vrt->_q2 = 0;
   vrt->mass  = 0;
-  vrt->fz = 0;
 
-  vrt->acc = 0;
+  vrt->_reffz = 0;
+  vrt->_refacc = 0;
   vrt->zeta = 0;
 }
 
@@ -19,6 +19,6 @@ void pdCZVrtDestroy(pdCZVrt *vrt)
 
 void pdCZVrtUpdate(pdCZVrt *vrt)
 {
-  vrt->z = vrt->zd;
-  vrt->zeta = sqrt( RK_G / vrt->zd );
+  vrt->z = vrt->_zd;
+  vrt->zeta = sqrt( RK_G / vrt->_zd );
 }

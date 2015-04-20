@@ -7,12 +7,12 @@
 __BEGIN_DECLS
 
 typedef struct{
-  double zd;     /* desired COM position */
-  double q1, q2; /* system poles */
-  double mass;   /* mass of robot */
+  double _zd;      /* desired COM position */
+  double _q1, _q2; /* system poles */
+  double mass;     /* mass of the robot */
 
-  double fz;     /* vertical reaction force */
-  double acc;    /* COM acceleration */
+  double _reffz;   /* referential vertical reaction force */
+  double _refacc;  /* referential COM acceleration */
 
   double zeta;
 
@@ -24,16 +24,16 @@ void pdCZVrtInit(pdCZVrt *vrt);
 void pdCZVrtDestroy(pdCZVrt *vrt);
 
 /* methods to set parameters */
-#define pdCZVrtSetRef(v,z) (v)->zd = z
+#define pdCZVrtSetRef(v,zd) (v)->_zd = zd
 #define pdCZVrtSetMass(v,m) (v)->mass = m
-#define pdCZVrtSetQ1(v,q) (v)->q1 = q
-#define pdCZVrtSetQ2(v,q) (v)->q2 = q
+#define pdCZVrtSetQ1(v,q1) (v)->_q1 = q1
+#define pdCZVrtSetQ2(v,q2) (v)->_q2 = q2
 
 /* methods to get parameters */
-#define pdCZVrtGetRef(v) (v)->zd
+#define pdCZVrtGetRef(v) (v)->_zd
 #define pdCZVrtGetMass(v) (v)->mass
-#define pdCZVrtGetQ1(v) (v)->q1
-#define pdCZVrtGetQ2(v) (v)->q2
+#define pdCZVrtGetQ1(v) (v)->_q1
+#define pdCZVrtGetQ2(v) (v)->_q2
 
 
 void pdCZVrtUpdate(pdCZVrt *vrt);

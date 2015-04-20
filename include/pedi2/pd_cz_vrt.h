@@ -7,9 +7,15 @@
 __BEGIN_DECLS
 
 typedef struct{
-  double zd;
-  double z;
+  double zd;     /* desired COM position */
+  double q1, q2; /* system poles */
+  double m;      /* mass of robot */
+  double fz;     /* vertical reaction force */
+
+  double acc;    /* COM acceleration */
   double zeta;
+
+  double z;      /* deprecated */
 } pdCZVrt;
 
 void pdCZVrtInit(pdCZVrt *vrt);

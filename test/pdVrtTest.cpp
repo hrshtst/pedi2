@@ -7,7 +7,11 @@ TEST(pdCZVrtTest, Init)
 
   pdCZVrtInit( &vrt );
   EXPECT_EQ( 0, vrt.zd );
-  EXPECT_EQ( 0, vrt.z );
+  EXPECT_EQ( 0, vrt.q1 );
+  EXPECT_EQ( 0, vrt.q2 );
+  EXPECT_EQ( 0, vrt.m );
+  EXPECT_EQ( 0, vrt.fz );
+  EXPECT_EQ( 0, vrt.acc );
   EXPECT_EQ( 0, vrt.zeta );
 }
 
@@ -16,9 +20,17 @@ TEST(pdCZVrtTest, Destroy)
   pdCZVrt vrt;
 
   pdCZVrtInit( &vrt );
+  vrt.zd = 1;
+  vrt.q1 = 2;
+  vrt.q2 = 3;
+  vrt.m  = 4;
   pdCZVrtDestroy( &vrt );
   EXPECT_EQ( 0, vrt.zd );
-  EXPECT_EQ( 0, vrt.z );
+  EXPECT_EQ( 0, vrt.q1 );
+  EXPECT_EQ( 0, vrt.q2 );
+  EXPECT_EQ( 0, vrt.m );
+  EXPECT_EQ( 0, vrt.fz );
+  EXPECT_EQ( 0, vrt.acc );
   EXPECT_EQ( 0, vrt.zeta );
 }
 

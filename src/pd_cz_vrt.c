@@ -3,7 +3,12 @@
 void pdCZVrtInit(pdCZVrt *vrt)
 {
   vrt->zd = 0;
-  vrt->z = 0;
+  vrt->q1 = 0;
+  vrt->q2 = 0;
+  vrt->m  = 0;
+  vrt->fz = 0;
+
+  vrt->acc = 0;
   vrt->zeta = 0;
 }
 

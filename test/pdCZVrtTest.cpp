@@ -91,6 +91,11 @@ TEST_F(pdCZVrtTest, CalcAcc)
   EXPECT_DOUBLE_EQ( -9.806652, pdCZVrtCalcAcc( &vrt, 0.4, 0.1 ) );
 }
 
+TEST_F(pdCZVrtTest, ClacZMP)
+{
+  EXPECT_DOUBLE_EQ( 0, pdCZVrtCalcZMP( &vrt ) );
+}
+
 TEST_F(pdCZVrtTest, CalcZeta)
 {
   EXPECT_DOUBLE_EQ( 7.0023753112783096, pdCZVrtCalcZeta( &vrt, 0.2, 0, 0 ) );

@@ -12,6 +12,7 @@ typedef struct{
 
   double reffz;    /* referential reaction force */
   double refacc;   /* referential COM acceleration */
+  double refzmp;   /* referential ZMP position */
   double zeta;
 } pdCZVrt;
 
@@ -35,11 +36,13 @@ __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 #define pdCZVrtQ2(v) (v)->_q2
 #define pdCZVrtReactForce(v) (f)->reffz
 #define pdCZVrtAcc(v) (v)->refacc
+#define pdCZVrtZMP(v) (v)->refzmp
 #define pdCZVrtZeta(v) (v)->zeta
 
 /* calculation methods */
 __EXPORT double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz);
 __EXPORT double pdCZVrtCalcAcc(pdCZVrt *vrt, double z, double vz);
+__EXPORT double pdCZVrtCalcZMP(pdCZVrt *vrt);
 __EXPORT double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz );
 
 /* update method */

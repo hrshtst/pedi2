@@ -10,7 +10,7 @@ typedef struct{
   double _zd;      /* desired COM position */
   double _q1, _q2; /* system poles */
 
-  double reffz;    /* referential reaction force */
+  double reffz;    /* referential vertical reaction force */
   double refacc;   /* referential COM acceleration */
   double refzmp;   /* referential ZMP position */
   double zeta;
@@ -34,7 +34,7 @@ __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 #define pdCZVrtRef(v) (v)->_zd
 #define pdCZVrtQ1(v) (v)->_q1
 #define pdCZVrtQ2(v) (v)->_q2
-#define pdCZVrtReactForce(v) (f)->reffz
+#define pdCZVrtRF(v) (v)->reffz
 #define pdCZVrtAcc(v) (v)->refacc
 #define pdCZVrtZMP(v) (v)->refzmp
 #define pdCZVrtZeta(v) (v)->zeta

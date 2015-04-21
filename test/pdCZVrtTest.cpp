@@ -11,7 +11,7 @@ class pdCZVrtTest : public testing::Test {
     pdCZVrtDestroy( &vrt );
   };
 
-  void SetRandPrm() {
+  void SetVacuousPrm() {
     pdCZVrtSetRef( &vrt, 1 );
     pdCZVrtSetQ1( &vrt, 2 );
     pdCZVrtSetQ2( &vrt, 3 );
@@ -23,7 +23,7 @@ class pdCZVrtTest : public testing::Test {
 
 TEST_F(pdCZVrtTest, Init)
 {
-  SetRandPrm();
+  SetVacuousPrm();
   pdCZVrtInit( &vrt );
   EXPECT_EQ( 0, pdCZVrtRef( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ1( &vrt ) );
@@ -33,7 +33,7 @@ TEST_F(pdCZVrtTest, Init)
 
 TEST_F(pdCZVrtTest, Destroy)
 {
-  SetRandPrm();
+  SetVacuousPrm();
   pdCZVrtDestroy( &vrt );
   EXPECT_EQ( 0, pdCZVrtRef( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ1( &vrt ) );

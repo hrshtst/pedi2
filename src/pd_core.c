@@ -164,8 +164,8 @@ void _pdCoreLoad(pdCore *core, const char* model_file)
   /* feet distance */
   pdCZPrmRad(&core->cz)->dist = zVec3DElem(&core->lf.p,zY) - zVec3DElem(&core->rf.p,zY);
   /* COM height */
-  core->cz.vrt.zd = zVec3DElem(&core->robot.d_com_pos,zZ) - zVec3DElem(&core->lf.p,zZ);
-  core->cz.vrt.zd = 0.9 * core->cz.vrt.zd;
+  core->cz.vrt._zd = zVec3DElem(&core->robot.d_com_pos,zZ) - zVec3DElem(&core->lf.p,zZ);
+  core->cz.vrt._zd = 0.9 * core->cz.vrt._zd;
 }
 
 void _pdCorePoseInit(pdCore *core)
@@ -187,7 +187,7 @@ void _pdCorePoseInit(pdCore *core)
   zVec3DCopy( &core->robot.d_lf_att, &core->lf.as );
   zVec3DCopy( &core->robot.d_rf_att, &core->rf.as );
   /* body */
-  zVec3DCreate( &core->robot.d_com_pos, core->xd, core->yd, core->cz.vrt.zd );
+  zVec3DCreate( &core->robot.d_com_pos, core->xd, core->yd, core->cz.vrt._zd );
   zVec3DCreate( &core->robot.d_body_att, core->theta+zPI_2, 0, 0 );
   /* update */
   _pdCoreUpdateRobot( core );
@@ -347,7 +347,7 @@ void _pdCoreUpdateRef(pdCore *core)
   _pdCoreUpdateRefPosTheta( core );
 
   /* update IK constraints for COM */
-  zVec3DCreate( &core->robot.d_com_pos, core->nx[0], core->ny[0], core->cz.vrt.zd );
+  zVec3DCreate( &core->robot.d_com_pos, core->nx[0], core->ny[0], core->cz.vrt._zd );
   zVec3DCreate( &core->robot.d_body_att, core->theta+zPI_2, 0, 0 );
 }
 

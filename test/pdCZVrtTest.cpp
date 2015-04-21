@@ -92,6 +92,13 @@ TEST_F(pdCZVrtTest, SetPrm)
   EXPECT_EQ( 5.5, pdCZVrtMass( &vrt ) );
 }
 
+TEST_F(pdCZVrtTest, ReactForce)
+{
+  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0, 5 );
+  EXPECT_DOUBLE_EQ( 49.03326, pdCZVrtReactForce( &vrt, 0.2, 0 ) );
+  EXPECT_DOUBLE_EQ( 73.54989, pdCZVrtReactForce( &vrt, 0.1, 0 ) );
+  EXPECT_DOUBLE_EQ( 66.547514688721691, pdCZVrtReactForce( &vrt, 0.1, 0.1 ) );
+  EXPECT_DOUBLE_EQ( 0, pdCZVrtReactForce( &vrt, 0.4, 0.1 ) );
 }
 
 TEST_F(pdCZVrtTest, Update)

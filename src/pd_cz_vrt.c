@@ -17,6 +17,45 @@ void pdCZVrtDestroy(pdCZVrt *vrt)
   pdCZVrtInit( vrt );
 }
 
+static double _pdCZVrtXi(pdCZVrt *vrt);
+static double _pdCZVrtK1(pdCZVrt *vrt);
+static double _pdCZVrtK2(pdCZVrt *vrt);
+static double _pdCZVrtBias(pdCZVrt *vrt);
+static double _pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz);
+
+double _pdCZVrtXi(pdCZVrt *vrt)
+{
+  return sqrt( RK_G / pdCZVrtRef(vrt) );
+}
+
+double _pdCZVrtK1(pdCZVrt *vrt)
+{
+  return -pdCZVrtMass(vrt) * zSqr(_pdCZVrtXi(vrt)) * pdCZVrtQ1(vrt) * pdCZVrtQ1(vrt);
+}
+
+double _pdCZVrtK2(pdCZVrt *vrt)
+{
+  return -pdCZVrtMass(vrt) * _pdCZVrtXi(vrt) * ( pdCZVrtQ1(vrt) + pdCZVrtQ1(vrt) );
+}
+
+double _pdCZVrtBias(pdCZVrt *vrt)
+{
+  return pdCZVrtMass(vrt) * RK_G;
+}
+
+double _pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz)
+{
+  return _pdCZVrtK1(vrt) * ( z - pdCZVrtRef(vrt) ) + _pdCZVrtK2(vrt) * vz + _pdCZVrtBias(vrt);
+}
+
+double pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz)
+{
+  double fz;
+
+  fz = _pdCZVrtReactForce( vrt, z, vz );
+  return zMax( 0, fz );
+}
+
 void pdCZVrtUpdate(pdCZVrt *vrt)
 {
   vrt->z = vrt->_zd;

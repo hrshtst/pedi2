@@ -53,7 +53,7 @@ typedef struct{
 #define pdCZAccRad(c) \
   pdCZHrzAcc( &(c)->rad )
 #define pdCZUpdate(c,du,vu,dw,vw) do{\
-  pdCZVrtUpdate( &(c)->vrt );\
+  pdCZVrtUpdate( &(c)->vrt, (c)->vrt._zd, 0, 0, 0 );\
   pdCZHrzUpdate( &(c)->tan, du, vu, dw, vw );\
   pdCZHrzUpdate( &(c)->rad, du, vu, dw, vw );\
 } while (0)

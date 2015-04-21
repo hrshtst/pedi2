@@ -116,7 +116,7 @@ TEST_F(pdCZVrtTest, CalcZeta)
 
 TEST_F(pdCZVrtTest, Update)
 {
-  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0, 5 );
+  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
   pdCZVrtUpdate( &vrt, 0.2, 0, 0, 0 );
   EXPECT_DOUBLE_EQ( 9.806652, pdCZVrtRF(&vrt) );
   EXPECT_DOUBLE_EQ( 0, pdCZVrtAcc(&vrt) );

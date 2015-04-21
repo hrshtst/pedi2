@@ -13,12 +13,9 @@ class pdCZVrtTest : public testing::Test {
 
   void SetRandPrm() {
     pdCZVrtSetRef( &vrt, 1 );
-    pdCZVrtSetQ1( &vrt, 3 );
-    pdCZVrtSetQ2( &vrt, 4 );
-    pdCZVrtSetMass( &vrt, 2 );
-    vrt._reffz = 5;
-    vrt._refacc = 6;
-    vrt.zeta = 7;
+    pdCZVrtSetQ1( &vrt, 2 );
+    pdCZVrtSetQ2( &vrt, 3 );
+    vrt.zeta = 4;
   };
 
   pdCZVrt vrt;
@@ -31,9 +28,6 @@ TEST_F(pdCZVrtTest, Init)
   EXPECT_EQ( 0, pdCZVrtRef( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ1( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ2( &vrt ) );
-  EXPECT_EQ( 0, pdCZVrtMass( &vrt ) );
-  EXPECT_EQ( 0, vrt._reffz );
-  EXPECT_EQ( 0, vrt._refacc );
   EXPECT_EQ( 0, vrt.zeta );
 }
 
@@ -44,9 +38,6 @@ TEST_F(pdCZVrtTest, Destroy)
   EXPECT_EQ( 0, pdCZVrtRef( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ1( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ2( &vrt ) );
-  EXPECT_EQ( 0, pdCZVrtMass( &vrt ) );
-  EXPECT_EQ( 0, vrt._reffz );
-  EXPECT_EQ( 0, vrt._refacc );
   EXPECT_EQ( 0, vrt.zeta );
 }
 
@@ -74,30 +65,20 @@ TEST_F(pdCZVrtTest, SetQ2)
   EXPECT_EQ( 10, pdCZVrtQ2( &vrt ) );
 }
 
-TEST_F(pdCZVrtTest, SetMass)
-{
-  pdCZVrtSetMass( &vrt, 1 );
-  EXPECT_EQ( 1, pdCZVrtMass( &vrt ) );
-  pdCZVrtSetMass( &vrt, 10 );
-  EXPECT_EQ( 10, pdCZVrtMass( &vrt ) );
-}
-
 TEST_F(pdCZVrtTest, SetPrm)
 {
-  pdCZVrtInit( &vrt );
-  pdCZVrtSetPrm( &vrt, 0.26, 1.0, 0.5, 5.5 );
+  pdCZVrtSetPrm( &vrt, 0.26, 1.0, 0.5 );
   EXPECT_EQ( 0.26, pdCZVrtRef( &vrt ) );
   EXPECT_EQ( 1.0, pdCZVrtQ1( &vrt ) );
   EXPECT_EQ( 0.5, pdCZVrtQ2( &vrt ) );
-  EXPECT_EQ( 5.5, pdCZVrtMass( &vrt ) );
 }
 
 TEST_F(pdCZVrtTest, ReactForce)
 {
-  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0, 5 );
-  EXPECT_DOUBLE_EQ( 49.03326, pdCZVrtReactForce( &vrt, 0.2, 0 ) );
-  EXPECT_DOUBLE_EQ( 73.54989, pdCZVrtReactForce( &vrt, 0.1, 0 ) );
-  EXPECT_DOUBLE_EQ( 66.547514688721691, pdCZVrtReactForce( &vrt, 0.1, 0.1 ) );
+  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
+  EXPECT_DOUBLE_EQ( 9.806652, pdCZVrtReactForce( &vrt, 0.2, 0 ) );
+  EXPECT_DOUBLE_EQ( 14.709978, pdCZVrtReactForce( &vrt, 0.1, 0 ) );
+  EXPECT_DOUBLE_EQ( 13.309502937744337, pdCZVrtReactForce( &vrt, 0.1, 0.1 ) );
   EXPECT_DOUBLE_EQ( 0, pdCZVrtReactForce( &vrt, 0.4, 0.1 ) );
 }
 

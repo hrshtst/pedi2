@@ -5,10 +5,7 @@ void pdCZVrtInit(pdCZVrt *vrt)
   vrt->_zd = 0;
   vrt->_q1 = 0;
   vrt->_q2 = 0;
-  vrt->mass  = 0;
 
-  vrt->_reffz = 0;
-  vrt->_refacc = 0;
   vrt->zeta = 0;
 }
 
@@ -30,17 +27,17 @@ double _pdCZVrtXi(pdCZVrt *vrt)
 
 double _pdCZVrtK1(pdCZVrt *vrt)
 {
-  return -pdCZVrtMass(vrt) * zSqr(_pdCZVrtXi(vrt)) * pdCZVrtQ1(vrt) * pdCZVrtQ1(vrt);
+  return -zSqr(_pdCZVrtXi(vrt)) * pdCZVrtQ1(vrt) * pdCZVrtQ1(vrt);
 }
 
 double _pdCZVrtK2(pdCZVrt *vrt)
 {
-  return -pdCZVrtMass(vrt) * _pdCZVrtXi(vrt) * ( pdCZVrtQ1(vrt) + pdCZVrtQ1(vrt) );
+  return -_pdCZVrtXi(vrt) * ( pdCZVrtQ1(vrt) + pdCZVrtQ1(vrt) );
 }
 
 double _pdCZVrtBias(pdCZVrt *vrt)
 {
-  return pdCZVrtMass(vrt) * RK_G;
+  return RK_G;
 }
 
 double _pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz)

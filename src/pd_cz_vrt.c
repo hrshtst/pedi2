@@ -6,6 +6,9 @@ void pdCZVrtInit(pdCZVrt *vrt)
   vrt->_q1 = 0;
   vrt->_q2 = 0;
 
+  vrt->reffz = 0;
+  vrt->refacc = 0;
+  vrt->refzmp = 0;
   vrt->zeta = 0;
 }
 

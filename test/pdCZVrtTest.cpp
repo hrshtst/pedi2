@@ -15,7 +15,10 @@ class pdCZVrtTest : public testing::Test {
     pdCZVrtSetRef( &vrt, 1 );
     pdCZVrtSetQ1( &vrt, 2 );
     pdCZVrtSetQ2( &vrt, 3 );
-    vrt.zeta = 4;
+    vrt.reffz = 4;
+    vrt.refacc = 5;
+    vrt.refzmp = 6;
+    vrt.zeta = 7;
   };
 
   pdCZVrt vrt;
@@ -28,7 +31,10 @@ TEST_F(pdCZVrtTest, Init)
   EXPECT_EQ( 0, pdCZVrtRef( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ1( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ2( &vrt ) );
-  EXPECT_EQ( 0, vrt.zeta );
+  EXPECT_EQ( 0, pdCZVrtRF( &vrt ) );
+  EXPECT_EQ( 0, pdCZVrtAcc( &vrt ) );
+  EXPECT_EQ( 0, pdCZVrtZMP( &vrt ) );
+  EXPECT_EQ( 0, pdCZVrtZeta( &vrt ) );
 }
 
 TEST_F(pdCZVrtTest, Destroy)
@@ -38,7 +44,10 @@ TEST_F(pdCZVrtTest, Destroy)
   EXPECT_EQ( 0, pdCZVrtRef( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ1( &vrt ) );
   EXPECT_EQ( 0, pdCZVrtQ2( &vrt ) );
-  EXPECT_EQ( 0, vrt.zeta );
+  EXPECT_EQ( 0, pdCZVrtRF( &vrt ) );
+  EXPECT_EQ( 0, pdCZVrtAcc( &vrt ) );
+  EXPECT_EQ( 0, pdCZVrtZMP( &vrt ) );
+  EXPECT_EQ( 0, pdCZVrtZeta( &vrt ) );
 }
 
 TEST_F(pdCZVrtTest, SetRef)

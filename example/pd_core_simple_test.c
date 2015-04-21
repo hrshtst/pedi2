@@ -14,15 +14,14 @@ int main(void)
   pdCoreInit( &ctrl, &com );
 
   /* load kinematics/dynamics model file (robot.zkc) */
-  /* and inverse kinematics configuration file (robot_ik.conf) */
-  pdCoreLoad( &ctrl, "model/hydra.zkc", "model/hydra_ik.conf" );
+  pdCoreLoad( &ctrl, "model/hydra.zkc" );
 
   /* prepare joint displacement vector */
   dis = zVecAlloc( pdCoreGetJointSize(&ctrl) );
 
   /* set referential values */
-  com.zd = 0.8;             /* COM height */
-  com.dist = 0.35;           /* distance of both feet */
+  com.zd = 0.85;             /* COM height */
+  com.dist = 0.25;           /* distance of both feet */
   com.lfh = com.rfh = 0.2;  /* (maximal) foot lifting height */
   com.vud = 0.0;    /* referential velocity (longitudinal) */
   com.kappa = 0.0;  /* referential curvature for rotation */
@@ -30,7 +29,7 @@ int main(void)
   /* main loop */
   for( i=0; i<STEP; i++ ){
     /* modify command values */
-    com.vud = 0.25;
+    com.vud = 0.1;
     com.kappa = 0.0;
 
     /* feedback the current state */
@@ -43,7 +42,9 @@ int main(void)
     /* output */
     /* obtain desired joint displacement as a zVec instance */
     pdCoreGetJointDis( &ctrl, dis );
-    printf( "%f ", DT );zVecWrite( dis ); /* output to stdout */
+    /* you can visualize the motion by executing the following command, e.g. */
+    /*   $ rk_anim model/hydra.zkc motion.zvs -x 13 -y 0.5 -z 0.8            */
+    printf( "%f ", DT );zVecWrite( dis );
   }
 
   /* destroy */

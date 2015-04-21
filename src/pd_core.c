@@ -43,7 +43,7 @@ static void _pdCoreUpdateRobot(pdCore *core);
 static void _pdCoreUpdateRefPosTheta(pdCore *core);
 static void _pdCoreUpdateRef(pdCore *core);
 
-void _pdCoreLoad(pdCore *core, const char* model_file, const char* conf_file);
+void _pdCoreLoad(pdCore *core, const char* model_file);
 void _pdCorePoseInit(pdCore *core);
 
 void _pdCoreWritePosAtt(pdCore *core)
@@ -154,9 +154,9 @@ double _pdCoreCalcSoleWidth(zVec3DList *sr)
   return ymax - ymin;
 }
 
-void _pdCoreLoad(pdCore *core, const char* model_file, const char* conf_file)
+void _pdCoreLoad(pdCore *core, const char* model_file)
 {
-  pdRobotLoad( &core->robot, model_file, conf_file );
+  pdRobotLoad( &core->robot, model_file );
   _pdCoreUpdateRobot( core );
   /* sole width */
   core->lf.sole_w = _pdCoreCalcSoleWidth( &core->robot.sr_lf );
@@ -200,9 +200,9 @@ void _pdCorePoseInit(pdCore *core)
   core->rf.track_old[2] = zVec3DElem( &core->rf.p, zZ );
 }
 
-void pdCoreLoad(pdCore *core, char *model_file, char *conf_file)
+void pdCoreLoad(pdCore *core, char *model_file)
 {
-  _pdCoreLoad( core, model_file, conf_file );
+  _pdCoreLoad( core, model_file );
   _pdCorePoseInit( core );
 }
 

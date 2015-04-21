@@ -239,10 +239,10 @@ int main(int argc, char *argv[])
 
   pdCoreInit( &core, &com );
   if( model == DM_MODEL_MIGHTY ){
-    pdCoreLoad( &core, "../model/mighty.zkc", "../model/mighty_ik.conf" );
+    pdCoreLoad( &core, "../model/mighty.zkc" );
     dmGLInit( "../model/mighty.zkc" );
   } else if ( model == DM_MODEL_HYDRA ) {
-    pdCoreLoad( &core, "../model/hydra.zkc", "../model/hydra_ik.conf" );
+    pdCoreLoad( &core, "../model/hydra.zkc" );
     dmGLInit( "../model/hydra.zkc" );
   } else {
     ZRUNERROR( "invalid model" );

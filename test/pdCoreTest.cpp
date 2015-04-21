@@ -3,7 +3,7 @@
 
 __BEGIN_DECLS
 
-void _pdCoreLoad(pdCore *core, const char* model_file, const char* conf_file);
+void _pdCoreLoad(pdCore *core, const char* model_file);
 void _pdCorePoseInit(pdCore *core);
 
 __END_DECLS
@@ -20,10 +20,9 @@ class pdCoreTest : public testing::Test {
 TEST_F(pdCoreTest, InitProcess)
 {
   char model[] = "model/mighty.zkc";
-  char conf[]  = "model/mighty_ik.conf";
 
   pdCoreInit( &core, &com );
-  _pdCoreLoad( &core, model, conf );
+  _pdCoreLoad( &core, model );
 
   // feet position and attitude
   EXPECT_NEAR( 0.034, zVec3DElem(&core.lf.p,zX), 1e-04 );

@@ -14747,4 +14747,49 @@ frame: {
 parent: lankle_p
 shape: left_sole
 
+[init]
+frame : {
+ 1, 0, 0, 0
+ 0, 1, 0, 0
+ 0, 0, 1, 0
+}
 
+[ik]
+joint: waist_base   0.001
+joint: waist_p      0 0
+joint: waist_r	    0 0
+joint: neck_p       0 0
+joint: lhip_y	    0.001
+joint: lhip_p	    0.001
+joint: lhip_r	    0.001
+joint: lknee_p	    0.001
+joint: lankle_r	    0.001
+joint: lankle_p	    0.001
+joint: rhip_y	    0.001
+joint: rhip_p	    0.001
+joint: rhip_r	    0.001
+joint: rknee_p	    0.001
+joint: rankle_r	    0.001
+joint: rankle_p	    0.001
+joint: lscaplae_y   0 0
+joint: lshoulder_p  0 0
+joint: lshoulder_r  0 15
+joint: lshoulder_y  0 -90
+joint: lelbow_p     0 -15
+joint: lwrist_y     0 0
+joint: lwrist_r     0 -15
+joint: lwrist_p     0 0
+joint: rscaplae_y   0 0
+joint: rshoulder_p  0 0
+joint: rshoulder_r  0 -15
+joint: rshoulder_y  0 90
+joint: relbow_p     0 -15
+joint: rwrist_y     0 0
+joint: rwrist_r     0 15
+joint: rwrist_p     0 0
+constraint: com
+constraint: world_att waist_base
+constraint: world_pos left_foot f
+constraint: world_att left_foot f
+constraint: world_pos right_foot f
+constraint: world_att right_foot f

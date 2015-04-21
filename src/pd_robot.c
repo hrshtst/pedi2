@@ -24,7 +24,7 @@ void pdRobotInit(pdRobot *robot)
   zListInit( &robot->sr );
 }
 
-void pdRobotLoad(pdRobot *robot, const char* model_file, const char* conf_file)
+void pdRobotLoad(pdRobot *robot, const char* model_file)
 {
   register int i;
 
@@ -59,7 +59,7 @@ void pdRobotLoad(pdRobot *robot, const char* model_file, const char* conf_file)
   /* IK solver */
   if( !rkIKCreate( &robot->ik, &robot->chain ) )
     exit( EXIT_FAILURE );
-  if( !rkIKConfReadFile( &robot->ik, (char *)conf_file ) )
+  if( !rkIKConfReadFile( &robot->ik, &robot->chain, (char *)model_file ) )
     exit( EXIT_FAILURE );
   for( i=0; i<6; i++ )
     robot->cell[i] = rkIKFindCell( &robot->ik, i );

@@ -14,9 +14,8 @@ class pdRobotTest : public testing::Test {
 TEST_F(pdRobotTest, Load)
 {
   char model[] = "model/mighty.zkc";
-  char conf[]  = "model/mighty_ik.conf";
 
-  pdRobotLoad( &robot, model, conf );
+  pdRobotLoad( &robot, model );
   EXPECT_EQ( 25, (int)rkChainNum(&robot.chain) );
   EXPECT_EQ(  0, robot.body_id );
   EXPECT_EQ( 12, robot.lf_id );
@@ -27,19 +26,17 @@ TEST_F(pdRobotTest, Load)
 TEST_F(pdRobotTest, GetJointSize)
 {
   char model[] = "model/mighty.zkc";
-  char conf[]  = "model/mighty_ik.conf";
 
-  pdRobotLoad( &robot, model, conf );
+  pdRobotLoad( &robot, model );
   EXPECT_EQ( 26, pdRobotGetJointSize(&robot) );
 }
 
 TEST_F(pdRobotTest, GetJointDis)
 {
   char model[] = "model/mighty.zkc";
-  char conf[]  = "model/mighty_ik.conf";
   zVec dis;
 
-  pdRobotLoad( &robot, model, conf );
+  pdRobotLoad( &robot, model );
   dis = zVecAlloc(pdRobotGetJointSize(&robot));
   zVec3DCreate( &robot.d_com_pos, 0, 0, 0.26 );
   zVec3DCreate( &robot.d_lf_pos, 0.042, 0, 0 );

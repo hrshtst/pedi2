@@ -47,10 +47,7 @@ double _pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz)
 
 double pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz)
 {
-  double fz;
-
-  fz = _pdCZVrtReactForce( vrt, z, vz );
-  return zMax( 0, fz );
+  return zMax( 0, _pdCZVrtReactForce( vrt, z, vz ) );
 }
 
 void pdCZVrtUpdate(pdCZVrt *vrt)

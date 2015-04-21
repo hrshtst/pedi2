@@ -50,6 +50,11 @@ double pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz)
   return zMax( 0, _pdCZVrtReactForce( vrt, z, vz ) );
 }
 
+double pdCZVrtAcc(pdCZVrt *vrt, double z, double vz)
+{
+  return pdCZVrtReactForce( vrt, z, vz ) - _pdCZVrtBias( vrt );
+}
+
 void pdCZVrtUpdate(pdCZVrt *vrt)
 {
   vrt->z = vrt->_zd;

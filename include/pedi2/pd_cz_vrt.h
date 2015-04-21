@@ -35,6 +35,7 @@ __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 #define pdCZVrtQ2(v) (v)->_q2
 
 __EXPORT double pdCZVrtReactForce(pdCZVrt *vrt, double z, double vz);
+__EXPORT double pdCZVrtAcc(pdCZVrt *vrt, double z, double vz);
 
 void pdCZVrtUpdate(pdCZVrt *vrt);
 

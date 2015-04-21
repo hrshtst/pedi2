@@ -97,3 +97,11 @@ TEST_F(pdCZHrzUTest, SetZeta)
   zeta = 10;
   EXPECT_EQ( 10, pdCZHrzUZeta( &u ) );
 }
+
+TEST_F(pdCZHrzUTest, SetPrm)
+{
+  pdCZHrzUSetPrm( &u, 0.2, 1.0, 0.5 );
+  EXPECT_EQ( 0.2, pdCZHrzURefVel( &u ) );
+  EXPECT_EQ( 1.0, pdCZHrzUQ1( &u ) );
+  EXPECT_EQ( 0.5, pdCZHrzUQ2( &u ) );
+}

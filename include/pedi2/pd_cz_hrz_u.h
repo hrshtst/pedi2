@@ -24,6 +24,11 @@ __EXPORT void pdCZHrzUDestroy(pdCZHrzU *u);
 #define pdCZHrzUSetQ1(u,q1) (u)->_q1 = q1
 #define pdCZHrzUSetQ2(u,q2) (u)->_q2 = q2
 #define pdCZHrzUSetKappa(u,k) *((u)->_kappa) = k
+#define pdCZHrzUSetPrm(u,vd,q1,q2) do{\
+  pdCZHrzUSetRefVel( u, vd );\
+  pdCZHrzUSetQ1( u, q1 );\
+  pdCZHrzUSetQ2( u, q2 );\
+} while(0)
 
 /* methods to get parameters */
 #define pdCZHrzURefVel(u) (u)->_vd

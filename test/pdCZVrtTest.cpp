@@ -73,27 +73,27 @@ TEST_F(pdCZVrtTest, SetPrm)
   EXPECT_EQ( 0.5, pdCZVrtQ2( &vrt ) );
 }
 
-TEST_F(pdCZVrtTest, ReactForce)
+TEST_F(pdCZVrtTest, CalcReactForce)
 {
   pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
-  EXPECT_DOUBLE_EQ( 9.806652, pdCZVrtReactForce( &vrt, 0.2, 0 ) );
-  EXPECT_DOUBLE_EQ( 14.709978, pdCZVrtReactForce( &vrt, 0.1, 0 ) );
-  EXPECT_DOUBLE_EQ( 13.309502937744337, pdCZVrtReactForce( &vrt, 0.1, 0.1 ) );
-  EXPECT_DOUBLE_EQ( 0, pdCZVrtReactForce( &vrt, 0.4, 0.1 ) );
+  EXPECT_DOUBLE_EQ( 9.806652, pdCZVrtCalcReactForce( &vrt, 0.2, 0 ) );
+  EXPECT_DOUBLE_EQ( 14.709978, pdCZVrtCalcReactForce( &vrt, 0.1, 0 ) );
+  EXPECT_DOUBLE_EQ( 13.309502937744337, pdCZVrtCalcReactForce( &vrt, 0.1, 0.1 ) );
+  EXPECT_DOUBLE_EQ( 0, pdCZVrtCalcReactForce( &vrt, 0.4, 0.1 ) );
 }
 
-TEST_F(pdCZVrtTest, Acc)
+TEST_F(pdCZVrtTest, CalcAcc)
 {
-  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0, 5 );
-  EXPECT_DOUBLE_EQ( 0, pdCZVrtAcc( &vrt, 0.2, 0 ) );
-  EXPECT_DOUBLE_EQ( 4.903326, pdCZVrtAcc( &vrt, 0.1, 0 ) );
-  EXPECT_DOUBLE_EQ( 3.5028509377443386, pdCZVrtAcc( &vrt, 0.1, 0.1 ) );
-  EXPECT_DOUBLE_EQ( -9.806652, pdCZVrtAcc( &vrt, 0.4, 0.1 ) );
+  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
+  EXPECT_DOUBLE_EQ( 0, pdCZVrtCalcAcc( &vrt, 0.2, 0 ) );
+  EXPECT_DOUBLE_EQ( 4.903326, pdCZVrtCalcAcc( &vrt, 0.1, 0 ) );
+  EXPECT_DOUBLE_EQ( 3.5028509377443386, pdCZVrtCalcAcc( &vrt, 0.1, 0.1 ) );
+  EXPECT_DOUBLE_EQ( -9.806652, pdCZVrtCalcAcc( &vrt, 0.4, 0.1 ) );
 }
 
-TEST_F(pdCZVrtTest, Zeta)
+TEST_F(pdCZVrtTest, CalcZeta)
 {
-  EXPECT_DOUBLE_EQ( 7.0023753112783096, pdCZVrtZeta( &vrt, 0.2, 0, 0 ) );
-  EXPECT_DOUBLE_EQ( 7.037986928092435, pdCZVrtZeta( &vrt, 0.2, 0.1, 0 ) );
-  EXPECT_DOUBLE_EQ( 9.9532165655128786, pdCZVrtZeta( &vrt, 0.2, 0.1, 0.1 ) );
+  EXPECT_DOUBLE_EQ( 7.0023753112783096, pdCZVrtCalcZeta( &vrt, 0.2, 0, 0 ) );
+  EXPECT_DOUBLE_EQ( 7.037986928092435, pdCZVrtCalcZeta( &vrt, 0.2, 0.1, 0 ) );
+  EXPECT_DOUBLE_EQ( 9.9532165655128786, pdCZVrtCalcZeta( &vrt, 0.2, 0.1, 0.1 ) );
 }

@@ -44,7 +44,7 @@ typedef struct{
 } pdCore;
 
 void pdCoreInit(pdCore *core, pdCommand *com);
-void pdCoreLoad(pdCore *core, char *model_file, char *conf_file);
+void pdCoreLoad(pdCore *core, char *model_file);
 void pdCoreExit(pdCore *core);
 
 void pdCoreSetCommand(pdCore *core, pdCommand *com);

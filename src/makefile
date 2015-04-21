@@ -19,9 +19,10 @@ all: $(TARGET)
 $(DLIB): $(OBJ)
 	@echo " LD	" $^
 	@$(LD) $(LDFLAGS) -o $@ $^ > /dev/null
-	-mv $@ $(LIBDIR)
+	-@mv $@ $(LIBDIR)
 %.o: %.c
 	@echo " CC	" $<
 	@$(CC) $(CFLAGS) -c $< > /dev/null
 clean:
-	-rm -f *.o *~ $(TARGET)
+	@echo " CLEAN"
+	-@rm -f *.o *~ $(TARGET)

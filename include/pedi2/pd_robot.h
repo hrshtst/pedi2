@@ -26,7 +26,7 @@ typedef struct{
 } pdRobot;
 
 void pdRobotInit(pdRobot *robot);
-void pdRobotLoad(pdRobot *robot, const char* model_file, const char* conf_file);
+void pdRobotLoad(pdRobot *robot, const char* model_file);
 void pdRobotExit(pdRobot *robot);
 
 void pdRobotSolveIK(pdRobot *robot);

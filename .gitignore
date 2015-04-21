@@ -8,6 +8,7 @@ G*
 *.log
 /todo.org
 /example/ctrl_view_test
-/app/dynmorph
+/app/dynmorph/dynmorph
 /test/*Test
 /example/pd_core_simple_test
+/app/pedi2-config

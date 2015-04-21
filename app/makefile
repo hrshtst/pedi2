@@ -1,23 +1,37 @@
 include ../config
 
-ROOTDIR=..
-
-INCLUDE=-I$(ROOTDIR)/include -I$(PREFIX)/include
-LIB=-L$(ROOTDIR)/lib -L$(PREFIX)/lib
-LINK=-lpedi2 `rokigl-config -l`
+INCLUDE=-I. -I../include -I$(PREFIX)/include
+LIB=-L../lib -L$(PREFIX)/lib
+BINDIR=$(PREFIX)/bin
 
 CC=gcc
-CFLAGS=-Wall -O3 $(LIB) $(INCLUDE) -funroll-loops
+CFLAGS=-ansi -Wall -O3 $(INCLUDE) $(LIB)
 
-OBJS=dm_scene.o dm_console.o
-TARGET=dynmorph
+LINK=-lpedi2 `roki-config -l`
 
-VPATH=util
-all: $(TARGET)
+COMPILE=$(CC) $(CFLAGS) -o $@ $< $(LINK)
 
-%.o: %.c %.h
-	$(CC) $(CFLAGS) -c $<
-dynmorph: dynmorph.c $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LINK)
+INSTALL=install -m 755
+
+CONFIGGEN=cure-config-gen
+CONFIG=pedi2-config
+TARGET=$(CONFIG)
+
+#####################################################################
+all : $(TARGET)
+
+$(CONFIG):
+	@echo " GENERATE" $@
+	-@rm -f $@
+	@$(CONFIGGEN) -I $(PREFIX)/include -L $(PREFIX)/lib -l "$(LINK)" -v $(VERSION) > $@
+
+%: %.c
+	@echo " CC	" $<
+	@$(COMPILE)
+install: $(TARGET)
+	@echo " INSTALL" $^
+	@$(INSTALL) $^ $(BINDIR)
+
 clean :
-	rm -f *.o *~ core $(TARGET)
+	@echo " CLEAN"
+	-@rm -f *.o *~ core $(TARGET)

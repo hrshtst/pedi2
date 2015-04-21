@@ -30,14 +30,14 @@ void init_console_mighty(dmConsole *con, pdCommand *com)
 
 void init_console_hydra(dmConsole *con, pdCommand *com)
 {
-  dmConsoleAddEval( con, "COM height", 0.7, 0.95, 0.85, 0, &com->zd );
+  dmConsoleAddEval( con, "COM height", 0.7, 0.95, 0.9, 0, &com->zd );
   dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &com->vud );
   dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &com->qu1 );
   dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &com->qu2 );
   dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &com->vwd );
   dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &com->qw1 );
   dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &com->qw2 );
-  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.35, 0, &com->dist );
+  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.25, 0, &com->dist );
   dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &com->kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &com->rho );
   dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &com->kr );
@@ -239,11 +239,11 @@ int main(int argc, char *argv[])
 
   pdCoreInit( &core, &com );
   if( model == DM_MODEL_MIGHTY ){
-    pdCoreLoad( &core, "model/mighty.zkc", "model/mighty_ik.conf" );
-    dmGLInit( "model/mighty.zkc" );
+    pdCoreLoad( &core, "../model/mighty.zkc" );
+    dmGLInit( "../model/mighty.zkc" );
   } else if ( model == DM_MODEL_HYDRA ) {
-    pdCoreLoad( &core, "model/hydra.zkc", "model/hydra_ik.conf" );
-    dmGLInit( "model/hydra.zkc" );
+    pdCoreLoad( &core, "../model/hydra.zkc" );
+    dmGLInit( "../model/hydra.zkc" );
   } else {
     ZRUNERROR( "invalid model" );
     exit( EXIT_FAILURE );

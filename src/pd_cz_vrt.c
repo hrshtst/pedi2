@@ -55,6 +55,11 @@ double pdCZVrtAcc(pdCZVrt *vrt, double z, double vz)
   return pdCZVrtReactForce( vrt, z, vz ) - _pdCZVrtBias( vrt );
 }
 
+double pdCZVrtZeta(pdCZVrt *vrt, double z, double az, double zz )
+{
+  return sqrt( ( RK_G + az ) / ( z - zz ) );
+}
+
 void pdCZVrtUpdate(pdCZVrt *vrt)
 {
   vrt->z = vrt->_zd;

@@ -60,8 +60,9 @@ double pdCZVrtZeta(pdCZVrt *vrt, double z, double az, double zz )
   return sqrt( ( RK_G + az ) / ( z - zz ) );
 }
 
-void pdCZVrtUpdate(pdCZVrt *vrt)
+void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz)
 {
-  vrt->z = vrt->_zd;
-  vrt->zeta = sqrt( RK_G / vrt->_zd );
+  pdCZVrtReactForce( vrt, z, vz );
+  pdCZVrtAcc( vrt, z, vz );
+  pdCZVrtZeta( vrt, z, az, zz );
 }

@@ -97,21 +97,3 @@ TEST_F(pdCZVrtTest, Zeta)
   EXPECT_DOUBLE_EQ( 7.037986928092435, pdCZVrtZeta( &vrt, 0.2, 0.1, 0 ) );
   EXPECT_DOUBLE_EQ( 9.9532165655128786, pdCZVrtZeta( &vrt, 0.2, 0.1, 0.1 ) );
 }
-
-TEST_F(pdCZVrtTest, Update)
-{
-  pdCZVrt vrt;
-
-  pdCZVrtInit( &vrt );
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 0.26, vrt.z );
-  EXPECT_EQ( 0.26, vrt._zd );
-  EXPECT_EQ( sqrt(RK_G/0.26), vrt.zeta );
-
-  pdCZVrtSetRef( &vrt, 0.3 );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 0.3, vrt.z );
-  EXPECT_EQ( 0.3, vrt._zd );
-  EXPECT_EQ( sqrt(RK_G/0.3), vrt.zeta );
-}

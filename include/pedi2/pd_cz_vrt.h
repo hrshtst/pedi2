@@ -39,7 +39,7 @@ __EXPORT double pdCZVrtAcc(pdCZVrt *vrt, double z, double vz);
 
 __EXPORT double pdCZVrtZeta(pdCZVrt *vrt, double z, double az, double zz );
 
-void pdCZVrtUpdate(pdCZVrt *vrt);
+__EXPORT void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz);
 
 __END_DECLS
 

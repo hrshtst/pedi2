@@ -70,8 +70,11 @@ __EXPORT void pdCZHrzMovDestroy(pdCZHrzMov *hrz);
   pdCZHrzUCalcRegZMP( &(h)->_u, du, vu, dw, wu )
 #define pdCZHrzMovCalcRegZMPW(h,du,vu,dw,wu) \
   pdCZHrzWCalcRegZMP( &(h)->_w, du, vu, dw, wu )
-__EXPORT void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw);
-__EXPORT void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double du, double vu, double dw, double vw);
+__EXPORT void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw, double *uz, double *wz);
+__EXPORT void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double uz, double wz, double *ddu, double *ddw);
+
+/* update method */
+__EXPORT void pdCZHrzMovUpdate(pdCZHrzMov *hrz, double du, double vu, double dw, double vw);
 
 
 __END_DECLS

@@ -22,7 +22,7 @@ void pdCZHrzMovDestroy(pdCZHrzMov *hrz)
   pdCZHrzMovSetSR( hrz, NULL );
 }
 
-void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw)
+void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw, double *uz, double *wz)
 {
   zVec3D p, cp;
 
@@ -32,16 +32,23 @@ void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double 
                 pdCZVrtCalcZMP( hrz->_vrt ) );
   if( hrz->_sr ){
     zCH2DClosest( hrz->_sr, &p, &cp );
-    hrz->refuz = zVec3DElem( &cp, zX );
-    hrz->refwz = zVec3DElem( &cp, zY );
+    *uz = zVec3DElem( &cp, zX );
+    *wz = zVec3DElem( &cp, zY );
   } else {
-    hrz->refuz = zVec3DElem( &p, zX );
-    hrz->refwz = zVec3DElem( &p, zY );
+    *uz = zVec3DElem( &p, zX );
+    *wz = zVec3DElem( &p, zY );
   }
 }
 
-void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double du, double vu, double dw, double vw)
+void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double uz, double wz, double *ddu, double *ddw)
 {
-  hrz->refddu = -zSqr( pdCZHrzMovZeta( hrz ) ) * pdCZHrzMovZMPU( hrz );
-  hrz->refddw = -zSqr( pdCZHrzMovZeta( hrz ) ) * pdCZHrzMovZMPW( hrz );
+  *ddu = -zSqr( pdCZHrzMovZeta( hrz ) ) * uz;
+  *ddw = -zSqr( pdCZHrzMovZeta( hrz ) ) * wz;
+}
+
+void pdCZHrzMovUpdate(pdCZHrzMov *hrz, double du, double vu, double dw, double vw)
+{
+  pdCZHrzMovCalcZMP( hrz, du, vu, dw, vw, &pdCZHrzMovZMPU(hrz), &pdCZHrzMovZMPW(hrz) );
+  pdCZHrzMovCalcAcc( hrz,  pdCZHrzMovZMPU(hrz),  pdCZHrzMovZMPW(hrz),
+                          &pdCZHrzMovAccU(hrz), &pdCZHrzMovAccW(hrz) );
 }

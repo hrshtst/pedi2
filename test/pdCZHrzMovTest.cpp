@@ -77,6 +77,7 @@ TEST_F(pdCZHrzMovTest, Init)
   EXPECT_EQ( &hrz._kappa, hrz._u._kappa );
   EXPECT_EQ( &hrz._kappa, hrz._w._kappa );
   EXPECT_EQ( NULL, hrz._sr );
+  EXPECT_EQ( NULL, pdCZHrzMovSRVert( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzMovZMPU( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzMovZMPW( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzMovAccU( &hrz ) );
@@ -104,6 +105,7 @@ TEST_F(pdCZHrzMovTest, Destroy)
   EXPECT_EQ( NULL, hrz._u._kappa );
   EXPECT_EQ( NULL, hrz._w._kappa );
   EXPECT_EQ( NULL, hrz._sr );
+  EXPECT_EQ( NULL, pdCZHrzMovSRVert( &hrz ) );
 }
 
 TEST_F(pdCZHrzMovTest, CheckSimZMPAllStateZero)

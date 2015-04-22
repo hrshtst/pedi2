@@ -11,6 +11,7 @@ void pdCZHrzMovInit(pdCZHrzMov *hrz, pdCZVrt *vrt)
   hrz->refwz = 0;
   hrz->refddu = 0;
   hrz->refddw = 0;
+  hrz->_sr_vert = NULL;
 }
 
 void pdCZHrzMovDestroy(pdCZHrzMov *hrz)
@@ -20,6 +21,7 @@ void pdCZHrzMovDestroy(pdCZHrzMov *hrz)
   hrz->_vrt = NULL;
   pdCZHrzMovSetKappa( hrz, 0 );
   pdCZHrzMovSetSR( hrz, NULL );
+  zFree( pdCZHrzMovSRVert( hrz ) );
 }
 
 void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw, double *uz, double *wz)

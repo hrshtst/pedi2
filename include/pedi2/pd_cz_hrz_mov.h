@@ -15,6 +15,7 @@ typedef struct{
   double _kappa;   /* curvature of the referential orbit */
   pdCZVrt *_vrt;   /* controller for vertical motion */
   zVec3DList *_sr; /* supporting region */
+  zVec3D *_sr_vert; /* vertices of supporting retion */
 
   double refuz;    /* referential ZMP pos. for tangential dir. */
   double refwz;    /* referential ZMP pos. for radial dir. */
@@ -56,6 +57,7 @@ __EXPORT void pdCZHrzMovDestroy(pdCZHrzMov *hrz);
 #define pdCZHrzMovDist(h) pdCZHrzWDist( &(h)->_w )
 #define pdCZHrzMovKappa(h) (h)->_kappa
 #define pdCZHrzMovZeta(h) pdCZVrtZeta( (h)->_vrt )
+#define pdCZHrzMovSRVert(h) (h)->_sr_vert
 #define pdCZHrzMovZMPU(h) (h)->refuz
 #define pdCZHrzMovZMPW(h) (h)->refwz
 #define pdCZHrzMovAccU(h) (h)->refddu

@@ -13,13 +13,11 @@ protected:
   };
 
   void SetVacuousPrm() {
-    u._vd = 1;
-    u._q1 = 2;
-    u._q2 = 3;
+    pdCZHrzUSetRefVel( &u, 1 );
+    pdCZHrzUSetQ1( &u, 2 );
+    pdCZHrzUSetQ2( &u, 3 );
     u._kappa = NULL;
     u._zeta = NULL;
-    u.refzmp = 4;
-    u.refacc = 5;
   };
 
   double kappa;
@@ -31,26 +29,22 @@ TEST_F(pdCZHrzUTest, Init)
 {
   SetVacuousPrm();
   pdCZHrzUInit( &u, &kappa, &zeta );
-  EXPECT_EQ( 0, u._vd );
-  EXPECT_EQ( 0, u._q1 );
-  EXPECT_EQ( 0, u._q2 );
+  EXPECT_EQ( 0, pdCZHrzURefVel( &u ) );
+  EXPECT_EQ( 0, pdCZHrzUQ1( &u ) );
+  EXPECT_EQ( 0, pdCZHrzUQ2( &u ) );
   EXPECT_EQ( &kappa, u._kappa );
   EXPECT_EQ( &zeta, u._zeta );
-  EXPECT_EQ( 0, u.refzmp );
-  EXPECT_EQ( 0, u.refacc );
 }
 
 TEST_F(pdCZHrzUTest, Destroy)
 {
   SetVacuousPrm();
   pdCZHrzUDestroy( &u );
-  EXPECT_EQ( 0, u._vd );
-  EXPECT_EQ( 0, u._q1 );
-  EXPECT_EQ( 0, u._q2 );
+  EXPECT_EQ( 0, pdCZHrzURefVel( &u ) );
+  EXPECT_EQ( 0, pdCZHrzUQ1( &u ) );
+  EXPECT_EQ( 0, pdCZHrzUQ2( &u ) );
   EXPECT_EQ( NULL, u._kappa );
   EXPECT_EQ( NULL, u._zeta );
-  EXPECT_EQ( 0, u.refzmp );
-  EXPECT_EQ( 0, u.refacc );
 }
 
 TEST_F(pdCZHrzUTest, SetRefVel)

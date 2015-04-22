@@ -7,8 +7,6 @@ void pdCZHrzUInit(pdCZHrzU *u, double *kappa, double *zeta)
   u->_q2 = 0;
   u->_kappa = kappa;
   u->_zeta = zeta;
-  u->refzmp = 0;
-  u->refacc = 0;
 }
 
 void pdCZHrzUDestroy(pdCZHrzU *u)
@@ -18,8 +16,6 @@ void pdCZHrzUDestroy(pdCZHrzU *u)
   u->_q2 = 0;
   u->_kappa = NULL;
   u->_zeta = NULL;
-  u->refzmp = 0;
-  u->refacc = 0;
 }
 
 static double _pdCZHrzUK1(pdCZHrzU *u);

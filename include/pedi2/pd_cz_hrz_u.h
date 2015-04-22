@@ -10,9 +10,6 @@ typedef struct{
   double _q1, _q2; /* system poles */
   double *_kappa;  /* curvature of referential orbit */
   double *_zeta;   /* interference from vertical motion */
-
-  double refzmp;   /* referential ZMP position */
-  double refacc;   /* referential COM acceleration */
 } pdCZHrzU;
 
 /* c'tor and d'tor */

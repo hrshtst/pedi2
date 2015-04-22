@@ -46,6 +46,11 @@ __EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
 #define pdCZHrzWKappa(w) *((w)->_kappa)
 #define pdCZHrzWZeta(w) *((w)->_zeta)
 
+/* calculation methods */
+__EXPORT double pdCZHrzWCalcSimZMP(pdCZHrzW *w, double du, double vu, double dw, double vw);
+__EXPORT double pdCZHrzWCalcRegZMP(pdCZHrzW *w, double du, double vu, double dw, double vw);
+
+
 __END_DECLS
 
 #endif /* __PD_CZ_HRZ_W_H__ */

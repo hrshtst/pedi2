@@ -55,10 +55,23 @@ __EXPORT void pdCZHrzMovDestroy(pdCZHrzMov *hrz);
 #define pdCZHrzMovKr(h) pdCZHrzWKr( &(h)->_w )
 #define pdCZHrzMovDist(h) pdCZHrzWDist( &(h)->_w )
 #define pdCZHrzMovKappa(h) (h)->_kappa
+#define pdCZHrzMovZeta(h) pdCZVrtZeta( (h)->_vrt )
 #define pdCZHrzMovZMPU(h) (h)->refuz
 #define pdCZHrzMovZMPW(h) (h)->refwz
 #define pdCZHrzMovAccU(h) (h)->refddu
 #define pdCZHrzMovAccW(h) (h)->refddw
+
+/* calculation methods */
+#define pdCZHrzMovCalcSimZMPU(h,du,vu,dw,wu) \
+  pdCZHrzUCalcSimZMP( &(h)->_u, du, vu, dw, wu )
+#define pdCZHrzMovCalcSimZMPW(h,du,vu,dw,wu) \
+  pdCZHrzWCalcSimZMP( &(h)->_w, du, vu, dw, wu )
+#define pdCZHrzMovCalcRegZMPU(h,du,vu,dw,wu) \
+  pdCZHrzUCalcRegZMP( &(h)->_u, du, vu, dw, wu )
+#define pdCZHrzMovCalcRegZMPW(h,du,vu,dw,wu) \
+  pdCZHrzWCalcRegZMP( &(h)->_w, du, vu, dw, wu )
+__EXPORT void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw);
+__EXPORT void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double du, double vu, double dw, double vw);
 
 
 __END_DECLS

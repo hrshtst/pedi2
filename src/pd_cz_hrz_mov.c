@@ -21,3 +21,15 @@ void pdCZHrzMovDestroy(pdCZHrzMov *hrz)
   pdCZHrzMovSetKappa( hrz, 0 );
   pdCZHrzMovSetSR( hrz, NULL );
 }
+
+void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw)
+{
+  hrz->refuz = pdCZHrzMovCalcSimZMPU( hrz, du, vu, dw, vw );
+  hrz->refwz = pdCZHrzMovCalcSimZMPW( hrz, du, vu, dw, vw );
+}
+
+void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double du, double vu, double dw, double vw)
+{
+  hrz->refddu = -zSqr( pdCZHrzMovZeta( hrz ) ) * pdCZHrzMovZMPU( hrz );
+  hrz->refddw = -zSqr( pdCZHrzMovZeta( hrz ) ) * pdCZHrzMovZMPW( hrz );
+}

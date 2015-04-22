@@ -1,7 +1,7 @@
 #ifndef __PD_CZ_HRZ_U_H__
 #define __PD_CZ_HRZ_U_H__
 
-#include <cure/cure_defs.h>
+#include <zm/zm.h>
 
 __BEGIN_DECLS
 
@@ -36,6 +36,11 @@ __EXPORT void pdCZHrzUDestroy(pdCZHrzU *u);
 #define pdCZHrzUQ2(u) (u)->_q2
 #define pdCZHrzUKappa(u) *((u)->_kappa)
 #define pdCZHrzUZeta(u) *((u)->_zeta)
+
+/* calculation methods */
+__EXPORT double pdCZHrzUCalcSimZMP(pdCZHrzU *u, double du, double vu, double dw, double vw);
+__EXPORT double pdCZHrzUCalcRegZMP(pdCZHrzU *u, double du, double vu, double dw, double vw);
+
 
 __END_DECLS
 

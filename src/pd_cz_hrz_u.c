@@ -21,3 +21,32 @@ void pdCZHrzUDestroy(pdCZHrzU *u)
   u->refzmp = 0;
   u->refacc = 0;
 }
+
+static double _pdCZHrzUK1(pdCZHrzU *u);
+static double _pdCZHrzUK2(pdCZHrzU *u);
+
+double _pdCZHrzUK1(pdCZHrzU *u)
+{
+  return pdCZHrzUQ1(u) * pdCZHrzUQ2(u);
+}
+
+double _pdCZHrzUK2(pdCZHrzU *u)
+{
+  return ( pdCZHrzUQ1(u) + pdCZHrzUQ2(u) ) / pdCZHrzUZeta(u);
+}
+
+double pdCZHrzUCalcSimZMP(pdCZHrzU *u, double du, double vu, double dw, double vw)
+{
+  double r;
+
+  r = 1.0 + pdCZHrzUKappa(u) * dw;
+  return -_pdCZHrzUK1(u)*r*du + _pdCZHrzUK2(u)*(vu-r*pdCZHrzURefVel(u)) + 2*pdCZHrzUKappa(u)*vu*vw/(zSqr(pdCZHrzUZeta(u))*r);
+}
+
+double pdCZHrzUCalcRegZMP(pdCZHrzU *u, double du, double vu, double dw, double vw)
+{
+  double r;
+
+  r = 1.0 + pdCZHrzUKappa(u) * dw;
+  return -_pdCZHrzUK1(u)*r*du + _pdCZHrzUK2(u)*vu + 2*pdCZHrzUKappa(u)*vu*vw/(zSqr(pdCZHrzUZeta(u))*r);
+}

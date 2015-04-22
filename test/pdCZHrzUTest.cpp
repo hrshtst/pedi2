@@ -105,3 +105,37 @@ TEST_F(pdCZHrzUTest, SetPrm)
   EXPECT_EQ( 1.0, pdCZHrzUQ1( &u ) );
   EXPECT_EQ( 0.5, pdCZHrzUQ2( &u ) );
 }
+
+TEST_F(pdCZHrzUTest, CalcSimZMP)
+{
+  zeta = 1.0;
+  kappa = 0.0;
+  pdCZHrzUSetPrm( &u, 0, 1, 1 );
+  EXPECT_DOUBLE_EQ( 0, pdCZHrzUCalcSimZMP( &u, 0, 0, 0, 0 ) );
+  EXPECT_DOUBLE_EQ( 0.8, pdCZHrzUCalcSimZMP( &u, 0.2, 0.5, 0, 0 ) );
+  EXPECT_DOUBLE_EQ( -1.2, pdCZHrzUCalcSimZMP( &u, 0.8, -0.2, 0, 0 ) );
+  pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
+  EXPECT_NEAR( 0, pdCZHrzUCalcSimZMP( &u, 0.2, 0.3, 0, 0 ), 1e-04 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZHrzUCalcSimZMP( &u, -0.1, 0.2, 0, 0 ) );
+  kappa = 1.0;
+  pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
+  EXPECT_DOUBLE_EQ( -0.18, pdCZHrzUCalcSimZMP( &u, 0.2, 0.2, -0.2, -0.2 ) );
+  EXPECT_DOUBLE_EQ(  0.34, pdCZHrzUCalcSimZMP( &u, -0.2, 0.2, -0.2, 0.2 ) );
+}
+
+TEST_F(pdCZHrzUTest, CalcRegZMP)
+{
+  zeta = 1.0;
+  kappa = 0.0;
+  pdCZHrzUSetPrm( &u, 0, 1, 1 );
+  EXPECT_DOUBLE_EQ( 0, pdCZHrzUCalcRegZMP( &u, 0, 0, 0, 0 ) );
+  EXPECT_DOUBLE_EQ( 0.8, pdCZHrzUCalcRegZMP( &u, 0.2, 0.5, 0, 0 ) );
+  EXPECT_DOUBLE_EQ( -1.2, pdCZHrzUCalcRegZMP( &u, 0.8, -0.2, 0, 0 ) );
+  pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
+  EXPECT_DOUBLE_EQ( 0.4, pdCZHrzUCalcRegZMP( &u, 0.2, 0.3, 0, 0 ) );
+  EXPECT_DOUBLE_EQ( 0.5, pdCZHrzUCalcRegZMP( &u, -0.1, 0.2, 0, 0 ) );
+  kappa = 1.0;
+  pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
+  EXPECT_DOUBLE_EQ( 0.14, pdCZHrzUCalcRegZMP( &u, 0.2, 0.2, -0.2, -0.2 ) );
+  EXPECT_DOUBLE_EQ( 0.66, pdCZHrzUCalcRegZMP( &u, -0.2, 0.2, -0.2, 0.2 ) );
+}

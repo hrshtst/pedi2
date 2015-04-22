@@ -7,8 +7,8 @@ void pdCZVrtInit(pdCZVrt *vrt)
   vrt->_q2 = 0;
 
   vrt->reffz = 0;
-  vrt->refacc = 0;
-  vrt->refzmp = 0;
+  vrt->refddz = 0;
+  vrt->refzz = 0;
   vrt->zeta = 0;
 }
 
@@ -71,7 +71,7 @@ double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz )
 void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz)
 {
   vrt->reffz = pdCZVrtCalcReactForce( vrt, z, vz );
-  vrt->refacc = pdCZVrtCalcAcc( vrt, z, vz );
-  vrt->refzmp = pdCZVrtCalcZMP( vrt );
+  vrt->refddz = pdCZVrtCalcAcc( vrt, z, vz );
+  vrt->refzz = pdCZVrtCalcZMP( vrt );
   vrt->zeta = pdCZVrtCalcZeta( vrt, z, az, zz );
 }

@@ -16,8 +16,8 @@ class pdCZVrtTest : public testing::Test {
     pdCZVrtSetQ1( &vrt, 2 );
     pdCZVrtSetQ2( &vrt, 3 );
     vrt.reffz = 4;
-    vrt.refacc = 5;
-    vrt.refzmp = 6;
+    vrt.refddz = 5;
+    vrt.refzz = 6;
     vrt.zeta = 7;
   };
 

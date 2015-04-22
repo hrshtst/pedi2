@@ -53,9 +53,9 @@ double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz)
   return zMax( 0, _pdCZVrtCalcReactForce( vrt, z, vz ) );
 }
 
-double pdCZVrtCalcAcc(pdCZVrt *vrt, double z, double vz)
+double pdCZVrtCalcAcc(pdCZVrt *vrt, double fz)
 {
-  return pdCZVrtCalcReactForce( vrt, z, vz ) + _pdCZVrtBias( vrt );
+  return fz + _pdCZVrtBias( vrt );
 }
 
 double pdCZVrtCalcZMP(pdCZVrt *vrt)
@@ -71,7 +71,7 @@ double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz )
 void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz)
 {
   vrt->reffz = pdCZVrtCalcReactForce( vrt, z, vz );
-  vrt->refddz = pdCZVrtCalcAcc( vrt, z, vz );
+  vrt->refddz = pdCZVrtCalcAcc( vrt, pdCZVrtRF(vrt) );
   vrt->refzz = pdCZVrtCalcZMP( vrt );
   vrt->zeta = pdCZVrtCalcZeta( vrt, z, az, zz );
 }

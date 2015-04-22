@@ -41,7 +41,7 @@ __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 
 /* calculation methods */
 __EXPORT double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz);
-__EXPORT double pdCZVrtCalcAcc(pdCZVrt *vrt, double z, double vz);
+__EXPORT double pdCZVrtCalcAcc(pdCZVrt *vrt, double fz);
 __EXPORT double pdCZVrtCalcZMP(pdCZVrt *vrt);
 __EXPORT double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz );
 

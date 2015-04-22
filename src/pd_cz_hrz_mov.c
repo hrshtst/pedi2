@@ -24,8 +24,20 @@ void pdCZHrzMovDestroy(pdCZHrzMov *hrz)
 
 void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw)
 {
-  hrz->refuz = pdCZHrzMovCalcSimZMPU( hrz, du, vu, dw, vw );
-  hrz->refwz = pdCZHrzMovCalcSimZMPW( hrz, du, vu, dw, vw );
+  zVec3D p, cp;
+
+  zVec3DCreate( &p,
+                pdCZHrzMovCalcSimZMPU( hrz, du, vu, dw, vw ),
+                pdCZHrzMovCalcSimZMPW( hrz, du, vu, dw, vw ),
+                pdCZVrtCalcZMP( hrz->_vrt ) );
+  if( hrz->_sr ){
+    zCH2DClosest( hrz->_sr, &p, &cp );
+    hrz->refuz = zVec3DElem( &cp, zX );
+    hrz->refwz = zVec3DElem( &cp, zY );
+  } else {
+    hrz->refuz = zVec3DElem( &p, zX );
+    hrz->refwz = zVec3DElem( &p, zY );
+  }
 }
 
 void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double du, double vu, double dw, double vw)

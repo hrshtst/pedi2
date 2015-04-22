@@ -30,22 +30,22 @@ double _pdCZVrtXi(pdCZVrt *vrt)
 
 double _pdCZVrtK1(pdCZVrt *vrt)
 {
-  return -zSqr(_pdCZVrtXi(vrt)) * pdCZVrtQ1(vrt) * pdCZVrtQ1(vrt);
+  return zSqr(_pdCZVrtXi(vrt)) * pdCZVrtQ1(vrt) * pdCZVrtQ1(vrt);
 }
 
 double _pdCZVrtK2(pdCZVrt *vrt)
 {
-  return -_pdCZVrtXi(vrt) * ( pdCZVrtQ1(vrt) + pdCZVrtQ1(vrt) );
+  return _pdCZVrtXi(vrt) * ( pdCZVrtQ1(vrt) + pdCZVrtQ1(vrt) );
 }
 
 double _pdCZVrtBias(pdCZVrt *vrt)
 {
-  return RK_G;
+  return -RK_G;
 }
 
 double _pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz)
 {
-  return _pdCZVrtK1(vrt) * ( z - pdCZVrtRef(vrt) ) + _pdCZVrtK2(vrt) * vz + _pdCZVrtBias(vrt);
+  return -_pdCZVrtK1(vrt) * ( z - pdCZVrtRef(vrt) ) - _pdCZVrtK2(vrt) * vz - _pdCZVrtBias(vrt);
 }
 
 double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz)
@@ -55,7 +55,7 @@ double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz)
 
 double pdCZVrtCalcAcc(pdCZVrt *vrt, double z, double vz)
 {
-  return pdCZVrtCalcReactForce( vrt, z, vz ) - _pdCZVrtBias( vrt );
+  return pdCZVrtCalcReactForce( vrt, z, vz ) + _pdCZVrtBias( vrt );
 }
 
 double pdCZVrtCalcZMP(pdCZVrt *vrt)

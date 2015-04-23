@@ -31,3 +31,39 @@ void pdCZHrzDestroy(pdCZHrz *hrz)
   pdCZHrzSetTheta( hrz, 0 );
   pdCZHrzSetSR( hrz, NULL );
 }
+
+void pdCZHrzXformMtoW(pdCZHrz *hrz, double u, double w, double *X, double *Y)
+{
+  double s, c;
+
+  zSinCos( pdCZHrzTheta(hrz), &s, &c );
+  *X = pdCZHrzPosX(hrz) + c * u - s * w;
+  *Y = pdCZHrzPosY(hrz) + s * u + c * w;
+}
+
+void pdCZHrzXformWtoM(pdCZHrz *hrz, double X, double Y, double *u, double *w)
+{
+  double s, c;
+
+  zSinCos( pdCZHrzTheta(hrz), &s, &c );
+  *u =  c * ( X - pdCZHrzPosX(hrz) ) + s * ( Y - pdCZHrzPosY(hrz) );
+  *w = -s * ( X - pdCZHrzPosX(hrz) ) + c * ( Y - pdCZHrzPosY(hrz) );
+}
+
+void pdCZHrzRotMtoW(pdCZHrz *hrz, double vu, double vw, double *vx, double *vy)
+{
+  double s, c;
+
+  zSinCos( pdCZHrzTheta(hrz), &s, &c );
+  *vx = c * vu - s * vw;
+  *vy = s * vu + c * vw;
+}
+
+void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, double *vw)
+{
+  double s, c;
+
+  zSinCos( pdCZHrzTheta(hrz), &s, &c );
+  *vu =  c * vx + s * vy;
+  *vw = -s * vx + c * vy;
+}

@@ -79,6 +79,11 @@ __EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzAccX(h)     (h)->refddx
 #define pdCZHrzAccY(h)     (h)->refddy
 
+/* calculation method */
+__EXPORT void pdCZHrzXformMtoW(pdCZHrz *hrz, double u, double w, double *X, double *Y);
+__EXPORT void pdCZHrzXformWtoM(pdCZHrz *hrz, double X, double Y, double *u, double *w);
+__EXPORT void pdCZHrzRotMtoW(pdCZHrz *hrz, double vu, double vw, double *vx, double *vy);
+__EXPORT void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, double *vw);
 
 
 __END_DECLS

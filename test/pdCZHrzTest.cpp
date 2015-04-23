@@ -99,3 +99,47 @@ TEST_F(pdCZHrzTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzVelY( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzTheta( &hrz ) );
 }
+
+TEST_F(pdCZHrzTest, XformMtoW)
+{
+  double X, Y;
+
+  pdCZHrzSetPosX( &hrz, 2 );
+  pdCZHrzSetPosY( &hrz, 1 );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzXformMtoW( &hrz, 2, 4, &X, &Y );
+  EXPECT_DOUBLE_EQ( sqrt(3), X );
+  EXPECT_DOUBLE_EQ( 2*sqrt(3)+2, Y );
+}
+
+TEST_F(pdCZHrzTest, XformWtoM)
+{
+  double u, w;
+
+  pdCZHrzSetPosX( &hrz, 2 );
+  pdCZHrzSetPosY( &hrz, 1 );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzXformWtoM( &hrz, 4, 5, &u, &w );
+  EXPECT_DOUBLE_EQ( sqrt(3)+2, u );
+  EXPECT_DOUBLE_EQ( 2*sqrt(3)-1, w );
+}
+
+TEST_F(pdCZHrzTest, RotMtoW)
+{
+  double vx, vy;
+
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzRotMtoW( &hrz, 4, 2, &vx, &vy );
+  EXPECT_DOUBLE_EQ( 2*sqrt(3)-1, vx );
+  EXPECT_DOUBLE_EQ( sqrt(3)+2, vy );
+}
+
+TEST_F(pdCZHrzTest, RotWtoM)
+{
+  double vu, vw;
+
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzRotWtoM( &hrz, -2, 2, &vu, &vw );
+  EXPECT_DOUBLE_EQ( -sqrt(3)+1, vu );
+  EXPECT_DOUBLE_EQ( sqrt(3)+1, vw );
+}

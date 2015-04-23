@@ -67,3 +67,14 @@ void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, double *vw)
   *vu =  c * vx + s * vy;
   *vw = -s * vx + c * vy;
 }
+
+void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, double ud, double wd, double *deltau, double *deltaw)
+{
+  if( zIsTiny( pdCZHrzKappa(hrz) ) ){
+    *deltau = ud;
+    *deltaw = wd;
+  } else {
+    *deltau = asin( pdCZHrzKappa(hrz)*ud ) / pdCZHrzKappa(hrz);
+    *deltaw = wd - ( 1.0 - sqrt( 1.0 - zSqr(pdCZHrzKappa(hrz)*ud) ) ) / pdCZHrzKappa(hrz);
+  }
+}

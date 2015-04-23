@@ -143,3 +143,18 @@ TEST_F(pdCZHrzTest, RotWtoM)
   EXPECT_DOUBLE_EQ( -sqrt(3)+1, vu );
   EXPECT_DOUBLE_EQ( sqrt(3)+1, vw );
 }
+
+TEST_F(pdCZHrzTest, CalcDiffToRefPos)
+{
+  double deltau, deltaw;
+
+  pdCZHrzSetKappa( &hrz, 0 );
+  pdCZHrzCalcDiffToRefPos( &hrz, 3, 2, &deltau, &deltaw );
+  EXPECT_DOUBLE_EQ( 3, deltau );
+  EXPECT_DOUBLE_EQ( 2, deltaw );
+
+  pdCZHrzSetKappa( &hrz, 1.0/6.0 );
+  pdCZHrzCalcDiffToRefPos( &hrz, 3, 2, &deltau, &deltaw );
+  EXPECT_DOUBLE_EQ( zPI, deltau );
+  EXPECT_DOUBLE_EQ( 3*sqrt(3)-4, deltaw );
+}

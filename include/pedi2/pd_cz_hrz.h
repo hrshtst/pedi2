@@ -87,6 +87,10 @@ __EXPORT void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, dou
 __EXPORT void pdCZHrzXformSRWtoM(pdCZHrz *hrz, zVec3DList *sr);
 __EXPORT void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, double ud, double wd, double *deltau, double *deltaw);
 
+/* update method */
+#define pdCZHrzUpdateM(h,du,vu,dw,vw) pdCZHrzMovUpdate( &(h)->_hrzm, du, vu, dw, vw )
+__EXPORT void pdCZHrzUpdate(pdCZHrz *hrz, double x, double y, double theta, double vx, double vy, double xd, double yd, double thetad, zVec3DList *sr);
+
 __END_DECLS
 
 #endif /* __PD_CZ_HRZ_H__ */

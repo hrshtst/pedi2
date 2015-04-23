@@ -68,6 +68,30 @@ void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, double *vw)
   *vw = -s * vx + c * vy;
 }
 
+zVec3D *pdCZHrzXformSRWtoM(pdCZHrz *hrz, zVec3DList *sr_w, zVec3DList *sr_m, zVec3D *sr_m_vert)
+{
+  zVec3DListCell *cp;
+  zVec3D *traversep;
+  double u, w;
+
+  if( sr_m_vert == NULL || zListNum( sr_w ) != zListNum( sr_m ) ){
+    zFree( sr_m_vert );
+    /* printf("reallocated!\n"); */
+    if( !( sr_m_vert = zAlloc( zVec3D, zListNum( sr_w ) ) ) ){
+      ZALLOCERROR();
+      zFree( sr_m_vert );
+      exit( EXIT_FAILURE );
+    }
+  }
+  traversep = sr_m_vert;
+  zListForEach( sr_w, cp ){
+    pdCZHrzXformWtoM( hrz, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY), &u, &w );
+    zVec3DCreate( traversep++, u, w, zVec3DElem(cp->data,zZ) );
+  }
+  zCH2D( sr_m, sr_m_vert, zListNum(sr_w) );
+  return sr_m_vert;
+}
+
 void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, double ud, double wd, double *deltau, double *deltaw)
 {
   if( zIsTiny( pdCZHrzKappa(hrz) ) ){

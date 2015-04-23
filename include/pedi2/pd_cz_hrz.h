@@ -84,7 +84,7 @@ __EXPORT void pdCZHrzXformMtoW(pdCZHrz *hrz, double u, double w, double *X, doub
 __EXPORT void pdCZHrzXformWtoM(pdCZHrz *hrz, double X, double Y, double *u, double *w);
 __EXPORT void pdCZHrzRotMtoW(pdCZHrz *hrz, double vu, double vw, double *vx, double *vy);
 __EXPORT void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, double *vw);
-__EXPORT zVec3D *pdCZHrzXformSRWtoM(pdCZHrz *hrz, zVec3DList *sr_w, zVec3DList *sr_m, zVec3D *sr_m_vert);
+__EXPORT void pdCZHrzXformSRWtoM(pdCZHrz *hrz, zVec3DList *sr);
 __EXPORT void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, double ud, double wd, double *deltau, double *deltaw);
 
 __END_DECLS

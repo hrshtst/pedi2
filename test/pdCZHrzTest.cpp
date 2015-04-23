@@ -146,9 +146,9 @@ TEST_F(pdCZHrzTest, RotWtoM)
 
 TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_1)
 {
-  zVec3DList sr_w, sr_m;
+  zVec3DList sr_w;
   zVec3D sr_w_vert[3];
-  zVec3D *sr_m_vert = NULL;
+  zVec3D *sr_m_vert;
 
   // make a convex hull
   zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
@@ -160,8 +160,9 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_1)
   pdCZHrzSetTheta( &hrz, zPI/6 );
 
   // method to be tested
-  sr_m_vert = pdCZHrzXformSRWtoM( &hrz, &sr_w, &sr_m, sr_m_vert );
+  pdCZHrzXformSRWtoM( &hrz, &sr_w );
 
+  sr_m_vert = pdCZHrzSRVertM( &hrz );
   EXPECT_DOUBLE_EQ( -2*sqrt(3)-0.5, zVec3DElem(&sr_m_vert[0], zX) );
   EXPECT_DOUBLE_EQ( -0.5*sqrt(3)+2, zVec3DElem(&sr_m_vert[0], zY) );
   // EXPECT_DOUBLE_EQ( 0.5*sqrt(3)-1,  zVec3DElem(&sr_m_vert[1], zX) );
@@ -173,9 +174,9 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_1)
 
 TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_2)
 {
-  zVec3DList sr_w, sr_m;
+  zVec3DList sr_w;
   zVec3D sr_w_vert[4];
-  zVec3D *sr_m_vert = NULL;
+  zVec3D *sr_m_vert;
 
   // make a convex hull
   zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
@@ -188,8 +189,9 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_2)
   pdCZHrzSetTheta( &hrz, zPI/4 );
 
   // method to be tested
-  sr_m_vert = pdCZHrzXformSRWtoM( &hrz, &sr_w, &sr_m, sr_m_vert );
+  pdCZHrzXformSRWtoM( &hrz, &sr_w );
 
+  sr_m_vert = pdCZHrzSRVertM( &hrz );
   EXPECT_DOUBLE_EQ( sqrt(2),   zVec3DElem(&sr_m_vert[0], zX) );
   EXPECT_DOUBLE_EQ( sqrt(2),   zVec3DElem(&sr_m_vert[0], zY) );
   EXPECT_DOUBLE_EQ( 2*sqrt(2), zVec3DElem(&sr_m_vert[1], zX) );
@@ -199,44 +201,6 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_2)
   EXPECT_DOUBLE_EQ( sqrt(2),   zVec3DElem(&sr_m_vert[2], zY) );
   EXPECT_DOUBLE_EQ( 2*sqrt(2), zVec3DElem(&sr_m_vert[3], zX) );
   EXPECT_DOUBLE_EQ( 2*sqrt(2), zVec3DElem(&sr_m_vert[3], zY) );
-}
-
-TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_chkmemory)
-{
-  zVec3DList sr_w1;
-  zVec3DList sr_w2;
-  zVec3DList sr_w3;
-  zVec3DList sr_m;
-  zVec3D sr_w_vert1[3];
-  zVec3D sr_w_vert2[4];
-  zVec3D sr_w_vert3[4];
-  zVec3D *sr_m_vert1 = NULL;
-  zVec3D *sr_m_vert2 = NULL;
-  zVec3D *sr_m_vert3 = NULL;
-
-  zVec3DCreate( &sr_w_vert1[0], 0, 0, 0 );
-  zVec3DCreate( &sr_w_vert1[1], 0, 1, 0 );
-  zVec3DCreate( &sr_w_vert1[2], 1, 1, 0 );
-  zCH2D( &sr_w1, sr_w_vert1, 3 );
-  zVec3DCreate( &sr_w_vert2[0], 0, 0, 0 );
-  zVec3DCreate( &sr_w_vert2[1], 0, 1, 0 );
-  zVec3DCreate( &sr_w_vert2[2], 1, 1, 0 );
-  zVec3DCreate( &sr_w_vert2[3], 1, 0, 0 );
-  zCH2D( &sr_w2, sr_w_vert2, 4 );
-  zVec3DCreate( &sr_w_vert3[0], 0, 0, 0 );
-  zVec3DCreate( &sr_w_vert3[1], 0, 1, 0 );
-  zVec3DCreate( &sr_w_vert3[2], 1, 1, 0 );
-  zVec3DCreate( &sr_w_vert3[3], 1, 0, 0 );
-  zCH2D( &sr_w3, sr_w_vert3, 4 );
-
-  sr_m_vert1 = pdCZHrzXformSRWtoM( &hrz, &sr_w1, &sr_m, sr_m_vert1 );
-  EXPECT_TRUE( sr_m_vert1 != NULL );
-  sr_m_vert2 = pdCZHrzXformSRWtoM( &hrz, &sr_w2, &sr_m, sr_m_vert1 );
-  EXPECT_NE( sr_m_vert1, sr_m_vert2 );
-  sr_m_vert3 = pdCZHrzXformSRWtoM( &hrz, &sr_w3, &sr_m, sr_m_vert2 );
-  EXPECT_EQ( sr_m_vert2, sr_m_vert3 );
-  sr_m_vert1 = pdCZHrzXformSRWtoM( &hrz, &sr_w1, &sr_m, sr_m_vert3 );
-  EXPECT_NE( sr_m_vert3, sr_m_vert1 );
 }
 
 TEST_F(pdCZHrzTest, CalcDiffToRefPos)

@@ -14,6 +14,8 @@ typedef struct{
   zVec3DList *_sr; /* supporting region */
 
   pdCZHrzMov _hrzm; /* horizontal controller w.r.t moving frame */
+  double _ud, _deltau, _vu;
+  double _wd, _deltaw, _vw;
 
   double refxz;     /* referential ZMP pos. */
   double refyz;     /* referential ZMP pos. */
@@ -47,6 +49,12 @@ __EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa) \
   pdCZHrzMovSetPrm(&(h)->_hrzm,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa)
 #define pdCZHrzSetSR(h,sr) (h)->_sr = sr
+#define pdCZHrzSetRefU(h,ud) (h)->_ud = ud
+#define pdCZHrzSetDeltaU(h,du) (h)->_deltau = du
+#define pdCZHrzSetVelU(h,vu) (h)->_vu = vu
+#define pdCZHrzSetRefW(h,wd) (h)->_wd = wd
+#define pdCZHrzSetDeltaW(h,dw) (h)->_deltaw = dw
+#define pdCZHrzSetVelW(h,vw) (h)->_vw = vw
 
 /* methods to get parameters */
 #define pdCZHrzRefPosX(h)  (h)->_xd
@@ -78,6 +86,12 @@ __EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzZMPY(h)     (h)->refyz
 #define pdCZHrzAccX(h)     (h)->refddx
 #define pdCZHrzAccY(h)     (h)->refddy
+#define pdCZHrzRefU(h)     (h)->_ud
+#define pdCZHrzDeltaU(h)   (h)->_deltau
+#define pdCZHrzVelU(h)     (h)->_vu
+#define pdCZHrzRefW(h)     (h)->_wd
+#define pdCZHrzDeltaW(h)   (h)->_deltaw
+#define pdCZHrzVelW(h)     (h)->_vw
 
 /* calculation method */
 __EXPORT void pdCZHrzXformMtoW(pdCZHrz *hrz, double u, double w, double *X, double *Y);

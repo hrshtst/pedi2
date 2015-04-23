@@ -101,8 +101,6 @@ void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, double ud, double wd, double *deltau,
 
 void pdCZHrzUpdate(pdCZHrz *hrz, double x, double y, double theta, double vx, double vy, double xd, double yd, double thetad, zVec3DList *sr)
 {
-  double ud, wd, du, vu, dw, vw;
-
   pdCZHrzSetPosX( hrz, x );
   pdCZHrzSetPosY( hrz, y );
   pdCZHrzSetTheta( hrz, theta );
@@ -113,10 +111,10 @@ void pdCZHrzUpdate(pdCZHrz *hrz, double x, double y, double theta, double vx, do
   pdCZHrzSetRefTheta( hrz, thetad );
   if( sr )
     pdCZHrzXformSRWtoM( hrz, sr );
-  pdCZHrzXformWtoM( hrz, pdCZHrzRefPosX(hrz), pdCZHrzRefPosY(hrz), &ud, &wd );
-  pdCZHrzCalcDiffToRefPos( hrz, ud, wd, &du, &dw );
-  pdCZHrzRotWtoM( hrz, pdCZHrzVelX(hrz), pdCZHrzVelY(hrz), &vu, &vw);
-  pdCZHrzUpdateM( hrz, du, vu, dw, vw );
+  pdCZHrzXformWtoM( hrz, pdCZHrzRefPosX(hrz), pdCZHrzRefPosY(hrz), &pdCZHrzRefU(hrz), &pdCZHrzRefW(hrz) );
+  pdCZHrzCalcDiffToRefPos( hrz, pdCZHrzRefU(hrz), pdCZHrzRefW(hrz), &pdCZHrzDeltaU(hrz), &pdCZHrzDeltaW(hrz) );
+  pdCZHrzRotWtoM( hrz, pdCZHrzVelX(hrz), pdCZHrzVelY(hrz), &pdCZHrzVelU(hrz), &pdCZHrzVelW(hrz) );
+  pdCZHrzUpdateM( hrz, pdCZHrzDeltaU(hrz), pdCZHrzDeltaW(hrz), pdCZHrzVelU(hrz), pdCZHrzVelW(hrz) );
   pdCZHrzXformMtoW( hrz, pdCZHrzZMPU(hrz), pdCZHrzZMPW(hrz), &pdCZHrzZMPX(hrz), &pdCZHrzZMPY(hrz) );
   pdCZHrzRotMtoW( hrz, pdCZHrzAccU(hrz), pdCZHrzAccW(hrz), &pdCZHrzAccX(hrz), &pdCZHrzAccY(hrz) );
 }

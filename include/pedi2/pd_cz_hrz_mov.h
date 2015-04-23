@@ -14,8 +14,9 @@ typedef struct{
   pdCZHrzW _w;     /* desired ZMP calculator for radial dir. */
   double _kappa;   /* curvature of the referential orbit */
   pdCZVrt *_vrt;   /* controller for vertical motion */
-  zVec3DList *_sr; /* supporting region */
+  zVec3DList _sr;  /* supporting region */
   zVec3D *_sr_vert; /* vertices of supporting retion */
+  int _vert_num;    /* number of vertices */
 
   double refuz;    /* referential ZMP pos. for tangential dir. */
   double refwz;    /* referential ZMP pos. for radial dir. */
@@ -43,7 +44,9 @@ __EXPORT void pdCZHrzMovDestroy(pdCZHrzMov *hrz);
   pdCZHrzWSetPrm( &(h)->_w, vwd, qw1, qw2, rho, kr, dist );\
   pdCZHrzMovSetKappa( h, kappa );\
 } while(0)
-#define pdCZHrzMovSetSR(h,sr) (h)->_sr = sr
+/* #define pdCZHrzMovSetSR(h,sr) (h)->_sr = sr */
+__EXPORT void pdCZHrzMovSetSR(pdCZHrzMov *hrz, zVec3D p[], int num);
+#define pdCZHrzMovIsSRSet(h) ( zListNum( &(h)->_sr ) ? true : false )
 
 /* methods to get parameters */
 #define pdCZHrzMovRefVelU(h) pdCZHrzURefVel( &(h)->_u )
@@ -57,6 +60,7 @@ __EXPORT void pdCZHrzMovDestroy(pdCZHrzMov *hrz);
 #define pdCZHrzMovDist(h) pdCZHrzWDist( &(h)->_w )
 #define pdCZHrzMovKappa(h) (h)->_kappa
 #define pdCZHrzMovZeta(h) pdCZVrtZeta( (h)->_vrt )
+#define pdCZHrzMovSR(h)     (h)->_sr
 #define pdCZHrzMovSRVert(h) (h)->_sr_vert
 #define pdCZHrzMovZMPU(h) (h)->refuz
 #define pdCZHrzMovZMPW(h) (h)->refwz

@@ -6,7 +6,8 @@ void pdCZHrzMovInit(pdCZHrzMov *hrz, pdCZVrt *vrt)
   pdCZHrzWInit( &hrz->_w, &pdCZHrzMovKappa(hrz), &pdCZVrtZeta(vrt) );
   hrz->_vrt = vrt;
   pdCZHrzMovSetKappa( hrz, 0 );
-  pdCZHrzMovSetSR( hrz, NULL );
+  zListInit( &pdCZHrzMovSR(hrz) );
+  hrz->_vert_num = 0;
   hrz->refuz = 0;
   hrz->refwz = 0;
   hrz->refddu = 0;
@@ -20,8 +21,32 @@ void pdCZHrzMovDestroy(pdCZHrzMov *hrz)
   pdCZHrzWDestroy( &hrz->_w );
   hrz->_vrt = NULL;
   pdCZHrzMovSetKappa( hrz, 0 );
-  pdCZHrzMovSetSR( hrz, NULL );
+  zVec3DListDestroy( &pdCZHrzMovSR(hrz), false );
   zFree( pdCZHrzMovSRVert( hrz ) );
+  hrz->_vert_num = 0;
+}
+
+void pdCZHrzMovSetSR(pdCZHrzMov *hrz, zVec3D p[], int num)
+{
+  register int i;
+  zVec3D *traversep;
+
+  if( num != hrz->_vert_num ){
+    zFree( pdCZHrzMovSRVert(hrz) );
+    if( !( pdCZHrzMovSRVert(hrz) = zAlloc( zVec3D, num ) ) ){
+      ZALLOCERROR();
+      zFree( pdCZHrzMovSRVert(hrz) );
+      exit( EXIT_FAILURE );
+    }
+  }
+  traversep = pdCZHrzMovSRVert(hrz);
+  for( i=0; i<num; i++ )
+    zVec3DCreate( traversep++,
+                  zVec3DElem(&p[i],zX),
+                  zVec3DElem(&p[i],zY),
+                  zVec3DElem(&p[i],zZ) );
+  zCH2D( &pdCZHrzMovSR(hrz), pdCZHrzMovSRVert(hrz), num );
+  hrz->_vert_num = num;
 }
 
 void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw, double *uz, double *wz)
@@ -32,8 +57,8 @@ void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double 
                 pdCZHrzMovCalcSimZMPU( hrz, du, vu, dw, vw ),
                 pdCZHrzMovCalcSimZMPW( hrz, du, vu, dw, vw ),
                 pdCZVrtCalcZMP( hrz->_vrt ) );
-  if( hrz->_sr ){
-    zCH2DClosest( hrz->_sr, &p, &cp );
+  if( pdCZHrzMovIsSRSet( hrz ) ){
+    zCH2DClosest( &hrz->_sr, &p, &cp );
     *uz = zVec3DElem( &cp, zX );
     *wz = zVec3DElem( &cp, zY );
   } else {

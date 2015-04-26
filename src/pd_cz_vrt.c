@@ -75,3 +75,15 @@ void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz)
   vrt->refzz = pdCZVrtCalcZMP( vrt );
   vrt->zeta = pdCZVrtCalcZeta( vrt, z, az, zz );
 }
+
+void pdCZVrtFWrite(FILE *fp, pdCZVrt *vrt)
+{
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "zd:%f\n", pdCZVrtRef(vrt) );
+  fprintf( fp, "q1:%f, q2:%f\n", pdCZVrtQ1(vrt), pdCZVrtQ2(vrt) );
+  fprintf( fp, "fz:%f\n", pdCZVrtRF(vrt) );
+  fprintf( fp, "ddz:%f\n", pdCZVrtAcc(vrt) );
+  fprintf( fp, "zz:%f\n", pdCZVrtZMP(vrt) );
+  fprintf( fp, "zeta:%f\n", pdCZVrtZeta(vrt) );
+}

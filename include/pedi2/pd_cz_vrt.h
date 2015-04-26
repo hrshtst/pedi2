@@ -48,6 +48,10 @@ __EXPORT double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz );
 /* update method */
 __EXPORT void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz);
 
+/* for debug */
+__EXPORT void pdCZVrtFWrite(FILE *fp, pdCZVrt *vrt);
+#define pdCZVrtWrite(v) pdCZVrtFWrite( stdout, v )
+
 __END_DECLS
 
 #endif /* __PD_CZ_VRT_H__ */

@@ -16,8 +16,8 @@ class pdCZVrtTest : public testing::Test {
     pdCZVrtSetQ1( &vrt, 2 );
     pdCZVrtSetQ2( &vrt, 3 );
     vrt.reffz = 4;
-    vrt.refacc = 5;
-    vrt.refzmp = 6;
+    vrt.refddz = 5;
+    vrt.refzz = 6;
     vrt.zeta = 7;
   };
 
@@ -93,11 +93,17 @@ TEST_F(pdCZVrtTest, CalcReactForce)
 
 TEST_F(pdCZVrtTest, CalcAcc)
 {
+  double fz;
+
   pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
-  EXPECT_DOUBLE_EQ( 0, pdCZVrtCalcAcc( &vrt, 0.2, 0 ) );
-  EXPECT_DOUBLE_EQ( 4.903326, pdCZVrtCalcAcc( &vrt, 0.1, 0 ) );
-  EXPECT_DOUBLE_EQ( 3.5028509377443386, pdCZVrtCalcAcc( &vrt, 0.1, 0.1 ) );
-  EXPECT_DOUBLE_EQ( -9.806652, pdCZVrtCalcAcc( &vrt, 0.4, 0.1 ) );
+  fz = pdCZVrtCalcReactForce( &vrt, 0.2, 0 );
+  EXPECT_DOUBLE_EQ( 0, pdCZVrtCalcAcc( &vrt, fz ) );
+  fz = pdCZVrtCalcReactForce( &vrt, 0.1, 0 );
+  EXPECT_DOUBLE_EQ( 4.903326, pdCZVrtCalcAcc( &vrt, fz ) );
+  fz = pdCZVrtCalcReactForce( &vrt, 0.1, 0.1 );
+  EXPECT_DOUBLE_EQ( 3.5028509377443386, pdCZVrtCalcAcc( &vrt, fz ) );
+  fz = pdCZVrtCalcReactForce( &vrt, 0.4, 0.1 );
+  EXPECT_DOUBLE_EQ( -9.806652, pdCZVrtCalcAcc( &vrt, fz ) );
 }
 
 TEST_F(pdCZVrtTest, ClacZMP)

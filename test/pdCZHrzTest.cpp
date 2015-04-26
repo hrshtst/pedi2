@@ -1,357 +1,241 @@
 #include "gtest/gtest.h"
-#include <pedi2/pd_cz_vrt.h>
 #include <pedi2/pd_cz_hrz.h>
 
 class pdCZHrzTest : public testing::Test {
- protected:
+protected:
   virtual void SetUp() {
     pdCZVrtInit( &vrt );
-    pdCZHrzSetup( &tan, &vrt, PD_CZ_HRZ_TAN );
-    pdCZHrzSetup( &rad, &vrt, PD_CZ_HRZ_RAD );
+    pdCZHrzInit( &hrz, &vrt );
   };
   virtual void TearDown() {
-    pdCZHrzDestroy( &tan );
-    pdCZHrzDestroy( &rad );
+    pdCZHrzDestroy( &hrz );
     pdCZVrtDestroy( &vrt );
   };
 
-  void SetDefaultPrmVelocityFollow() {
-    pdCZVrtSetRef( &vrt, 0.26 );
-    ((pdCZHrzPrmTan *)tan.prm)->vd = 0.25;
-    ((pdCZHrzPrmTan *)tan.prm)->q1 = 1.0;
-    ((pdCZHrzPrmTan *)tan.prm)->q2 = 0.0;
-    ((pdCZHrzPrmTan *)tan.prm)->kappa = 0.0;
-    ((pdCZHrzPrmRad *)rad.prm)->q1 = 1.0;
-    ((pdCZHrzPrmRad *)rad.prm)->q2 = 1.5;
-    ((pdCZHrzPrmRad *)rad.prm)->kappa = 0.0;
-    ((pdCZHrzPrmRad *)rad.prm)->rho = 1.0;
-    ((pdCZHrzPrmRad *)rad.prm)->kr = 1.0;
-    ((pdCZHrzPrmRad *)rad.prm)->dist = 0.1;
-  }
-  void SetDefaultPrmVelocityFollowCurve() {
-    SetDefaultPrmVelocityFollow();
-    ((pdCZHrzPrmTan *)tan.prm)->kappa = 2.0;
-    ((pdCZHrzPrmRad *)rad.prm)->kappa = 2.0;
-  }
+  void SetVacuousPrm() {
+    pdCZVrtSetRef( &vrt, 1 );
+    pdCZHrzSetRefPosX( &hrz, 2 );
+    pdCZHrzSetRefPosY( &hrz, 3 );
+    pdCZHrzSetRefTheta( &hrz, 4 );
+    pdCZHrzSetPosX( &hrz, 5 );
+    pdCZHrzSetPosY( &hrz, 6 );
+    pdCZHrzSetVelX( &hrz, 7 );
+    pdCZHrzSetVelY( &hrz, 8 );
+    pdCZHrzSetTheta( &hrz, 9 );
+    pdCZHrzSetRefVelU( &hrz, 10 );
+    pdCZHrzSetQ1U( &hrz, 11 );
+    pdCZHrzSetQ2U( &hrz, 12 );
+    pdCZHrzSetRefVelW( &hrz, 13 );
+    pdCZHrzSetQ1W( &hrz, 14 );
+    pdCZHrzSetQ2W( &hrz, 15 );
+    pdCZHrzSetRho( &hrz, 16 );
+    pdCZHrzSetKr( &hrz, 17 );
+    pdCZHrzSetDist( &hrz, 18 );
+    pdCZHrzSetKappa( &hrz, 19 );
+    hrz._sr = &sr;
+    hrz.refxz = 20;
+    hrz.refyz = 21;
+    hrz.refddx = 22;
+    hrz.refddy = 23;
+  };
 
+  zVec3DList sr;
   pdCZVrt vrt;
-  pdCZHrz tan;
-  pdCZHrz rad;
+  pdCZHrz hrz;
 };
 
 TEST_F(pdCZHrzTest, Init)
 {
-  pdCZHrz _hrz;
-
-  pdCZHrzInit( &_hrz );
-  EXPECT_EQ( -1, _hrz.dir );
-  EXPECT_EQ( NULL, _hrz.prm );
-  EXPECT_EQ( NULL, _hrz.com );
-}
-
-TEST_F(pdCZHrzTest, SetupOutOfRange)
-{
-  pdCZVrt _vrt;
-  pdCZHrz _hrz;
-  pdCZHrz *ret;
-
-  ret = pdCZHrzSetup( &_hrz, &_vrt, -1 );
-  EXPECT_EQ( NULL, ret );
-  ret = pdCZHrzSetup( &_hrz, &_vrt, 9 );
-  EXPECT_EQ( NULL, ret );
-}
-
-TEST_F(pdCZHrzTest, SetupHrzTan)
-{
-  pdCZVrt _vrt;
-  pdCZHrz _tan;
-  pdCZHrzPrmTan *prm;
-
-  pdCZVrtInit( &_vrt );
-  pdCZHrzSetup( &_tan, &_vrt, PD_CZ_HRZ_TAN );
-  prm = (pdCZHrzPrmTan *)_tan.prm;
-  EXPECT_EQ( (byte)PD_CZ_HRZ_TAN, _tan.dir );
-  EXPECT_EQ( 0, prm->vd );
-  EXPECT_EQ( 0, prm->q1 );
-  EXPECT_EQ( 0, prm->q2 );
-  EXPECT_EQ( 0, prm->kappa );
-  EXPECT_EQ( &_vrt, prm->vrt );
-  EXPECT_EQ( 0, _vrt.z );
-}
-
-TEST_F(pdCZHrzTest, SetupHrzRad)
-{
-  pdCZVrt _vrt;
-  pdCZHrz _rad;
-  pdCZHrzPrmRad *prm;
-
-  pdCZVrtInit( &_vrt );
-  pdCZHrzSetup( &_rad, &_vrt, PD_CZ_HRZ_RAD );
-  prm = (pdCZHrzPrmRad *)_rad.prm;
-  EXPECT_EQ( (byte)PD_CZ_HRZ_RAD, _rad.dir );
-  EXPECT_EQ( 0, prm->vd );
-  EXPECT_EQ( 0, prm->q1 );
-  EXPECT_EQ( 0, prm->q2 );
-  EXPECT_EQ( 0, prm->kappa );
-  EXPECT_EQ( 0, prm->rho );
-  EXPECT_EQ( 0, prm->kr );
-  EXPECT_EQ( 0, prm->dist );
-  EXPECT_EQ( &_vrt, prm->vrt );
-  EXPECT_EQ( 0, _vrt.z );
+  SetVacuousPrm();
+  pdCZVrtInit( &vrt );
+  pdCZHrzInit( &hrz, &vrt );
+  EXPECT_EQ( 0, pdCZHrzRefVelU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ1U( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ2U( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefVelW( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ1W( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ2W( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRho( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzKr( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzDist( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzKappa( &hrz ) );
+  EXPECT_EQ( NULL, hrz._sr );
+  EXPECT_EQ( 0, pdCZHrzRefPosX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefPosY( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefTheta( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzPosX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzPosY( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelY( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzTheta( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzZMPX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzZMPY( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzAccX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzAccY( &hrz ) );
 }
 
 TEST_F(pdCZHrzTest, Destroy)
 {
-  pdCZVrt _vrt;
-  pdCZHrz _tan;
-
-  pdCZHrzSetup( &_tan, &_vrt, PD_CZ_HRZ_TAN );
-  pdCZHrzDestroy( &_tan );
-  EXPECT_EQ( -1, _tan.dir );
-  EXPECT_EQ( NULL, _tan.prm );
-  EXPECT_EQ( NULL, _tan.com );
+  SetVacuousPrm();
+  pdCZHrzDestroy( &hrz );
+  pdCZVrtDestroy( &vrt );
+  EXPECT_EQ( 0, pdCZHrzRefVelU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ1U( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ2U( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefVelW( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ1W( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzQ2W( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRho( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzKr( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzDist( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzKappa( &hrz ) );
+  EXPECT_EQ( NULL, hrz._sr );
+  EXPECT_EQ( 0, pdCZHrzRefPosX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefPosY( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefTheta( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzPosX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzPosY( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelX( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelY( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzTheta( &hrz ) );
 }
 
-TEST_F(pdCZHrzTest, SetPrmTan)
+TEST_F(pdCZHrzTest, XformMtoW)
 {
-  pdCZHrzPrmTan pt;
+  double X, Y;
 
-  pt.vd = 1;
-  pt.q1 = 2;
-  pt.q2 = 3;
-  pt.kappa = 4;
-  pdCZHrzSetPrm( &tan, &pt );
-  EXPECT_EQ( 1, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->vd );
-  EXPECT_EQ( 2, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->q1 );
-  EXPECT_EQ( 3, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->q2 );
-  EXPECT_EQ( 4, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->kappa );
+  pdCZHrzSetPosX( &hrz, 0 );
+  pdCZHrzSetPosY( &hrz, 0 );
+  pdCZHrzSetTheta( &hrz, zPI/4 );
+  pdCZHrzXformMtoW( &hrz, 2, -2, &X, &Y );
+  EXPECT_NEAR( 0, X, 1e-12 );
+  EXPECT_NEAR( 2*sqrt(2), Y, 1e-12 );
 
-  pt.q1 = 5;
-  pt.q2 = 6;
-  pt.kappa = 7;
-  pdCZHrzSetPrm( &tan, &pt );
-  EXPECT_EQ( 1, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->vd );
-  EXPECT_EQ( 5, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->q1 );
-  EXPECT_EQ( 6, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->q2 );
-  EXPECT_EQ( 7, ((pdCZHrzPrmTan *)pdCZHrzPrm(&tan))->kappa );
+  pdCZHrzSetPosX( &hrz, 2 );
+  pdCZHrzSetPosY( &hrz, 1 );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzXformMtoW( &hrz, 2, 4, &X, &Y );
+  EXPECT_NEAR( -2*sqrt(3)+1, X, 1e-12 );
+  EXPECT_NEAR( sqrt(3)-1, Y, 1e-12 );
 }
 
-TEST_F(pdCZHrzTest, SetPrmRad)
+TEST_F(pdCZHrzTest, XformWtoM)
 {
-  pdCZHrzPrmRad pr;
+  double u, w;
 
-  pr.vd    = 1;
-  pr.q1    = 2;
-  pr.q2    = 3;
-  pr.kappa = 4;
-  pr.rho   = 5;
-  pr.kr    = 6;
-  pr.dist  = 7;
-  pdCZHrzSetPrm( &rad, &pr );
-  EXPECT_EQ( 1, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->vd );
-  EXPECT_EQ( 2, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->q1 );
-  EXPECT_EQ( 3, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->q2 );
-  EXPECT_EQ( 4, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->kappa );
-  EXPECT_EQ( 5, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->rho );
-  EXPECT_EQ( 6, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->kr );
-  EXPECT_EQ( 7, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->dist );
+  pdCZHrzSetPosX( &hrz, 0 );
+  pdCZHrzSetPosY( &hrz, 0 );
+  pdCZHrzSetTheta( &hrz, zPI/4 );
+  pdCZHrzXformWtoM( &hrz, 2, -2, &u, &w );
+  EXPECT_NEAR( -2*sqrt(2), u, 1e-12 );
+  EXPECT_NEAR( 0, w, 1e-12 );
 
-  pr.q1 = 8;
-  pr.q2 = 9;
-  pr.kappa = 10;
-  pr.rho   = 11;
-  pr.kr    = 12;
-  pdCZHrzSetPrm( &rad, &pr );
-  EXPECT_EQ( 1,  ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->vd );
-  EXPECT_EQ( 8,  ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->q1 );
-  EXPECT_EQ( 9,  ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->q2 );
-  EXPECT_EQ( 10, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->kappa );
-  EXPECT_EQ( 11, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->rho );
-  EXPECT_EQ( 12, ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->kr );
-  EXPECT_EQ( 7,  ((pdCZHrzPrmRad *)pdCZHrzPrm(&rad))->dist );
+  pdCZHrzSetPosX( &hrz, 2 );
+  pdCZHrzSetPosY( &hrz, 1 );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzXformWtoM( &hrz, 4, 5, &u, &w );
+  EXPECT_NEAR( -1+2*sqrt(3), u, 1e-12 );
+  EXPECT_NEAR( -sqrt(3)-2, w, 1e-12 );
 }
 
-TEST_F(pdCZHrzTest, HrzK1Tan)
+TEST_F(pdCZHrzTest, RotMtoW)
 {
-  pdCZHrzPrmTan pt;
+  double vx, vy;
 
-  pt.q1 = 1.0;
-  pt.q2 = 0.5;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &tan, &pt );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 0.5, pdCZHrzK1( &tan ) );
+  pdCZHrzSetTheta( &hrz, zPI/4 );
+  pdCZHrzRotMtoW( &hrz, 2, 2, &vx, &vy );
+  EXPECT_NEAR( -2*sqrt(2), vx, 1e-12 );
+  EXPECT_NEAR( 0, vy, 1e-12 );
 
-  pt.q1 = 0.8;
-  pt.q2 = 1.3;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &tan, &pt );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 0.8*1.3, pdCZHrzK1( &tan ) );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzRotMtoW( &hrz, 4, 2, &vx, &vy );
+  EXPECT_NEAR( -sqrt(3)-2, vx, 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)-1, vy, 1e-12 );
 }
 
-TEST_F(pdCZHrzTest, HrzK2Tan)
+TEST_F(pdCZHrzTest, RotWtoM)
 {
-  pdCZHrzPrmTan pt;
+  double vu, vw;
 
-  pt.q1 = 1.0;
-  pt.q2 = 0.5;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &tan, &pt );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdCZHrzK2( &tan ) );
+  pdCZHrzSetTheta( &hrz, zPI/4 );
+  pdCZHrzRotWtoM( &hrz, 2, 2, &vu, &vw );
+  EXPECT_NEAR( 0, vu, 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), vw, 1e-12 );
 
-  pt.q1 = 0.8;
-  pt.q2 = 1.3;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &tan, &pt );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdCZHrzK2( &tan ) );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  pdCZHrzRotWtoM( &hrz, -2, 2, &vu, &vw );
+  EXPECT_NEAR( sqrt(3)+1, vu, 1e-12 );
+  EXPECT_NEAR( sqrt(3)-1, vw, 1e-12 );
 }
 
-TEST_F(pdCZHrzTest, HrzK1Rad)
+TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_1)
 {
-  pdCZHrzPrmRad pr;
+  zVec3DList sr_w;
+  zVec3D sr_w_vert[4];
+  zVec3D *sr_m_vert;
 
-  pr.q1 = 1.0;
-  pr.q2 = 0.5;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &rad, &pr );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 0.5, pdCZHrzK1( &rad ) );
+  // make a convex hull
+  zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
+  zVec3DCreate( &sr_w_vert[1], 0, 4, 0 );
+  zVec3DCreate( &sr_w_vert[2], 2, 4, 0 );
+  zVec3DCreate( &sr_w_vert[3], 2, 2, 0 );
+  zCH2D( &sr_w, sr_w_vert, 4 );
+  pdCZHrzSetPosX( &hrz, 0 );
+  pdCZHrzSetPosY( &hrz, 0 );
+  pdCZHrzSetTheta( &hrz, zPI/4 );
 
-  pr.q1 = 0.8;
-  pr.q2 = 1.3;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &rad, &pr );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 0.8*1.3, pdCZHrzK1( &rad ) );
+  // method to be tested
+  pdCZHrzXformSRWtoM( &hrz, &sr_w );
+
+  sr_m_vert = pdCZHrzSRVertM( &hrz );
+  EXPECT_NEAR( sqrt(2),    zVec3DElem(&sr_m_vert[0], zX), 1e-12 );
+  EXPECT_NEAR( -sqrt(2),   zVec3DElem(&sr_m_vert[0], zY), 1e-12 );
+  EXPECT_NEAR( 0,          zVec3DElem(&sr_m_vert[1], zX), 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), zVec3DElem(&sr_m_vert[1], zY), 1e-12 );
+  EXPECT_NEAR( sqrt(2),    zVec3DElem(&sr_m_vert[2], zX), 1e-12 );
+  EXPECT_NEAR( -3*sqrt(2), zVec3DElem(&sr_m_vert[2], zY), 1e-12 );
+  EXPECT_NEAR( 2*sqrt(2),  zVec3DElem(&sr_m_vert[3], zX), 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), zVec3DElem(&sr_m_vert[3], zY), 1e-12 );
 }
 
-TEST_F(pdCZHrzTest, HrzK2Rad)
+TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_2)
 {
-  pdCZHrzPrmRad pr;
+  zVec3DList sr_w;
+  zVec3D sr_w_vert[3];
+  zVec3D *sr_m_vert;
 
-  pr.q1 = 1.0;
-  pr.q2 = 0.5;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &rad, &pr );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 1.5/sqrt(RK_G/0.26), pdCZHrzK2( &rad ) );
+  // make a convex hull
+  zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
+  zVec3DCreate( &sr_w_vert[1], 4, 5, 0 );
+  zVec3DCreate( &sr_w_vert[2], 5, 1, 0 );
+  zCH2D( &sr_w, sr_w_vert, 3 );
+  pdCZHrzSetPosX( &hrz, 4 );
+  pdCZHrzSetPosY( &hrz, 3 );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
 
-  pr.q1 = 0.8;
-  pr.q2 = 1.3;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &rad, &pr );
-  pdCZVrtUpdate( &vrt );
-  EXPECT_EQ( 2.1/sqrt(RK_G/0.26), pdCZHrzK2( &rad ) );
+  // method to be tested
+  pdCZHrzXformSRWtoM( &hrz, &sr_w );
+
+  sr_m_vert = pdCZHrzSRVertM( &hrz );
+  EXPECT_NEAR( -0.5*sqrt(3)+2, zVec3DElem(&sr_m_vert[0], zX), 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)+0.5,  zVec3DElem(&sr_m_vert[0], zY), 1e-12 );
+  EXPECT_NEAR( -sqrt(3)-0.5,   zVec3DElem(&sr_m_vert[1], zX), 1e-12 );
+  EXPECT_NEAR( -0.5*sqrt(3)+1, zVec3DElem(&sr_m_vert[1], zY), 1e-12 );
+  EXPECT_NEAR( sqrt(3),        zVec3DElem(&sr_m_vert[2], zX), 1e-12 );
+  EXPECT_NEAR( -1,             zVec3DElem(&sr_m_vert[2], zY), 1e-12 );
 }
 
-TEST_F(pdCZHrzTest, CheckZMPTanAllStateZero)
+TEST_F(pdCZHrzTest, CalcDiffToRefPos)
 {
-  pdCZHrzPrmTan pt;
+  double deltau, deltaw;
 
-  pt.vd = 0.0;
-  pt.q1 = 0.0;
-  pt.q2 = 0.0;
-  pt.kappa = 0.0;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &tan, &pt );
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &tan, 0, 0, 0, 0 );
-  EXPECT_DOUBLE_EQ( 0.0, pdCZHrzZMP( &tan ) );
+  pdCZHrzSetKappa( &hrz, 0 );
+  pdCZHrzCalcDiffToRefPos( &hrz, 3, 2, &deltau, &deltaw );
+  EXPECT_NEAR( 3, deltau, 1e-12 );
+  EXPECT_NEAR( 2, deltaw, 1e-12 );
 
-  pt.vd = 0.25;
-  pt.q1 = 1.0;
-  pt.q2 = 0.0;
-  pt.kappa = 0.0;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &tan, &pt );
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &tan, 0, 0, 0, 0 );
-  EXPECT_DOUBLE_EQ( -0.040706737871602130529602, pdCZHrzZMP( &tan ) );
-}
-
-TEST_F(pdCZHrzTest, CheckZMPRadAllStateZero)
-{
-  pdCZHrzPrmRad pr;
-
-  pr.vd = 0.0;
-  pr.q1 = 1.0;
-  pr.q2 = 1.5;
-  pr.kappa = 0.0;
-  pr.rho = 1.0;
-  pr.kr = 1.0;
-  pr.dist = 0.1;
-  pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzSetPrm( &rad, &pr );
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &rad, 0, 0, 0, 0 );
-  EXPECT_DOUBLE_EQ( 0.0, pdCZHrzZMP( &rad ) );
-}
-
-TEST_F(pdCZHrzTest, CheckZMPTanVelocityFollow)
-{
-  SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &tan, 0.0, 0.2, 0.01, 0.1 );
-  EXPECT_DOUBLE_EQ( -0.008141347574320424718142, pdCZHrzZMP( &tan ) );
-}
-
-TEST_F(pdCZHrzTest, CheckZMPRadVelocityFollow)
-{
-  SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &rad, 0.0, 0.2, 0.01, 0.1 );
-  // EXPECT_DOUBLE_EQ( 0.000310222468637089826560, pdCZHrzZMP( &rad ) );
-  EXPECT_DOUBLE_EQ( 0.000310222468637088091836, pdCZHrzZMP( &rad ) );
-}
-
-TEST_F(pdCZHrzTest, CheckZMPTanVelocityFollowCurve)
-{
-  SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &tan, 0.0, 0.2, 0.01, 0.1 );
-  EXPECT_DOUBLE_EQ( -0.005162917622573504408678, pdCZHrzZMP( &tan ) );
-}
-
-TEST_F(pdCZHrzTest, CheckZMPRadVelocityFollowCurve)
-{
-  SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &rad, 0.0, 0.2, 0.01, 0.1 );
-  // EXPECT_DOUBLE_EQ( -0.001854072725677786536574, pdCZHrzZMP( &rad ) );
-  EXPECT_DOUBLE_EQ( -0.001854072725677788271298, pdCZHrzZMP( &rad ) );
-}
-
-TEST_F(pdCZHrzTest, CheckAccTanVelocityFollow)
-{
-  SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &tan, 0.0, 0.2, 0.01, 0.1 );
-  EXPECT_DOUBLE_EQ( 0.307074471047709740556542, pdCZHrzAcc( &tan ) );
-}
-
-TEST_F(pdCZHrzTest, CheckAccRadVelocityFollow)
-{
-  SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &rad, 0.0, 0.2, 0.01, 0.1 );
-  EXPECT_DOUBLE_EQ( 0.011700937663480142150729, pdCZHrzAcc( &rad ) );
-}
-
-TEST_F(pdCZHrzTest, CheckAccTanVelocityFollowCurve)
-{
-  SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &tan, 0.0, 0.2, 0.01, 0.1 );
-  EXPECT_DOUBLE_EQ( 0.276367023942938716540851, pdCZHrzAcc( &tan ) );
-}
-
-TEST_F(pdCZHrzTest, CheckAccRadVelocityFollowCurve)
-{
-  SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt );
-  pdCZHrzUpdate( &rad, 0.0, 0.2, 0.01, 0.1 );
-  EXPECT_DOUBLE_EQ( 0.011700937663480154293794, pdCZHrzAcc( &rad ) );
+  pdCZHrzSetKappa( &hrz, 1.0/6.0 );
+  pdCZHrzCalcDiffToRefPos( &hrz, 3, 2, &deltau, &deltaw );
+  EXPECT_NEAR( zPI, deltau, 1e-12 );
+  EXPECT_NEAR( 3*sqrt(3)-4, deltaw, 1e-12 );
 }

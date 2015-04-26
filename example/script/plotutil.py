@@ -41,6 +41,9 @@ class FigureCreator(object):
         if ylim is not None:
             self.setYLimit(ylim)
 
+    def makeAspectEqual(self):
+        self.ax.set_aspect('equal', 'datalim')
+
     def legend(self, loc='best'):
         self.ax.legend(loc=loc)
 

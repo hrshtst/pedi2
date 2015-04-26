@@ -197,7 +197,7 @@ TEST_F(pdCZHrzMovTest, CheckSimZMPVelocityFollow)
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
   pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
   EXPECT_DOUBLE_EQ( -0.008141347574320424718142, uz );
-  EXPECT_DOUBLE_EQ( 0.000310222468637088091836,  wz );
+  EXPECT_DOUBLE_EQ( -0.029689777531362912532664, wz );
 }
 
 TEST_F(pdCZHrzMovTest, CheckSimZMPVelocityFollowCurve)
@@ -208,12 +208,12 @@ TEST_F(pdCZHrzMovTest, CheckSimZMPVelocityFollowCurve)
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
   pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
   EXPECT_DOUBLE_EQ( -0.006876061458783272808959, uz );
-  EXPECT_DOUBLE_EQ( -0.001769198404332106896314, wz );
+  EXPECT_DOUBLE_EQ( -0.031769198404332107954495, wz );
   // EXPECT_DOUBLE_EQ( -0.005162917622573504408678, pdCZHrzMovZMPU( &hrz ) );
   // EXPECT_DOUBLE_EQ( -0.001854072725677788271298,  pdCZHrzMovZMPW( &hrz ) );
 }
 
-TEST_F(pdCZHrzMovTest, CheckSimAccVelocityFollow)
+TEST_F(pdCZHrzMovTest, CheckAccVelocityFollow)
 {
   double uz, wz;
   double ddu, ddw;
@@ -222,11 +222,11 @@ TEST_F(pdCZHrzMovTest, CheckSimAccVelocityFollow)
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
   pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
   pdCZHrzMovCalcAcc( &hrz, uz, wz, &ddu, &ddw );
-  EXPECT_DOUBLE_EQ( 0.307074471047709740556542,  ddu );
-  EXPECT_DOUBLE_EQ( -0.011700937663480142150729, ddw );
+  EXPECT_DOUBLE_EQ( 0.307074471047709740556542, ddu );
+  EXPECT_DOUBLE_EQ( 1.119835831567288941812421, ddw );
 }
 
-TEST_F(pdCZHrzMovTest, CheckSimAccVelocityFollowCurve)
+TEST_F(pdCZHrzMovTest, CheckAccVelocityFollowCurve)
 {
   double uz, wz;
   double ddu, ddw;
@@ -236,7 +236,7 @@ TEST_F(pdCZHrzMovTest, CheckSimAccVelocityFollowCurve)
   pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
   pdCZHrzMovCalcAcc( &hrz, uz, wz, &ddu, &ddw );
   EXPECT_DOUBLE_EQ( 0.259350545603461102306397, ddu );
-  EXPECT_DOUBLE_EQ( 0.066730434885539466338678, ddw );
+  EXPECT_DOUBLE_EQ( 1.198267204116308493055953, ddw );
 }
 
 TEST_F(pdCZHrzMovTest, SaturationOfZMP)
@@ -274,9 +274,9 @@ TEST_F(pdCZHrzMovTest, UpdateVelocityFollow)
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
   pdCZHrzMovUpdate( &hrz, 0.0, 0.2, 0.01, 0.1 );
   EXPECT_DOUBLE_EQ( -0.008141347574320424718142, pdCZHrzMovZMPU(&hrz) );
-  EXPECT_DOUBLE_EQ( 0.000310222468637088091836,  pdCZHrzMovZMPW(&hrz) );
+  EXPECT_DOUBLE_EQ( -0.029689777531362912532664, pdCZHrzMovZMPW(&hrz) );
   EXPECT_DOUBLE_EQ( 0.307074471047709740556542,  pdCZHrzMovAccU(&hrz) );
-  EXPECT_DOUBLE_EQ( -0.011700937663480142150729, pdCZHrzMovAccW(&hrz) );
+  EXPECT_DOUBLE_EQ( 1.119835831567288941812421,  pdCZHrzMovAccW(&hrz) );
 }
 
 TEST_F(pdCZHrzMovTest, UpdateVelocityFollowCurve)
@@ -285,7 +285,7 @@ TEST_F(pdCZHrzMovTest, UpdateVelocityFollowCurve)
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
   pdCZHrzMovUpdate( &hrz, 0.0, 0.2, 0.01, 0.1 );
   EXPECT_DOUBLE_EQ( -0.006876061458783272808959, pdCZHrzMovZMPU(&hrz) );
-  EXPECT_DOUBLE_EQ( -0.001769198404332106896314, pdCZHrzMovZMPW(&hrz) );
+  EXPECT_DOUBLE_EQ( -0.031769198404332107954495, pdCZHrzMovZMPW(&hrz) );
   EXPECT_DOUBLE_EQ(  0.259350545603461102306397, pdCZHrzMovAccU(&hrz) );
-  EXPECT_DOUBLE_EQ(  0.066730434885539466338678, pdCZHrzMovAccW(&hrz) );
+  EXPECT_DOUBLE_EQ(  1.198267204116308493055953, pdCZHrzMovAccW(&hrz) );
 }

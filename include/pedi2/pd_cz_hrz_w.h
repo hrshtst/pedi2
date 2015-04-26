@@ -19,14 +19,24 @@ typedef struct{
 __EXPORT void pdCZHrzWInit(pdCZHrzW *w, double *kappa, double *zeta);
 __EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
 
+/* methods to get parameters */
+#define pdCZHrzWRefVel(w) (w)->_vd
+#define pdCZHrzWQ1(w)     (w)->_q1
+#define pdCZHrzWQ2(w)     (w)->_q2
+#define pdCZHrzWRho(w)    (w)->_rho
+#define pdCZHrzWKr(w)     (w)->_kr
+#define pdCZHrzWDist(w)   (w)->_dist
+#define pdCZHrzWKappa(w)  *((w)->_kappa)
+#define pdCZHrzWZeta(w)   *((w)->_zeta)
+
 /* methods to set parameters */
-#define pdCZHrzWSetRefVel(w,vd) (w)->_vd = vd
-#define pdCZHrzWSetQ1(w,q1) (w)->_q1 = q1
-#define pdCZHrzWSetQ2(w,q2) (w)->_q2 = q2
-#define pdCZHrzWSetRho(w,r) (w)->_rho = r
-#define pdCZHrzWSetKr(w,k) (w)->_kr = k
-#define pdCZHrzWSetDist(w,d) (w)->_dist = d
-#define pdCZHrzWSetKappa(w,k) *((w)->_kappa) = k
+#define pdCZHrzWSetRefVel(w,vd) pdCZHrzWRefVel(w) = vd
+#define pdCZHrzWSetQ1(w,q1)     pdCZHrzWQ1(w) = q1
+#define pdCZHrzWSetQ2(w,q2)     pdCZHrzWQ2(w) = q2
+#define pdCZHrzWSetRho(w,r)     pdCZHrzWRho(w) = r
+#define pdCZHrzWSetKr(w,k)      pdCZHrzWKr(w) = k
+#define pdCZHrzWSetDist(w,d)    pdCZHrzWDist(w) = d
+#define pdCZHrzWSetKappa(w,k)   pdCZHrzWKappa(w) = k
 #define pdCZHrzWSetPrm(w,vd,q1,q2,rho,kr,dist) do{\
   pdCZHrzWSetRefVel( w, vd );\
   pdCZHrzWSetQ1( w, q1 );\
@@ -35,16 +45,6 @@ __EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
   pdCZHrzWSetKr( w, kr );\
   pdCZHrzWSetDist( w, dist );\
 } while(0)
-
-/* methods to get parameters */
-#define pdCZHrzWRefVel(w) (w)->_vd
-#define pdCZHrzWQ1(w) (w)->_q1
-#define pdCZHrzWQ2(w) (w)->_q2
-#define pdCZHrzWRho(w) (w)->_rho
-#define pdCZHrzWKr(w) (w)->_kr
-#define pdCZHrzWDist(w) (w)->_dist
-#define pdCZHrzWKappa(w) *((w)->_kappa)
-#define pdCZHrzWZeta(w) *((w)->_zeta)
 
 /* calculation methods */
 __EXPORT double pdCZHrzWCalcSimZMP(pdCZHrzW *w, double du, double vu, double dw, double vw);

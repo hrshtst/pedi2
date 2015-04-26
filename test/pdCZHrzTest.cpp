@@ -32,7 +32,7 @@ protected:
     pdCZHrzSetKr( &hrz, 17 );
     pdCZHrzSetDist( &hrz, 18 );
     pdCZHrzSetKappa( &hrz, 19 );
-    hrz._sr = &sr;
+    pdCZHrzSetSR( &hrz, &sr );
     hrz.refxz = 20;
     hrz.refyz = 21;
     hrz.refddx = 22;
@@ -59,7 +59,7 @@ TEST_F(pdCZHrzTest, Init)
   EXPECT_EQ( 0, pdCZHrzKr( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzDist( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzKappa( &hrz ) );
-  EXPECT_EQ( NULL, hrz._sr );
+  EXPECT_EQ( NULL, pdCZHrzSR( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosY( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefTheta( &hrz ) );
@@ -89,7 +89,7 @@ TEST_F(pdCZHrzTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzKr( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzDist( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzKappa( &hrz ) );
-  EXPECT_EQ( NULL, hrz._sr );
+  EXPECT_EQ( NULL, pdCZHrzSR( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosY( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefTheta( &hrz ) );

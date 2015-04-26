@@ -20,24 +20,24 @@ typedef struct{
 __EXPORT void pdCZVrtInit(pdCZVrt *vrt);
 __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 
+/* methods to get parameters */
+#define pdCZVrtRef(v)  (v)->_zd
+#define pdCZVrtQ1(v)   (v)->_q1
+#define pdCZVrtQ2(v)   (v)->_q2
+#define pdCZVrtRF(v)   (v)->reffz
+#define pdCZVrtAcc(v)  (v)->refddz
+#define pdCZVrtZMP(v)  (v)->refzz
+#define pdCZVrtZeta(v) (v)->zeta
+
 /* methods to set parameters */
-#define pdCZVrtSetRef(v,zd) (v)->_zd = zd
-#define pdCZVrtSetQ1(v,q1) (v)->_q1 = q1
-#define pdCZVrtSetQ2(v,q2) (v)->_q2 = q2
+#define pdCZVrtSetRef(v,zd) pdCZVrtRef(v) = zd
+#define pdCZVrtSetQ1(v,q1)  pdCZVrtQ1(v)  = q1
+#define pdCZVrtSetQ2(v,q2)  pdCZVrtQ2(v)  = q2
 #define pdCZVrtSetPrm(v,zd,q1,q2) do{\
   pdCZVrtSetRef( v, zd );\
   pdCZVrtSetQ1( v, q1 );\
   pdCZVrtSetQ2( v, q2 );\
 } while(0)
-
-/* methods to get parameters */
-#define pdCZVrtRef(v) (v)->_zd
-#define pdCZVrtQ1(v) (v)->_q1
-#define pdCZVrtQ2(v) (v)->_q2
-#define pdCZVrtRF(v) (v)->reffz
-#define pdCZVrtAcc(v) (v)->refddz
-#define pdCZVrtZMP(v) (v)->refzz
-#define pdCZVrtZeta(v) (v)->zeta
 
 /* calculation methods */
 __EXPORT double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz);

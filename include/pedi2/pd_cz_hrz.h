@@ -105,6 +105,10 @@ __EXPORT void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, double ud, double wd, double
 #define pdCZHrzUpdateM(h,du,vu,dw,vw) pdCZHrzMovUpdate( &(h)->_hrzm, du, vu, dw, vw )
 __EXPORT void pdCZHrzUpdate(pdCZHrz *hrz, double x, double y, double theta, double vx, double vy, double xd, double yd, double thetad, zVec3DList *sr);
 
+/* for debug */
+__EXPORT void pdCZHrzFWrite(FILE *fp, pdCZHrz *hrz);
+#define pdCZHrzWrite(h) pdCZHrzFWrite( stdout, h )
+
 __END_DECLS
 
 #endif /* __PD_CZ_HRZ_H__ */

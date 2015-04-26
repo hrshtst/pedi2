@@ -82,6 +82,9 @@ __EXPORT void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double uz, double wz, double *d
 /* update method */
 __EXPORT void pdCZHrzMovUpdate(pdCZHrzMov *hrz, double du, double vu, double dw, double vw);
 
+/* for debug */
+__EXPORT void pdCZHrzMovFWrite(FILE *fp, pdCZHrzMov *hrz);
+#define pdCZHrzMovWrite(h) pdCZHrzMovFWrite( stdout, h )
 
 __END_DECLS
 

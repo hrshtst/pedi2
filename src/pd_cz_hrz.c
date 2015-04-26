@@ -117,4 +117,16 @@ void pdCZHrzUpdate(pdCZHrz *hrz, double x, double y, double theta, double vx, do
   pdCZHrzUpdateM( hrz, pdCZHrzDeltaU(hrz), pdCZHrzDeltaW(hrz), pdCZHrzVelU(hrz), pdCZHrzVelW(hrz) );
   pdCZHrzXformMtoW( hrz, pdCZHrzZMPU(hrz), pdCZHrzZMPW(hrz), &pdCZHrzZMPX(hrz), &pdCZHrzZMPY(hrz) );
   pdCZHrzRotMtoW( hrz, pdCZHrzAccU(hrz), pdCZHrzAccW(hrz), &pdCZHrzAccX(hrz), &pdCZHrzAccY(hrz) );
+
+void pdCZHrzFWrite(FILE *fp, pdCZHrz *hrz)
+{
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "xd:%f, yd:%f, thetad:%f\n", hrz->_xd, hrz->_yd, hrz->_thetad );
+  fprintf( fp, "x: %f, y :%f, theta :%f\n", hrz->_x, hrz->_y, hrz->_theta );
+  fprintf( fp, "vx:%f, vy:%f\n",            hrz->_vx, hrz->_vy );
+  fprintf( fp, "ud:%f, deltau:%f, vu:%f\n", hrz->_ud, hrz->_deltau, hrz->_vu );
+  fprintf( fp, "wd:%f, deltaw:%f, vw:%f\n", hrz->_wd, hrz->_deltaw, hrz->_vw );
+  fprintf( fp, "refxz:%f, refyz:%f\n", hrz->refxz, hrz->refyz );
+  fprintf( fp, "refddx:%f, refddy:%f\n", hrz->refddx, hrz->refddy );
 }

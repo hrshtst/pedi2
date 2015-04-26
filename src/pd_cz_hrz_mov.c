@@ -79,3 +79,17 @@ void pdCZHrzMovUpdate(pdCZHrzMov *hrz, double du, double vu, double dw, double v
   pdCZHrzMovCalcAcc( hrz,  pdCZHrzMovZMPU(hrz),  pdCZHrzMovZMPW(hrz),
                           &pdCZHrzMovAccU(hrz), &pdCZHrzMovAccW(hrz) );
 }
+
+void pdCZHrzMovFWrite(FILE *fp, pdCZHrzMov *hrz)
+{
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "vud:%f, vwd:%f\n", pdCZHrzMovRefVelU(hrz), pdCZHrzMovRefVelW(hrz) );
+  fprintf( fp, "qu1:%f, qu2:%f\n", pdCZHrzMovQ1U(hrz), pdCZHrzMovQ2U(hrz) );
+  fprintf( fp, "qw1:%f, qw2:%f\n", pdCZHrzMovQ1W(hrz), pdCZHrzMovQ2W(hrz) );
+  fprintf( fp, "rho:%f, kr:%f, dist:%f\n",
+           pdCZHrzMovRho(hrz), pdCZHrzMovKr(hrz), pdCZHrzMovDist(hrz) );
+  fprintf( fp, "kappa:%f\n", pdCZHrzMovKappa(hrz) );
+  fprintf( fp, "refuz:%f, refwz:%f\n", pdCZHrzMovZMPU(hrz), pdCZHrzMovZMPW(hrz) );
+  fprintf( fp, "refddu:%f, refddw:%f\n", pdCZHrzMovAccU(hrz), pdCZHrzMovAccW(hrz) );
+}

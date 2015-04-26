@@ -37,8 +37,8 @@ void pdCZHrzXformMtoW(pdCZHrz *hrz, double u, double w, double *X, double *Y)
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  *X = pdCZHrzPosX(hrz) + c * u - s * w;
-  *Y = pdCZHrzPosY(hrz) + s * u + c * w;
+  *X = pdCZHrzPosX(hrz) - s * u - c * w;
+  *Y = pdCZHrzPosY(hrz) + c * u - s * w;
 }
 
 void pdCZHrzXformWtoM(pdCZHrz *hrz, double X, double Y, double *u, double *w)
@@ -46,8 +46,8 @@ void pdCZHrzXformWtoM(pdCZHrz *hrz, double X, double Y, double *u, double *w)
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  *u =  c * ( X - pdCZHrzPosX(hrz) ) + s * ( Y - pdCZHrzPosY(hrz) );
-  *w = -s * ( X - pdCZHrzPosX(hrz) ) + c * ( Y - pdCZHrzPosY(hrz) );
+  *u = -s * ( X - pdCZHrzPosX(hrz) ) + c * ( Y - pdCZHrzPosY(hrz) );
+  *w = -c * ( X - pdCZHrzPosX(hrz) ) - s * ( Y - pdCZHrzPosY(hrz) );
 }
 
 void pdCZHrzRotMtoW(pdCZHrz *hrz, double vu, double vw, double *vx, double *vy)
@@ -55,8 +55,8 @@ void pdCZHrzRotMtoW(pdCZHrz *hrz, double vu, double vw, double *vx, double *vy)
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  *vx = c * vu - s * vw;
-  *vy = s * vu + c * vw;
+  *vx = -s * vu - c * vw;
+  *vy =  c * vu - s * vw;
 }
 
 void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, double *vw)
@@ -64,8 +64,8 @@ void pdCZHrzRotWtoM(pdCZHrz *hrz, double vx, double vy, double *vu, double *vw)
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  *vu =  c * vx + s * vy;
-  *vw = -s * vx + c * vy;
+  *vu = -s * vx + c * vy;
+  *vw = -c * vx - s * vy;
 }
 
 void pdCZHrzXformSRWtoM(pdCZHrz *hrz, zVec3DList *sr)

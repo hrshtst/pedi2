@@ -54,7 +54,7 @@ double pdCZHrzWCalcSimZMP(pdCZHrzW *w, double du, double vu, double dw, double v
   double r;
 
   r = 1.0 + pdCZHrzWKappa(w) * dw;
-  return _pdCZHrzWK1(w)*dw + _pdCZHrzWK2(w)*_pdCZHrzWAct(w,dw,vw)*vw - (pdCZHrzWKappa(w)/r)*zSqr(vu/pdCZHrzWZeta(w));
+  return -_pdCZHrzWK1(w)*dw + _pdCZHrzWK2(w)*_pdCZHrzWAct(w,dw,vw)*vw - (pdCZHrzWKappa(w)/r)*zSqr(vu/pdCZHrzWZeta(w));
 }
 
 double pdCZHrzWCalcRegZMP(pdCZHrzW *w, double du, double vu, double dw, double vw)
@@ -62,5 +62,5 @@ double pdCZHrzWCalcRegZMP(pdCZHrzW *w, double du, double vu, double dw, double v
   double r;
 
   r = 1.0 + pdCZHrzWKappa(w) * dw;
-  return _pdCZHrzWK1(w)*dw + _pdCZHrzWK2(w)*vw - (pdCZHrzWKappa(w)/r)*zSqr(vu/pdCZHrzWZeta(w));
+  return -_pdCZHrzWK1(w)*dw + _pdCZHrzWK2(w)*vw - (pdCZHrzWKappa(w)/r)*zSqr(vu/pdCZHrzWZeta(w));
 }

@@ -1,7 +1,7 @@
 #ifndef __PD_CZ_HRZ_H__
 #define __PD_CZ_HRZ_H__
 
-#include <pedi2/pd_cz_hrz_mov.h>
+#include <pedi2/pd_cz_hrz_uw.h>
 
 __BEGIN_DECLS
 
@@ -13,7 +13,7 @@ typedef struct{
   double _theta;   /* rotational angle */
   zVec3DList *_sr; /* supporting region */
 
-  pdCZHrzMov _uw;  /* horizontal controller w.r.t moving frame */
+  pdCZHrzUW _uw;   /* horizontal controller w.r.t moving frame */
   zVec2D _uwd;     /* desired COM position w.r.t moving frame */
   zVec2D _delta;   /* difference from COM to desired position */
   zVec2D _vuw;     /* COM velocity w.r.t moving frame */
@@ -39,24 +39,24 @@ __EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzVelY(h)     pdCZHrzVel(h)[zY]
 #define pdCZHrzTheta(h)    (h)->_theta
 #define pdCZHrzUW(h)       (h)->_uw
-#define pdCZHrzRefVelU(h)  pdCZHrzMovRefVelU( &pdCZHrzUW(h) )
-#define pdCZHrzQ1U(h)      pdCZHrzMovQ1U( &pdCZHrzUW(h) )
-#define pdCZHrzQ2U(h)      pdCZHrzMovQ2U( &pdCZHrzUW(h) )
-#define pdCZHrzRefVelW(h)  pdCZHrzMovRefVelW( &pdCZHrzUW(h) )
-#define pdCZHrzQ1W(h)      pdCZHrzMovQ1W( &pdCZHrzUW(h) )
-#define pdCZHrzQ2W(h)      pdCZHrzMovQ2W( &pdCZHrzUW(h) )
-#define pdCZHrzRho(h)      pdCZHrzMovRho( &pdCZHrzUW(h) )
-#define pdCZHrzKr(h)       pdCZHrzMovKr( &pdCZHrzUW(h) )
-#define pdCZHrzDist(h)     pdCZHrzMovDist( &pdCZHrzUW(h) )
-#define pdCZHrzKappa(h)    pdCZHrzMovKappa( &pdCZHrzUW(h) )
-#define pdCZHrzSRUW(h)     pdCZHrzMovSR( &pdCZHrzUW(h) )
-#define pdCZHrzSRVertUW(h) pdCZHrzMovSRVert( &pdCZHrzUW(h) )
-#define pdCZHrzZMPUW(h)    pdCZHrzMovZMP( &pdCZHrzUW(h) )
-#define pdCZHrzZMPU(h)     pdCZHrzMovZMPU( &pdCZHrzUW(h) )
-#define pdCZHrzZMPW(h)     pdCZHrzMovZMPW( &pdCZHrzUW(h) )
-#define pdCZHrzAccUW(h)    pdCZHrzMovAcc( &pdCZHrzUW(h) )
-#define pdCZHrzAccU(h)     pdCZHrzMovAccU( &pdCZHrzUW(h) )
-#define pdCZHrzAccW(h)     pdCZHrzMovAccW( &pdCZHrzUW(h) )
+#define pdCZHrzRefVelU(h)  pdCZHrzUWRefVelU( &pdCZHrzUW(h) )
+#define pdCZHrzQ1U(h)      pdCZHrzUWQ1U( &pdCZHrzUW(h) )
+#define pdCZHrzQ2U(h)      pdCZHrzUWQ2U( &pdCZHrzUW(h) )
+#define pdCZHrzRefVelW(h)  pdCZHrzUWRefVelW( &pdCZHrzUW(h) )
+#define pdCZHrzQ1W(h)      pdCZHrzUWQ1W( &pdCZHrzUW(h) )
+#define pdCZHrzQ2W(h)      pdCZHrzUWQ2W( &pdCZHrzUW(h) )
+#define pdCZHrzRho(h)      pdCZHrzUWRho( &pdCZHrzUW(h) )
+#define pdCZHrzKr(h)       pdCZHrzUWKr( &pdCZHrzUW(h) )
+#define pdCZHrzDist(h)     pdCZHrzUWDist( &pdCZHrzUW(h) )
+#define pdCZHrzKappa(h)    pdCZHrzUWKappa( &pdCZHrzUW(h) )
+#define pdCZHrzSRUW(h)     pdCZHrzUWSR( &pdCZHrzUW(h) )
+#define pdCZHrzSRVertUW(h) pdCZHrzUWSRVert( &pdCZHrzUW(h) )
+#define pdCZHrzZMPUW(h)    pdCZHrzUWZMP( &pdCZHrzUW(h) )
+#define pdCZHrzZMPU(h)     pdCZHrzUWZMPU( &pdCZHrzUW(h) )
+#define pdCZHrzZMPW(h)     pdCZHrzUWZMPW( &pdCZHrzUW(h) )
+#define pdCZHrzAccUW(h)    pdCZHrzUWAcc( &pdCZHrzUW(h) )
+#define pdCZHrzAccU(h)     pdCZHrzUWAccU( &pdCZHrzUW(h) )
+#define pdCZHrzAccW(h)     pdCZHrzUWAccW( &pdCZHrzUW(h) )
 #define pdCZHrzSR(h)       (h)->_sr
 #define pdCZHrzZMP(h)      (h)->zmp
 #define pdCZHrzZMPX(h)     pdCZHrzZMP(h)[zX]
@@ -89,19 +89,19 @@ __EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzSetVelVec(h,v)       zVec2DCopy( v, pdCZHrzVel(h) )
 #define pdCZHrzSetVelX(h,vx)        pdCZHrzVelX(h) = vx
 #define pdCZHrzSetVelY(h,vy)        pdCZHrzVelY(h) = vy
-#define pdCZHrzSetRefVelU(h,vd)     pdCZHrzMovSetRefVelU( &pdCZHrzUW(h), vd )
-#define pdCZHrzSetQ1U(h,q1)         pdCZHrzMovSetQ1U( &pdCZHrzUW(h), q1 )
-#define pdCZHrzSetQ2U(h,q2)         pdCZHrzMovSetQ2U( &pdCZHrzUW(h), q2 )
-#define pdCZHrzSetRefVelW(h,vd)     pdCZHrzMovSetRefVelW( &pdCZHrzUW(h), vd )
-#define pdCZHrzSetQ1W(h,q1)         pdCZHrzMovSetQ1W( &pdCZHrzUW(h), q1 )
-#define pdCZHrzSetQ2W(h,q2)         pdCZHrzMovSetQ2W( &pdCZHrzUW(h), q2 )
-#define pdCZHrzSetRho(h,r)          pdCZHrzMovSetRho( &pdCZHrzUW(h), r )
-#define pdCZHrzSetKr(h,k)           pdCZHrzMovSetKr( &pdCZHrzUW(h), k )
-#define pdCZHrzSetDist(h,d)         pdCZHrzMovSetDist( &pdCZHrzUW(h), d )
-#define pdCZHrzSetKappa(h,k)        pdCZHrzMovSetKappa( &pdCZHrzUW(h), k )
+#define pdCZHrzSetRefVelU(h,vd)     pdCZHrzUWSetRefVelU( &pdCZHrzUW(h), vd )
+#define pdCZHrzSetQ1U(h,q1)         pdCZHrzUWSetQ1U( &pdCZHrzUW(h), q1 )
+#define pdCZHrzSetQ2U(h,q2)         pdCZHrzUWSetQ2U( &pdCZHrzUW(h), q2 )
+#define pdCZHrzSetRefVelW(h,vd)     pdCZHrzUWSetRefVelW( &pdCZHrzUW(h), vd )
+#define pdCZHrzSetQ1W(h,q1)         pdCZHrzUWSetQ1W( &pdCZHrzUW(h), q1 )
+#define pdCZHrzSetQ2W(h,q2)         pdCZHrzUWSetQ2W( &pdCZHrzUW(h), q2 )
+#define pdCZHrzSetRho(h,r)          pdCZHrzUWSetRho( &pdCZHrzUW(h), r )
+#define pdCZHrzSetKr(h,k)           pdCZHrzUWSetKr( &pdCZHrzUW(h), k )
+#define pdCZHrzSetDist(h,d)         pdCZHrzUWSetDist( &pdCZHrzUW(h), d )
+#define pdCZHrzSetKappa(h,k)        pdCZHrzUWSetKappa( &pdCZHrzUW(h), k )
 #define pdCZHrzSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa) \
-  pdCZHrzMovSetPrm( &pdCZHrzUW(h), vud, qu1, qu2, \
-                                   vwd, qw1, qw2, rho, kr, dist, kappa )
+  pdCZHrzUWSetPrm( &pdCZHrzUW(h), vud, qu1, qu2, \
+                                  vwd, qw1, qw2, rho, kr, dist, kappa )
 #define pdCZHrzSetSR(h,sr)          pdCZHrzSR(h) = sr
 #define pdCZHrzSetRefPosUW(h,ud,wd) zVec2DCreate( pdCZHrzRefPosUW(h), ud, wd )
 #define pdCZHrzSetRefPosUWVec(h,pd) zVec2DCopy( pd, pdCZHrzRefPosUW(h) )
@@ -125,7 +125,7 @@ __EXPORT void pdCZHrzXformSRXYtoUW(pdCZHrz *hrz, zVec3DList *sr);
 __EXPORT void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D uwd, zVec2D delta);
 
 /* update method */
-#define pdCZHrzUpdateUW(h,d,v) pdCZHrzMovUpdate( &pdCZHrzUW(h), d, v )
+#define pdCZHrzUpdateUW(h,d,v) pdCZHrzUWUpdate( &pdCZHrzUW(h), d, v )
 __EXPORT void pdCZHrzUpdate(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr);
 
 /* for debug */

@@ -1,0 +1,92 @@
+#ifndef __PD_CZ_HRZ_UW_H__
+#define __PD_CZ_HRZ_UW_H__
+
+#include <zm/zm.h>
+#include <zeo/zeo_bv.h>
+#include <pedi2/pd_cz_vrt.h>
+#include <pedi2/pd_cz_hrz_u.h>
+#include <pedi2/pd_cz_hrz_w.h>
+
+__BEGIN_DECLS
+
+typedef struct{
+  pdCZHrzU _u;     /* desired ZMP calculator for tangential dir. */
+  pdCZHrzW _w;     /* desired ZMP calculator for radial dir. */
+  double _kappa;   /* curvature of the referential orbit */
+  pdCZVrt *_vrt;   /* controller for vertical motion */
+  zVec3DList _sr;  /* supporting region */
+  zVec3D *_sr_vert; /* vertices of supporting retion */
+  int _vert_num;    /* number of vertices */
+
+  zVec2D zmp;   /* referential ZMP position */
+  zVec2D acc;   /* referential COM acceleration */
+} pdCZHrzUW;
+
+/* c'tor and d'tor */
+__EXPORT void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt);
+__EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
+
+/* methods to get parameters */
+#define pdCZHrzUWU(h)       (h)->_u
+#define pdCZHrzUWW(h)       (h)->_w
+#define pdCZHrzUWRefVelU(h) pdCZHrzURefVel( &pdCZHrzUWU(h) )
+#define pdCZHrzUWQ1U(h)     pdCZHrzUQ1( &pdCZHrzUWU(h) )
+#define pdCZHrzUWQ2U(h)     pdCZHrzUQ2( &pdCZHrzUWU(h) )
+#define pdCZHrzUWRefVelW(h) pdCZHrzWRefVel( &pdCZHrzUWW(h) )
+#define pdCZHrzUWQ1W(h)     pdCZHrzWQ1( &pdCZHrzUWW(h) )
+#define pdCZHrzUWQ2W(h)     pdCZHrzWQ2( &pdCZHrzUWW(h) )
+#define pdCZHrzUWRho(h)     pdCZHrzWRho( &pdCZHrzUWW(h) )
+#define pdCZHrzUWKr(h)      pdCZHrzWKr( &pdCZHrzUWW(h) )
+#define pdCZHrzUWDist(h)    pdCZHrzWDist( &pdCZHrzUWW(h) )
+#define pdCZHrzUWKappa(h)   (h)->_kappa
+#define pdCZHrzUWZeta(h)    pdCZVrtZeta( (h)->_vrt )
+#define pdCZHrzUWSR(h)      (h)->_sr
+#define pdCZHrzUWSRVert(h)  (h)->_sr_vert
+#define pdCZHrzUWZMP(h)     (h)->zmp
+#define pdCZHrzUWZMPU(h)    pdCZHrzUWZMP(h)[pdU]
+#define pdCZHrzUWZMPW(h)    pdCZHrzUWZMP(h)[pdW]
+#define pdCZHrzUWAcc(h)     (h)->acc
+#define pdCZHrzUWAccU(h)    pdCZHrzUWAcc(h)[pdU]
+#define pdCZHrzUWAccW(h)    pdCZHrzUWAcc(h)[pdW]
+
+/* methods to set parameters */
+#define pdCZHrzUWSetRefVelU(h,vd) pdCZHrzUSetRefVel( &pdCZHrzUWU(h), vd )
+#define pdCZHrzUWSetQ1U(h,q1)     pdCZHrzUSetQ1( &pdCZHrzUWU(h), q1 )
+#define pdCZHrzUWSetQ2U(h,q2)     pdCZHrzUSetQ2( &pdCZHrzUWU(h), q2 )
+#define pdCZHrzUWSetRefVelW(h,vd) pdCZHrzWSetRefVel( &pdCZHrzUWW(h), vd )
+#define pdCZHrzUWSetQ1W(h,q1)     pdCZHrzWSetQ1( &pdCZHrzUWW(h), q1 )
+#define pdCZHrzUWSetQ2W(h,q2)     pdCZHrzWSetQ2( &pdCZHrzUWW(h), q2 )
+#define pdCZHrzUWSetRho(h,r)      pdCZHrzWSetRho( &pdCZHrzUWW(h), r )
+#define pdCZHrzUWSetKr(h,k)       pdCZHrzWSetKr( &pdCZHrzUWW(h), k )
+#define pdCZHrzUWSetDist(h,d)     pdCZHrzWSetDist( &pdCZHrzUWW(h), d )
+#define pdCZHrzUWSetKappa(h,k)    pdCZHrzUWKappa(h) = k
+#define pdCZHrzUWSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa) do{\
+  pdCZHrzUSetPrm( &pdCZHrzUWU(h), vud, qu1, qu2 );\
+  pdCZHrzWSetPrm( &pdCZHrzUWW(h), vwd, qw1, qw2, rho, kr, dist );\
+  pdCZHrzUWSetKappa( h, kappa );\
+} while(0)
+__EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
+#define pdCZHrzUWIsSRSet(h) ( zListNum( &(h)->_sr ) ? true : false )
+
+/* calculation methods */
+#define pdCZHrzUWCalcSimZMPU(h,d,v) \
+  pdCZHrzUCalcSimZMP( &pdCZHrzUWU(h), d, v )
+#define pdCZHrzUWCalcSimZMPW(h,d,v) \
+  pdCZHrzWCalcSimZMP( &pdCZHrzUWW(h), d, v )
+#define pdCZHrzUWCalcRegZMPU(h,d,v) \
+  pdCZHrzUCalcRegZMP( &pdCZHrzUWU(h), d, v )
+#define pdCZHrzUWCalcRegZMPW(h,d,v) \
+  pdCZHrzWCalcRegZMP( &pdCZHrzUWW(h), d, v )
+__EXPORT void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel, zVec2D zmp);
+__EXPORT void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D zmp, zVec2D acc);
+
+/* update method */
+__EXPORT void pdCZHrzUWUpdate(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel);
+
+/* for debug */
+__EXPORT void pdCZHrzUWFWrite(FILE *fp, pdCZHrzUW *hrz);
+#define pdCZHrzUWWrite(h) pdCZHrzUWFWrite( stdout, h )
+
+__END_DECLS
+
+#endif /* __PD_CZ_HRZ_UW_H__ */

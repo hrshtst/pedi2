@@ -9,6 +9,9 @@ void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt)
   pdCZHrzSetTheta( hrz, 0 );
   pdCZHrzSetSR( hrz, NULL );
   pdCZHrzUWInit( pdCZHrzUWPtr(hrz), vrt );
+  pdCZHrzSetRefPosUW( hrz, 0, 0 );
+  pdCZHrzSetDelta( hrz, 0, 0 );
+  pdCZHrzSetVelUW( hrz, 0, 0 );
   pdCZHrzZMPX( hrz ) = 0;
   pdCZHrzZMPY( hrz ) = 0;
   pdCZHrzAccX( hrz ) = 0;
@@ -24,6 +27,9 @@ void pdCZHrzDestroy(pdCZHrz *hrz)
   pdCZHrzSetVel( hrz, 0, 0 );
   pdCZHrzSetTheta( hrz, 0 );
   pdCZHrzSetSR( hrz, NULL );
+  pdCZHrzSetRefPosUW( hrz, 0, 0 );
+  pdCZHrzSetDelta( hrz, 0, 0 );
+  pdCZHrzSetVelUW( hrz, 0, 0 );
 }
 
 double *pdCZHrzRotUWtoXY(pdCZHrz *hrz, zVec2D vuw, zVec2D vxy)

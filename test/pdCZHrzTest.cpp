@@ -33,10 +33,16 @@ protected:
     pdCZHrzSetDist( &hrz, 18 );
     pdCZHrzSetKappa( &hrz, 19 );
     pdCZHrzSetSR( &hrz, &sr );
-    pdCZHrzZMPX( &hrz ) = 20;
-    pdCZHrzZMPY( &hrz ) = 21;
-    pdCZHrzAccX( &hrz ) = 22;
-    pdCZHrzAccY( &hrz ) = 23;
+    pdCZHrzSetRefPosU( &hrz, 20 );
+    pdCZHrzSetRefPosW( &hrz, 21 );
+    pdCZHrzSetDeltaU( &hrz, 22 );
+    pdCZHrzSetDeltaW( &hrz, 23 );
+    pdCZHrzSetVelU( &hrz, 24 );
+    pdCZHrzSetVelW( &hrz, 25 );
+    pdCZHrzZMPX( &hrz ) = 26;
+    pdCZHrzZMPY( &hrz ) = 27;
+    pdCZHrzAccX( &hrz ) = 28;
+    pdCZHrzAccY( &hrz ) = 29;
   };
 
   zVec3DList sr;
@@ -68,6 +74,12 @@ TEST_F(pdCZHrzTest, Init)
   EXPECT_EQ( 0, pdCZHrzVelX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzVelY( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzTheta( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefPosU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefPosW( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzDeltaU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzDeltaW( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelW( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzZMPX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzZMPY( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzAccX( &hrz ) );
@@ -93,6 +105,12 @@ TEST_F(pdCZHrzTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzRefPosX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosY( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefTheta( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefPosU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzRefPosW( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzDeltaU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzDeltaW( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelU( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzVelW( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzPosX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzPosY( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzVelX( &hrz ) );
@@ -215,7 +233,7 @@ TEST_F(pdCZHrzTest, SetRefPosUPosW)
   EXPECT_DOUBLE_EQ( 0.6, pdCZHrzRefPosW(&hrz) );
 }
 
-TEST_F(pdCZHrzTest, SetDeltaM)
+TEST_F(pdCZHrzTest, SetDelta)
 {
   SetVacuousPrm();
   pdCZHrzSetDelta( &hrz, 0.1, 0.2 );
@@ -223,7 +241,7 @@ TEST_F(pdCZHrzTest, SetDeltaM)
   EXPECT_DOUBLE_EQ( 0.2, pdCZHrzDeltaW(&hrz) );
 }
 
-TEST_F(pdCZHrzTest, SetDeltaMVec)
+TEST_F(pdCZHrzTest, SetDeltaVec)
 {
   zVec2D v;
 

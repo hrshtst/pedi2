@@ -8,7 +8,7 @@ void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt)
   pdCZHrzSetVel( hrz, 0, 0 );
   pdCZHrzSetTheta( hrz, 0 );
   pdCZHrzSetSR( hrz, NULL );
-  pdCZHrzUWInit( &pdCZHrzUW(hrz), vrt );
+  pdCZHrzUWInit( pdCZHrzUWPtr(hrz), vrt );
   pdCZHrzZMPX( hrz ) = 0;
   pdCZHrzZMPY( hrz ) = 0;
   pdCZHrzAccX( hrz ) = 0;
@@ -17,7 +17,7 @@ void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt)
 
 void pdCZHrzDestroy(pdCZHrz *hrz)
 {
-  pdCZHrzUWDestroy( &pdCZHrzUW(hrz) );
+  pdCZHrzUWDestroy( pdCZHrzUWPtr(hrz) );
   pdCZHrzSetRefPos( hrz, 0, 0 );
   pdCZHrzSetRefTheta( hrz, 0 );
   pdCZHrzSetPos( hrz, 0, 0 );
@@ -75,7 +75,7 @@ void pdCZHrzXformSRXYtoUW(pdCZHrz *hrz, zVec3DList *sr)
     pdCZHrzXformXYtoUW( hrz, xy, uw );
     zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
   }
-  pdCZHrzUWSetSR( &pdCZHrzUW(hrz), p, zListNum(sr) );
+  pdCZHrzUWSetSR( pdCZHrzUWPtr(hrz), p, zListNum(sr) );
   zFree( p );
 }
 

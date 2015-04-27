@@ -173,7 +173,7 @@ TEST_F(pdCZHrzUWTest, IsSRSet)
   zVec3DCreate( &v[1], 0, 1, 0 );
   zVec3DCreate( &v[2], 1, 1, 0 );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
-  zCH2D( &pdCZHrzUWSR( &uw ), v, 3 );
+  zCH2D( pdCZHrzUWSR( &uw ), v, 3 );
   EXPECT_TRUE( pdCZHrzUWIsSRSet( &uw ) );
 }
 

@@ -6,7 +6,7 @@ void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt)
   pdCZHrzWInit( &hrz->_w, &pdCZHrzUWKappa(hrz), &pdCZVrtZeta(vrt) );
   hrz->_vrt = vrt;
   pdCZHrzUWSetKappa( hrz, 0 );
-  zListInit( &pdCZHrzUWSR(hrz) );
+  zListInit( pdCZHrzUWSR(hrz) );
   hrz->_vert_num = 0;
   zVec2DClear( pdCZHrzUWZMP(hrz) );
   zVec2DClear( pdCZHrzUWAcc(hrz) );
@@ -19,7 +19,7 @@ void pdCZHrzUWDestroy(pdCZHrzUW *hrz)
   pdCZHrzWDestroy( &hrz->_w );
   hrz->_vrt = NULL;
   pdCZHrzUWSetKappa( hrz, 0 );
-  zVec3DListDestroy( &pdCZHrzUWSR(hrz), false );
+  zVec3DListDestroy( pdCZHrzUWSR(hrz), false );
   zFree( pdCZHrzUWSRVert( hrz ) );
   hrz->_vert_num = 0;
   zVec2DClear( pdCZHrzUWZMP(hrz) );
@@ -45,7 +45,7 @@ void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num)
                   zVec3DElem(&p[i],zX),
                   zVec3DElem(&p[i],zY),
                   zVec3DElem(&p[i],zZ) );
-  zCH2D( &pdCZHrzUWSR(hrz), pdCZHrzUWSRVert(hrz), num );
+  zCH2D( pdCZHrzUWSR(hrz), pdCZHrzUWSRVert(hrz), num );
   hrz->_vert_num = num;
 }
 

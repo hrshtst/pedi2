@@ -30,9 +30,9 @@ __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 #define pdCZVrtZeta(v) (v)->zeta
 
 /* methods to set parameters */
-#define pdCZVrtSetRef(v,zd) pdCZVrtRef(v) = zd
-#define pdCZVrtSetQ1(v,q1)  pdCZVrtQ1(v)  = q1
-#define pdCZVrtSetQ2(v,q2)  pdCZVrtQ2(v)  = q2
+#define pdCZVrtSetRef(v,zd) ( pdCZVrtRef(v) = (zd) )
+#define pdCZVrtSetQ1(v,q1)  ( pdCZVrtQ1(v)  = (q1) )
+#define pdCZVrtSetQ2(v,q2)  ( pdCZVrtQ2(v)  = (q2) )
 #define pdCZVrtSetPrm(v,zd,q1,q2) do{\
   pdCZVrtSetRef( v, zd );\
   pdCZVrtSetQ1( v, q1 );\

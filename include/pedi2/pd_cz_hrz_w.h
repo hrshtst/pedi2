@@ -28,17 +28,17 @@ __EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
 #define pdCZHrzWRho(w)    (w)->_rho
 #define pdCZHrzWKr(w)     (w)->_kr
 #define pdCZHrzWDist(w)   (w)->_dist
-#define pdCZHrzWKappa(w)  *((w)->_kappa)
-#define pdCZHrzWZeta(w)   *((w)->_zeta)
+#define pdCZHrzWKappa(w)  ( *((w)->_kappa) )
+#define pdCZHrzWZeta(w)   ( *((w)->_zeta) )
 
 /* methods to set parameters */
-#define pdCZHrzWSetRefVel(w,vd) pdCZHrzWRefVel(w) = vd
-#define pdCZHrzWSetQ1(w,q1)     pdCZHrzWQ1(w) = q1
-#define pdCZHrzWSetQ2(w,q2)     pdCZHrzWQ2(w) = q2
-#define pdCZHrzWSetRho(w,r)     pdCZHrzWRho(w) = r
-#define pdCZHrzWSetKr(w,k)      pdCZHrzWKr(w) = k
-#define pdCZHrzWSetDist(w,d)    pdCZHrzWDist(w) = d
-#define pdCZHrzWSetKappa(w,k)   pdCZHrzWKappa(w) = k
+#define pdCZHrzWSetRefVel(w,vd) ( pdCZHrzWRefVel(w) = (vd) )
+#define pdCZHrzWSetQ1(w,q1)     ( pdCZHrzWQ1(w) = (q1) )
+#define pdCZHrzWSetQ2(w,q2)     ( pdCZHrzWQ2(w) = (q2) )
+#define pdCZHrzWSetRho(w,r)     ( pdCZHrzWRho(w) = (r) )
+#define pdCZHrzWSetKr(w,k)      ( pdCZHrzWKr(w) = (k) )
+#define pdCZHrzWSetDist(w,d)    ( pdCZHrzWDist(w) = (d) )
+#define pdCZHrzWSetKappa(w,k)   ( pdCZHrzWKappa(w) = (k) )
 #define pdCZHrzWSetPrm(w,vd,q1,q2,rho,kr,dist) do{\
   pdCZHrzWSetRefVel( w, vd );\
   pdCZHrzWSetQ1( w, q1 );\

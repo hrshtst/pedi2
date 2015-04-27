@@ -22,14 +22,14 @@ __EXPORT void pdCZHrzUDestroy(pdCZHrzU *u);
 #define pdCZHrzURefVel(u) (u)->_vd
 #define pdCZHrzUQ1(u)     (u)->_q1
 #define pdCZHrzUQ2(u)     (u)->_q2
-#define pdCZHrzUKappa(u)  *((u)->_kappa)
-#define pdCZHrzUZeta(u)   *((u)->_zeta)
+#define pdCZHrzUKappa(u)  ( *((u)->_kappa) )
+#define pdCZHrzUZeta(u)   ( *((u)->_zeta) )
 
 /* methods to set parameters */
-#define pdCZHrzUSetRefVel(u,vd) pdCZHrzURefVel(u) = vd
-#define pdCZHrzUSetQ1(u,q1)     pdCZHrzUQ1(u) = q1
-#define pdCZHrzUSetQ2(u,q2)     pdCZHrzUQ2(u) = q2
-#define pdCZHrzUSetKappa(u,k)   pdCZHrzUKappa(u) = k
+#define pdCZHrzUSetRefVel(u,vd) ( pdCZHrzURefVel(u) = (vd) )
+#define pdCZHrzUSetQ1(u,q1)     ( pdCZHrzUQ1(u) = (q1) )
+#define pdCZHrzUSetQ2(u,q2)     ( pdCZHrzUQ2(u) = (q2) )
+#define pdCZHrzUSetKappa(u,k)   ( pdCZHrzUKappa(u) = (k) )
 #define pdCZHrzUSetPrm(u,vd,q1,q2) do{\
   pdCZHrzUSetRefVel( u, vd );\
   pdCZHrzUSetQ1( u, q1 );\

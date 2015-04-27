@@ -33,10 +33,10 @@ protected:
     pdCZHrzSetDist( &hrz, 18 );
     pdCZHrzSetKappa( &hrz, 19 );
     pdCZHrzSetSR( &hrz, &sr );
-    hrz.refxz = 20;
-    hrz.refyz = 21;
-    hrz.refddx = 22;
-    hrz.refddy = 23;
+    pdCZHrzZMPX( &hrz ) = 20;
+    pdCZHrzZMPY( &hrz ) = 21;
+    pdCZHrzAccX( &hrz ) = 22;
+    pdCZHrzAccY( &hrz ) = 23;
   };
 
   zVec3DList sr;
@@ -100,72 +100,267 @@ TEST_F(pdCZHrzTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzTheta( &hrz ) );
 }
 
-TEST_F(pdCZHrzTest, XformMtoW)
+TEST_F(pdCZHrzTest, SetRefPos)
 {
-  double X, Y;
+  SetVacuousPrm();
+  pdCZHrzSetRefPos( &hrz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZHrzRefPosX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZHrzRefPosY(&hrz) );
+}
+TEST_F(pdCZHrzTest, SetRefPosVec)
+{
+  zVec2D v;
 
-  pdCZHrzSetPosX( &hrz, 0 );
-  pdCZHrzSetPosY( &hrz, 0 );
-  pdCZHrzSetTheta( &hrz, zPI/4 );
-  pdCZHrzXformMtoW( &hrz, 2, -2, &X, &Y );
-  EXPECT_NEAR( 0, X, 1e-12 );
-  EXPECT_NEAR( 2*sqrt(2), Y, 1e-12 );
-
-  pdCZHrzSetPosX( &hrz, 2 );
-  pdCZHrzSetPosY( &hrz, 1 );
-  pdCZHrzSetTheta( &hrz, zPI/6 );
-  pdCZHrzXformMtoW( &hrz, 2, 4, &X, &Y );
-  EXPECT_NEAR( -2*sqrt(3)+1, X, 1e-12 );
-  EXPECT_NEAR( sqrt(3)-1, Y, 1e-12 );
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.3, 0.4 );
+  pdCZHrzSetRefPosVec( &hrz, v );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZHrzRefPosX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.4, pdCZHrzRefPosY(&hrz) );
 }
 
-TEST_F(pdCZHrzTest, XformWtoM)
+TEST_F(pdCZHrzTest, SetRefPosXYTheta)
 {
-  double u, w;
-
-  pdCZHrzSetPosX( &hrz, 0 );
-  pdCZHrzSetPosY( &hrz, 0 );
-  pdCZHrzSetTheta( &hrz, zPI/4 );
-  pdCZHrzXformWtoM( &hrz, 2, -2, &u, &w );
-  EXPECT_NEAR( -2*sqrt(2), u, 1e-12 );
-  EXPECT_NEAR( 0, w, 1e-12 );
-
-  pdCZHrzSetPosX( &hrz, 2 );
-  pdCZHrzSetPosY( &hrz, 1 );
-  pdCZHrzSetTheta( &hrz, zPI/6 );
-  pdCZHrzXformWtoM( &hrz, 4, 5, &u, &w );
-  EXPECT_NEAR( -1+2*sqrt(3), u, 1e-12 );
-  EXPECT_NEAR( -sqrt(3)-2, w, 1e-12 );
+  SetVacuousPrm();
+  pdCZHrzSetRefPosX( &hrz, 0.5 );
+  pdCZHrzSetRefPosY( &hrz, 0.6 );
+  pdCZHrzSetRefTheta( &hrz, 0.7 );
+  EXPECT_DOUBLE_EQ( 0.5, pdCZHrzRefPosX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.6, pdCZHrzRefPosY(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.7, pdCZHrzRefTheta(&hrz) );
 }
 
-TEST_F(pdCZHrzTest, RotMtoW)
+TEST_F(pdCZHrzTest, SetPos)
 {
-  double vx, vy;
-
-  pdCZHrzSetTheta( &hrz, zPI/4 );
-  pdCZHrzRotMtoW( &hrz, 2, 2, &vx, &vy );
-  EXPECT_NEAR( -2*sqrt(2), vx, 1e-12 );
-  EXPECT_NEAR( 0, vy, 1e-12 );
-
-  pdCZHrzSetTheta( &hrz, zPI/6 );
-  pdCZHrzRotMtoW( &hrz, 4, 2, &vx, &vy );
-  EXPECT_NEAR( -sqrt(3)-2, vx, 1e-12 );
-  EXPECT_NEAR( 2*sqrt(3)-1, vy, 1e-12 );
+  SetVacuousPrm();
+  pdCZHrzSetPos( &hrz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZHrzPosX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZHrzPosY(&hrz) );
 }
 
-TEST_F(pdCZHrzTest, RotWtoM)
+TEST_F(pdCZHrzTest, SetPosVec)
 {
-  double vu, vw;
+  zVec2D v;
+
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.3, 0.4 );
+  pdCZHrzSetPosVec( &hrz, v );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZHrzPosX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.4, pdCZHrzPosY(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetPosXYTheta)
+{
+  SetVacuousPrm();
+  pdCZHrzSetPosX( &hrz, 0.5 );
+  pdCZHrzSetPosY( &hrz, 0.6 );
+  pdCZHrzSetTheta( &hrz, 0.7 );
+  EXPECT_DOUBLE_EQ( 0.5, pdCZHrzPosX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.6, pdCZHrzPosY(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.7, pdCZHrzTheta(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetVel)
+{
+  SetVacuousPrm();
+  pdCZHrzSetVel( &hrz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZHrzVelX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZHrzVelY(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetVelVec)
+{
+  zVec2D v;
+
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.3, 0.4 );
+  pdCZHrzSetVelVec( &hrz, v );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZHrzVelX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.4, pdCZHrzVelY(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetVelXY)
+{
+  SetVacuousPrm();
+  pdCZHrzSetVelX( &hrz, 0.5 );
+  pdCZHrzSetVelY( &hrz, 0.6 );
+  EXPECT_DOUBLE_EQ( 0.5, pdCZHrzVelX(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.6, pdCZHrzVelY(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetRefPosM)
+{
+  SetVacuousPrm();
+  pdCZHrzSetRefPosM( &hrz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZHrzRefPosU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZHrzRefPosW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetRefPosMVec)
+{
+  zVec2D v;
+
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.3, 0.4 );
+  pdCZHrzSetRefPosMVec( &hrz, v );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZHrzRefPosU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.4, pdCZHrzRefPosW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetRefPosUW)
+{
+  SetVacuousPrm();
+  pdCZHrzSetRefPosU( &hrz, 0.5 );
+  pdCZHrzSetRefPosW( &hrz, 0.6 );
+  EXPECT_DOUBLE_EQ( 0.5, pdCZHrzRefPosU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.6, pdCZHrzRefPosW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetDeltaM)
+{
+  SetVacuousPrm();
+  pdCZHrzSetDeltaM( &hrz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZHrzDeltaU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZHrzDeltaW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetDeltaMVec)
+{
+  zVec2D v;
+
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.3, 0.4 );
+  pdCZHrzSetDeltaMVec( &hrz, v );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZHrzDeltaU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.4, pdCZHrzDeltaW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetDeltaUW)
+{
+  SetVacuousPrm();
+  pdCZHrzSetDeltaU( &hrz, 0.5 );
+  pdCZHrzSetDeltaW( &hrz, 0.6 );
+  EXPECT_DOUBLE_EQ( 0.5, pdCZHrzDeltaU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.6, pdCZHrzDeltaW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetVelM)
+{
+  SetVacuousPrm();
+  pdCZHrzSetVelM( &hrz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZHrzVelU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZHrzVelW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetVelMVec)
+{
+  zVec2D v;
+
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.3, 0.4 );
+  pdCZHrzSetVelMVec( &hrz, v );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZHrzVelU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.4, pdCZHrzVelW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, SetVelUW)
+{
+  SetVacuousPrm();
+  pdCZHrzSetVelU( &hrz, 0.5 );
+  pdCZHrzSetVelW( &hrz, 0.6 );
+  EXPECT_DOUBLE_EQ( 0.5, pdCZHrzVelU(&hrz) );
+  EXPECT_DOUBLE_EQ( 0.6, pdCZHrzVelW(&hrz) );
+}
+
+TEST_F(pdCZHrzTest, RotMtoW_1)
+{
+  zVec2D vm, vw;
 
   pdCZHrzSetTheta( &hrz, zPI/4 );
-  pdCZHrzRotWtoM( &hrz, 2, 2, &vu, &vw );
-  EXPECT_NEAR( 0, vu, 1e-12 );
-  EXPECT_NEAR( -2*sqrt(2), vw, 1e-12 );
+  zVec2DCreate( vm, 2, 2 );
+  pdCZHrzRotMtoW( &hrz, vm, vw );
+  EXPECT_NEAR( -2*sqrt(2), vw[zX], 1e-12 );
+  EXPECT_NEAR( 0,          vw[zY], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, RotMtoW_2)
+{
+  zVec2D vm, vw;
 
   pdCZHrzSetTheta( &hrz, zPI/6 );
-  pdCZHrzRotWtoM( &hrz, -2, 2, &vu, &vw );
-  EXPECT_NEAR( sqrt(3)+1, vu, 1e-12 );
-  EXPECT_NEAR( sqrt(3)-1, vw, 1e-12 );
+  zVec2DCreate( vm, 4, 2 );
+  pdCZHrzRotMtoW( &hrz, vm, vw );
+  EXPECT_NEAR( -sqrt(3)-2,  vw[zX], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)-1, vw[zY], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, RotWtoM_1)
+{
+  zVec2D vm, vw;
+
+  pdCZHrzSetTheta( &hrz, zPI/4 );
+  zVec2DCreate( vw, 2, 2 );
+  pdCZHrzRotWtoM( &hrz, vw, vm );
+  EXPECT_NEAR( 0,          vm[pdU], 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), vm[pdW], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, RotWtoM_2)
+{
+  zVec2D vm, vw;
+
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  zVec2DCreate( vw, -2, 2 );
+  pdCZHrzRotWtoM( &hrz, vw, vm );
+  EXPECT_NEAR( sqrt(3)+1, vm[pdU], 1e-12 );
+  EXPECT_NEAR( sqrt(3)-1, vm[pdW], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, XformMtoW_1)
+{
+  zVec2D pm, pw;
+
+  pdCZHrzSetPos( &hrz, 0, 0 );
+  pdCZHrzSetTheta( &hrz, zPI/4 );
+  zVec2DCreate( pm, 2, -2 );
+  pdCZHrzXformMtoW( &hrz, pm, pw );
+  EXPECT_NEAR( 0,         pw[zX], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(2), pw[zY], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, XformMtoW_2)
+{
+  zVec2D pm, pw;
+
+  pdCZHrzSetPos( &hrz, 2, 1 );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  zVec2DCreate( pm, 2, 4 );
+  pdCZHrzXformMtoW( &hrz, pm, pw );
+  EXPECT_NEAR( -2*sqrt(3)+1, pw[zX], 1e-12 );
+  EXPECT_NEAR( sqrt(3)-1,    pw[zY], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, XformWtoM_1)
+{
+  zVec2D pm, pw;
+
+  pdCZHrzSetPos( &hrz, 0, 0 );
+  pdCZHrzSetTheta( &hrz, zPI/4 );
+  zVec2DCreate( pw, 2, -2 );
+  pdCZHrzXformWtoM( &hrz, pw, pm );
+  EXPECT_NEAR( -2*sqrt(2), pm[pdU], 1e-12 );
+  EXPECT_NEAR( 0,          pm[pdW], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, XformWtoM_2)
+{
+  zVec2D pm, pw;
+
+  pdCZHrzSetPos( &hrz, 2, 1 );
+  pdCZHrzSetTheta( &hrz, zPI/6 );
+  zVec2DCreate( pw, 4, 5 );
+  pdCZHrzXformWtoM( &hrz, pw, pm);
+  EXPECT_NEAR( -1+2*sqrt(3), pm[pdU], 1e-12 );
+  EXPECT_NEAR( -sqrt(3)-2,   pm[pdW], 1e-12 );
 }
 
 TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_1)
@@ -180,8 +375,7 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_1)
   zVec3DCreate( &sr_w_vert[2], 2, 4, 0 );
   zVec3DCreate( &sr_w_vert[3], 2, 2, 0 );
   zCH2D( &sr_w, sr_w_vert, 4 );
-  pdCZHrzSetPosX( &hrz, 0 );
-  pdCZHrzSetPosY( &hrz, 0 );
+  pdCZHrzSetPos( &hrz, 0, 0 );
   pdCZHrzSetTheta( &hrz, zPI/4 );
 
   // method to be tested
@@ -209,8 +403,7 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_2)
   zVec3DCreate( &sr_w_vert[1], 4, 5, 0 );
   zVec3DCreate( &sr_w_vert[2], 5, 1, 0 );
   zCH2D( &sr_w, sr_w_vert, 3 );
-  pdCZHrzSetPosX( &hrz, 4 );
-  pdCZHrzSetPosY( &hrz, 3 );
+  pdCZHrzSetPos( &hrz, 4, 3 );
   pdCZHrzSetTheta( &hrz, zPI/6 );
 
   // method to be tested
@@ -225,17 +418,24 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRWtoM_2)
   EXPECT_NEAR( -1,             zVec3DElem(&sr_m_vert[2], zY), 1e-12 );
 }
 
-TEST_F(pdCZHrzTest, CalcDiffToRefPos)
+TEST_F(pdCZHrzTest, CalcDiffToRefPos_1)
 {
-  double deltau, deltaw;
+  zVec2D pd, delta;
 
   pdCZHrzSetKappa( &hrz, 0 );
-  pdCZHrzCalcDiffToRefPos( &hrz, 3, 2, &deltau, &deltaw );
-  EXPECT_NEAR( 3, deltau, 1e-12 );
-  EXPECT_NEAR( 2, deltaw, 1e-12 );
+  zVec2DCreate( pd, 3, 2 );
+  pdCZHrzCalcDiffToRefPos( &hrz, pd, delta );
+  EXPECT_NEAR( 3, delta[pdU], 1e-12 );
+  EXPECT_NEAR( 2, delta[pdW], 1e-12 );
+}
+
+TEST_F(pdCZHrzTest, CalcDiffToRefPos_2)
+{
+  zVec2D pd, delta;
 
   pdCZHrzSetKappa( &hrz, 1.0/6.0 );
-  pdCZHrzCalcDiffToRefPos( &hrz, 3, 2, &deltau, &deltaw );
-  EXPECT_NEAR( zPI, deltau, 1e-12 );
-  EXPECT_NEAR( 3*sqrt(3)-4, deltaw, 1e-12 );
+  zVec2DCreate( pd, 3, 2 );
+  pdCZHrzCalcDiffToRefPos( &hrz, pd, delta );
+  EXPECT_NEAR( zPI,         delta[pdU], 1e-12 );
+  EXPECT_NEAR( 3*sqrt(3)-4, delta[pdW], 1e-12 );
 }

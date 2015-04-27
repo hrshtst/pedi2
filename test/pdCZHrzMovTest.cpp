@@ -26,10 +26,14 @@ class pdCZHrzMovTest : public testing::Test {
     pdCZHrzMovSetKappa( &hrz, 11 );
     hrz._vert_num = 12;
     hrz._vrt = NULL;
-    hrz.refuz = 13;
-    hrz.refwz = 14;
-    hrz.refddu = 15;
-    hrz.refddw = 16;
+    // hrz.refuz = 13;
+    // hrz.refwz = 14;
+    // hrz.refddu = 15;
+    // hrz.refddw = 16;
+    pdCZHrzMovZMPU( &hrz ) = 13;
+    pdCZHrzMovZMPW( &hrz ) = 14;
+    pdCZHrzMovAccU( &hrz ) = 15;
+    pdCZHrzMovAccW( &hrz ) = 16;
   };
 
   void SetDefaultPrmVelocityFollow() {
@@ -179,70 +183,74 @@ TEST_F(pdCZHrzMovTest, IsSRSet)
 
 TEST_F(pdCZHrzMovTest, CheckSimZMPAllStateZero)
 {
-  double uz, wz;
+  zVec2D delta, vel, zmp;
 
   pdCZVrtSetRef( &vrt, 0.26 );
   pdCZHrzMovSetPrm( &hrz, 0.25, 1.0, 0, 0, 1.0, 1.5, 1.0, 1.0, 0.1, 0 );
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovCalcZMP( &hrz, 0, 0, 0, 0, &uz, &wz );
-  EXPECT_DOUBLE_EQ( -0.040706737871602130529602, uz );
-  EXPECT_DOUBLE_EQ( 0.0, wz );
+  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 0, 0 );
+  pdCZHrzMovCalcZMP( &hrz, delta, vel, zmp );
+  EXPECT_DOUBLE_EQ( -0.040706737871602130529602, zmp[pdU] );
+  EXPECT_DOUBLE_EQ( 0.0, zmp[pdW] );
 }
 
 TEST_F(pdCZHrzMovTest, CheckSimZMPVelocityFollow)
 {
-  double uz, wz;
+  zVec2D delta, vel, zmp;
 
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
-  EXPECT_DOUBLE_EQ( -0.008141347574320424718142, uz );
-  EXPECT_DOUBLE_EQ( -0.029689777531362912532664, wz );
+  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
+  pdCZHrzMovCalcZMP( &hrz, delta, vel, zmp );
+  EXPECT_DOUBLE_EQ( -0.008141347574320424718142, zmp[pdU] );
+  EXPECT_DOUBLE_EQ( -0.029689777531362912532664, zmp[pdW] );
 }
 
 TEST_F(pdCZHrzMovTest, CheckSimZMPVelocityFollowCurve)
 {
-  double uz, wz;
+  zVec2D delta, vel, zmp;
 
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
-  EXPECT_DOUBLE_EQ( -0.006876061458783272808959, uz );
-  EXPECT_DOUBLE_EQ( -0.031769198404332107954495, wz );
+  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
+  pdCZHrzMovCalcZMP( &hrz, delta, vel, zmp );
+  EXPECT_DOUBLE_EQ( -0.006876061458783272808959, zmp[pdU] );
+  EXPECT_DOUBLE_EQ( -0.031769198404332107954495, zmp[pdW] );
   // EXPECT_DOUBLE_EQ( -0.005162917622573504408678, pdCZHrzMovZMPU( &hrz ) );
   // EXPECT_DOUBLE_EQ( -0.001854072725677788271298,  pdCZHrzMovZMPW( &hrz ) );
 }
 
 TEST_F(pdCZHrzMovTest, CheckAccVelocityFollow)
 {
-  double uz, wz;
-  double ddu, ddw;
+  zVec2D delta, vel, zmp, acc;
 
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
-  pdCZHrzMovCalcAcc( &hrz, uz, wz, &ddu, &ddw );
-  EXPECT_DOUBLE_EQ( 0.307074471047709740556542, ddu );
-  EXPECT_DOUBLE_EQ( 1.119835831567288941812421, ddw );
+  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
+  pdCZHrzMovCalcZMP( &hrz, delta, vel, zmp );
+  pdCZHrzMovCalcAcc( &hrz, zmp, acc );
+  EXPECT_DOUBLE_EQ( 0.307074471047709740556542, acc[pdU] );
+  EXPECT_DOUBLE_EQ( 1.119835831567288941812421, acc[pdW] );
 }
 
 TEST_F(pdCZHrzMovTest, CheckAccVelocityFollowCurve)
 {
-  double uz, wz;
-  double ddu, ddw;
+  zVec2D delta, vel, zmp, acc;
 
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovCalcZMP( &hrz, 0.0, 0.2, 0.01, 0.1, &uz, &wz );
-  pdCZHrzMovCalcAcc( &hrz, uz, wz, &ddu, &ddw );
-  EXPECT_DOUBLE_EQ( 0.259350545603461102306397, ddu );
-  EXPECT_DOUBLE_EQ( 1.198267204116308493055953, ddw );
+  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
+  pdCZHrzMovCalcZMP( &hrz, delta, vel, zmp );
+  pdCZHrzMovCalcAcc( &hrz, zmp, acc );
+  EXPECT_DOUBLE_EQ( 0.259350545603461102306397, acc[pdU] );
+  EXPECT_DOUBLE_EQ( 1.198267204116308493055953, acc[pdW] );
 }
 
 TEST_F(pdCZHrzMovTest, SaturationOfZMP)
 {
   zVec3D v[8];
-  double uz, wz;
+  // double uz, wz;
+  zVec2D delta, vel, zmp;
 
   // make convex hull
   zVec3DCreate( &v[0], -0.2, -0.1, 0 );
@@ -257,22 +265,27 @@ TEST_F(pdCZHrzMovTest, SaturationOfZMP)
 
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovCalcZMP( &hrz, 0, 1, 0, 1, &uz, &wz );
-  EXPECT_DOUBLE_EQ( 0.122120213614806391588807, uz );
-  EXPECT_DOUBLE_EQ( 0.3, wz );
+  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 1, 1 );
+  pdCZHrzMovCalcZMP( &hrz, delta, vel, zmp );
+  EXPECT_DOUBLE_EQ( 0.122120213614806391588807, zmp[pdU] );
+  EXPECT_DOUBLE_EQ( 0.3, zmp[pdW] );
 
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovCalcZMP( &hrz, 0, 1, 0, 1, &uz, &wz );
-  EXPECT_DOUBLE_EQ( 0.2, uz );
-  EXPECT_DOUBLE_EQ( 0.3, wz );
+  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 1, 1 );
+  pdCZHrzMovCalcZMP( &hrz, delta, vel, zmp );
+  EXPECT_DOUBLE_EQ( 0.2, zmp[pdU] );
+  EXPECT_DOUBLE_EQ( 0.3, zmp[pdW] );
 }
 
 TEST_F(pdCZHrzMovTest, UpdateVelocityFollow)
 {
+  zVec2D delta, vel;
+
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovUpdate( &hrz, 0.0, 0.2, 0.01, 0.1 );
+  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
+  pdCZHrzMovUpdate( &hrz, delta, vel );
   EXPECT_DOUBLE_EQ( -0.008141347574320424718142, pdCZHrzMovZMPU(&hrz) );
   EXPECT_DOUBLE_EQ( -0.029689777531362912532664, pdCZHrzMovZMPW(&hrz) );
   EXPECT_DOUBLE_EQ( 0.307074471047709740556542,  pdCZHrzMovAccU(&hrz) );
@@ -281,9 +294,12 @@ TEST_F(pdCZHrzMovTest, UpdateVelocityFollow)
 
 TEST_F(pdCZHrzMovTest, UpdateVelocityFollowCurve)
 {
+  zVec2D delta, vel;
+
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
-  pdCZHrzMovUpdate( &hrz, 0.0, 0.2, 0.01, 0.1 );
+  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
+  pdCZHrzMovUpdate( &hrz, delta, vel );
   EXPECT_DOUBLE_EQ( -0.006876061458783272808959, pdCZHrzMovZMPU(&hrz) );
   EXPECT_DOUBLE_EQ( -0.031769198404332107954495, pdCZHrzMovZMPW(&hrz) );
   EXPECT_DOUBLE_EQ(  0.259350545603461102306397, pdCZHrzMovAccU(&hrz) );

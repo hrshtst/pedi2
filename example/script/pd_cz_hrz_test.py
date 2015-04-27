@@ -6,7 +6,7 @@ from plotutil import FigureCreator
 import matplotlib.pyplot as plt
 
 LABEL_LIST = [
-    't', 'x', 'y', 'vx', 'vy', 'xz', 'yz', 'xd', 'yd', 'theta'
+    't', 'xd', 'yd', 'x', 'y', 'vx', 'vy', 'xz', 'yz', 'theta'
 ]
 
 

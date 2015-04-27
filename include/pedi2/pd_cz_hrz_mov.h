@@ -18,10 +18,8 @@ typedef struct{
   zVec3D *_sr_vert; /* vertices of supporting retion */
   int _vert_num;    /* number of vertices */
 
-  double refuz;    /* referential ZMP pos. for tangential dir. */
-  double refwz;    /* referential ZMP pos. for radial dir. */
-  double refddu;   /* referential COM acc. for tangential dir. */
-  double refddw;   /* referential COM acc. for radial dir. */
+  zVec2D zmp;   /* referential ZMP position */
+  zVec2D acc;   /* referential COM acceleration */
 } pdCZHrzMov;
 
 /* c'tor and d'tor */
@@ -44,10 +42,12 @@ __EXPORT void pdCZHrzMovDestroy(pdCZHrzMov *hrz);
 #define pdCZHrzMovZeta(h)    pdCZVrtZeta( (h)->_vrt )
 #define pdCZHrzMovSR(h)      (h)->_sr
 #define pdCZHrzMovSRVert(h)  (h)->_sr_vert
-#define pdCZHrzMovZMPU(h)    (h)->refuz
-#define pdCZHrzMovZMPW(h)    (h)->refwz
-#define pdCZHrzMovAccU(h)    (h)->refddu
-#define pdCZHrzMovAccW(h)    (h)->refddw
+#define pdCZHrzMovZMP(h)     (h)->zmp
+#define pdCZHrzMovZMPU(h)    pdCZHrzMovZMP(h)[pdU]
+#define pdCZHrzMovZMPW(h)    pdCZHrzMovZMP(h)[pdW]
+#define pdCZHrzMovAcc(h)     (h)->acc
+#define pdCZHrzMovAccU(h)    pdCZHrzMovAcc(h)[pdU]
+#define pdCZHrzMovAccW(h)    pdCZHrzMovAcc(h)[pdW]
 
 /* methods to set parameters */
 #define pdCZHrzMovSetRefVelU(h,vd) pdCZHrzUSetRefVel( &pdCZHrzMovU(h), vd )
@@ -69,19 +69,19 @@ __EXPORT void pdCZHrzMovSetSR(pdCZHrzMov *hrz, zVec3D p[], int num);
 #define pdCZHrzMovIsSRSet(h) ( zListNum( &(h)->_sr ) ? true : false )
 
 /* calculation methods */
-#define pdCZHrzMovCalcSimZMPU(h,du,vu,dw,wu) \
-  pdCZHrzUCalcSimZMP( &pdCZHrzMovU(h), du, vu, dw, wu )
-#define pdCZHrzMovCalcSimZMPW(h,du,vu,dw,wu) \
-  pdCZHrzWCalcSimZMP( &pdCZHrzMovW(h), du, vu, dw, wu )
-#define pdCZHrzMovCalcRegZMPU(h,du,vu,dw,wu) \
-  pdCZHrzUCalcRegZMP( &pdCZHrzMovU(h), du, vu, dw, wu )
-#define pdCZHrzMovCalcRegZMPW(h,du,vu,dw,wu) \
-  pdCZHrzWCalcRegZMP( &pdCZHrzMovW(h), du, vu, dw, wu )
-__EXPORT void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, double du, double vu, double dw, double vw, double *uz, double *wz);
-__EXPORT void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, double uz, double wz, double *ddu, double *ddw);
+#define pdCZHrzMovCalcSimZMPU(h,d,v) \
+  pdCZHrzUCalcSimZMP( &pdCZHrzMovU(h), d, v )
+#define pdCZHrzMovCalcSimZMPW(h,d,v) \
+  pdCZHrzWCalcSimZMP( &pdCZHrzMovW(h), d, v )
+#define pdCZHrzMovCalcRegZMPU(h,d,v) \
+  pdCZHrzUCalcRegZMP( &pdCZHrzMovU(h), d, v )
+#define pdCZHrzMovCalcRegZMPW(h,d,v) \
+  pdCZHrzWCalcRegZMP( &pdCZHrzMovW(h), d, v )
+__EXPORT void pdCZHrzMovCalcZMP(pdCZHrzMov *hrz, zVec2D delta, zVec2D vel, zVec2D zmp);
+__EXPORT void pdCZHrzMovCalcAcc(pdCZHrzMov *hrz, zVec2D zmp, zVec2D acc);
 
 /* update method */
-__EXPORT void pdCZHrzMovUpdate(pdCZHrzMov *hrz, double du, double vu, double dw, double vw);
+__EXPORT void pdCZHrzMovUpdate(pdCZHrzMov *hrz, zVec2D delta, zVec2D vel);
 
 /* for debug */
 __EXPORT void pdCZHrzMovFWrite(FILE *fp, pdCZHrzMov *hrz);

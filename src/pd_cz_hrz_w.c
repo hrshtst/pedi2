@@ -49,18 +49,18 @@ double _pdCZHrzWAct(pdCZHrzW *w, double dw, double vw)
   return act;
 }
 
-double pdCZHrzWCalcSimZMP(pdCZHrzW *w, double du, double vu, double dw, double vw)
+double pdCZHrzWCalcSimZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel)
 {
   double r;
 
-  r = 1.0 + pdCZHrzWKappa(w) * dw;
-  return -_pdCZHrzWK1(w)*dw + _pdCZHrzWK2(w)*_pdCZHrzWAct(w,dw,vw)*vw - (pdCZHrzWKappa(w)/r)*zSqr(vu/pdCZHrzWZeta(w));
+  r = 1.0 + pdCZHrzWKappa(w) * delta[pdW];
+  return -_pdCZHrzWK1(w)*delta[pdW] + _pdCZHrzWK2(w)*_pdCZHrzWAct(w,delta[pdW],vel[pdW])*vel[pdW] - (pdCZHrzWKappa(w)/r)*zSqr(vel[pdU]/pdCZHrzWZeta(w));
 }
 
-double pdCZHrzWCalcRegZMP(pdCZHrzW *w, double du, double vu, double dw, double vw)
+double pdCZHrzWCalcRegZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel)
 {
   double r;
 
-  r = 1.0 + pdCZHrzWKappa(w) * dw;
-  return -_pdCZHrzWK1(w)*dw + _pdCZHrzWK2(w)*vw - (pdCZHrzWKappa(w)/r)*zSqr(vu/pdCZHrzWZeta(w));
+  r = 1.0 + pdCZHrzWKappa(w) * delta[pdW];
+  return -_pdCZHrzWK1(w)*delta[pdW] + _pdCZHrzWK2(w)*vel[pdW] - (pdCZHrzWKappa(w)/r)*zSqr(vel[pdU]/pdCZHrzWZeta(w));
 }

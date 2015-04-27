@@ -2,6 +2,8 @@
 #define __PD_CZ_HRZ_U_H__
 
 #include <zm/zm.h>
+#include <zeo/zeo_vec2d.h>
+#include <pedi2/pd_misc.h>
 
 __BEGIN_DECLS
 
@@ -35,8 +37,8 @@ __EXPORT void pdCZHrzUDestroy(pdCZHrzU *u);
 } while(0)
 
 /* calculation methods */
-__EXPORT double pdCZHrzUCalcSimZMP(pdCZHrzU *u, double du, double vu, double dw, double vw);
-__EXPORT double pdCZHrzUCalcRegZMP(pdCZHrzU *u, double du, double vu, double dw, double vw);
+__EXPORT double pdCZHrzUCalcSimZMP(pdCZHrzU *u, zVec2D delta, zVec2D vel);
+__EXPORT double pdCZHrzUCalcRegZMP(pdCZHrzU *u, zVec2D delta, zVec2D vel);
 
 
 __END_DECLS

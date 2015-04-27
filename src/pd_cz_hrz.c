@@ -8,7 +8,7 @@ void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt)
   pdCZHrzSetVel( hrz, 0, 0 );
   pdCZHrzSetTheta( hrz, 0 );
   pdCZHrzSetSR( hrz, NULL );
-  pdCZHrzMovInit( &pdCZHrzM(hrz), vrt );
+  pdCZHrzMovInit( &pdCZHrzUW(hrz), vrt );
   pdCZHrzZMPX( hrz ) = 0;
   pdCZHrzZMPY( hrz ) = 0;
   pdCZHrzAccX( hrz ) = 0;
@@ -17,7 +17,7 @@ void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt)
 
 void pdCZHrzDestroy(pdCZHrz *hrz)
 {
-  pdCZHrzMovDestroy( &pdCZHrzM(hrz) );
+  pdCZHrzMovDestroy( &pdCZHrzUW(hrz) );
   pdCZHrzSetRefPos( hrz, 0, 0 );
   pdCZHrzSetRefTheta( hrz, 0 );
   pdCZHrzSetPos( hrz, 0, 0 );
@@ -26,43 +26,43 @@ void pdCZHrzDestroy(pdCZHrz *hrz)
   pdCZHrzSetSR( hrz, NULL );
 }
 
-double *pdCZHrzRotMtoW(pdCZHrz *hrz, zVec2D vm, zVec2D vw)
+double *pdCZHrzRotUWtoXY(pdCZHrz *hrz, zVec2D vuw, zVec2D vxy)
 {
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  return zVec2DCreate( vw, -s*vm[pdU]-c*vm[pdW], c*vm[pdU]-s*vm[pdW]);
+  return zVec2DCreate( vxy, -s*vuw[pdU]-c*vuw[pdW], c*vuw[pdU]-s*vuw[pdW]);
 }
 
-double *pdCZHrzRotWtoM(pdCZHrz *hrz, zVec2D vw, zVec2D vm)
+double *pdCZHrzRotXYtoUW(pdCZHrz *hrz, zVec2D vxy, zVec2D vuw)
 {
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  return zVec2DCreate( vm, -s*vw[zX]+c*vw[zY], -c*vw[zX]-s*vw[zY] );
+  return zVec2DCreate( vuw, -s*vxy[zX]+c*vxy[zY], -c*vxy[zX]-s*vxy[zY] );
 }
 
-double *pdCZHrzXformMtoW(pdCZHrz *hrz, zVec2D pm, zVec2D pw)
+double *pdCZHrzXformUWtoXY(pdCZHrz *hrz, zVec2D uw, zVec2D xy)
 {
   zVec2D p;
 
-  pdCZHrzRotMtoW( hrz, pm, p );
-  return zVec2DAdd( p, pdCZHrzPos(hrz), pw );
+  pdCZHrzRotUWtoXY( hrz, uw, p );
+  return zVec2DAdd( p, pdCZHrzPos(hrz), xy );
 }
 
-double *pdCZHrzXformWtoM(pdCZHrz *hrz, zVec2D pw, zVec2D pm)
+double *pdCZHrzXformXYtoUW(pdCZHrz *hrz, zVec2D xy, zVec2D uw)
 {
   zVec2D p;
 
-  zVec2DSub( pw, pdCZHrzPos(hrz), p );
-  return pdCZHrzRotWtoM( hrz, p, pm );
+  zVec2DSub( xy, pdCZHrzPos(hrz), p );
+  return pdCZHrzRotXYtoUW( hrz, p, uw );
 }
 
-void pdCZHrzXformSRWtoM(pdCZHrz *hrz, zVec3DList *sr)
+void pdCZHrzXformSRXYtoUW(pdCZHrz *hrz, zVec3DList *sr)
 {
   zVec3D *p, *pp;
   zVec3DListCell *cp;
-  zVec2D pw, pm;
+  zVec2D xy, uw;
 
   if( !( p = zAlloc( zVec3D, zListNum( sr ) ) ) ){
     ZALLOCERROR();
@@ -71,39 +71,39 @@ void pdCZHrzXformSRWtoM(pdCZHrz *hrz, zVec3DList *sr)
   }
   pp = p;
   zListForEach( sr, cp ){
-    zVec2DCreate( pw, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
-    pdCZHrzXformWtoM( hrz, pw, pm );
-    zVec3DCreate( pp++, pm[pdU], pm[pdW], zVec3DElem(cp->data,zZ) );
+    zVec2DCreate( xy, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
+    pdCZHrzXformXYtoUW( hrz, xy, uw );
+    zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
   }
-  pdCZHrzMovSetSR( &pdCZHrzM(hrz), p, zListNum(sr) );
+  pdCZHrzMovSetSR( &pdCZHrzUW(hrz), p, zListNum(sr) );
   zFree( p );
 }
 
-void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D pdm, zVec2D deltam)
+void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D uwd, zVec2D delta)
 {
   if( zIsTiny( pdCZHrzKappa(hrz) ) ){
-    zVec2DCopy( pdm, deltam );
+    zVec2DCopy( uwd, delta );
   } else {
-    zVec2DCreate( deltam, asin( pdCZHrzKappa(hrz)*pdm[pdU] ) / pdCZHrzKappa(hrz),
-                  pdm[pdW] - ( 1.0 - sqrt( 1.0 - zSqr(pdCZHrzKappa(hrz)*pdm[pdU]) ) ) / pdCZHrzKappa(hrz) );
+    zVec2DCreate( delta, asin( pdCZHrzKappa(hrz)*uwd[pdU] ) / pdCZHrzKappa(hrz),
+                  uwd[pdW] - ( 1.0 - sqrt( 1.0 - zSqr(pdCZHrzKappa(hrz)*uwd[pdU]) ) ) / pdCZHrzKappa(hrz) );
   }
 }
 
-void pdCZHrzUpdate(pdCZHrz *hrz, zVec2D p, double theta, zVec2D v, zVec2D pd, double thetad, zVec3DList *sr)
+void pdCZHrzUpdate(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr)
 {
-  pdCZHrzSetPosVec( hrz, p );
+  pdCZHrzSetPosVec( hrz, xy );
   pdCZHrzSetTheta( hrz, theta );
-  pdCZHrzSetVelVec( hrz, v );
-  pdCZHrzSetRefPosVec( hrz, pd );
+  pdCZHrzSetVelVec( hrz, vxy );
+  pdCZHrzSetRefPosVec( hrz, xyd );
   pdCZHrzSetRefTheta( hrz, thetad );
   if( sr )
-    pdCZHrzXformSRWtoM( hrz, sr );
-  pdCZHrzXformWtoM( hrz, pdCZHrzRefPos(hrz), pdCZHrzRefPosM(hrz) );
-  pdCZHrzCalcDiffToRefPos( hrz, pdCZHrzRefPosM(hrz), pdCZHrzDeltaM(hrz) );
-  pdCZHrzRotWtoM( hrz, pdCZHrzVel(hrz), pdCZHrzVelM(hrz) );
-  pdCZHrzUpdateM( hrz, pdCZHrzDeltaM(hrz), pdCZHrzVelM(hrz) );
-  pdCZHrzXformMtoW( hrz, pdCZHrzZMPM(hrz), pdCZHrzZMP(hrz) );
-  pdCZHrzRotMtoW( hrz, pdCZHrzAccM(hrz), pdCZHrzAcc(hrz) );
+    pdCZHrzXformSRXYtoUW( hrz, sr );
+  pdCZHrzXformXYtoUW( hrz, pdCZHrzRefPos(hrz), pdCZHrzRefPosUW(hrz) );
+  pdCZHrzCalcDiffToRefPos( hrz, pdCZHrzRefPosUW(hrz), pdCZHrzDelta(hrz) );
+  pdCZHrzRotXYtoUW( hrz, pdCZHrzVel(hrz), pdCZHrzVelUW(hrz) );
+  pdCZHrzUpdateUW( hrz, pdCZHrzDelta(hrz), pdCZHrzVelUW(hrz) );
+  pdCZHrzXformUWtoXY( hrz, pdCZHrzZMPUW(hrz), pdCZHrzZMP(hrz) );
+  pdCZHrzRotUWtoXY( hrz, pdCZHrzAccUW(hrz), pdCZHrzAcc(hrz) );
 }
 
 void pdCZHrzFWrite(FILE *fp, pdCZHrz *hrz)

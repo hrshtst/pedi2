@@ -1,5 +1,11 @@
 #include <pedi2/pd_cz.h>
 
+static void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr);
+static void _pdCZUpdateVrt(pdCZ *cz);
+static void _pdCZUpdateHrz(pdCZ *cz);
+static zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc);
+static void _pdCZUpdateRef(pdCZ *cz);
+
 void pdCZInit(pdCZ *c, double dt)
 {
   pdCZSetCmdCOM( c, 0, 0, 0 );
@@ -18,7 +24,7 @@ void pdCZInit(pdCZ *c, double dt)
   c->_ode.vel = zVecCreateList( 3, pdCZVelX(c), pdCZVelY(c), pdCZVelZ(c) );
   zODE2Assign( &c->_ode.solver, Regular, NULL, NULL, NULL, NULL );
   zODE2AssignRegular( &c->_ode.solver, RK4 );
-  /* zODE2Init( &c->_ode.solver, 3, 0, NULL ); */
+  zODE2Init( &c->_ode.solver, 3, 0, _pdCZUpdate );
   pdCZRefCOMX( c ) = 0;
   pdCZRefCOMY( c ) = 0;
   pdCZRefCOMZ( c ) = 0;
@@ -37,7 +43,7 @@ void pdCZDestroy(pdCZ *c)
 {
   zVecFree( c->_ode.pos );
   zVecFree( c->_ode.vel );
-  /* zODE2Destroy( &c->_ode.solver ); */
+  zODE2Destroy( &c->_ode.solver );
   pdCZVrtDestroy( pdCZVrtPtr(c) );
   pdCZHrzDestroy( pdCZHrzPtr(c) );
   pdCZSetCmdCOM( c, 0, 0, 0 );
@@ -67,6 +73,95 @@ void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd)
     refdw += ( 1.0 - cos(delta_theta) ) / ( pdCZKappa(cz) * cos(delta_theta) );
   zVec2DCreate( nextuwd, refuw[pdU] - refdw * sin(delta_theta),
                          refuw[pdW] + refdw * cos(delta_theta) );
+}
+
+void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr)
+{
+  pdCZSetCOMVec( cz, com );
+  pdCZSetVelVec( cz, vel );
+  pdCZSetAccVec( cz, acc );
+  pdCZSetZMPVec( cz, zmp );
+  pdCZSetTheta( cz, theta );
+  pdCZSetSR( cz, sr );
+  zVecSetElem( cz->_ode.pos, zX, pdCZCOMX(cz) );
+  zVecSetElem( cz->_ode.pos, zY, pdCZCOMY(cz) );
+  zVecSetElem( cz->_ode.pos, zZ, pdCZCOMZ(cz) );
+  zVecSetElem( cz->_ode.vel, zX, pdCZVelX(cz) );
+  zVecSetElem( cz->_ode.vel, zY, pdCZVelY(cz) );
+  zVecSetElem( cz->_ode.vel, zZ, pdCZVelZ(cz) );
+}
+
+void _pdCZUpdateVrt(pdCZ *cz)
+{
+  pdCZVrtSetRef( pdCZVrtPtr( cz ), pdCZCmdCOMZ( cz ) );
+  pdCZVrtUpdateAcc( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZVelZ(cz) );
+  pdCZVrtUpdateZeta( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZAccZ(cz), pdCZZMPZ(cz) );
+  pdCZVrtUpdateZMP( pdCZVrtPtr(cz) ); /* may not be updated here */
+}
+
+void _pdCZUpdateHrz(pdCZ *cz)
+{
+  zVec2D xy, vxy, xyd;
+
+  zVec2DCreate( xy,  pdCZCOMX(cz), pdCZCOMY(cz) );
+  zVec2DCreate( vxy, pdCZVelX(cz), pdCZVelY(cz) );
+  zVec2DCreate( xyd, pdCZCmdCOMX(cz), pdCZCmdCOMY(cz) );
+  pdCZHrzUpdateAcc( pdCZHrzPtr(cz), xy, pdCZTheta(cz), vxy, xyd, pdCZCmdTheta(cz), pdCZSR(cz) );
+}
+
+zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc)
+{
+  pdCZ *cz;
+
+  cz = (pdCZ *)util;
+  /* _pdCZUpdateVrt( cz ); */
+  /* _pdCZUpdateHrz( cz ); */
+  zVecSetElem( acc, 0, pdCZHrzAccX( pdCZHrzPtr(cz) ) );
+  zVecSetElem( acc, 1, pdCZHrzAccY( pdCZHrzPtr(cz) ) );
+  zVecSetElem( acc, 2, pdCZVrtAcc( pdCZVrtPtr(cz) ) );
+  return acc;
+}
+
+void _pdCZUpdateRef(pdCZ *cz)
+{
+  zVec3DSetElem( &cz->refcom, zX, zVecElem( cz->_ode.pos, zX ) );
+  zVec3DSetElem( &cz->refcom, zY, zVecElem( cz->_ode.pos, zY ) );
+  zVec3DSetElem( &cz->refcom, zZ, zVecElem( cz->_ode.pos, zZ ) );
+  zVec3DSetElem( &cz->refvel, zX, zVecElem( cz->_ode.vel, zX ) );
+  zVec3DSetElem( &cz->refvel, zY, zVecElem( cz->_ode.vel, zY ) );
+  zVec3DSetElem( &cz->refvel, zZ, zVecElem( cz->_ode.vel, zZ ) );
+  zVec3DSetElem( &cz->refacc, zX, pdCZHrzAccX( pdCZHrzPtr(cz) ) );
+  zVec3DSetElem( &cz->refacc, zY, pdCZHrzAccY( pdCZHrzPtr(cz) ) );
+  zVec3DSetElem( &cz->refacc, zZ, pdCZVrtAcc( pdCZVrtPtr(cz) ) );
+  zVec3DSetElem( &cz->refzmp, zX, pdCZHrzZMPX( pdCZHrzPtr(cz) ) );
+  zVec3DSetElem( &cz->refzmp, zY, pdCZHrzZMPY( pdCZHrzPtr(cz) ) );
+  zVec3DSetElem( &cz->refzmp, zZ, pdCZVrtZMP( pdCZVrtPtr(cz) ) );
+}
+
+
+void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr)
+{
+  _pdCZUpdateState( cz, com, vel, acc, zmp, theta, sr );
+  _pdCZUpdateVrt( cz );
+  _pdCZUpdateHrz( cz );
+  zODE2Update( &cz->_ode.solver, pdCZTime(cz), cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz), cz );
+  _pdCZUpdateRef( cz );
+  pdCZIncrTime( cz );
+}
+
+void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *comd, double *thetad)
+{
+  zVec2D refxy, refuw;
+  zVec2D nextxyd, nextuwd;
+  double delta_theta;
+
+  zVec2DCreate( refxy, pdCZRefCOMX(cz), pdCZRefCOMY(cz) );
+  pdCZHrzXformXYtoUW( pdCZHrzPtr(cz), refxy, refuw );
+  delta_theta = pdCZCalcDeltaTheta( cz, refuw );
+  pdCZCalcNextUW( cz, refuw, nextuwd );
+  pdCZHrzXformUWtoXY( pdCZHrzPtr(cz), nextuwd, nextxyd );
+  zVec3DCreate( comd, nextxyd[zX], nextxyd[zY], zVec3DElem( comd, zZ ) );
+  *thetad = pdCZTheta(cz) + delta_theta;
 }
 
 #if 0

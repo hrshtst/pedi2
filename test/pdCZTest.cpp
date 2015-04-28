@@ -1,10 +1,12 @@
 #include "gtest/gtest.h"
 #include <pedi2/pd_cz.h>
 
+const double TIME_STEP = 0.01;
+
 class pdCZTest : public testing::Test {
  protected:
   virtual void SetUp() {
-    pdCZInit( &cz );
+    pdCZInit( &cz, TIME_STEP );
     destroyed_flag = false;
   };
   virtual void TearDown() {
@@ -72,7 +74,7 @@ class pdCZTest : public testing::Test {
 TEST_F(pdCZTest, Init)
 {
   SetVacuousPrm();
-  pdCZInit( &cz );
+  pdCZInit( &cz, TIME_STEP );
   EXPECT_EQ( 0, pdCZCmdCOMX( &cz )  );
   EXPECT_EQ( 0, pdCZCmdCOMY( &cz )  );
   EXPECT_EQ( 0, pdCZCmdCOMZ( &cz )  );
@@ -396,6 +398,30 @@ TEST_F(pdCZTest, SetDeltaUW)
   pdCZSetDeltaW( &cz, 0.2 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZDeltaU(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZDeltaW(&cz) );
+}
+
+TEST_F(pdCZTest, SetTime)
+{
+  SetVacuousPrm();
+  cz._ode._t = 1000;
+
+  pdCZInit( &cz, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 0.0, pdCZTime(&cz) );
+
+  pdCZSetTime( &cz, 10 );
+  EXPECT_DOUBLE_EQ( 10.0, pdCZTime(&cz) );
+}
+
+TEST_F(pdCZTest, SetTimeStep)
+{
+  SetVacuousPrm();
+  cz._ode._dt = 1000;
+
+  pdCZInit( &cz, TIME_STEP );
+  EXPECT_DOUBLE_EQ( TIME_STEP, pdCZTimeStep(&cz) );
+
+  pdCZSetTimeStep( &cz, 0.001 );
+  EXPECT_DOUBLE_EQ( 0.001, pdCZTimeStep(&cz) );
 }
 
 TEST_F(pdCZTest, CalcDeltaTheta_KappaIsZero)

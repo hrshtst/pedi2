@@ -21,7 +21,8 @@ typedef struct{
   pdCZHrz _hrz;     /* horizontal motion controller */
 
   struct{
-    double t;       /* time */
+    double _t;       /* time */
+    double _dt;      /* time step */
     zVec pos, vel;  /* state vector: pos = [ x y z ]^T */
     zODE2 solver;   /* ODE solver */
   } _ode;
@@ -33,10 +34,12 @@ typedef struct{
 } pdCZ;
 
 /* c'tor and d'tor */
-__EXPORT void pdCZInit(pdCZ *cz);
+__EXPORT void pdCZInit(pdCZ *cz, double dt);
 __EXPORT void pdCZDestroy(pdCZ *cz);
 
 /* methods to get parameters */
+#define pdCZTime(c)     (c)->_ode._t
+#define pdCZTimeStep(c) (c)->_ode._dt
 #define pdCZCmdCOM(c)   ( &(c)->_comd )
 #define pdCZCmdCOMX(c)  zVec3DElem( pdCZCmdCOM(c), zX )
 #define pdCZCmdCOMY(c)  zVec3DElem( pdCZCmdCOM(c), zY )
@@ -102,6 +105,10 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZRefZMPZ(c) zVec3DElem( pdCZRefZMP(c), zZ )
 
 /* methods to set parameters */
+#define pdCZSetTime(c,t)          ( (c)->_ode._t = (t) )
+#define pdCZResetTime(c)          pdCZSetTime( c, 0 )
+#define pdCZSetTimeStep(c,dt)     ( (c)->_ode._dt = (dt) )
+#define pdCZIncrTime(c)           ( pdCZTime( c ) += pdCZTimeStep( c ) )
 #define pdCZSetCmdCOM(c,xd,yd,zd) zVec3DCreate( pdCZCmdCOM(c), xd, yd, zd )
 #define pdCZSetCmdCOMVec(c,pd)    zVec3DCopy( pd, pdCZCmdCOM(c) )
 #define pdCZSetCmdCOMX(c,xd)      zVec3DSetElem( pdCZCmdCOM(c), zX, xd )

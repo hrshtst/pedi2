@@ -1,6 +1,6 @@
 #include <pedi2/pd_cz.h>
 
-void pdCZInit(pdCZ *c)
+void pdCZInit(pdCZ *c, double dt)
 {
   pdCZSetCmdCOM( c, 0, 0, 0 );
   pdCZSetCmdTheta( c, 0 );
@@ -12,7 +12,8 @@ void pdCZInit(pdCZ *c)
   pdCZSetSR( c, NULL );
   pdCZVrtInit( pdCZVrtPtr(c) );
   pdCZHrzInit( pdCZHrzPtr(c), pdCZVrtPtr(c) );
-  c->_ode.t = 0;
+  pdCZResetTime( c );
+  pdCZSetTimeStep( c, dt );
   c->_ode.pos  = zVecCreateList( 3, pdCZCOMX(c), pdCZCOMY(c), pdCZCOMZ(c) );
   c->_ode.vel = zVecCreateList( 3, pdCZVelX(c), pdCZVelY(c), pdCZVelZ(c) );
   zODE2Assign( &c->_ode.solver, Regular, NULL, NULL, NULL, NULL );
@@ -67,7 +68,6 @@ void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd)
   zVec2DCreate( nextuwd, refuw[pdU] - refdw * sin(delta_theta),
                          refuw[pdW] + refdw * cos(delta_theta) );
 }
-
 
 #if 0
 void pdCZZMPPhase(pdCZ *c, double dw, double vw, zComplex *pz)

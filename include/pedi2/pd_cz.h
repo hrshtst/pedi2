@@ -64,7 +64,6 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZTheta(c)   (c)->_theta
 #define pdCZSR(c)      (c)->_sr
 #define pdCZVrtPtr(c)  ( &(c)->_vrt )
-#define pdCZRefZ(c)    pdCZVrtRef( pdCZVrtPtr(c) )
 #define pdCZQ1Z(c)     pdCZVrtQ1( pdCZVrtPtr(c) )
 #define pdCZQ2Z(c)     pdCZVrtQ2( pdCZVrtPtr(c) )
 #define pdCZHrzPtr(c)  ( &(c)->_hrz )
@@ -137,7 +136,6 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetZMPZ(c,zz)         zVec3DSetElem( pdCZZMP(c), zZ, zz )
 #define pdCZSetTheta(c,t)         ( (c)->_theta = (t) )
 #define pdCZSetSR(c,sr)           ( (c)->_sr = (sr) )
-#define pdCZSetRefZ(c,zd)         pdCZVrtSetRef( pdCZVrtPtr(c), zd )
 #define pdCZSetQ1Z(c,q1)          pdCZVrtSetQ1( pdCZVrtPtr(c), q1 )
 #define pdCZSetQ2Z(c,q2)          pdCZVrtSetQ2( pdCZVrtPtr(c), q2 )
 #define pdCZSetRefVelU(c,vd)      pdCZHrzSetRefVelU( pdCZHrzPtr(c), vd )

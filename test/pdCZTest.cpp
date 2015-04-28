@@ -33,7 +33,6 @@ class pdCZTest : public testing::Test {
     pdCZSetZMPZ( &cz, 16 );
     pdCZSetTheta( &cz, 17 );
     pdCZSetSR( &cz, &sr );
-    pdCZSetRefZ( &cz, 18 );
     pdCZSetQ1Z( &cz, 19 );
     pdCZSetQ2Z( &cz, 20 );
     pdCZSetRefVelU( &cz, 21 );
@@ -93,7 +92,6 @@ TEST_F(pdCZTest, Init)
   EXPECT_EQ( 0, pdCZZMPZ( &cz )     );
   EXPECT_EQ( 0, pdCZTheta( &cz )    );
   EXPECT_EQ( NULL, pdCZSR( &cz )    );
-  EXPECT_EQ( 0, pdCZRefZ( &cz )     );
   EXPECT_EQ( 0, pdCZQ1Z( &cz )      );
   EXPECT_EQ( 0, pdCZQ2Z( &cz )      );
   EXPECT_EQ( 0, pdCZRefVelU( &cz )  );
@@ -148,7 +146,6 @@ TEST_F(pdCZTest, Destroy)
   EXPECT_EQ( 0, pdCZZMPZ( &cz )     );
   EXPECT_EQ( 0, pdCZTheta( &cz )    );
   EXPECT_EQ( NULL, pdCZSR( &cz )    );
-  EXPECT_EQ( 0, pdCZRefZ( &cz )     );
   EXPECT_EQ( 0, pdCZQ1Z( &cz )      );
   EXPECT_EQ( 0, pdCZQ2Z( &cz )      );
   EXPECT_EQ( 0, pdCZRefVelU( &cz )  );

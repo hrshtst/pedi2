@@ -164,6 +164,49 @@ void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *comd, double *thetad)
   *thetad = pdCZTheta(cz) + delta_theta;
 }
 
+void pdCZFWrite(FILE *fp, pdCZ *cz)
+{
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "t:%g, dt:%g\n", pdCZTime(cz), pdCZTimeStep(cz) );
+  fprintf( fp, "xd:%g, yd:%g, zd:%g, thetad:%g\n",
+           pdCZCmdCOMX(cz), pdCZCmdCOMY(cz), pdCZCmdCOMZ(cz), pdCZCmdTheta(cz) );
+  fprintf( fp, "x :%g, y: %g, z: %g, theta :%g\n",
+           pdCZCOMX(cz), pdCZCOMY(cz), pdCZCOMZ(cz), pdCZTheta(cz) );
+  fprintf( fp, "vx:%g, vy:%g, vz:%g\n", pdCZVelX(cz), pdCZVelY(cz), pdCZVelZ(cz) );
+  fprintf( fp, "ax:%g, ay:%g, az:%g\n", pdCZAccX(cz), pdCZAccY(cz), pdCZAccZ(cz) );
+  fprintf( fp, "zx:%g, zy:%g, zz:%g\n", pdCZZMPX(cz), pdCZZMPY(cz), pdCZZMPZ(cz) );
+  fprintf( fp, "ud:%g, deltau:%g, vu:%g\n",
+           pdCZRefPosU(cz), pdCZDeltaU(cz), pdCZVelU(cz) );
+  fprintf( fp, "wd:%g, deltaw:%g, vw:%g\n",
+           pdCZRefPosW(cz), pdCZDeltaW(cz), pdCZVelW(cz) );
+  fprintf( fp, "refx: %g, refy: %g, refz: %g\n",
+           pdCZRefCOMX(cz), pdCZRefCOMY(cz), pdCZRefCOMZ(cz) );
+  fprintf( fp, "refvx:%g, refvy:%g, refvz:%g\n",
+           pdCZRefVelX(cz), pdCZRefVelY(cz), pdCZRefVelZ(cz) );
+  fprintf( fp, "refax:%g, refay:%g, refaz:%g\n",
+           pdCZRefAccX(cz), pdCZRefAccY(cz), pdCZRefAccZ(cz) );
+  fprintf( fp, "refzx:%g, refzy:%g, refzz:%g\n",
+           pdCZRefZMPX(cz), pdCZRefZMPY(cz), pdCZRefZMPZ(cz) );
+}
+
+void pdCZDataFWrite(FILE *fp, pdCZ *cz)
+{
+  fprintf( fp, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
+/* 0- 1*/  pdCZTime(cz), pdCZTimeStep(cz),
+/* 2- 5*/  pdCZCmdCOMX(cz), pdCZCmdCOMY(cz), pdCZCmdCOMZ(cz), pdCZCmdTheta(cz),
+/* 6- 9*/  pdCZCOMX(cz), pdCZCOMY(cz), pdCZCOMZ(cz), pdCZTheta(cz),
+/*10-12*/  pdCZVelX(cz), pdCZVelY(cz), pdCZVelZ(cz),
+/*13-15*/  pdCZAccX(cz), pdCZAccY(cz), pdCZAccZ(cz),
+/*16-18*/  pdCZZMPX(cz), pdCZZMPY(cz), pdCZZMPZ(cz),
+/*19-21*/  pdCZRefPosU(cz), pdCZDeltaU(cz), pdCZVelU(cz),
+/*22-24*/  pdCZRefPosW(cz), pdCZDeltaW(cz), pdCZVelW(cz),
+/*25-27*/  pdCZRefCOMX(cz), pdCZRefCOMY(cz), pdCZRefCOMZ(cz),
+/*28-30*/  pdCZRefVelX(cz), pdCZRefVelY(cz), pdCZRefVelZ(cz),
+/*31-33*/  pdCZRefAccX(cz), pdCZRefAccY(cz), pdCZRefAccZ(cz),
+/*34-36*/  pdCZRefZMPX(cz), pdCZRefZMPY(cz), pdCZRefZMPZ(cz) );
+}
+
 #if 0
 void pdCZZMPPhase(pdCZ *c, double dw, double vw, zComplex *pz)
 {

@@ -171,6 +171,12 @@ __EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
 __EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr);
 __EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *comd, double *thetad);
 
+/* output method */
+__EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);
+#define pdCZWrite(c) pdCZFWrite( stdout, c )
+__EXPORT void pdCZDataFWrite(FILE *fp, pdCZ *cz);
+#define pdCZDataWrite(c) pdCZDataFWrite( stdout, c )
+
 __END_DECLS
 
 #endif /* __PD_CZ_H__ */

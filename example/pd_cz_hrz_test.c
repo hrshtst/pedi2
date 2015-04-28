@@ -96,7 +96,7 @@ int main(void)
       pdCZHrzSetKappa( &hrz, -1.0 );
     /* update */
     pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-    pdCZHrzUpdate( &hrz, xy, theta, vxy, xyd, thetad, NULL );
+    pdCZHrzUpdateAcc( &hrz, xy, theta, vxy, xyd, thetad, NULL );
     zODE2Update( &ode, t, p, dp, DT, &hrz );
     zVec2DCreate( xy, zVecElem(p,0), zVecElem(p,1) );
     zVec2DCreate( vxy, zVecElem(dp,0), zVecElem(dp,1) );

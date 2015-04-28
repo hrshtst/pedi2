@@ -95,7 +95,7 @@ void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D uwd, zVec2D delta)
   }
 }
 
-void pdCZHrzUpdate(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr)
+void pdCZHrzUpdateAcc(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr)
 {
   pdCZHrzSetPosVec( hrz, xy );
   pdCZHrzSetTheta( hrz, theta );

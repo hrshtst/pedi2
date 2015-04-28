@@ -126,7 +126,7 @@ __EXPORT void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D uwd, zVec2D delta);
 
 /* update method */
 #define pdCZHrzUpdateUW(h,d,v) pdCZHrzUWUpdate( pdCZHrzUWPtr(h), d, v )
-__EXPORT void pdCZHrzUpdate(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr);
+__EXPORT void pdCZHrzUpdateAcc(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr);
 
 /* for debug */
 __EXPORT void pdCZHrzFWrite(FILE *fp, pdCZHrz *hrz);

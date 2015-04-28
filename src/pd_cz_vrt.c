@@ -68,11 +68,19 @@ double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz )
   return sqrt( ( RK_G + az ) / ( z - zz ) );
 }
 
-void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz)
+void pdCZVrtUpdateAcc(pdCZVrt *vrt, double z, double vz)
 {
   vrt->reffz = pdCZVrtCalcReactForce( vrt, z, vz );
   vrt->refddz = pdCZVrtCalcAcc( vrt, pdCZVrtRF(vrt) );
+}
+
+void pdCZVrtUpdateZMP(pdCZVrt *vrt)
+{
   vrt->refzz = pdCZVrtCalcZMP( vrt );
+}
+
+void pdCZVrtUpdateZeta(pdCZVrt *vrt, double z, double az, double zz )
+{
   vrt->zeta = pdCZVrtCalcZeta( vrt, z, az, zz );
 }
 

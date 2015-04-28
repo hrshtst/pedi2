@@ -120,27 +120,34 @@ TEST_F(pdCZVrtTest, CalcZeta)
   EXPECT_DOUBLE_EQ( 9.9532165655128786, pdCZVrtCalcZeta( &vrt, 0.2, 0.1, 0.1 ) );
 }
 
-TEST_F(pdCZVrtTest, Update)
+TEST_F(pdCZVrtTest, UpdateAcc)
 {
   pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
-  pdCZVrtUpdate( &vrt, 0.2, 0, 0, 0 );
+  pdCZVrtUpdateAcc( &vrt, 0.2, 0 );
   EXPECT_DOUBLE_EQ( 9.806652, pdCZVrtRF(&vrt) );
   EXPECT_DOUBLE_EQ( 0, pdCZVrtAcc(&vrt) );
-  EXPECT_DOUBLE_EQ( 0, pdCZVrtZMP(&vrt) );
-  EXPECT_DOUBLE_EQ( 7.0023753112783096, pdCZVrtZeta(&vrt) );
-  pdCZVrtUpdate( &vrt, 0.1, 0, 0, 0 );
+  pdCZVrtUpdateAcc( &vrt, 0.1, 0 );
   EXPECT_DOUBLE_EQ( 14.709978, pdCZVrtRF(&vrt) );
   EXPECT_DOUBLE_EQ( 4.903326, pdCZVrtAcc(&vrt) );
-  EXPECT_DOUBLE_EQ( 0, pdCZVrtZMP(&vrt) );
-  EXPECT_DOUBLE_EQ( 9.9028541340363088, pdCZVrtZeta(&vrt) );
-  pdCZVrtUpdate( &vrt, 0.1, 0.1, 0, 0 );
+  pdCZVrtUpdateAcc( &vrt, 0.1, 0.1 );
   EXPECT_DOUBLE_EQ( 13.309502937744337, pdCZVrtRF(&vrt) );
   EXPECT_DOUBLE_EQ( 3.5028509377443386, pdCZVrtAcc(&vrt) );
+}
+
+TEST_F(pdCZVrtTest, UpdateZMP)
+{
+  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
+  pdCZVrtUpdateZMP( &vrt );
   EXPECT_DOUBLE_EQ( 0, pdCZVrtZMP(&vrt) );
+}
+
+TEST_F(pdCZVrtTest, UpdateZeta)
+{
+  pdCZVrtSetPrm( &vrt, 0.2, 1.0, 1.0 );
+  pdCZVrtUpdateZeta( &vrt, 0.2, 0, 0 );
+  EXPECT_DOUBLE_EQ( 7.0023753112783096, pdCZVrtZeta(&vrt) );
+  pdCZVrtUpdateZeta( &vrt, 0.1, 0, 0 );
   EXPECT_DOUBLE_EQ( 9.9028541340363088, pdCZVrtZeta(&vrt) );
-  pdCZVrtUpdate( &vrt, 0.1, 0.1, 0.1, 0 );
-  EXPECT_DOUBLE_EQ( 13.309502937744337, pdCZVrtRF(&vrt) );
-  EXPECT_DOUBLE_EQ( 3.5028509377443386, pdCZVrtAcc(&vrt) );
-  EXPECT_DOUBLE_EQ( 0, pdCZVrtZMP(&vrt) );
+  pdCZVrtUpdateZeta( &vrt, 0.1, 0.1, 0 );
   EXPECT_DOUBLE_EQ( 9.9532165655128786, pdCZVrtZeta(&vrt) );
 }

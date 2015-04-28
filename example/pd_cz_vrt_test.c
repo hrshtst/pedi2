@@ -43,7 +43,7 @@ int main(void)
   /* loop */
   output( 0, zVecElem(x,0), zVecElem(dx,0), pdCZVrtAcc(&vrt) );
   for( t=0; t<T; t+=DT ){
-    pdCZVrtUpdate( &vrt, zVecElem(x,0), zVecElem(dx,0), 0, 0 );
+    pdCZVrtUpdateAcc( &vrt, zVecElem(x,0), zVecElem(dx,0) );
     zODE2Update( &ode, t, x, dx, DT, &vrt );
     output( t, zVecElem(x,0), zVecElem(dx,0), pdCZVrtAcc(&vrt) );
   }

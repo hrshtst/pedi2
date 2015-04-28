@@ -46,7 +46,9 @@ __EXPORT double pdCZVrtCalcZMP(pdCZVrt *vrt);
 __EXPORT double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz );
 
 /* update method */
-__EXPORT void pdCZVrtUpdate(pdCZVrt *vrt, double z, double vz, double az, double zz);
+__EXPORT void pdCZVrtUpdateAcc(pdCZVrt *vrt, double z, double vz);
+__EXPORT void pdCZVrtUpdateZMP(pdCZVrt *vrt);
+__EXPORT void pdCZVrtUpdateZeta(pdCZVrt *vrt, double z, double az, double zz );
 
 /* for debug */
 __EXPORT void pdCZVrtFWrite(FILE *fp, pdCZVrt *vrt);

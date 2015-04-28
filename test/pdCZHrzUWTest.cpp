@@ -183,7 +183,7 @@ TEST_F(pdCZHrzUWTest, CheckSimZMPAllStateZero)
 
   pdCZVrtSetRef( &vrt, 0.26 );
   pdCZHrzUWSetPrm( &uw, 0.25, 1.0, 0, 0, 1.0, 1.5, 1.0, 1.0, 0.1, 0 );
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 0, 0 );
   pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
   EXPECT_DOUBLE_EQ( -0.040706737871602130529602, zmp[pdU] );
@@ -195,7 +195,7 @@ TEST_F(pdCZHrzUWTest, CheckSimZMPVelocityFollow)
   zVec2D delta, vel, zmp;
 
   SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
   pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
   EXPECT_DOUBLE_EQ( -0.008141347574320424718142, zmp[pdU] );
@@ -207,7 +207,7 @@ TEST_F(pdCZHrzUWTest, CheckSimZMPVelocityFollowCurve)
   zVec2D delta, vel, zmp;
 
   SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
   pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
   EXPECT_DOUBLE_EQ( -0.006876061458783272808959, zmp[pdU] );
@@ -221,7 +221,7 @@ TEST_F(pdCZHrzUWTest, CheckAccVelocityFollow)
   zVec2D delta, vel, zmp, acc;
 
   SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
   pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
   pdCZHrzUWCalcAcc( &uw, zmp, acc );
@@ -234,7 +234,7 @@ TEST_F(pdCZHrzUWTest, CheckAccVelocityFollowCurve)
   zVec2D delta, vel, zmp, acc;
 
   SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
   pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
   pdCZHrzUWCalcAcc( &uw, zmp, acc );
@@ -260,14 +260,14 @@ TEST_F(pdCZHrzUWTest, SaturationOfZMP)
   pdCZHrzUWSetSR( &uw, v, 8 );
 
   SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 1, 1 );
   pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
   EXPECT_DOUBLE_EQ( 0.122120213614806391588807, zmp[pdU] );
   EXPECT_DOUBLE_EQ( 0.3, zmp[pdW] );
 
   SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 1, 1 );
   pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
   EXPECT_DOUBLE_EQ( 0.2, zmp[pdU] );
@@ -279,7 +279,7 @@ TEST_F(pdCZHrzUWTest, UpdateVelocityFollow)
   zVec2D delta, vel;
 
   SetDefaultPrmVelocityFollow();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
   pdCZHrzUWUpdate( &uw, delta, vel );
   EXPECT_DOUBLE_EQ( -0.008141347574320424718142, pdCZHrzUWZMPU(&uw) );
@@ -293,7 +293,7 @@ TEST_F(pdCZHrzUWTest, UpdateVelocityFollowCurve)
   zVec2D delta, vel;
 
   SetDefaultPrmVelocityFollowCurve();
-  pdCZVrtUpdate( &vrt, 0.26, 0, 0, 0 );
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
   pdCZHrzUWUpdate( &uw, delta, vel );
   EXPECT_DOUBLE_EQ( -0.006876061458783272808959, pdCZHrzUWZMPU(&uw) );

@@ -156,6 +156,9 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetVelU(c,vu)        pdCZHrzSetVelU( pdCZHrzPtr(c), vu )
 #define pdCZSetVelW(c,vw)        pdCZHrzSetVelW( pdCZHrzPtr(c), vw )
 
+/* calculation method */
+__EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);
+__EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
 #if 0
 #define pdCZInit(c) do{\
   pdCZVrtInit( &(c)->vrt );\

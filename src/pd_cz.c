@@ -49,6 +49,25 @@ void pdCZDestroy(pdCZ *c)
   pdCZSetSR( c, NULL );
 }
 
+double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw)
+{
+  return atan2( pdCZKappa(cz)*refuw[pdU],
+                1.0+pdCZKappa(cz)*(pdCZDeltaW(cz)-refuw[pdW]) );
+}
+
+void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd)
+{
+  double refdw;
+  double delta_theta;
+
+  delta_theta = pdCZCalcDeltaTheta( cz, refuw );
+  refdw = ( pdCZDeltaW( cz ) - refuw[pdW] ) / cos( delta_theta );
+  if( !zIsTiny( pdCZKappa( cz ) ) )
+    refdw += ( 1.0 - cos(delta_theta) ) / ( pdCZKappa(cz) * cos(delta_theta) );
+  zVec2DCreate( nextuwd, refuw[pdU] - refdw * sin(delta_theta),
+                         refuw[pdW] + refdw * cos(delta_theta) );
+}
+
 
 #if 0
 void pdCZZMPPhase(pdCZ *c, double dw, double vw, zComplex *pz)

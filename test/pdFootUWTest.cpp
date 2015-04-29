@@ -82,3 +82,21 @@ TEST_F(pdFootUWTest, Destroy)
   EXPECT_EQ( 0, pdFootUWRefPosU( &rf ) );
   EXPECT_EQ( 0, pdFootUWRefPosW( &rf ) );
 }
+
+TEST_F(pdFootUWTest, ReferKappa)
+{
+  EXPECT_EQ( 0, pdFootUWKappa( &lf ) );
+  pdCZHrzUWSetKappa( &czuw, 1 );
+  EXPECT_EQ( 1, pdFootUWKappa( &lf ) );
+  pdCZHrzUWSetKappa( &czuw, 0.2 );
+  EXPECT_EQ( 0.2, pdFootUWKappa( &lf ) );
+}
+
+TEST_F(pdFootUWTest, ReferDist)
+{
+  EXPECT_EQ( 0, pdFootUWDist( &lf ) );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  EXPECT_EQ( 1, pdFootUWDist( &lf ) );
+  pdCZHrzUWSetDist( &czuw, 0.2 );
+  EXPECT_EQ( 0.2, pdFootUWDist( &lf ) );
+}

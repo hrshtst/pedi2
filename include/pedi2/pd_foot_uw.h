@@ -36,6 +36,7 @@ __EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 #define pdFootUWRefPosU(f) pdFootUWRefPos(f)[pdU]
 #define pdFootUWRefPosW(f) pdFootUWRefPos(f)[pdW]
 #define pdFootUWKappa(f)   pdCZHrzUWKappa( pdFootUWCZPtr(f) )
+#define pdFootUWDist(f)    pdCZHrzUWDist( pdFootUWCZPtr(f) )
 
 __END_DECLS
 

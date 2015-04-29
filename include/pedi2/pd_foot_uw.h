@@ -38,6 +38,10 @@ __EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 #define pdFootUWKappa(f)   pdCZHrzUWKappa( pdFootUWCZPtr(f) )
 #define pdFootUWDist(f)    pdCZHrzUWDist( pdFootUWCZPtr(f) )
 
+/* calculation method */
+#define pdFootUWCalcRegZMPU(f,d,v) pdCZHrzUWCalcRegZMPU( pdFootUWCZPtr(f), d, v )
+#define pdFootUWCalcRegZMPW(f,d,v) pdCZHrzUWCalcRegZMPW( pdFootUWCZPtr(f), d, v )
+
 __END_DECLS
 
 #endif /* __PD_FOOT_UW_H__ */

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include <pedi2/pd_foot_uw.h>
+#include "mock/pdCZHrzUWCalcRegZMP_fake.h"
 
 class pdFootUWTest : public testing::Test {
  protected:
@@ -99,4 +100,14 @@ TEST_F(pdFootUWTest, ReferDist)
   EXPECT_EQ( 1, pdFootUWDist( &lf ) );
   pdCZHrzUWSetDist( &czuw, 0.2 );
   EXPECT_EQ( 0.2, pdFootUWDist( &lf ) );
+}
+
+TEST_F(pdFootUWTest, CalcRegZMP)
+{
+  zVec2D d, v;
+
+  MOCK_EXPECT_RETURN( pdCZHrzUCalcRegZMP, 0.1 );
+  EXPECT_EQ( 0.1, pdFootUWCalcRegZMPU( &lf, d, v ) );
+  MOCK_EXPECT_RETURN( pdCZHrzWCalcRegZMP, 0.2 );
+  EXPECT_EQ( 0.2, pdFootUWCalcRegZMPW( &lf, d, v ) );
 }

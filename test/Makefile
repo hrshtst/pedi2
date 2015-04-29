@@ -20,9 +20,9 @@ CPPFLAGS += -isystem $(GTEST_INC_DIR)
 CXXFLAGS += -g -Wall -Wextra -pthread
 
 # Edit below when you add a new test
-TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest
+TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest pdFootUWTest
 # Add depending objects (make sure $(SRCDIR)/makefile)
-OBJ=pd_cz_vrt.o pd_cz_hrz_u.o pd_cz_hrz_w.o pd_cz_hrz_uw.o pd_cz_hrz.o pd_cz.o
+OBJ=pd_cz_vrt.o pd_cz_hrz_u.o pd_cz_hrz_w.o pd_cz_hrz_uw.o pd_cz_hrz.o pd_cz.o pd_foot_uw.o
 
 TESTOBJ=$(addsuffix .o, $(TESTS))
 LIBOBJ=$(addprefix $(SRCDIR)/, $(OBJ))
@@ -75,5 +75,6 @@ $(LIBOBJ): $(LIBOBJ_SRCS_)
 %Test: %Test.o $(LIBOBJ) gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBRARY) $^ -o $@ -lpthread $(LINK)
 
+.PRECIOUS: %.o
 %.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(INCLUDE) $(CXXFLAGS) -c $<

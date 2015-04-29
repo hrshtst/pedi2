@@ -135,3 +135,43 @@ TEST_F(pdFootUWTest, CalcPhi_KappaIsNotZero)
   zVec2DCreate( regzmp, 2, 1 );
   EXPECT_NEAR( zPI/6.0, pdFootUWCalcPhi( &lf, delta, vel, regzmp ), 1e-12 );
 }
+
+TEST_F(pdFootUWTest, CalcRefPos_KappaIsZero)
+{
+  zVec2D delta, vel, regzmp, refpos;
+
+  pdCZHrzUWSetKappa( &czuw, 0 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+
+  zVec2DCreate( delta, 0, 2*sqrt(3) );
+  zVec2DCreate( vel, 0, 0 );
+  zVec2DCreate( regzmp, 2, 1 );
+  // left foot
+  pdFootUWCalcRefPos( &lf, delta, vel, regzmp, refpos );
+  EXPECT_NEAR( 2.0,       refpos[pdU], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)+0.5, refpos[pdW], 1e-12 );
+  // right foot
+  pdFootUWCalcRefPos( &rf, delta, vel, regzmp, refpos );
+  EXPECT_NEAR( 2.0,       refpos[pdU], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)-0.5, refpos[pdW], 1e-12 );
+}
+
+TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
+{
+  zVec2D delta, vel, regzmp, refpos;
+
+  pdCZHrzUWSetKappa( &czuw, 1 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+
+  zVec2DCreate( delta, 0, 2*sqrt(3) );
+  zVec2DCreate( vel, 0, 0 );
+  zVec2DCreate( regzmp, 2, 1 );
+  // left foot
+  pdFootUWCalcRefPos( &lf, delta, vel, regzmp, refpos );
+  EXPECT_NEAR( 0.25,           refpos[pdU], 1e-12 );
+  EXPECT_NEAR( 1+1.75*sqrt(3), refpos[pdW], 1e-12 );
+  // right foot
+  pdFootUWCalcRefPos( &rf, delta, vel, regzmp, refpos );
+  EXPECT_NEAR( 0.75,           refpos[pdU], 1e-12 );
+  EXPECT_NEAR( 1+1.25*sqrt(3), refpos[pdW], 1e-12 );
+}

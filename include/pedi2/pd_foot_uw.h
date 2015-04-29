@@ -41,6 +41,7 @@ __EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 /* calculation method */
 #define pdFootUWCalcRegZMPU(f,d,v) pdCZHrzUWCalcRegZMPU( pdFootUWCZPtr(f), d, v )
 #define pdFootUWCalcRegZMPW(f,d,v) pdCZHrzUWCalcRegZMPW( pdFootUWCZPtr(f), d, v )
+__EXPORT double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp);
 
 __END_DECLS
 

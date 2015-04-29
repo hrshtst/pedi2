@@ -29,3 +29,9 @@ void pdFootUWDestroy(pdFootUW *fuw)
   pdFootUWRefPosU( fuw ) = 0;
   pdFootUWRefPosW( fuw ) = 0;
 }
+
+double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp)
+{
+  return atan2( pdFootUWKappa(fuw)*regzmp[pdU],
+                1.0+pdFootUWKappa(fuw)*(delta[pdW]-regzmp[pdW]));
+}

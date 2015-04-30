@@ -88,6 +88,24 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( 0, pdFootZRefHeight( &rf ) );
 }
 
+TEST_F(pdFootZTest, ReferRho)
+{
+  EXPECT_EQ( 0, pdFootZRho( &lf ) );
+  pdCZHrzUWSetRho( &czuw, 1 );
+  EXPECT_EQ( 1, pdFootZRho( &lf ) );
+  pdCZHrzUWSetRho( &czuw, 0.2 );
+  EXPECT_EQ( 0.2, pdFootZRho( &lf ) );
+}
+
+TEST_F(pdFootZTest, ReferDist)
+{
+  EXPECT_EQ( 0, pdFootZDist( &lf ) );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  EXPECT_EQ( 1, pdFootZDist( &lf ) );
+  pdCZHrzUWSetDist( &czuw, 0.2 );
+  EXPECT_EQ( 0.2, pdFootZDist( &lf ) );
+}
+
 TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)
 {
   zVec3D v[4];

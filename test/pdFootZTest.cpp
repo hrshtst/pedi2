@@ -87,3 +87,168 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( 0, pdFootZFootPhase( &rf ) );
   EXPECT_EQ( 0, pdFootZRefHeight( &rf ) );
 }
+
+TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)
+{
+  zVec3D v[4];
+  zVec2D delta, vel, zmp;
+  zComplex pz;
+
+  // make convex hull of left foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, 0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, 0.15, 0.0 );
+  zCH2D( &lsr, v, 4 );
+  pdFootZSetSR( &lf, &lsr );
+  pdFootZSetSR( &rf, NULL );
+  pdCZVrtZeta( &vrt ) = 2;
+  pdCZHrzUWSetQ1W( &czuw, 1 );
+  pdCZHrzUWSetQ2W( &czuw, 1 );
+
+  // Now ZMP is out of the supporting region,
+  zVec2DCreate( delta, 0, 0.05 );
+  zVec2DCreate( vel,   0, 0.05 );
+  zVec2DCreate( zmp,   0, 0.07 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // comes into the supporting region,
+  zVec2DCreate( delta, 0, 0.02 );
+  zVec2DCreate( vel,   0, 0.1 );
+  zVec2DCreate( zmp,   0, 0.1 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // comes at the most leftward,
+  zVec2DCreate( delta, 0, -0.02 );
+  zVec2DCreate( vel,   0, 0.0 );
+  zVec2DCreate( zmp,   0, 0.125 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0.5, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // get back to the edge again,
+  zVec2DCreate( delta, 0, 0.02 );
+  zVec2DCreate( vel,   0, -0.1 );
+  zVec2DCreate( zmp,   0, 0.1 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 1, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // and go far away
+  zVec2DCreate( delta, 0, 0.05 );
+  zVec2DCreate( vel,   0, -0.05 );
+  zVec2DCreate( zmp,   0, 0.07 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 1, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+}
+
+TEST_F(pdFootZTest, CalcFootPhase_OrthogonalSRRight)
+{
+  zVec3D v[4];
+  zVec2D delta, vel, zmp;
+  zComplex pz;
+
+  // make convex hull of right foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, -0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, -0.15, 0.0 );
+  zCH2D( &rsr, v, 4 );
+  pdFootZSetSR( &lf, NULL );
+  pdFootZSetSR( &rf, &rsr );
+  pdCZVrtZeta( &vrt ) = 2;
+  pdCZHrzUWSetQ1W( &czuw, 1 );
+  pdCZHrzUWSetQ2W( &czuw, 1 );
+
+  // Now ZMP is out of the supporting region,
+  zVec2DCreate( delta, 0, -0.05 );
+  zVec2DCreate( vel,   0, -0.05 );
+  zVec2DCreate( zmp,   0, -0.07 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // comes into the supporting region,
+  zVec2DCreate( delta, 0, -0.02 );
+  zVec2DCreate( vel,   0, -0.1 );
+  zVec2DCreate( zmp,   0, -0.1 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // comes at the most righttward,
+  zVec2DCreate( delta, 0, 0.02 );
+  zVec2DCreate( vel,   0, 0.0 );
+  zVec2DCreate( zmp,   0, -0.125 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0.5, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // get back to the edge again,
+  zVec2DCreate( delta, 0, -0.02 );
+  zVec2DCreate( vel,   0, 0.1 );
+  zVec2DCreate( zmp,   0, -0.1 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 1, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  // and go far away
+  zVec2DCreate( delta, 0, -0.05 );
+  zVec2DCreate( vel,   0, 0.05 );
+  zVec2DCreate( zmp,   0, -0.07 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 1, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+}
+
+TEST_F(pdFootZTest, CalcFootPhase_DoubleSupport)
+{
+  zVec3D vl[4], vr[4];
+  zVec2D delta, vel, zmp;
+  zComplex pz;
+
+  // make convex hull of left foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &vl[0],  0.04, 0.1,  0.0 );
+  zVec3DCreate( &vl[1], -0.04, 0.1,  0.0 );
+  zVec3DCreate( &vl[2], -0.04, 0.15, 0.0 );
+  zVec3DCreate( &vl[3],  0.04, 0.15, 0.0 );
+  zCH2D( &lsr, vl, 4 );
+  zVec3DCreate( &vr[0],  0.04, -0.1,  0.0 );
+  zVec3DCreate( &vr[1], -0.04, -0.1,  0.0 );
+  zVec3DCreate( &vr[2], -0.04, -0.15, 0.0 );
+  zVec3DCreate( &vr[3],  0.04, -0.15, 0.0 );
+  zCH2D( &rsr, vr, 4 );
+
+  pdCZVrtZeta( &vrt ) = 2;
+  pdCZHrzUWSetQ1W( &czuw, 1 );
+  pdCZHrzUWSetQ2W( &czuw, 1 );
+  pdFootZSetSR( &lf, &lsr );
+  pdFootZSetSR( &rf, &rsr );
+
+  // always 0 or 1 when double support phase
+  zVec2DCreate( delta, 0, -0.05 );
+  zVec2DCreate( vel,   0, -0.02 );
+  zVec2DCreate( zmp,   0, 0.07 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+  //
+  zVec2DCreate( delta, 0, 0.05 );
+  zVec2DCreate( vel,   0, 0.02 );
+  zVec2DCreate( zmp,   0, -0.07 );
+  pdFootZCalcZMPPhase( &lf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &lf, delta, &pz ), 1e-12 );
+  pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
+}

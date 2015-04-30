@@ -34,6 +34,10 @@ __EXPORT void pdFootZDestroy(pdFootZ *fz);
 #define pdFootZSetMaxHeight(f,h) ( pdFootZMaxHeight(f) = (h) )
 #define pdFootZSetSR(f,sr)        ( pdFootZSR(f) = (sr) )
 
+/* calculation method */
+#define pdFootZCalcZMPPhase(f,d,v,z,pz) pdCZHrzUWCalcZMPPhase( pdFootZCZPtr(f), d, v, z, pz )
+__EXPORT double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zComplex *pz);
+
 __END_DECLS
 
 #endif /* __PD_FOOT_Z_H__ */

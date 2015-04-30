@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
-#include <pedi2/pd_foot_uw.h>
 #include "mock/pdCZHrzUWCalcRegZMP_fake.h"
+#include <pedi2/pd_foot_uw.h>
+#include "../src/pd_foot_uw.c"
 
 class pdFootUWTest : public testing::Test {
  protected:
@@ -174,4 +175,24 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
   pdFootUWCalcRefPos( &rf, delta, vel, regzmp, refpos );
   EXPECT_NEAR( 0.75,           refpos[pdU], 1e-12 );
   EXPECT_NEAR( 1+1.25*sqrt(3), refpos[pdW], 1e-12 );
+}
+
+TEST_F(pdFootUWTest, Update)
+{
+  zVec2D delta, vel;
+
+  pdCZHrzUWSetKappa( &czuw, 1 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  zVec2DCreate( delta, 0, 2*sqrt(3) );
+  zVec2DCreate( vel, 0, 0 );
+  MOCK_EXPECT_RETURN( pdCZHrzUCalcRegZMP, 2 );
+  MOCK_EXPECT_RETURN( pdCZHrzWCalcRegZMP, 1 );
+  // left foot
+  pdFootUWUpdate( &lf, delta, vel );
+  EXPECT_NEAR( 0.25,           pdFootUWRefPosU(&lf), 1e-12 );
+  EXPECT_NEAR( 1+1.75*sqrt(3), pdFootUWRefPosW(&lf), 1e-12 );
+  // right foot
+  pdFootUWUpdate( &rf, delta, vel );
+  EXPECT_NEAR( 0.75,           pdFootUWRefPosU(&rf), 1e-12 );
+  EXPECT_NEAR( 1+1.25*sqrt(3), pdFootUWRefPosW(&rf), 1e-12 );
 }

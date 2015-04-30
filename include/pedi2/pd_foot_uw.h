@@ -39,10 +39,14 @@ __EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 #define pdFootUWDist(f)    pdCZHrzUWDist( pdFootUWCZPtr(f) )
 
 /* calculation method */
-#define pdFootUWCalcRegZMPU(f,d,v) pdCZHrzUWCalcRegZMPU( pdFootUWCZPtr(f), d, v )
-#define pdFootUWCalcRegZMPW(f,d,v) pdCZHrzUWCalcRegZMPW( pdFootUWCZPtr(f), d, v )
+#define pdFootUWCalcRegZMP(f,d,v,z) pdCZHrzUWCalcRegZMP( pdFootUWCZPtr(f), d, v, z )
+#define pdFootUWCalcRegZMPU(f,d,v)  pdCZHrzUWCalcRegZMPU( pdFootUWCZPtr(f), d, v )
+#define pdFootUWCalcRegZMPW(f,d,v)  pdCZHrzUWCalcRegZMPW( pdFootUWCZPtr(f), d, v )
 __EXPORT double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp);
 __EXPORT void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, zVec2D refpos);
+
+/* update method */
+__EXPORT void pdFootUWUpdate(pdFootUW *fuw, zVec2D delta, zVec2D vel);
 
 __END_DECLS
 

@@ -72,6 +72,10 @@ LIBOBJ_SRCS_=$(INCDIR)/pedi2/*.h $(SRCDIR)/*.c
 $(LIBOBJ): $(LIBOBJ_SRCS_)
 	@cd $(SRCDIR); make $@
 
+OTHERLIBOBJ = $(filter-out $(SRCDIR)/pd_foot_uw.o, $(LIBOBJ))
+pdFootUWTest: pdFootUWTest.o $(OTHERLIBOBJ) gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBRARY) $^ -o $@ -lpthread $(LINK)
+
 %Test: %Test.o $(LIBOBJ) gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBRARY) $^ -o $@ -lpthread $(LINK)
 

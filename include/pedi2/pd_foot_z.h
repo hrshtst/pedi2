@@ -39,6 +39,7 @@ __EXPORT void pdFootZDestroy(pdFootZ *fz);
 /* calculation method */
 #define pdFootZCalcZMPPhase(f,d,v,z,pz) pdCZHrzUWCalcZMPPhase( pdFootZCZPtr(f), d, v, z, pz )
 __EXPORT double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zComplex *pz);
+__EXPORT double pdFootZCalcRefZ(pdFootZ *pf, double phase, zComplex *pz);
 
 __END_DECLS
 

@@ -270,3 +270,60 @@ TEST_F(pdFootZTest, CalcFootPhase_DoubleSupport)
   pdFootZCalcZMPPhase( &rf, delta, vel, zmp, &pz );
   EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, delta, &pz ), 1e-12 );
 }
+
+TEST_F(pdFootZTest, CalcRefZ_RhoIsOne)
+{
+  double phase;
+  zComplex pz;
+
+  pdCZHrzUWSetRho( &czuw, 1 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  pdFootZSetMaxHeight( &lf, 0.8 );
+  zComplexCreate( &pz, 0.5, 0 );
+
+  phase = 0;
+  EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+  phase = 0.5;
+  EXPECT_NEAR( 0.8, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+  phase = 1;
+  EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+}
+
+TEST_F(pdFootZTest, CalcRefZ_RhoIsLowerThanOne)
+{
+  double phase;
+  zComplex pz;
+
+  // e^-1 = 0.36787944117144233
+  pdCZHrzUWSetRho( &czuw, 0.8 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  pdFootZSetMaxHeight( &lf, 0.8 );
+  zComplexCreate( &pz, 0.5, 0 );
+
+  phase = 0;
+  EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+  phase = 0.5;
+  EXPECT_GT( pdFootZCalcRefZ( &lf, phase, &pz ), 0 );
+  EXPECT_LT( pdFootZCalcRefZ( &lf, phase, &pz ), 0.8 );
+  phase = 1;
+  EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+}
+
+TEST_F(pdFootZTest, CalcRefZ_RhoIsNearlyZero)
+{
+  double phase;
+  zComplex pz;
+
+  // e^-1 = 0.36787944117144233
+  pdCZHrzUWSetRho( &czuw, 0.2 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  pdFootZSetMaxHeight( &lf, 0.8 );
+  zComplexCreate( &pz, 0.5, 0 );
+
+  phase = 0;
+  EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+  phase = 0.5;
+  EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+  phase = 1;
+  EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
+}

@@ -59,3 +59,18 @@ double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zComplex *pz)
   } else
     return 0.0;
 }
+
+static double _sigma(double rho);
+double _sigma(double rho)
+{
+  return zLimit( (rho*zE-1)/(zE-1), 0, 1 );
+}
+
+double pdFootZCalcRefZ(pdFootZ *kf, double phase, zComplex *pz)
+{
+  double dh, d;
+
+  d = 0.5 * pdFootZDist( kf );
+  dh = zComplexAbs(pz) / d * _sigma( pdFootZRho(kf) );
+  return zCycloidY( 0, pdFootZMaxHeight(kf) * dh, phase );
+}

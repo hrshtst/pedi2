@@ -274,6 +274,22 @@ TEST_F(pdCZHrzUWTest, SaturationOfZMP)
   EXPECT_DOUBLE_EQ( 0.3, zmp[pdW] );
 }
 
+TEST_F(pdCZHrzUWTest, CalcRegZMP)
+{
+  zVec2D delta, vel, regzmp;
+
+  pdCZVrtZeta( &vrt ) = 1;
+  pdCZHrzUWSetPrm( &uw, 0.2, 1, 1, 0.2, 1, 1, 1, 1, 1, 1 );
+  zVec2DCreate( delta, 0.2, -0.2 ); zVec2DCreate( vel, 0.2, -0.2 );
+  pdCZHrzUWCalcRegZMP( &uw, delta, vel, regzmp );
+  EXPECT_NEAR( 0.14,  regzmp[pdU], 1e-12 );
+  EXPECT_NEAR( -0.25, regzmp[pdW], 1e-12 );
+  zVec2DCreate( delta, -0.2, -0.2 ); zVec2DCreate( vel, 0.2, 0.2 );
+  pdCZHrzUWCalcRegZMP( &uw, delta, vel, regzmp );
+  EXPECT_NEAR( 0.66, regzmp[pdU], 1e-12 );
+  EXPECT_NEAR( 0.55, regzmp[pdW], 1e-12 );
+}
+
 TEST_F(pdCZHrzUWTest, UpdateVelocityFollow)
 {
   zVec2D delta, vel;

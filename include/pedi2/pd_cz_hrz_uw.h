@@ -78,6 +78,8 @@ __EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
 #define pdCZHrzUWCalcRegZMPW(h,d,v) \
   pdCZHrzWCalcRegZMP( pdCZHrzWPtr(h), d, v )
 __EXPORT void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel, zVec2D zmp);
+#define pdCZHrzUWCalcRegZMP(h,d,v,z) \
+  zVec2DCreate( z, pdCZHrzUWCalcRegZMPU( h, d, v ), pdCZHrzUWCalcRegZMPW( h, d, v ) )
 __EXPORT void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D zmp, zVec2D acc);
 
 /* update method */

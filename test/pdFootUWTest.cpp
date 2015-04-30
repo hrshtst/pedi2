@@ -8,8 +8,10 @@ class pdFootUWTest : public testing::Test {
   virtual void SetUp() {
     pdCZVrtInit( &vrt );
     pdCZHrzUWInit( &czuw, &vrt );
-    pdFootUWInit( &lf, &czuw, PD_FOOT_LEFT );
-    pdFootUWInit( &rf, &czuw, PD_FOOT_RIGHT );
+    pdFootUWInit( &lf, &czuw );
+    pdFootUWInit( &rf, &czuw );
+    pdFootUWSign( &lf ) = 1;
+    pdFootUWSign( &rf ) = -1;
   };
   virtual void TearDown() {
     pdFootUWDestroy( &lf );
@@ -44,18 +46,18 @@ class pdFootUWTest : public testing::Test {
 TEST_F(pdFootUWTest, Init)
 {
   SetVacuousPrm();
-  pdFootUWInit( &lf, &czuw, PD_FOOT_LEFT );
+  pdFootUWInit( &lf, &czuw );
   EXPECT_EQ( &czuw, pdFootUWCZPtr( &lf ) );
-  EXPECT_EQ( 1, pdFootUWSign( &lf ) );
+  EXPECT_EQ( 0, pdFootUWSign( &lf ) );
   EXPECT_EQ( 0, pdFootUWPhi( &lf ) );
   EXPECT_EQ( 0, pdFootUWRegZMPU( &lf ) );
   EXPECT_EQ( 0, pdFootUWRegZMPW( &lf ) );
   EXPECT_EQ( 0, pdFootUWRefPosU( &lf ) );
   EXPECT_EQ( 0, pdFootUWRefPosW( &lf ) );
 
-  pdFootUWInit( &rf, &czuw, PD_FOOT_RIGHT );
+  pdFootUWInit( &rf, &czuw );
   EXPECT_EQ( &czuw, pdFootUWCZPtr( &rf ) );
-  EXPECT_EQ( -1, pdFootUWSign( &rf ) );
+  EXPECT_EQ( 0, pdFootUWSign( &rf ) );
   EXPECT_EQ( 0, pdFootUWPhi( &rf ) );
   EXPECT_EQ( 0, pdFootUWRegZMPU( &rf ) );
   EXPECT_EQ( 0, pdFootUWRegZMPW( &rf ) );

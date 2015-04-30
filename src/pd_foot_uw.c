@@ -1,6 +1,6 @@
 #include <pedi2/pd_foot_uw.h>
 
-void pdFootUWInit(pdFootUW *fuw, pdCZHrzUW *czuw, byte dir)
+void pdFootUWInit(pdFootUW *fuw, pdCZHrzUW *czuw)
 {
   pdFootUWCZPtr( fuw ) = czuw;
   pdFootUWPhi( fuw ) = 0;
@@ -8,15 +8,7 @@ void pdFootUWInit(pdFootUW *fuw, pdCZHrzUW *czuw, byte dir)
   pdFootUWRegZMPW( fuw ) = 0;
   pdFootUWRefPosU( fuw ) = 0;
   pdFootUWRefPosW( fuw ) = 0;
-  if( dir == PD_FOOT_LEFT )
-    pdFootUWSign( fuw ) = 1.0;
-  else if( dir == PD_FOOT_RIGHT )
-    pdFootUWSign( fuw ) = -1.0;
-  else{
-    ZRUNERROR( "invalid foot dir specified - %d", dir );
-    pdFootUWDestroy( fuw );
-    return;
-  }
+  pdFootUWSign( fuw ) = 0;
 }
 
 void pdFootUWDestroy(pdFootUW *fuw)

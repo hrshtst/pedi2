@@ -5,12 +5,6 @@
 
 __BEGIN_DECLS
 
-enum{
-  PD_FOOT_INVALID=-1,
-  PD_FOOT_LEFT=0,
-  PD_FOOT_RIGHT
-};
-
 typedef struct{
   pdCZHrzUW *_czuw;
 
@@ -22,7 +16,7 @@ typedef struct{
 } pdFootUW;
 
 /* c'tor and d'tor */
-__EXPORT void pdFootUWInit(pdFootUW *fuw, pdCZHrzUW *czuw, byte dir);
+__EXPORT void pdFootUWInit(pdFootUW *fuw, pdCZHrzUW *czuw);
 __EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 
 /* methods to get parameters */

@@ -48,6 +48,10 @@ __EXPORT void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D
 /* update method */
 __EXPORT void pdFootUWUpdate(pdFootUW *fuw, zVec2D delta, zVec2D vel);
 
+/* output method */
+__EXPORT void pdFootUWFWrite(FILE *fp, pdFootUW *fuw);
+#define pdFootUWWrite(f) pdFootUWFWrite( stdout, f )
+
 __END_DECLS
 
 #endif /* __PD_FOOT_UW_H__ */

@@ -60,3 +60,13 @@ void pdFootUWUpdate(pdFootUW *f, zVec2D delta, zVec2D vel)
   pdFootUWPhi( f ) = pdFootUWCalcPhi( f, delta, vel, pdFootUWRegZMP( f ) );
   pdFootUWCalcRefPos( f, delta, vel, pdFootUWRegZMP( f ), pdFootUWRefPos( f ) );
 }
+
+void pdFootUWFWrite(FILE *fp, pdFootUW *f)
+{
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "sign:%g, kappa:%g, dist:%g, phi:%g\n",
+           pdFootUWSign(f), pdFootUWKappa(f), pdFootUWDist(f), pdFootUWPhi(f) );
+  fprintf( fp, "reguz:%g, regwz:%g\n", pdFootUWRegZMPU(f), pdFootUWRegZMPW(f) );
+  fprintf( fp, "refud:%g, refwd:%g\n", pdFootUWRefPosU(f), pdFootUWRefPosW(f) );
+}

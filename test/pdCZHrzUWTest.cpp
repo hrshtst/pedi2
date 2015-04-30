@@ -113,6 +113,7 @@ TEST_F(pdCZHrzUWTest, Destroy)
 TEST_F(pdCZHrzUWTest, SetSR)
 {
   zVec3D v[3];
+  zVec3D vv[4];
 
   zVec3DCreate( &v[0], 0, 0, 0 );
   zVec3DCreate( &v[1], 0, 1, 0 );
@@ -124,6 +125,31 @@ TEST_F(pdCZHrzUWTest, SetSR)
   EXPECT_EQ( 1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zY ) );
   EXPECT_EQ( 1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zX ) );
   EXPECT_EQ( 1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zY ) );
+
+  zVec3DCreate( &v[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &v[1], 0.1, 0.2, 0 );
+  zVec3DCreate( &v[2], 0.2, 0.2, 0 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zX ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zY ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zY ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zY ) );
+
+  zVec3DCreate( &vv[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &vv[1], 0.1, 0.2, 0 );
+  zVec3DCreate( &vv[2], 0.2, 0.2, 0 );
+  zVec3DCreate( &vv[3], 0.2, 0.1, 0 );
+  pdCZHrzUWSetSR( &uw, vv, 4 );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zX ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zY ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zY ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zY ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[3], zX ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[3], zY ) );
 }
 
 TEST_F(pdCZHrzUWTest, SetSR_chk_memory)
@@ -173,8 +199,29 @@ TEST_F(pdCZHrzUWTest, IsSRSet)
   zVec3DCreate( &v[1], 0, 1, 0 );
   zVec3DCreate( &v[2], 1, 1, 0 );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
-  zCH2D( pdCZHrzUWSR( &uw ), v, 3 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
   EXPECT_TRUE( pdCZHrzUWIsSRSet( &uw ) );
+}
+
+TEST_F(pdCZHrzUWTest, SetSR_None)
+{
+  zVec3D v[3];
+
+  zVec3DCreate( &v[0], 0, 0, 0 );
+  zVec3DCreate( &v[1], 0, 1, 0 );
+  zVec3DCreate( &v[2], 1, 1, 0 );
+  // set supporting region
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_TRUE( pdCZHrzUWIsSRSet( &uw ) );
+  EXPECT_EQ( 3, uw._vert_num );
+  // set None
+  pdCZHrzUWSetSR( &uw, NULL, 0 );
+  EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
+  EXPECT_EQ( 0, uw._vert_num );
+  // set supporting region again
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_TRUE( pdCZHrzUWIsSRSet( &uw ) );
+  EXPECT_EQ( 3, uw._vert_num );
 }
 
 TEST_F(pdCZHrzUWTest, CheckSimZMPAllStateZero)

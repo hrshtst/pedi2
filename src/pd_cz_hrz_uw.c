@@ -31,7 +31,11 @@ void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num)
   register int i;
   zVec3D *traversep;
 
-  if( num != hrz->_vert_num ){
+  if( num == 0 || !p ){
+    zFree( pdCZHrzUWSRVert(hrz) );
+    zVec3DListDestroy( pdCZHrzUWSR(hrz), false );
+    zListInit( pdCZHrzUWSR(hrz) );
+  } else if( num != hrz->_vert_num ){
     zFree( pdCZHrzUWSRVert(hrz) );
     if( !( pdCZHrzUWSRVert(hrz) = zAlloc( zVec3D, num ) ) ){
       ZALLOCERROR();
@@ -39,13 +43,15 @@ void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num)
       exit( EXIT_FAILURE );
     }
   }
-  traversep = pdCZHrzUWSRVert(hrz);
-  for( i=0; i<num; i++ )
-    zVec3DCreate( traversep++,
-                  zVec3DElem(&p[i],zX),
-                  zVec3DElem(&p[i],zY),
-                  zVec3DElem(&p[i],zZ) );
-  zCH2D( pdCZHrzUWSR(hrz), pdCZHrzUWSRVert(hrz), num );
+  if( num > 0 && p ){
+    traversep = pdCZHrzUWSRVert(hrz);
+    for( i=0; i<num; i++ )
+      zVec3DCreate( traversep++,
+                    zVec3DElem(&p[i],zX),
+                    zVec3DElem(&p[i],zY),
+                    zVec3DElem(&p[i],zZ) );
+    zCH2D( pdCZHrzUWSR(hrz), pdCZHrzUWSRVert(hrz), num );
+  }
   hrz->_vert_num = num;
 }
 

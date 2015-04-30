@@ -4,7 +4,9 @@ void pdFootZInit(pdFootZ *f, pdCZHrzUW *czuw)
 {
   pdFootZCZPtr( f ) = czuw;
   pdFootZSetMaxHeight( f, 0 );
-  pdFootZSetSR( f, NULL );
+  zListInit( pdFootZSR( f ) );
+  f->_vert_num = 0;
+  f->_sr_vert = NULL;
   pdFootZSign( f ) = 0;
   zComplexClear( pdFootZZMPPhase( f ) );
   pdFootZFootPhase( f ) = 0;
@@ -15,11 +17,42 @@ void pdFootZDestroy(pdFootZ *f)
 {
   pdFootZCZPtr( f ) = NULL;
   pdFootZSetMaxHeight( f, 0 );
-  pdFootZSetSR( f, NULL );
+  zVec3DListDestroy( pdFootZSR( f ), false );
+  zFree( pdFootZSRVert( f ) );
+  f->_vert_num = 0;
   pdFootZSign( f ) = 0;
   zComplexClear( pdFootZZMPPhase( f ) );
   pdFootZFootPhase( f ) = 0;
   pdFootZRefHeight( f ) = 0;
+}
+
+void pdFootZSetSR(pdFootZ *f, zVec3D p[], int num)
+{
+  register int i;
+  zVec3D *traversep;
+
+  if( num == 0 || !p ){
+    zFree( pdFootZSRVert( f ) );
+    zVec3DListDestroy( pdFootZSR( f ), false );
+    zListInit( pdFootZSR( f ) );
+  } else if( num != f->_vert_num ){
+    zFree( pdFootZSRVert( f ) );
+    if( !( pdFootZSRVert( f ) = zAlloc( zVec3D, num ) ) ){
+      ZALLOCERROR();
+      zFree( pdFootZSRVert( f ) );
+      exit( EXIT_FAILURE );
+    }
+  }
+  if( num > 0 && p ){
+    traversep = pdFootZSRVert( f );
+    for( i=0; i<num; i++ )
+      zVec3DCreate( traversep++,
+                    zVec3DElem(&p[i],zX),
+                    zVec3DElem(&p[i],zY),
+                    zVec3DElem(&p[i],zZ) );
+    zCH2D( pdFootZSR( f ), pdFootZSRVert( f ), num );
+  }
+  f->_vert_num = num;
 }
 
 static double _pdFootZFindInnerEdgeW(pdFootZ *f);
@@ -46,7 +79,7 @@ double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zComplex *pz)
   double inner_w;
   zComplex p_in, p;
 
-  if( !pdFootZSR( pf ) ) return 0.0; /* pf is floating */
+  if( !pdFootZIsSRSet( pf ) ) return 0.0; /* pf is floating */
   r2 = zComplexSqrAbs( pz );
   r  = sqrt( r2 );
   inner_w = _pdFootZFindInnerEdgeW( pf );

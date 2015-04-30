@@ -9,7 +9,9 @@ typedef struct{
   pdCZHrzUW *_czuw;
 
   double _h;         /* maximum lifting height */
-  zVec3DList *_sr;   /* supporting region */
+  zVec3DList _sr;    /* supporting region */
+  zVec3D *_sr_vert;  /* vertices of supporting region */
+  int _vert_num;     /* number of vertices */
   double _sign;      /* for calculation (left: +1, right: -1) */
 
   zComplex pz;       /* ZMP phase */
@@ -24,7 +26,8 @@ __EXPORT void pdFootZDestroy(pdFootZ *fz);
 /* methods to get parameters */
 #define pdFootZCZPtr(f)      (f)->_czuw
 #define pdFootZMaxHeight(f) (f)->_h
-#define pdFootZSR(f)         (f)->_sr
+#define pdFootZSR(f)         ( &(f)->_sr )
+#define pdFootZSRVert(f)     (f)->_sr_vert
 #define pdFootZSign(f)       (f)->_sign
 #define pdFootZZMPPhase(f)  ( &(f)->pz )
 #define pdFootZFootPhase(f) (f)->phase
@@ -34,7 +37,8 @@ __EXPORT void pdFootZDestroy(pdFootZ *fz);
 
 /* methods to set parameters */
 #define pdFootZSetMaxHeight(f,h) ( pdFootZMaxHeight(f) = (h) )
-#define pdFootZSetSR(f,sr)        ( pdFootZSR(f) = (sr) )
+__EXPORT void pdFootZSetSR(pdFootZ *fz, zVec3D p[], int num);
+#define pdFootZIsSRSet(f) ( zListNum( pdFootZSR(f) ) ? true : false )
 
 /* calculation method */
 #define pdFootZCalcZMPPhase(f,d,v,z,pz) pdCZHrzUWCalcZMPPhase( pdFootZCZPtr(f), d, v, z, pz )

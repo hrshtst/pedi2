@@ -21,22 +21,25 @@ class pdFootZTest : public testing::Test {
   void SetVacuousPrm() {
     pdFootZCZPtr( &lf ) = NULL;
     pdFootZSetMaxHeight( &lf, 100 );
-    pdFootZSetSR( &lf, &rsr ); // purposely set pointer to rsr
     pdFootZSign( &lf ) = 0.5;
     zComplexCreate( pdFootZZMPPhase( &lf ), 10, 20 );
     pdFootZFootPhase( &lf ) = 30;
     pdFootZRefHeight( &lf ) = 40;
+    lf._sr_vert = dummy1;
+    lf._vert_num = 50;
 
     pdFootZCZPtr( &rf ) = NULL;
     pdFootZSetMaxHeight( &rf, 100 );
-    pdFootZSetSR( &rf, &lsr ); // purposely set pointer to lsr
     pdFootZSign( &rf ) = 0.5;
     zComplexCreate( pdFootZZMPPhase( &rf ), 10, 20 );
     pdFootZFootPhase( &rf ) = 30;
     pdFootZRefHeight( &rf ) = 40;
-}
+    rf._sr_vert = dummy2;
+    rf._vert_num = 50;
+  }
 
-  zVec3DList lsr, rsr;
+  // zVec3DList lsr, rsr;
+  zVec3D *dummy1, *dummy2;
   pdCZVrt vrt;
   pdCZHrzUW czuw;
   pdFootZ lf, rf;
@@ -48,7 +51,9 @@ TEST_F(pdFootZTest, Init)
   pdFootZInit( &lf, &czuw );
   EXPECT_EQ( &czuw, pdFootZCZPtr( &lf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &lf ) );
-  EXPECT_EQ( NULL, pdFootZSR( &lf ) );
+  EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( NULL, pdFootZSRVert( &lf ) );
+  EXPECT_EQ( 0, lf._vert_num );
   EXPECT_EQ( 0, pdFootZSign( &lf ) );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->im );
@@ -58,7 +63,9 @@ TEST_F(pdFootZTest, Init)
   pdFootZInit( &rf, &czuw );
   EXPECT_EQ( &czuw, pdFootZCZPtr( &rf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &rf ) );
-  EXPECT_EQ( NULL, pdFootZSR( &rf ) );
+  EXPECT_FALSE( pdFootZIsSRSet( &rf ) );
+  EXPECT_EQ( NULL, pdFootZSRVert( &rf ) );
+  EXPECT_EQ( 0, rf._vert_num );
   EXPECT_EQ( 0, pdFootZSign( &rf ) );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->im );
@@ -69,19 +76,25 @@ TEST_F(pdFootZTest, Init)
 TEST_F(pdFootZTest, Destroy)
 {
   SetVacuousPrm();
+  pdFootZInit( &lf, &czuw );
   pdFootZDestroy( &lf );
   EXPECT_EQ( NULL, pdFootZCZPtr( &lf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &lf ) );
-  EXPECT_EQ( NULL, pdFootZSR( &lf ) );
+  EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( NULL, pdFootZSRVert( &lf ) );
+  EXPECT_EQ( 0, lf._vert_num );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->im );
   EXPECT_EQ( 0, pdFootZFootPhase( &lf ) );
   EXPECT_EQ( 0, pdFootZRefHeight( &lf ) );
 
+  pdFootZInit( &rf, &czuw );
   pdFootZDestroy( &rf );
   EXPECT_EQ( NULL, pdFootZCZPtr( &rf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &rf ) );
-  EXPECT_EQ( NULL, pdFootZSR( &rf ) );
+  EXPECT_FALSE( pdFootZIsSRSet( &rf ) );
+  EXPECT_EQ( NULL, pdFootZSRVert( &rf ) );
+  EXPECT_EQ( 0, rf._vert_num );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->im );
   EXPECT_EQ( 0, pdFootZFootPhase( &rf ) );
@@ -106,6 +119,120 @@ TEST_F(pdFootZTest, ReferDist)
   EXPECT_EQ( 0.2, pdFootZDist( &lf ) );
 }
 
+TEST_F(pdFootZTest, SetSR)
+{
+  zVec3D v[3];
+  zVec3D vv[4];
+
+  zVec3DCreate( &v[0], 0, 0, 0 );
+  zVec3DCreate( &v[1], 0, 1, 0 );
+  zVec3DCreate( &v[2], 1, 1, 0 );
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_EQ( 0, zVec3DElem( &pdFootZSRVert(&lf)[0], zX ) );
+  EXPECT_EQ( 0, zVec3DElem( &pdFootZSRVert(&lf)[0], zY ) );
+  EXPECT_EQ( 0, zVec3DElem( &pdFootZSRVert(&lf)[1], zX ) );
+  EXPECT_EQ( 1, zVec3DElem( &pdFootZSRVert(&lf)[1], zY ) );
+  EXPECT_EQ( 1, zVec3DElem( &pdFootZSRVert(&lf)[2], zX ) );
+  EXPECT_EQ( 1, zVec3DElem( &pdFootZSRVert(&lf)[2], zY ) );
+
+  zVec3DCreate( &v[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &v[1], 0.1, 0.2, 0 );
+  zVec3DCreate( &v[2], 0.2, 0.2, 0 );
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdFootZSRVert(&lf)[0], zX ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdFootZSRVert(&lf)[0], zY ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdFootZSRVert(&lf)[1], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdFootZSRVert(&lf)[1], zY ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdFootZSRVert(&lf)[2], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdFootZSRVert(&lf)[2], zY ) );
+
+  zVec3DCreate( &vv[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &vv[1], 0.1, 0.2, 0 );
+  zVec3DCreate( &vv[2], 0.2, 0.2, 0 );
+  zVec3DCreate( &vv[3], 0.2, 0.1, 0 );
+  pdFootZSetSR( &lf, vv, 4 );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdFootZSRVert(&lf)[0], zX ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdFootZSRVert(&lf)[0], zY ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdFootZSRVert(&lf)[1], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdFootZSRVert(&lf)[1], zY ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdFootZSRVert(&lf)[2], zX ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdFootZSRVert(&lf)[2], zY ) );
+  EXPECT_EQ( 0.2, zVec3DElem( &pdFootZSRVert(&lf)[3], zX ) );
+  EXPECT_EQ( 0.1, zVec3DElem( &pdFootZSRVert(&lf)[3], zY ) );
+}
+
+TEST_F(pdFootZTest, SetSR_chk_memory)
+{
+  zVec3D v1[3];
+  zVec3D v2[4];
+  zVec3D v3[4];
+  zVec3D *p1;
+  zVec3D *p2;
+  zVec3D *p3;
+
+  zVec3DCreate( &v1[0], 0, 0, 0 );
+  zVec3DCreate( &v1[1], 0, 1, 0 );
+  zVec3DCreate( &v1[2], 1, 1, 0 );
+  zVec3DCreate( &v2[0], 0, 0, 0 );
+  zVec3DCreate( &v2[1], 0, 1, 0 );
+  zVec3DCreate( &v2[2], 1, 1, 0 );
+  zVec3DCreate( &v2[3], 1, 0, 0 );
+  zVec3DCreate( &v3[0], 0, 0, 0 );
+  zVec3DCreate( &v3[1], 0, 1, 0 );
+  zVec3DCreate( &v3[2], 1, 1, 0 );
+  zVec3DCreate( &v3[3], 1, 0, 0 );
+
+  EXPECT_EQ( NULL, pdFootZSRVert(&lf) );
+  pdFootZSetSR( &lf, v1, 3 );
+  p1 = pdFootZSRVert(&lf);
+  EXPECT_TRUE( NULL != p1 );
+
+  pdFootZSetSR( &lf, v2, 4 );
+  p2 = pdFootZSRVert(&lf);
+  EXPECT_NE( p1, p2 );
+
+  pdFootZSetSR( &lf, v3, 4 );
+  p3 = pdFootZSRVert(&lf);
+  EXPECT_EQ( p2, p3 );
+
+  pdFootZSetSR( &lf, v1, 3 );
+  p1 = pdFootZSRVert(&lf);
+  EXPECT_NE( p3, p1 );
+}
+
+TEST_F(pdFootZTest, IsSRSet)
+{
+  zVec3D v[3];
+
+  zVec3DCreate( &v[0], 0, 0, 0 );
+  zVec3DCreate( &v[1], 0, 1, 0 );
+  zVec3DCreate( &v[2], 1, 1, 0 );
+  EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_TRUE( pdFootZIsSRSet( &lf ) );
+}
+
+TEST_F(pdFootZTest, SetSR_None)
+{
+  zVec3D v[3];
+
+  zVec3DCreate( &v[0], 0, 0, 0 );
+  zVec3DCreate( &v[1], 0, 1, 0 );
+  zVec3DCreate( &v[2], 1, 1, 0 );
+  // set supporting region
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_TRUE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( 3, lf._vert_num );
+  // set None
+  pdFootZSetSR( &lf, NULL, 0 );
+  EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( 0, lf._vert_num );
+  // set supporting region again
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_TRUE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( 3, lf._vert_num );
+}
+
 TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)
 {
   zVec3D v[4];
@@ -118,9 +245,8 @@ TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)
   zVec3DCreate( &v[1], -0.04, 0.1,  0.0 );
   zVec3DCreate( &v[2], -0.04, 0.15, 0.0 );
   zVec3DCreate( &v[3],  0.04, 0.15, 0.0 );
-  zCH2D( &lsr, v, 4 );
-  pdFootZSetSR( &lf, &lsr );
-  pdFootZSetSR( &rf, NULL );
+  pdFootZSetSR( &lf, v, 4 );
+  pdFootZSetSR( &rf, NULL, 0 );
   pdCZVrtZeta( &vrt ) = 2;
   pdCZHrzUWSetQ1W( &czuw, 1 );
   pdCZHrzUWSetQ2W( &czuw, 1 );
@@ -179,9 +305,8 @@ TEST_F(pdFootZTest, CalcFootPhase_OrthogonalSRRight)
   zVec3DCreate( &v[1], -0.04, -0.1,  0.0 );
   zVec3DCreate( &v[2], -0.04, -0.15, 0.0 );
   zVec3DCreate( &v[3],  0.04, -0.15, 0.0 );
-  zCH2D( &rsr, v, 4 );
-  pdFootZSetSR( &lf, NULL );
-  pdFootZSetSR( &rf, &rsr );
+  pdFootZSetSR( &lf, NULL, 0 );
+  pdFootZSetSR( &rf, v, 4 );
   pdCZVrtZeta( &vrt ) = 2;
   pdCZHrzUWSetQ1W( &czuw, 1 );
   pdCZHrzUWSetQ2W( &czuw, 1 );
@@ -230,28 +355,26 @@ TEST_F(pdFootZTest, CalcFootPhase_OrthogonalSRRight)
 
 TEST_F(pdFootZTest, CalcFootPhase_DoubleSupport)
 {
-  zVec3D vl[4], vr[4];
+  zVec3D v[4];
   zVec2D delta, vel, zmp;
   zComplex pz;
 
   // make convex hull of left foot
   // orthogonal to the moving frame
-  zVec3DCreate( &vl[0],  0.04, 0.1,  0.0 );
-  zVec3DCreate( &vl[1], -0.04, 0.1,  0.0 );
-  zVec3DCreate( &vl[2], -0.04, 0.15, 0.0 );
-  zVec3DCreate( &vl[3],  0.04, 0.15, 0.0 );
-  zCH2D( &lsr, vl, 4 );
-  zVec3DCreate( &vr[0],  0.04, -0.1,  0.0 );
-  zVec3DCreate( &vr[1], -0.04, -0.1,  0.0 );
-  zVec3DCreate( &vr[2], -0.04, -0.15, 0.0 );
-  zVec3DCreate( &vr[3],  0.04, -0.15, 0.0 );
-  zCH2D( &rsr, vr, 4 );
+  zVec3DCreate( &v[0],  0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, 0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, 0.15, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+  zVec3DCreate( &v[0],  0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, -0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, -0.15, 0.0 );
+  pdFootZSetSR( &rf, v, 4 );
 
   pdCZVrtZeta( &vrt ) = 2;
   pdCZHrzUWSetQ1W( &czuw, 1 );
   pdCZHrzUWSetQ2W( &czuw, 1 );
-  pdFootZSetSR( &lf, &lsr );
-  pdFootZSetSR( &rf, &rsr );
 
   // always 0 or 1 when double support phase
   zVec2DCreate( delta, 0, -0.05 );

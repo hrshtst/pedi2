@@ -74,6 +74,17 @@ void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D zmp, zVec2D acc)
   zVec2DCreate( acc, ddu, ddw );
 }
 
+void pdCZHrzUWCalcZMPPhase(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel, zVec2D zmp, zComplex *pz)
+{
+  double q1, q2, zeta;
+
+  q1 = pdCZHrzUWQ1W( hrz );
+  q2 = pdCZHrzUWQ2W( hrz );
+  zeta = pdCZHrzUWZeta( hrz );
+  zComplexCreate( pz, zmp[pdW]-delta[pdW],
+                  -( q1*q2 + 1.0 ) * vel[pdW] / ( zeta * sqrt( q1*q2 ) ) );
+}
+
 void pdCZHrzUWUpdate(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel)
 {
   pdCZHrzUWCalcZMP( hrz, delta, vel, pdCZHrzUWZMP(hrz) );

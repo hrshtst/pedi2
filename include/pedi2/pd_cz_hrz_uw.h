@@ -3,6 +3,7 @@
 
 #include <zm/zm.h>
 #include <zeo/zeo_bv.h>
+#include <zm/zm_complex.h>
 #include <pedi2/pd_cz_vrt.h>
 #include <pedi2/pd_cz_hrz_u.h>
 #include <pedi2/pd_cz_hrz_w.h>
@@ -81,6 +82,7 @@ __EXPORT void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel, zVec2D 
 #define pdCZHrzUWCalcRegZMP(h,d,v,z) \
   zVec2DCreate( z, pdCZHrzUWCalcRegZMPU( h, d, v ), pdCZHrzUWCalcRegZMPW( h, d, v ) )
 __EXPORT void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D zmp, zVec2D acc);
+__EXPORT void pdCZHrzUWCalcZMPPhase(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel, zVec2D zmp, zComplex *pz);
 
 /* update method */
 __EXPORT void pdCZHrzUWUpdate(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel);

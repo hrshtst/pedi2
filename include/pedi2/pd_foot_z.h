@@ -1,7 +1,6 @@
 #ifndef __PD_FOOT_Z_H__
 #define __PD_FOOT_Z_H__
 
-#include <zm/zm_complex.h>
 #include <pedi2/pd_cz_hrz_uw.h>
 
 __BEGIN_DECLS

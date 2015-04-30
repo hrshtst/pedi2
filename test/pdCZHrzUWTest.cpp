@@ -290,6 +290,38 @@ TEST_F(pdCZHrzUWTest, CalcRegZMP)
   EXPECT_NEAR( 0.55, regzmp[pdW], 1e-12 );
 }
 
+TEST_F(pdCZHrzUWTest, CalcZMPPhase_1)
+{
+  zVec2D delta, vel, zmp;
+  zComplex pz;
+
+  pdCZVrtZeta( &vrt ) = 1;
+  pdCZHrzUWSetQ1W( &uw, 1 );
+  pdCZHrzUWSetQ2W( &uw, 1 );
+  zVec2DCreate( delta, 0, 0 );
+  zVec2DCreate( vel, 0, 0 );
+  zVec2DCreate( zmp, 0, 0 );
+  pdCZHrzUWCalcZMPPhase( &uw, delta, vel, zmp, &pz );
+  EXPECT_NEAR( 0, pz.re, 1e-12 );
+  EXPECT_NEAR( 0, pz.im, 1e-12 );
+}
+
+TEST_F(pdCZHrzUWTest, CalcZMPPhase_2)
+{
+  zVec2D delta, vel, zmp;
+  zComplex pz;
+
+  pdCZVrtZeta( &vrt ) = 2;
+  pdCZHrzUWSetQ1W( &uw, 1 );
+  pdCZHrzUWSetQ2W( &uw, 1 );
+  zVec2DCreate( delta, 0, 0.2 );
+  zVec2DCreate( vel, 0, 0.5 );
+  zVec2DCreate( zmp, 0, 0.1 );
+  pdCZHrzUWCalcZMPPhase( &uw, delta, vel, zmp, &pz );
+  EXPECT_NEAR( -0.1, pz.re, 1e-12 );
+  EXPECT_NEAR( -0.5, pz.im, 1e-12 );
+}
+
 TEST_F(pdCZHrzUWTest, UpdateVelocityFollow)
 {
   zVec2D delta, vel;

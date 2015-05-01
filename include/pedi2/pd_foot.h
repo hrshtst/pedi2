@@ -116,6 +116,7 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootXformUWtoXY(f,uw,xy) pdCZHrzXformUWtoXY( pdFootCZPtr(f), uw, xy )
 #define pdFootXformXYtoUW(f,xy,uw) pdCZHrzXformXYtoUW( pdFootCZPtr(f), xy, uw )
 __EXPORT void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr);
+__EXPORT void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp);
 
 __END_DECLS
 

@@ -89,3 +89,18 @@ void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
   pdFootZSetSR( pdFootZPtr(f), p, zListNum(sr) );
   zFree( p );
 }
+
+static void _pdFootUpdateSOL(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp, zAxis i, double dt);
+void _pdFootUpdateSOL(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp, zAxis i, double dt)
+{
+  refp->e[i] =
+      ( f->_sol._k[i]*dt*dt * pd->e[i] + ( f->_sol._c[i]*dt+2 ) * p->e[i] - f->_sol._old[i] ) / ( 1 + f->_sol._c[i]*dt + f->_sol._k[i]*dt*dt );
+  f->_sol._old[i] = p->e[i];
+}
+
+void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp)
+{
+  _pdFootUpdateSOL( f, p, pd, refp, zX, pdFootTimeStep(f) );
+  _pdFootUpdateSOL( f, p, pd, refp, zY, pdFootTimeStep(f) );
+  _pdFootUpdateSOL( f, p, pd, refp, zZ, pdFootTimeStep(f) );
+}

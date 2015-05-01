@@ -110,6 +110,13 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootSetTrZOld(f,old)    ( (f)->_sol._old[2] = (old) )
 #define pdFootSetMaxHeight(f,h)   pdFootZSetMaxHeight( pdFootZPtr(f), h )
 
+/* calculation method */
+#define pdFootRotUWtoXY(f,vuw,vxy) pdCZHrzRotUWtoXY( pdFootCZPtr(f), vuw, vxy )
+#define pdFootRotXYtoUW(f,vxy,vuw) pdCZHrzRotXYtoUW( pdFootCZPtr(f), vxy, vuw )
+#define pdFootXformUWtoXY(f,uw,xy) pdCZHrzXformUWtoXY( pdFootCZPtr(f), uw, xy )
+#define pdFootXformXYtoUW(f,xy,uw) pdCZHrzXformXYtoUW( pdFootCZPtr(f), xy, uw )
+__EXPORT void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr);
+
 __END_DECLS
 
 #endif /* __PD_FOOT_H__ */

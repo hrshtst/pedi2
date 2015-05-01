@@ -68,3 +68,24 @@ void pdFootDestroy(pdFoot *f)
   pdFootRefAttY( f ) = 0;
   pdFootRefAttZ( f ) = 0;
 }
+
+void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
+{
+  zVec3D *p, *pp;
+  zVec3DListCell *cp;
+  zVec2D xy, uw;
+
+  if( !( p = zAlloc( zVec3D, zListNum( sr ) ) ) ){
+    ZALLOCERROR();
+    zFree( p );
+    exit( EXIT_FAILURE );
+  }
+  pp = p;
+  zListForEach( sr, cp ){
+    zVec2DCreate( xy, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
+    pdFootXformXYtoUW( f, xy, uw );
+    zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
+  }
+  pdFootZSetSR( pdFootZPtr(f), p, zListNum(sr) );
+  zFree( p );
+}

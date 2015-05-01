@@ -104,3 +104,15 @@ void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp)
   _pdFootUpdateSOL( f, p, pd, refp, zY, pdFootTimeStep(f) );
   _pdFootUpdateSOL( f, p, pd, refp, zZ, pdFootTimeStep(f) );
 }
+
+void pdFootUpdate(pdFoot *f, zVec2D delta, zVec2D vel, zVec2D zmp, zVec3D *p, zVec3DList *sr)
+{
+  zVec2D xy;
+
+  pdFootXformSRXYtoUW( f, sr );
+  pdFootUWUpdate( pdFootUWPtr( f ), delta, vel );
+  pdFootZUpdate( pdFootZPtr( f ), delta, vel, zmp );
+  pdFootXformUWtoXY( f, pdFootUWRefPos( pdFootUWPtr( f ) ), xy );
+  pdFootSetDesPos( f, xy[zX], xy[zY], pdFootZRefZ( pdFootZPtr( f ) ) );
+  pdFootCalcRefPos( f, p, pdFootDesPos( f ), pdFootRefPos( f ) );
+}

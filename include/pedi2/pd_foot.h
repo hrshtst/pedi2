@@ -118,6 +118,9 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 __EXPORT void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr);
 __EXPORT void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp);
 
+/* update */
+__EXPORT void pdFootUpdate(pdFoot *f, zVec2D delta, zVec2D vel, zVec2D zmp, zVec3D *p, zVec3DList *sr);
+
 __END_DECLS
 
 #endif /* __PD_FOOT_H__ */

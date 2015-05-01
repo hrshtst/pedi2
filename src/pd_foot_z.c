@@ -107,3 +107,10 @@ double pdFootZCalcRefZ(pdFootZ *kf, double phase, zComplex *pz)
   dh = zComplexAbs(pz) / d * _sigma( pdFootZRho(kf) );
   return zCycloidY( 0, pdFootZMaxHeight(kf) * dh, phase );
 }
+
+void pdFootZUpdate(pdFootZ *fz, zVec2D delta, zVec2D vel, zVec2D zmp)
+{
+  pdFootZCalcZMPPhase( fz, delta, vel, zmp, &fz->pz );
+  fz->phase = pdFootZCalcFootPhase( fz, delta, &fz->pz );
+  fz->refz = pdFootZCalcRefZ( fz, fz->phase, &fz->pz );
+}

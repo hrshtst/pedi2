@@ -24,7 +24,7 @@ class pdFootZTest : public testing::Test {
     pdFootZSign( &lf ) = 0.5;
     zComplexCreate( pdFootZZMPPhase( &lf ), 10, 20 );
     pdFootZFootPhase( &lf ) = 30;
-    pdFootZRefHeight( &lf ) = 40;
+    pdFootZRefZ( &lf ) = 40;
     lf._sr_vert = dummy1;
     lf._vert_num = 50;
 
@@ -33,7 +33,7 @@ class pdFootZTest : public testing::Test {
     pdFootZSign( &rf ) = 0.5;
     zComplexCreate( pdFootZZMPPhase( &rf ), 10, 20 );
     pdFootZFootPhase( &rf ) = 30;
-    pdFootZRefHeight( &rf ) = 40;
+    pdFootZRefZ( &rf ) = 40;
     rf._sr_vert = dummy2;
     rf._vert_num = 50;
   }
@@ -58,7 +58,7 @@ TEST_F(pdFootZTest, Init)
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->im );
   EXPECT_EQ( 0, pdFootZFootPhase( &lf ) );
-  EXPECT_EQ( 0, pdFootZRefHeight( &lf ) );
+  EXPECT_EQ( 0, pdFootZRefZ( &lf ) );
 
   pdFootZInit( &rf, &czuw );
   EXPECT_EQ( &czuw, pdFootZCZPtr( &rf ) );
@@ -70,7 +70,7 @@ TEST_F(pdFootZTest, Init)
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->im );
   EXPECT_EQ( 0, pdFootZFootPhase( &rf ) );
-  EXPECT_EQ( 0, pdFootZRefHeight( &rf ) );
+  EXPECT_EQ( 0, pdFootZRefZ( &rf ) );
 }
 
 TEST_F(pdFootZTest, Destroy)
@@ -86,7 +86,7 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->im );
   EXPECT_EQ( 0, pdFootZFootPhase( &lf ) );
-  EXPECT_EQ( 0, pdFootZRefHeight( &lf ) );
+  EXPECT_EQ( 0, pdFootZRefZ( &lf ) );
 
   pdFootZInit( &rf, &czuw );
   pdFootZDestroy( &rf );
@@ -98,7 +98,7 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->im );
   EXPECT_EQ( 0, pdFootZFootPhase( &rf ) );
-  EXPECT_EQ( 0, pdFootZRefHeight( &rf ) );
+  EXPECT_EQ( 0, pdFootZRefZ( &rf ) );
 }
 
 TEST_F(pdFootZTest, ReferRho)

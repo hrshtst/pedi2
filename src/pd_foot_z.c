@@ -10,7 +10,7 @@ void pdFootZInit(pdFootZ *f, pdCZHrzUW *czuw)
   pdFootZSign( f ) = 0;
   zComplexClear( pdFootZZMPPhase( f ) );
   pdFootZFootPhase( f ) = 0;
-  pdFootZRefHeight( f ) = 0;
+  pdFootZRefZ( f ) = 0;
 }
 
 void pdFootZDestroy(pdFootZ *f)
@@ -23,7 +23,7 @@ void pdFootZDestroy(pdFootZ *f)
   pdFootZSign( f ) = 0;
   zComplexClear( pdFootZZMPPhase( f ) );
   pdFootZFootPhase( f ) = 0;
-  pdFootZRefHeight( f ) = 0;
+  pdFootZRefZ( f ) = 0;
 }
 
 void pdFootZSetSR(pdFootZ *f, zVec3D p[], int num)

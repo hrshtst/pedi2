@@ -31,7 +31,7 @@ __EXPORT void pdFootZDestroy(pdFootZ *fz);
 #define pdFootZSign(f)       (f)->_sign
 #define pdFootZZMPPhase(f)  ( &(f)->pz )
 #define pdFootZFootPhase(f) (f)->phase
-#define pdFootZRefHeight(f) (f)->refz
+#define pdFootZRefZ(f)      (f)->refz
 #define pdFootZRho(f)       pdCZHrzUWRho( pdFootZCZPtr(f) )
 #define pdFootZDist(f)      pdCZHrzUWDist( pdFootZCZPtr(f) )
 

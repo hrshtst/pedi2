@@ -522,3 +522,27 @@ TEST_F(pdFootTest, pdFootCalcRefPos)
   EXPECT_NEAR( 0.5, zVec3DElem( &p, zY ), 1e-12 );
   EXPECT_NEAR( 0.5, zVec3DElem( &p, zY ), 1e-12 );
 }
+
+TEST_F(pdFootTest, pdFootCalcRefAtt)
+{
+  zVec3D pd, refa;
+
+  zVec3DClear( &pd );
+  pdFootCalcRefAtt( &lf, &pd, &refa );
+  EXPECT_NEAR( 0, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( 0, zVec3DElem( &refa, zY ), 1e-12 );
+  EXPECT_NEAR( 0, zVec3DElem( &refa, zZ ), 1e-12 );
+
+  pdCZHrzSetTheta( &cz, zPI_2 );
+  pdFootCalcRefAtt( &lf, &pd, &refa );
+  EXPECT_NEAR( zPI_2, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zY ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zZ ), 1e-12 );
+
+  pdCZHrzSetTheta( &cz, zPI_2 );
+  pdFootUWPhi( pdFootUWPtr( &lf ) ) = zPI / 6.0;
+  pdFootCalcRefAtt( &lf, &pd, &refa );
+  EXPECT_NEAR( 2.0*zPI/3.0, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zY ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zZ ), 1e-12 );
+}

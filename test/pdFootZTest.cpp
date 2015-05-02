@@ -451,7 +451,7 @@ TEST_F(pdFootZTest, CalcRefZ_RhoIsNearlyZero)
   EXPECT_NEAR( 0, pdFootZCalcRefZ( &lf, phase, &pz ), 1e-12 );
 }
 
-TEST_F(pdFootZTest, Update)
+TEST_F(pdFootZTest, Update_SingleSupportLeftIsOn)
 {
   zVec3D v[4];
   zVec2D delta, vel, zmp;
@@ -472,23 +472,66 @@ TEST_F(pdFootZTest, Update)
   pdFootZSetMaxHeight( &lf, 0.8 );
   pdFootZSetMaxHeight( &rf, 0.8 );
 
-  // Now ZMP is out of the supporting region,
+  // Now ZMP is out of the left foot
   zVec2DCreate( delta, 0, 0.05 );
   zVec2DCreate( vel,   0, 0.05 );
   zVec2DCreate( zmp,   0, 0.07 );
-  pdFootZUpdate( &lf, delta, vel, zmp );
-  pdFootZUpdate( &rf, delta, vel, zmp );
+  pdFootZUpdate( &lf, &rf, delta, vel, zmp );
+  pdFootZUpdate( &rf, &lf, delta, vel, zmp );
   EXPECT_NEAR( 0, pdFootZFootPhase( &lf ), 1e-12 );
   EXPECT_NEAR( 0, pdFootZRefZ( &lf ), 1e-12 );
   EXPECT_NEAR( 0, pdFootZFootPhase( &rf ), 1e-12 );
   EXPECT_NEAR( 0, pdFootZRefZ( &rf ), 1e-12 );
 
-  // comes at the most leftward
+  // right foot can be lifted
   zVec2DCreate( delta, 0, 0.0 );
   zVec2DCreate( vel,   0, 0.0 );
   zVec2DCreate( zmp,   0, 0.125 );
-  pdFootZUpdate( &lf, delta, vel, zmp );
-  pdFootZUpdate( &rf, delta, vel, zmp );
+  pdFootZUpdate( &lf, &rf, delta, vel, zmp );
+  pdFootZUpdate( &rf, &lf, delta, vel, zmp );
+  EXPECT_NEAR( 0,   pdFootZFootPhase( &lf ), 1e-12 );
+  EXPECT_NEAR( 0,   pdFootZRefZ( &lf ), 1e-12 );
+  EXPECT_NEAR( 0.5, pdFootZFootPhase( &rf ), 1e-12 );
+  EXPECT_NEAR( 0.8, pdFootZRefZ( &rf ), 1e-12 );
+}
+
+TEST_F(pdFootZTest, Update_SingleSupportRightIsOn)
+{
+  zVec3D v[4];
+  zVec2D delta, vel, zmp;
+
+  // make convex hull of right foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, -0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, -0.15, 0.0 );
+  pdFootZSetSR( &lf, NULL, 0 );
+  pdFootZSetSR( &rf, v, 4 );
+  pdCZVrtZeta( &vrt ) = 2;
+  pdCZHrzUWSetQ1W( &czuw, 1 );
+  pdCZHrzUWSetQ2W( &czuw, 1 );
+  pdCZHrzUWSetRho( &czuw, 1 );
+  pdCZHrzUWSetDist( &czuw, 0.25 );
+  pdFootZSetMaxHeight( &lf, 0.8 );
+  pdFootZSetMaxHeight( &rf, 0.8 );
+
+  // Now ZMP is out of the right foot
+  zVec2DCreate( delta, 0, -0.05 );
+  zVec2DCreate( vel,   0, -0.05 );
+  zVec2DCreate( zmp,   0, -0.07 );
+  pdFootZUpdate( &lf, &rf, delta, vel, zmp );
+  pdFootZUpdate( &rf, &lf, delta, vel, zmp );
+  EXPECT_NEAR( 0, pdFootZFootPhase( &lf ), 1e-12 );
+  EXPECT_NEAR( 0, pdFootZRefZ( &lf ), 1e-12 );
+  EXPECT_NEAR( 0, pdFootZFootPhase( &rf ), 1e-12 );
+  EXPECT_NEAR( 0, pdFootZRefZ( &rf ), 1e-12 );
+  // left foot can be lifted
+  zVec2DCreate( delta, 0, 0.0 );
+  zVec2DCreate( vel,   0, 0.0 );
+  zVec2DCreate( zmp,   0, -0.125 );
+  pdFootZUpdate( &lf, &rf, delta, vel, zmp );
+  pdFootZUpdate( &rf, &lf, delta, vel, zmp );
   EXPECT_NEAR( 0.5, pdFootZFootPhase( &lf ), 1e-12 );
   EXPECT_NEAR( 0.8, pdFootZRefZ( &lf ), 1e-12 );
   EXPECT_NEAR( 0,   pdFootZFootPhase( &rf ), 1e-12 );

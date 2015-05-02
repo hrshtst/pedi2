@@ -46,7 +46,7 @@ __EXPORT double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zComplex *pz);
 __EXPORT double pdFootZCalcRefZ(pdFootZ *pf, double phase, zComplex *pz);
 
 /* update method */
-__EXPORT void pdFootZUpdate(pdFootZ *fz, zVec2D delta, zVec2D vel, zVec2D zmp);
+__EXPORT void pdFootZUpdate(pdFootZ *pf, pdFootZ *kf, zVec2D delta, zVec2D vel, zVec2D zmp);
 
 __END_DECLS
 

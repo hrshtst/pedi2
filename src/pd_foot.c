@@ -116,14 +116,30 @@ void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
   zVec3DCreate( refa, theta + phi, 0, 0 );
 }
 
-void pdFootUpdate(pdFoot *f, zVec2D delta, zVec2D vel, zVec2D zmp, zVec3D *p, zVec3DList *sr)
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec2D zmp, zVec3D *lfp, zVec3D *rfp, zVec3DList *lfsr, zVec3DList *rfsr)
 {
-  zVec2D xy;
+  zVec2D lfxy, rfxy;
 
-  pdFootXformSRXYtoUW( f, sr );
-  pdFootUWUpdate( pdFootUWPtr( f ), delta, vel );
-  /* pdFootZUpdate( pdFootZPtr( f ), delta, vel, zmp ); */
-  pdFootXformUWtoXY( f, pdFootUWRefPos( pdFootUWPtr( f ) ), xy );
-  pdFootSetDesPos( f, xy[zX], xy[zY], pdFootZRefZ( pdFootZPtr( f ) ) );
-  pdFootCalcRefPos( f, p, pdFootDesPos( f ), pdFootRefPos( f ) );
+  /* update left foot */
+  pdFootXformSRXYtoUW( lf, lfsr );
+  pdFootUWUpdate( pdFootUWPtr( lf ), delta, vel );
+  pdFootZUpdate( pdFootZPtr( lf ), pdFootZPtr( rf ), delta, vel, zmp );
+  pdFootXformUWtoXY( lf, pdFootUWRefPos( pdFootUWPtr( lf ) ), lfxy );
+  pdFootSetDesPos( lf, lfxy[zX], lfxy[zY], pdFootZRefZ( pdFootZPtr( lf ) ) );
+  if( !lfsr ){
+    /* update only when floating */
+    pdFootCalcRefPos( lf, lfp, pdFootDesPos( lf ), pdFootRefPos( lf ) );
+    pdFootCalcRefAtt( lf, pdFootDesPos( lf ), pdFootRefAtt( lf ) );
+  }
+  /* update right foot */
+  pdFootXformSRXYtoUW( rf, rfsr );
+  pdFootUWUpdate( pdFootUWPtr( rf ), delta, vel );
+  pdFootZUpdate( pdFootZPtr( rf ), pdFootZPtr( lf ), delta, vel, zmp );
+  pdFootXformUWtoXY( rf, pdFootUWRefPos( pdFootUWPtr( rf ) ), rfxy );
+  pdFootSetDesPos( rf, rfxy[zX], rfxy[zY], pdFootZRefZ( pdFootZPtr( rf ) ) );
+  if( !rfsr ){
+    /* update only when floating */
+    pdFootCalcRefPos( rf, rfp, pdFootDesPos( rf ), pdFootRefPos( rf ) );
+    pdFootCalcRefAtt( rf, pdFootDesPos( rf ), pdFootRefAtt( rf ) );
+  }
 }

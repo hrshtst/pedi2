@@ -497,6 +497,30 @@ TEST_F(pdFootTest, XformSRXYtoUW_2)
   EXPECT_NEAR( -1,             zVec3DElem(&sr_m_vert[2], zY), 1e-12 );
 }
 
+TEST_F(pdFootTest, XformSRXYtoUW_NULL)
+{
+  zVec3D sr_w_vert[3];
+  zVec3DList sr_w, sr_dummy;
+
+  // make a convex hull
+  zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
+  zVec3DCreate( &sr_w_vert[1], 4, 5, 0 );
+  zVec3DCreate( &sr_w_vert[2], 5, 1, 0 );
+  zCH2D( &sr_w, sr_w_vert, 3 );
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 4, 3 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/6 );
+
+  pdFootXformSRXYtoUW( &lf, &sr_w );
+  EXPECT_EQ( 3, pdFootZPtr(&lf)->_vert_num );
+
+  zListInit( &sr_dummy );
+  pdFootXformSRXYtoUW( &lf, &sr_dummy );
+  EXPECT_EQ( 0, pdFootZPtr(&lf)->_vert_num );
+
+  pdFootXformSRXYtoUW( &lf, NULL );
+  EXPECT_EQ( 0, pdFootZPtr(&lf)->_vert_num );
+}
+
 TEST_F(pdFootTest, pdFootCalcRefPos)
 {
   zVec3D p, pd, refp;

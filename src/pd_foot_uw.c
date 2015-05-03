@@ -46,11 +46,11 @@ void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, 
   zVec2DCreate( refpos, ud, wd );
 }
 
-void pdFootUWUpdate(pdFootUW *f, zVec2D delta, zVec2D vel)
+void pdFootUWUpdate(pdFootUW *kf, zVec2D delta, zVec2D vel)
 {
-  pdFootUWCalcRegZMP( f, delta, vel, pdFootUWRegZMP( f ) );
-  pdFootUWPhi( f ) = pdFootUWCalcPhi( f, delta, vel, pdFootUWRegZMP( f ) );
-  pdFootUWCalcRefPos( f, delta, vel, pdFootUWRegZMP( f ), pdFootUWRefPos( f ) );
+  pdFootUWCalcRegZMP( kf, delta, vel, pdFootUWRegZMP( kf ) );
+  pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, vel, pdFootUWRegZMP( kf ) );
+  pdFootUWCalcRefPos( kf, delta, vel, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ) );
 }
 
 void pdFootUWFWrite(FILE *fp, pdFootUW *f)

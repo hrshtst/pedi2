@@ -40,7 +40,7 @@ __EXPORT double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D 
 __EXPORT void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, zVec2D refpos);
 
 /* update method */
-__EXPORT void pdFootUWUpdate(pdFootUW *fuw, zVec2D delta, zVec2D vel);
+__EXPORT void pdFootUWUpdate(pdFootUW *kf, zVec2D delta, zVec2D vel);
 
 /* output method */
 __EXPORT void pdFootUWFWrite(FILE *fp, pdFootUW *fuw);

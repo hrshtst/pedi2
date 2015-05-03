@@ -12,6 +12,7 @@ typedef struct{
 
 /* c'tor and d'tor */
 void pdRobotInit(pdRobot *robot);
+void pdRobotLoad(pdRobot *robot, const char model[]);
 void pdRobotDestroy(pdRobot *robot);
 
 /* methods to get parameters */

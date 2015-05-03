@@ -36,3 +36,11 @@ TEST_F(pdRobotTest, Destroy)
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
 }
+
+TEST_F(pdRobotTest, Load)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ( 25, (int)rkChainNum( pdRobotChainPtr( &robot ) ) );
+}

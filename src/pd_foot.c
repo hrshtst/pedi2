@@ -143,3 +143,38 @@ void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec2D zmp, 
     pdFootCalcRefAtt( rf, pdFootDesPos( rf ), pdFootRefAtt( rf ) );
   }
 }
+
+void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)
+{
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "lf    x:%g,    y:%g,    z:%g\n", zVec3DElem(&lf->_p,zX), zVec3DElem(&lf->_p,zY), zVec3DElem(&lf->_p,zZ) );
+  fprintf( fp, "lf   xd:%g,   yd:%g,   zd:%g\n", zVec3DElem(&lf->_pd,zX), zVec3DElem(&lf->_pd,zY), zVec3DElem(&lf->_pd,zZ) );
+  fprintf( fp, "lf refx:%g, refy:%g, refz:%g\n", zVec3DElem(&lf->refp,zX), zVec3DElem(&lf->refp,zY), zVec3DElem(&lf->refp,zZ) );
+  fprintf( fp, "lf azim:%g, elev:%g, tilt:%g\n", zVec3DElem(&lf->_a,zX), zVec3DElem(&lf->_a,zY), zVec3DElem(&lf->_a,zZ) );
+  fprintf( fp, "lf desa:%g, dese:%g, dest:%g\n", zVec3DElem(&lf->_ad,zX), zVec3DElem(&lf->_ad,zY), zVec3DElem(&lf->_ad,zZ) );
+  fprintf( fp, "lf refa:%g, refe:%g, reft:%g\n", zVec3DElem(&lf->refa,zX), zVec3DElem(&lf->refa,zY), zVec3DElem(&lf->refa,zZ) );
+  fprintf( fp, "lf sign:%g, kappa:%g, dist:%g, phi:%g\n",
+           pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)), pdFootUWDist(pdFootUWPtr(lf)), pdFootUWPhi(pdFootUWPtr(lf)) );
+  fprintf( fp, "lf reguz:%g, regwz:%g\n", pdFootUWRegZMPU(pdFootUWPtr(lf)), pdFootUWRegZMPW(pdFootUWPtr(lf)) );
+  fprintf( fp, "lf refud:%g, refwd:%g\n", pdFootUWRefPosU(pdFootUWPtr(lf)), pdFootUWRefPosW(pdFootUWPtr(lf)) );
+  fprintf( fp, "lf sign:%g, h:%g, rho:%g, dist:%g\n",
+           pdFootZSign(pdFootZPtr(lf)), pdFootZMaxHeight(pdFootZPtr(lf)), pdFootZRho(pdFootZPtr(lf)), pdFootZDist(pdFootZPtr(lf)) );
+  fprintf( fp, "lf pz:" );zComplexFWrite( fp, pdFootZZMPPhase(pdFootZPtr(lf)) );
+  fprintf( fp, ", phase:%g, zd:%g\n", pdFootZFootPhase(pdFootZPtr(lf)), pdFootZRefZ(pdFootZPtr(lf)) );
+  fprintf( fp, "--\n" );
+  fprintf( fp, "rf    x:%g,    y:%g,    z:%g\n", zVec3DElem(&rf->_p,zX), zVec3DElem(&rf->_p,zY), zVec3DElem(&rf->_p,zZ) );
+  fprintf( fp, "rf   xd:%g,   yd:%g,   zd:%g\n", zVec3DElem(&rf->_pd,zX), zVec3DElem(&rf->_pd,zY), zVec3DElem(&rf->_pd,zZ) );
+  fprintf( fp, "rf refx:%g, refy:%g, refz:%g\n", zVec3DElem(&rf->refp,zX), zVec3DElem(&rf->refp,zY), zVec3DElem(&rf->refp,zZ) );
+  fprintf( fp, "rf azim:%g, elev:%g, tilt:%g\n", zVec3DElem(&rf->_a,zX), zVec3DElem(&rf->_a,zY), zVec3DElem(&rf->_a,zZ) );
+  fprintf( fp, "rf desa:%g, dese:%g, dest:%g\n", zVec3DElem(&rf->_ad,zX), zVec3DElem(&rf->_ad,zY), zVec3DElem(&rf->_ad,zZ) );
+  fprintf( fp, "rf refa:%g, refe:%g, reft:%g\n", zVec3DElem(&rf->refa,zX), zVec3DElem(&rf->refa,zY), zVec3DElem(&rf->refa,zZ) );
+  fprintf( fp, "rf sign:%g, kappa:%g, dist:%g, phi:%g\n",
+           pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)), pdFootUWDist(pdFootUWPtr(rf)), pdFootUWPhi(pdFootUWPtr(rf)) );
+  fprintf( fp, "rf reguz:%g, regwz:%g\n", pdFootUWRegZMPU(pdFootUWPtr(rf)), pdFootUWRegZMPW(pdFootUWPtr(rf)) );
+  fprintf( fp, "rf refud:%g, refwd:%g\n", pdFootUWRefPosU(pdFootUWPtr(rf)), pdFootUWRefPosW(pdFootUWPtr(rf)) );
+  fprintf( fp, "rf sign:%g, h:%g, rho:%g, dist:%g\n",
+           pdFootZSign(pdFootZPtr(rf)), pdFootZMaxHeight(pdFootZPtr(rf)), pdFootZRho(pdFootZPtr(rf)), pdFootZDist(pdFootZPtr(rf)) );
+  fprintf( fp, "rf pz:" );zComplexFWrite( fp, pdFootZZMPPhase(pdFootZPtr(rf)) );
+  fprintf( fp, ", phase:%g, zd:%g\n", pdFootZFootPhase(pdFootZPtr(rf)), pdFootZRefZ(pdFootZPtr(rf)) );
+}

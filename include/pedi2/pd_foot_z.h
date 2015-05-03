@@ -48,6 +48,10 @@ __EXPORT double pdFootZCalcRefZ(pdFootZ *pf, double phase, zComplex *pz);
 /* update method */
 __EXPORT void pdFootZUpdate(pdFootZ *pf, pdFootZ *kf, zVec2D delta, zVec2D vel, zVec2D zmp);
 
+/* output method */
+__EXPORT void pdFootZFWrite(FILE *fp, pdFootZ *fz);
+#define pdFootZWrite(f) pdFootZFWrite( stdout, f )
+
 __END_DECLS
 
 #endif /* __PD_FOOT_Z_H__ */

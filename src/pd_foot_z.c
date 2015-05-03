@@ -114,3 +114,13 @@ void pdFootZUpdate(pdFootZ *pf, pdFootZ *kf, zVec2D delta, zVec2D vel, zVec2D zm
   kf->phase = pdFootZCalcFootPhase( pf, delta, &pf->pz );
   kf->refz = pdFootZCalcRefZ( kf, kf->phase, &pf->pz );
 }
+
+void pdFootZFWrite(FILE *fp, pdFootZ *f)
+{
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "sign:%g, h:%g, rho:%g, dist:%g\n",
+           pdFootZSign(f), pdFootZMaxHeight(f), pdFootZRho(f), pdFootZDist(f) );
+  fprintf( fp, "pz:" );zComplexFWrite( fp, pdFootZZMPPhase(f) );
+  fprintf( fp, ", phase:%g, refz:%g\n", pdFootZFootPhase(f), pdFootZRefZ(f) );
+}

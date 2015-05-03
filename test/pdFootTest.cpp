@@ -547,6 +547,32 @@ TEST_F(pdFootTest, pdFootCalcRefPos)
   EXPECT_NEAR( 0.5, zVec3DElem( &p, zY ), 1e-12 );
 }
 
+TEST_F(pdFootTest, pdFootCalcRefPos_2)
+{
+  zVec3D p, pd, refp;
+  int i;
+
+  pdFootSetTimeStep( &lf, 0.01 );
+  zVec3DCreate( &p, 0.1, 0.1, 0.1 );
+  zVec3DCreate( &pd, 0.1, 0.1, 0.1 );
+  pdFootSetTrXK( &lf, 7000 );
+  pdFootSetTrXC( &lf, 200 );
+  pdFootSetTrXOld( &lf, 0 );
+  pdFootSetTrYK( &lf, 7000 );
+  pdFootSetTrYC( &lf, 200 );
+  pdFootSetTrYOld( &lf, 0 );
+  pdFootSetTrZK( &lf, 7000 );
+  pdFootSetTrZC( &lf, 200 );
+  pdFootSetTrZOld( &lf, 0 );
+  for( i=0; i<100; i++ ){
+    pdFootCalcRefPos( &lf, &p, &pd, &refp );
+    zVec3DCopy( &refp, &p );
+  }
+  EXPECT_NEAR( 0.1, zVec3DElem( &p, zX ), 1e-12 );
+  EXPECT_NEAR( 0.1, zVec3DElem( &p, zY ), 1e-12 );
+  EXPECT_NEAR( 0.1, zVec3DElem( &p, zY ), 1e-12 );
+}
+
 TEST_F(pdFootTest, pdFootCalcRefAtt)
 {
   zVec3D pd, refa;

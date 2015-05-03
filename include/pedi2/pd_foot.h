@@ -140,7 +140,8 @@ __EXPORT void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp);
 __EXPORT void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa);
 
 /* update */
-__EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec2D zmp, zVec3D *lfp, zVec3D *rfp, zVec3DList *lfsr, zVec3DList *rfsr);
+__EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3DList *lfsr, zVec3DList *rfsr);
+
 /* output */
 __EXPORT void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);
 #define pdFootWrite(lf,rf) pdFootFWrite( stdout, lf, rf )

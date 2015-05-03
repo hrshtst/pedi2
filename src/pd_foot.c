@@ -75,19 +75,24 @@ void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
   zVec3DListCell *cp;
   zVec2D xy, uw;
 
-  if( !( p = zAlloc( zVec3D, zListNum( sr ) ) ) ){
-    ZALLOCERROR();
+  if( !sr || zListNum( sr ) == 0 ){
+    pdFootZSetSR( pdFootZPtr(f), NULL, 0 );
+    return;
+  } else {
+    if( !( p = zAlloc( zVec3D, zListNum( sr ) ) ) ){
+      ZALLOCERROR();
+      zFree( p );
+      exit( EXIT_FAILURE );
+    }
+    pp = p;
+    zListForEach( sr, cp ){
+      zVec2DCreate( xy, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
+      pdFootXformXYtoUW( f, xy, uw );
+      zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
+    }
+    pdFootZSetSR( pdFootZPtr(f), p, zListNum(sr) );
     zFree( p );
-    exit( EXIT_FAILURE );
   }
-  pp = p;
-  zListForEach( sr, cp ){
-    zVec2DCreate( xy, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
-    pdFootXformXYtoUW( f, xy, uw );
-    zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
-  }
-  pdFootZSetSR( pdFootZPtr(f), p, zListNum(sr) );
-  zFree( p );
 }
 
 static void _pdFootUpdateSOL(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp, zAxis i, double dt);
@@ -114,34 +119,47 @@ void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
   /* rotational angle of foot w.r.t moving frame */
   phi = pdFootUWPhi( pdFootUWPtr( f ) );
   zVec3DCreate( refa, theta + phi, 0, 0 );
+  /* zVec3DCreate( refa, ( theta + zPI_2 ) + phi, 0, 0 ); */
 }
 
-void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec2D zmp, zVec3D *lfp, zVec3D *rfp, zVec3DList *lfsr, zVec3DList *rfsr)
+void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3DList *pfsr)
 {
-  zVec2D lfxy, rfxy;
+  zVec2D xy;
+  zVec2D zmpxy, zmpuw;
 
-  /* update left foot */
-  pdFootXformSRXYtoUW( lf, lfsr );
-  pdFootUWUpdate( pdFootUWPtr( lf ), delta, vel );
-  pdFootZUpdate( pdFootZPtr( lf ), pdFootZPtr( rf ), delta, vel, zmp );
-  pdFootXformUWtoXY( lf, pdFootUWRefPos( pdFootUWPtr( lf ) ), lfxy );
-  pdFootSetDesPos( lf, lfxy[zX], lfxy[zY], pdFootZRefZ( pdFootZPtr( lf ) ) );
-  if( !lfsr ){
-    /* update only when floating */
-    pdFootCalcRefPos( lf, lfp, pdFootDesPos( lf ), pdFootRefPos( lf ) );
-    pdFootCalcRefAtt( lf, pdFootDesPos( lf ), pdFootRefAtt( lf ) );
+  /* world frame -> moving frame */
+  zVec2DCreate( zmpxy, zVec3DElem(zmp,zX), zVec3DElem(zmp,zY) );
+  pdFootXformXYtoUW( pf, zmpxy, zmpuw );
+  pdFootXformSRXYtoUW( pf, pfsr );
+  /* update desired position */
+  pdFootUWUpdate( pdFootUWPtr( kf ), delta, vel );
+  pdFootZUpdate( pdFootZPtr( pf ), pdFootZPtr( kf ), delta, vel, zmpuw );
+  /* moving frame -> world frame */
+  pdFootXformUWtoXY( kf, pdFootUWRefPos( pdFootUWPtr( kf ) ), xy );
+  /* set desired position */
+  pdFootSetDesPos( kf, xy[zX], xy[zY], pdFootZRefZ( pdFootZPtr( kf ) ) );
+}
+
+void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3DList *kfsr)
+{
+  /* update current position */
+  pdFootSetPosVec( kf, kfp );
+  /* update referential position */
+  if( !kfsr || pdFootDesPosZ(kf) > 0 || pdFootRefPosZ(kf) > 0 ){
+    pdFootCalcRefPos( kf, pdFootPos( kf ), pdFootDesPos( kf ), pdFootRefPos( kf ) );
+    pdFootCalcRefAtt( kf, pdFootDesPos( kf ), pdFootRefAtt( kf ) );
+  } else {
+    zVec3DCopy( pdFootPos( kf ), pdFootRefPos( kf ) );
+    zVec3DCopy( pdFootAtt( kf ), pdFootRefAtt( kf ) );
   }
-  /* update right foot */
-  pdFootXformSRXYtoUW( rf, rfsr );
-  pdFootUWUpdate( pdFootUWPtr( rf ), delta, vel );
-  pdFootZUpdate( pdFootZPtr( rf ), pdFootZPtr( lf ), delta, vel, zmp );
-  pdFootXformUWtoXY( rf, pdFootUWRefPos( pdFootUWPtr( rf ) ), rfxy );
-  pdFootSetDesPos( rf, rfxy[zX], rfxy[zY], pdFootZRefZ( pdFootZPtr( rf ) ) );
-  if( !rfsr ){
-    /* update only when floating */
-    pdFootCalcRefPos( rf, rfp, pdFootDesPos( rf ), pdFootRefPos( rf ) );
-    pdFootCalcRefAtt( rf, pdFootDesPos( rf ), pdFootRefAtt( rf ) );
-  }
+}
+
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3DList *lfsr, zVec3DList *rfsr)
+{
+  _pdFootDesPosUpdate( lf, rf, delta, vel, zmp, rfsr );
+  _pdFootDesPosUpdate( rf, lf, delta, vel, zmp, lfsr );
+  _pdFootRefPosUpdate( lf, lfp, lfsr );
+  _pdFootRefPosUpdate( rf, rfp, rfsr );
 }
 
 void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)

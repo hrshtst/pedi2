@@ -99,6 +99,7 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootSetDesAttY(f,y)     zVec3DSetElem( pdFootDesAtt(f), zY, y )
 #define pdFootSetDesAttZ(f,z)     zVec3DSetElem( pdFootDesAtt(f), zZ, z )
 #define pdFootSetSR(f,sr)         ( (f)->_sr = (sr) )
+#define pdFootSetMaxHeight(f,h)   pdFootZSetMaxHeight( pdFootZPtr(f), h )
 #define pdFootSetTrXK(f,k)        ( (f)->_sol._k[0] = (k) )
 #define pdFootSetTrXC(f,c)        ( (f)->_sol._c[0] = (c) )
 #define pdFootSetTrXOld(f,old)    ( (f)->_sol._old[0] = (old) )
@@ -108,7 +109,26 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootSetTrZK(f,k)        ( (f)->_sol._k[2] = (k) )
 #define pdFootSetTrZC(f,c)        ( (f)->_sol._c[2] = (c) )
 #define pdFootSetTrZOld(f,old)    ( (f)->_sol._old[2] = (old) )
-#define pdFootSetMaxHeight(f,h)   pdFootZSetMaxHeight( pdFootZPtr(f), h )
+#define pdFootSetTrK(f,x,y,z) do{ \
+  pdFootSetTrXK( f, x ); \
+  pdFootSetTrYK( f, y ); \
+  pdFootSetTrZK( f, z ); \
+} while(0)
+#define pdFootSetTrC(f,x,y,z) do{ \
+  pdFootSetTrXC( f, x ); \
+  pdFootSetTrYC( f, y ); \
+  pdFootSetTrZC( f, z ); \
+} while(0)
+#define pdFootSetTrOld(f,x,y,z) do{ \
+  pdFootSetTrXOld( f, x ); \
+  pdFootSetTrYOld( f, y ); \
+  pdFootSetTrZOld( f, z ); \
+} while(0)
+#define pdFootSetTrOldVec(f,v) do{ \
+  pdFootSetTrXOld( f, zVec3DElem( v, zX ) ); \
+  pdFootSetTrYOld( f, zVec3DElem( v, zY ) ); \
+  pdFootSetTrZOld( f, zVec3DElem( v, zZ ) ); \
+} while(0)
 
 /* calculation method */
 #define pdFootRotUWtoXY(f,vuw,vxy) pdCZHrzRotUWtoXY( pdFootCZPtr(f), vuw, vxy )

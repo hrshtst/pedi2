@@ -31,3 +31,27 @@ void pdRobotDestroy(pdRobot *robot)
   rkIKDestroy( pdRobotIKPtr( robot ) );
   rkChainDestroy( pdRobotChainPtr( robot ) );
 }
+
+void pdRobotSolveIK(pdRobot *robot)
+{
+  rkIKCell *cell[6];
+  int i;
+  zVec3D v;
+
+  for( i=0; i<6; i++ )
+    cell[i] = rkIKFindCell( pdRobotIKPtr(robot), i );
+  rkIKDeactivate( &robot->_ik );
+  zVec3DCreate( &v, 0.0, 0.0, 0.26 );
+  rkIKCellSetRefVec( cell[0], &v );
+  zVec3DCreate( &v, 0.0, 0.0, 0.0 );
+  rkIKCellSetRefVec( cell[1], &v );
+  zVec3DCreate( &v, 0.0, 0.042, 0.0 );
+  rkIKCellSetRefVec( cell[2], &v );
+  zVec3DCreate( &v, 0.0, 0.0, 0.0 );
+  rkIKCellSetRefVec( cell[3], &v );
+  zVec3DCreate( &v, 0.0, -0.042, 0.0 );
+  rkIKCellSetRefVec( cell[4], &v );
+  zVec3DCreate( &v, 0.0, 0.0, 0.0 );
+  rkIKCellSetRefVec( cell[5], &v );
+  rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, 0 );
+}

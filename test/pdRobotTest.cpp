@@ -1,6 +1,12 @@
 #include "gtest/gtest.h"
 #include <pedi2/pd_robot.h>
 
+const int MIGHTY_BODY_ID = 0;
+const int MIGHTY_LH_ID = 5;
+const int MIGHTY_LF_ID = 12;
+const int MIGHTY_RH_ID = 17;
+const int MIGHTY_RF_ID = 24;
+
 class pdRobotTest : public testing::Test {
  protected:
   virtual void SetUp() {
@@ -66,4 +72,43 @@ TEST_F(pdRobotTest, JointDis)
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 0 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 1 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
+}
+
+#define GTEST_TOL 1e-12
+TEST_F(pdRobotTest, SolveIK)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D com_pos, lf_pos, rf_pos;
+  zVec3D base_att, lf_att, rf_att;
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
+  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+  pdRobotSolveIK( &robot );
+  EXPECT_NEAR( 0.0, rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[0], GTEST_TOL );
+  EXPECT_NEAR( 0.0, rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[1], GTEST_TOL );
+  EXPECT_NEAR( 0.26, rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[2], GTEST_TOL );
+  EXPECT_NEAR( 0.0, rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LF_ID )->e[0], GTEST_TOL );
+  EXPECT_NEAR( 0.042, rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LF_ID )->e[1], GTEST_TOL );
+  EXPECT_NEAR( 0.0, rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LF_ID )->e[2], GTEST_TOL );
+  EXPECT_NEAR( 0.0, rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RF_ID )->e[0], GTEST_TOL );
+  EXPECT_NEAR( -0.042, rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RF_ID )->e[1], GTEST_TOL );
+  EXPECT_NEAR( 0.0, rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RF_ID )->e[2], GTEST_TOL );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_BODY_ID ), &v);
+  EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL );
+  EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL );
+  EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_LF_ID ), &v);
+  EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL );
+  EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL );
+  EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_RF_ID ), &v);
+  EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL );
+  EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL );
+  EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL );
 }

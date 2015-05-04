@@ -20,6 +20,9 @@ void pdRobotDestroy(pdRobot *robot);
 #define pdRobotChainPtr(r) ( &(r)->_chain )
 #define pdRobotIKPtr(r)    ( &(r)->_ik )
 
+/* methods to solve IK */
+__EXPORT void pdRobotSolveIK(pdRobot *robot);
+
 #define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )
 #define pdRobotJointDis(r)  (r)->_dis
 

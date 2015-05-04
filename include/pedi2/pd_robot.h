@@ -8,6 +8,7 @@ __BEGIN_DECLS
 typedef struct{
   rkChain _chain;    /* robot kinematics/dynamics model */
   rkIK _ik;          /* IK solver */
+  zVec _dis;         /* displacement vector */
 } pdRobot;
 
 /* c'tor and d'tor */
@@ -18,6 +19,9 @@ void pdRobotDestroy(pdRobot *robot);
 /* methods to get parameters */
 #define pdRobotChainPtr(r) ( &(r)->_chain )
 #define pdRobotIKPtr(r)    ( &(r)->_ik )
+
+#define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )
+#define pdRobotJointDis(r)  (r)->_dis
 
 __END_DECLS
 

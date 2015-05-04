@@ -28,6 +28,8 @@ TEST_F(pdRobotTest, Init)
   pdRobotInit( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
+  EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
+  EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
 }
 
 TEST_F(pdRobotTest, Destroy)
@@ -35,6 +37,8 @@ TEST_F(pdRobotTest, Destroy)
   SetVacuousPrm();
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
+  EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
+  destroy_flag = true;
 }
 
 TEST_F(pdRobotTest, Load)
@@ -43,4 +47,23 @@ TEST_F(pdRobotTest, Load)
 
   pdRobotLoad( &robot, model );
   EXPECT_EQ( 25, (int)rkChainNum( pdRobotChainPtr( &robot ) ) );
+}
+
+TEST_F(pdRobotTest, JointSize)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
+}
+
+TEST_F(pdRobotTest, JointDis)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
+  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 0 ), GTEST_TOL );
+  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 1 ), GTEST_TOL );
+  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
 }

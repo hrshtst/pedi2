@@ -22,6 +22,7 @@ class pdRobotTest : public testing::Test {
     pdRobotChainPtr( &robot )->mass = 10000;
     rkChainReadFile( &robot._chain, (char *)"model/dummy.zkc" );
     rkIKCreate( &robot._ik, &robot._chain );
+    robot._num_cell = 100;
   };
 
   bool destroy_flag;
@@ -36,6 +37,8 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
+  EXPECT_EQ( 0, robot._num_cell );
+  EXPECT_EQ( NULL, robot._cell );
 }
 
 TEST_F(pdRobotTest, Destroy)
@@ -44,6 +47,8 @@ TEST_F(pdRobotTest, Destroy)
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
+  EXPECT_EQ( 0, robot._num_cell );
+  EXPECT_EQ( NULL, robot._cell );
   destroy_flag = true;
 }
 
@@ -72,6 +77,22 @@ TEST_F(pdRobotTest, JointDis)
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 0 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 1 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
+}
+
+TEST_F(pdRobotTest, CellNum)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ( 10, robot._num_cell );
+}
+
+TEST_F(pdRobotTest, CellNum_2)
+{
+  char model[] = "model/mighty2.zkc";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ( 6, robot._num_cell );
 }
 
 #define GTEST_TOL 1e-12

@@ -4,6 +4,8 @@ void pdRobotInit(pdRobot *robot)
 {
   rkChainInit( pdRobotChainPtr( robot ) );
   pdRobotJointDis( robot ) = NULL;
+  robot->_cell = NULL;
+  robot->_num_cell = 0;
 }
 
 void pdRobotLoad(pdRobot *robot, const char model_file[])
@@ -19,6 +21,7 @@ void pdRobotLoad(pdRobot *robot, const char model_file[])
     exit( EXIT_FAILURE );
   if( !rkIKConfReadFile( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ), (char *) model_file ) )
     exit( EXIT_FAILURE );
+  robot->_num_cell = zListNum( &pdRobotIKPtr( robot )->clist );
 
   /* joint displacement vector */
   if( !( pdRobotJointDis( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) )
@@ -28,6 +31,8 @@ void pdRobotLoad(pdRobot *robot, const char model_file[])
 void pdRobotDestroy(pdRobot *robot)
 {
   zVecFree( pdRobotJointDis( robot ) );
+  zFree( robot->_cell );
+  robot->_num_cell = 0;
   rkIKDestroy( pdRobotIKPtr( robot ) );
   rkChainDestroy( pdRobotChainPtr( robot ) );
 }

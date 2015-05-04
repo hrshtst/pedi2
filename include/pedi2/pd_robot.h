@@ -8,6 +8,8 @@ __BEGIN_DECLS
 typedef struct{
   rkChain _chain;    /* robot kinematics/dynamics model */
   rkIK _ik;          /* IK solver */
+  rkIKCell **_cell;  /* IK cell */
+  int _num_cell;     /* number of IK cell */
   zVec _dis;         /* displacement vector */
 } pdRobot;
 

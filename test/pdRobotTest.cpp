@@ -6,6 +6,8 @@ const int MIGHTY_LH_ID = 5;
 const int MIGHTY_LF_ID = 12;
 const int MIGHTY_RH_ID = 17;
 const int MIGHTY_RF_ID = 24;
+#define GTEST_TOL 1e-12
+#define GTEST_TOL_LOOSE 1e-04
 
 class pdRobotTest : public testing::Test {
  protected:
@@ -39,6 +41,11 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_EQ( 0, robot._num_cell );
   EXPECT_EQ( NULL, robot._cell );
+  EXPECT_EQ( -1, robot._base_id );
+  EXPECT_EQ( -1, robot._lf_id );
+  EXPECT_EQ( -1, robot._rf_id );
+  EXPECT_EQ( -1, robot._lh_id );
+  EXPECT_EQ( -1, robot._rh_id );
 }
 
 TEST_F(pdRobotTest, Destroy)
@@ -109,7 +116,7 @@ TEST_F(pdRobotTest, Load_CheckCell)
   EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
 }
 
-TEST_F(pdRobotTest, Load_CheckCell_2)
+TEST_F(pdRobotTest, DISABLED_Load_CheckCell_2)
 {
   char model[] = "model/mighty2.zkc";
 
@@ -117,7 +124,114 @@ TEST_F(pdRobotTest, Load_CheckCell_2)
   EXPECT_EQ( 6, robot._num_cell );
 }
 
-#define GTEST_TOL 1e-12
+TEST_F(pdRobotTest, Load_AllocCellPtr)
+{
+  char model[] = "model/mighty.zkc";
+  rkIKCell *cp;
+
+  pdRobotLoad( &robot, model );
+  cp = zListTail( &pdRobotIKPtr(&robot)->clist ); // 0
+  EXPECT_EQ( cp, robot._cell[0] );
+  cp = zListCellNext( cp );     // 1
+  EXPECT_EQ( cp, robot._cell[1] );
+  cp = zListCellNext( cp );     // 2
+  EXPECT_EQ( cp, robot._cell[2] );
+  cp = zListCellNext( cp );     // 3
+  cp = zListCellNext( cp );     // 4
+  cp = zListCellNext( cp );     // 5
+  cp = zListCellNext( cp );     // 6
+  cp = zListCellNext( cp );     // 7
+  cp = zListCellNext( cp );     // 8
+  cp = zListCellNext( cp );     // 9
+  EXPECT_EQ( cp, robot._cell[9] );
+}
+
+TEST_F(pdRobotTest, Load_CheckID)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ(  0, robot._base_id );
+  EXPECT_EQ( 12, robot._lf_id );
+  EXPECT_EQ( 24, robot._rf_id );
+  EXPECT_EQ(  5, robot._lh_id );
+  EXPECT_EQ( 17, robot._rh_id );
+}
+
+TEST_F(pdRobotTest, Load_InitRefVec)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D *v;
+
+  pdRobotLoad( &robot, model );
+  v = robot._ref_vec;
+  // COM pos
+  EXPECT_NEAR( 0.02961612673, zVec3DElem( &v[0], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0003066383315, zVec3DElem( &v[0], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.2928640259, zVec3DElem( &v[0], zZ ), GTEST_TOL_LOOSE );
+  // base att
+  EXPECT_NEAR( 0, zVec3DElem( &v[1], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[1], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[1], zZ ), GTEST_TOL_LOOSE );
+  // left foot pos
+  EXPECT_NEAR( 0.034, zVec3DElem( &v[2], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.042, zVec3DElem( &v[2], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[2], zZ ), GTEST_TOL_LOOSE );
+  // left foot att
+  EXPECT_NEAR( 0, zVec3DElem( &v[3], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[3], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[3], zZ ), GTEST_TOL_LOOSE );
+  // right foot pos
+  EXPECT_NEAR( 0.034, zVec3DElem( &v[4], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.042, zVec3DElem( &v[4], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[4], zZ ), GTEST_TOL_LOOSE );
+  // right foot att
+  EXPECT_NEAR( 0, zVec3DElem( &v[5], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[5], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[5], zZ ), GTEST_TOL_LOOSE );
+  // left hand pos
+  EXPECT_NEAR( 0.039, zVec3DElem( &v[6], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.13019468, zVec3DElem( &v[6], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.28642462, zVec3DElem( &v[6], zZ ), GTEST_TOL_LOOSE );
+  // left hand att
+  EXPECT_NEAR( 0, zVec3DElem( &v[7], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[7], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[7], zZ ), GTEST_TOL_LOOSE );
+  // right hand pos
+  EXPECT_NEAR( 0.039, zVec3DElem( &v[8], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.13019468, zVec3DElem( &v[8], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.28642462, zVec3DElem( &v[8], zZ ), GTEST_TOL_LOOSE );
+  // right hand att
+  EXPECT_NEAR( 0, zVec3DElem( &v[9], zX ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[9], zY ), GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0, zVec3DElem( &v[9], zZ ), GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, Load_FileError)
+{
+  rkIKCreate( pdRobotIKPtr( &robot ), pdRobotChainPtr( &robot ) );
+  EXPECT_FALSE( pdRobotLoad( &robot, "hoge.zkc" ) );
+  destroy_flag = true;
+}
+
+TEST_F(pdRobotTest, Load_NotEnoughConstraintsError)
+{
+  EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty2.zkc" ) );
+  destroy_flag = true;
+}
+
+TEST_F(pdRobotTest, Load_LinkIDMismatchError)
+{
+  EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty3.zkc" ) );
+  destroy_flag = true;
+}
+
+TEST_F(pdRobotTest, Load_NotImplementedError)
+{
+  EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty4.zkc" ) );
+  destroy_flag = true;
+}
+
 TEST_F(pdRobotTest, SolveIK)
 {
   char model[] = "model/mighty.zkc";

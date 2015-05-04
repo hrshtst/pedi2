@@ -79,15 +79,37 @@ TEST_F(pdRobotTest, JointDis)
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
 }
 
-TEST_F(pdRobotTest, CellNum)
+TEST_F(pdRobotTest, Load_CheckCell)
 {
   char model[] = "model/mighty.zkc";
+  rkIKCell *cp;
 
   pdRobotLoad( &robot, model );
   EXPECT_EQ( 10, robot._num_cell );
+  cp = zListTail( &pdRobotIKPtr(&robot)->clist ); // 0
+  EXPECT_EQ( rkIKJacobiCOM, cp->data._cmat_fp );
+  EXPECT_EQ( 0, cp->data.id );
+  EXPECT_EQ( 0, cp->data.attr.id );
+  cp = zListCellNext( cp );     // 1
+  EXPECT_EQ( rkIKJacobiLinkWldAng, cp->data._cmat_fp );
+  EXPECT_EQ( 1, cp->data.id );
+  EXPECT_EQ( MIGHTY_BODY_ID, cp->data.attr.id );
+  cp = zListCellNext( cp );     // 2
+  EXPECT_EQ( rkIKJacobiLinkWldLin, cp->data._cmat_fp );
+  EXPECT_EQ( 2, cp->data.id );
+  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
+  cp = zListCellNext( cp );     // 3
+  cp = zListCellNext( cp );     // 4
+  cp = zListCellNext( cp );     // 5
+  cp = zListCellNext( cp );     // 6
+  cp = zListCellNext( cp );     // 7
+  cp = zListCellNext( cp );     // 8
+  EXPECT_EQ( rkIKJacobiLinkWldLin, cp->data._cmat_fp );
+  EXPECT_EQ( 8, cp->data.id );
+  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
 }
 
-TEST_F(pdRobotTest, CellNum_2)
+TEST_F(pdRobotTest, Load_CheckCell_2)
 {
   char model[] = "model/mighty2.zkc";
 

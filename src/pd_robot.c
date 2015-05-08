@@ -13,6 +13,9 @@ void pdRobotInit(pdRobot *robot)
   robot->_rf_id = -1;
   robot->_lh_id = -1;
   robot->_rh_id = -1;
+  robot->_sr_lf_vert = NULL;
+  robot->_sr_rf_vert = NULL;
+  robot->_sr_vert = NULL;
 }
 
 int _pdRobotCheckLinkID(pdRobot *robot, pdRobotIKCellID pos_id, pdRobotIKCellID att_id )
@@ -110,6 +113,9 @@ bool _pdRobotInitRefVec(pdRobot *robot)
 bool pdRobotLoad(pdRobot *robot, const char model_file[])
 {
   register int i;
+  rkLink *foot;
+  zShape3D *sole;
+  int n_vert_lf, n_vert_rf;
 
   /* load robot model file */
   if( !rkChainReadFile( pdRobotChainPtr( robot ), (char *)model_file ) ){
@@ -139,6 +145,23 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
   if( !_pdRobotInitRefVec( robot ) )
     goto ERROR;
 
+  /* vertices of supporting region */
+  /* left foot */
+  foot = rkChainLink( pdRobotChainPtr(robot), pdRobotLFID(robot) );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  n_vert_lf = zShape3DVertNum( sole );
+  if( !( robot->_sr_lf_vert = zAlloc( zVec3D, n_vert_lf ) ) )
+    goto ERROR;
+  /* right foot */
+  foot = rkChainLink( pdRobotChainPtr(robot), pdRobotRFID(robot) );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  n_vert_rf = zShape3DVertNum( sole );
+  if( !( robot->_sr_rf_vert = zAlloc( zVec3D, n_vert_rf ) ) )
+    goto ERROR;
+  /* both feet */
+  if( !( robot->_sr_vert = zAlloc( zVec3D, n_vert_lf + n_vert_rf ) ) )
+    goto ERROR;
+
   /* joint displacement vector */
   if( !( pdRobotJointDis( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) )
     goto ERROR;
@@ -151,6 +174,9 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
 void pdRobotDestroy(pdRobot *robot)
 {
   zVecFree( pdRobotJointDis( robot ) );
+  zFree( robot->_sr_vert );
+  zFree( robot->_sr_rf_vert );
+  zFree( robot->_sr_lf_vert );
   zFree( robot->_ref_set_flag );
   zFree( robot->_ref_vec );
   zFree( robot->_cell );

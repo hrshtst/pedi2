@@ -77,6 +77,9 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( -1, pdRobotRFID( &robot ) );
   EXPECT_EQ( -1, pdRobotLHID( &robot ) );
   EXPECT_EQ( -1, pdRobotRHID( &robot ) );
+  EXPECT_EQ( NULL, robot._sr_lf_vert );
+  EXPECT_EQ( NULL, robot._sr_rf_vert );
+  EXPECT_EQ( NULL, robot._sr_vert );
 }
 
 TEST_F(pdRobotTest, Destroy)
@@ -89,6 +92,9 @@ TEST_F(pdRobotTest, Destroy)
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
   EXPECT_EQ( NULL, robot._ref_set_flag );
+  EXPECT_EQ( NULL, robot._sr_lf_vert );
+  EXPECT_EQ( NULL, robot._sr_rf_vert );
+  EXPECT_EQ( NULL, robot._sr_vert );
   destroy_flag = true;
 }
 

@@ -33,6 +33,10 @@ typedef struct{
   int _lf_id, _rf_id;  /* identifier of foot link */
   int _lh_id, _rh_id;  /* identifief of hand link */
 
+  zVec3D *_sr_lf_vert; /* vertices of supporting region of lf */
+  zVec3D *_sr_rf_vert; /* vertices of supporting region of rf */
+  zVec3D *_sr_vert;    /* vertices of supporting region */
+
   zVec dis;           /* displacement vector */
 } pdRobot;
 

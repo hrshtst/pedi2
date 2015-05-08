@@ -178,20 +178,12 @@ void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
 
 void pdRobotSolveIK(pdRobot *robot)
 {
-  zVec3D v;
+  register int i;
 
   rkIKDeactivate( &robot->_ik );
-  zVec3DCreate( &v, 0.0, 0.0, 0.26 );
-  rkIKCellSetRefVec( robot->_cell[0], &v );
-  zVec3DCreate( &v, 0.0, 0.0, 0.0 );
-  rkIKCellSetRefVec( robot->_cell[1], &v );
-  zVec3DCreate( &v, 0.0, 0.042, 0.0 );
-  rkIKCellSetRefVec( robot->_cell[2], &v );
-  zVec3DCreate( &v, 0.0, 0.0, 0.0 );
-  rkIKCellSetRefVec( robot->_cell[3], &v );
-  zVec3DCreate( &v, 0.0, -0.042, 0.0 );
-  rkIKCellSetRefVec( robot->_cell[4], &v );
-  zVec3DCreate( &v, 0.0, 0.0, 0.0 );
-  rkIKCellSetRefVec( robot->_cell[5], &v );
+  for( i=0; i<pdRobotCellNum( robot ); i++ )
+    if( pdRobotFlagIsOn( robot, i ) )
+      rkIKCellSetRefVec( robot->_cell[i], &robot->_ref_vec[i] );
   rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, 0 );
+  pdRobotUnsetAllFlags( robot );
 }

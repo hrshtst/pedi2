@@ -43,11 +43,11 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
   EXPECT_EQ( NULL, robot._ref_set_flag );
-  EXPECT_EQ( -1, robot._base_id );
-  EXPECT_EQ( -1, robot._lf_id );
-  EXPECT_EQ( -1, robot._rf_id );
-  EXPECT_EQ( -1, robot._lh_id );
-  EXPECT_EQ( -1, robot._rh_id );
+  EXPECT_EQ( -1, pdRobotBaseID( &robot ) );
+  EXPECT_EQ( -1, pdRobotLFID( &robot ) );
+  EXPECT_EQ( -1, pdRobotRFID( &robot ) );
+  EXPECT_EQ( -1, pdRobotLHID( &robot ) );
+  EXPECT_EQ( -1, pdRobotRHID( &robot ) );
 }
 
 TEST_F(pdRobotTest, Destroy)
@@ -176,11 +176,11 @@ TEST_F(pdRobotTest, Load_CheckID)
   char model[] = "model/mighty.zkc";
 
   pdRobotLoad( &robot, model );
-  EXPECT_EQ(  0, robot._base_id );
-  EXPECT_EQ( 12, robot._lf_id );
-  EXPECT_EQ( 24, robot._rf_id );
-  EXPECT_EQ(  5, robot._lh_id );
-  EXPECT_EQ( 17, robot._rh_id );
+  EXPECT_EQ(  0, pdRobotBaseID( &robot ) );
+  EXPECT_EQ( 12, pdRobotLFID( &robot ) );
+  EXPECT_EQ( 24, pdRobotRFID( &robot ) );
+  EXPECT_EQ(  5, pdRobotLHID( &robot ) );
+  EXPECT_EQ( 17, pdRobotRHID( &robot ) );
 }
 
 TEST_F(pdRobotTest, Load_InitRefVec)

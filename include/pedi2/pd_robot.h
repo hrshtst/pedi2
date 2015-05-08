@@ -43,6 +43,11 @@ void pdRobotDestroy(pdRobot *robot);
 #define pdRobotChainPtr(r) ( &(r)->_chain )
 #define pdRobotIKPtr(r)    ( &(r)->_ik )
 #define pdRobotCellNum(r)  (r)->_cell_num
+#define pdRobotBaseID(r)   (r)->_base_id
+#define pdRobotLFID(r)     (r)->_lf_id
+#define pdRobotRFID(r)     (r)->_rf_id
+#define pdRobotLHID(r)     (r)->_lh_id
+#define pdRobotRHID(r)     (r)->_rh_id
 
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);

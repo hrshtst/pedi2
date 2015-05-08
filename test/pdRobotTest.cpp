@@ -24,7 +24,7 @@ class pdRobotTest : public testing::Test {
     pdRobotChainPtr( &robot )->mass = 10000;
     rkChainReadFile( &robot._chain, (char *)"model/dummy.zkc" );
     rkIKCreate( &robot._ik, &robot._chain );
-    robot._num_cell = 100;
+    pdRobotCellNum( &robot ) = 100;
   };
 
   bool destroy_flag;
@@ -39,7 +39,7 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
-  EXPECT_EQ( 0, robot._num_cell );
+  EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
   EXPECT_EQ( NULL, robot._ref_set_flag );
@@ -56,7 +56,7 @@ TEST_F(pdRobotTest, Destroy)
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
-  EXPECT_EQ( 0, robot._num_cell );
+  EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
   EXPECT_EQ( NULL, robot._ref_set_flag );
@@ -77,7 +77,7 @@ TEST_F(pdRobotTest, Load_UnsetAllFlag)
   int i;
 
   pdRobotLoad( &robot, model );
-  for( i=0; i<robot._num_cell; i++ )
+  for( i=0; i<pdRobotCellNum( &robot ); i++ )
     robot._ref_set_flag[i] = true;
   pdRobotUnsetAllFlags( &robot );
   EXPECT_FALSE( robot._ref_set_flag[0] );
@@ -117,7 +117,7 @@ TEST_F(pdRobotTest, Load_CheckCell)
   rkIKCell *cp;
 
   pdRobotLoad( &robot, model );
-  EXPECT_EQ( 10, robot._num_cell );
+  EXPECT_EQ( 10, pdRobotCellNum( &robot ) );
   cp = zListTail( &pdRobotIKPtr(&robot)->clist ); // 0
   EXPECT_EQ( rkIKJacobiCOM, cp->data._cmat_fp );
   EXPECT_EQ( 0, cp->data.id );
@@ -146,7 +146,7 @@ TEST_F(pdRobotTest, DISABLED_Load_CheckCell_2)
   char model[] = "model/mighty2.zkc";
 
   pdRobotLoad( &robot, model );
-  EXPECT_EQ( 6, robot._num_cell );
+  EXPECT_EQ( 6, pdRobotCellNum( &robot ) );
 }
 
 TEST_F(pdRobotTest, Load_AllocCellPtr)

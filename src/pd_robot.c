@@ -5,7 +5,7 @@ void pdRobotInit(pdRobot *robot)
   rkChainInit( pdRobotChainPtr( robot ) );
   pdRobotJointDis( robot ) = NULL;
   robot->_cell = NULL;
-  robot->_num_cell = 0;
+  pdRobotCellNum( robot ) = 0;
   robot->_ref_vec = NULL;
   robot->_ref_set_flag = NULL;
   robot->_base_id = -1;
@@ -78,7 +78,7 @@ bool _pdRobotInitRefVec(pdRobot *robot)
   int id;
   register int i;
 
-  for( i=0; i<robot->_num_cell; i++ ){
+  for( i=0; i<pdRobotCellNum( robot ); i++ ){
     lookup = _pdRobotLookupCell( robot->_cell[i]->data._cmat_fp );
     id = robot->_cell[i]->data.attr.id;
     if( strcmp( lookup->str, "world_pos" ) == 0 ) {
@@ -122,16 +122,16 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
     goto ERROR;
   if( !rkIKConfReadFile( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ), (char *) model_file ) )
     goto ERROR;
-  if( ( robot->_num_cell = zListNum( &pdRobotIKPtr( robot )->clist ) ) < PD_ROBOT_REQUIRED_CONST_NUM )
+  if( ( pdRobotCellNum( robot ) = zListNum( &pdRobotIKPtr( robot )->clist ) ) < PD_ROBOT_REQUIRED_CONST_NUM )
     goto ERROR;
-  if( !( robot->_cell = zAlloc( rkIKCell*, robot->_num_cell ) ) )
+  if( !( robot->_cell = zAlloc( rkIKCell*, pdRobotCellNum( robot ) ) ) )
     goto ERROR;
-  for( i=0; i<robot->_num_cell; i++ )
+  for( i=0; i<pdRobotCellNum( robot ); i++ )
     robot->_cell[i] = rkIKFindCell( pdRobotIKPtr(robot), i );
   /* initialize reference vector */
-  if( !( robot->_ref_vec = zAlloc( zVec3D, robot->_num_cell ) ) )
+  if( !( robot->_ref_vec = zAlloc( zVec3D, pdRobotCellNum( robot ) ) ) )
     goto ERROR;
-  if( !( robot->_ref_set_flag = zAlloc( bool, robot->_num_cell ) ) )
+  if( !( robot->_ref_set_flag = zAlloc( bool, pdRobotCellNum( robot ) ) ) )
     goto ERROR;
   pdRobotUnsetAllFlags( robot );
   if( !_pdRobotSetLinkID( robot ) )
@@ -154,7 +154,7 @@ void pdRobotDestroy(pdRobot *robot)
   zFree( robot->_ref_set_flag );
   zFree( robot->_ref_vec );
   zFree( robot->_cell );
-  robot->_num_cell = 0;
+  pdRobotCellNum( robot ) = 0;
   rkIKDestroy( pdRobotIKPtr( robot ) );
   rkChainDestroy( pdRobotChainPtr( robot ) );
 }
@@ -163,13 +163,13 @@ void pdRobotUnsetAllFlags(pdRobot *robot)
 {
   register int i;
 
-  for( i=0; i<robot->_num_cell; i++ )
+  for( i=0; i<pdRobotCellNum( robot ); i++ )
     robot->_ref_set_flag[i] = false;
 }
 
 void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
 {
-  if( id < robot->_num_cell ){
+  if( id < pdRobotCellNum( robot ) ){
     zVec3DCopy( ref, &robot->_ref_vec[id] );
     robot->_ref_set_flag[id] = true;
   } else

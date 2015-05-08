@@ -25,7 +25,7 @@ typedef struct{
   rkChain _chain;      /* robot kinematics/dynamics model */
   rkIK _ik;            /* IK solver */
   rkIKCell **_cell;    /* IK cell */
-  int _num_cell;       /* number of IK cell */
+  int _cell_num;       /* number of IK cell */
   int _base_id;        /* identifier of base link */
   int _lf_id, _rf_id;  /* identifier of foot link */
   int _lh_id, _rh_id;  /* identifief of hand link */
@@ -42,6 +42,7 @@ void pdRobotDestroy(pdRobot *robot);
 /* methods to get parameters */
 #define pdRobotChainPtr(r) ( &(r)->_chain )
 #define pdRobotIKPtr(r)    ( &(r)->_ik )
+#define pdRobotCellNum(r)  (r)->_cell_num
 
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);

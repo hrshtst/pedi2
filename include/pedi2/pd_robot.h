@@ -26,12 +26,14 @@ typedef struct{
   rkIK _ik;            /* IK solver */
   rkIKCell **_cell;    /* IK cell */
   int _cell_num;       /* number of IK cell */
+  zVec3D *_ref_vec;    /* reference vector to set as constraint */
+  bool *_ref_set_flag; /* flag to set IKCell reference */
+
   int _base_id;        /* identifier of base link */
   int _lf_id, _rf_id;  /* identifier of foot link */
   int _lh_id, _rh_id;  /* identifief of hand link */
-  zVec3D *_ref_vec;    /* reference vector to set as constraint */
-  bool *_ref_set_flag; /* flag to set IKCell reference */
-  zVec _dis;           /* displacement vector */
+
+  zVec dis;           /* displacement vector */
 } pdRobot;
 
 /* c'tor and d'tor */
@@ -43,11 +45,6 @@ void pdRobotDestroy(pdRobot *robot);
 #define pdRobotChainPtr(r) ( &(r)->_chain )
 #define pdRobotIKPtr(r)    ( &(r)->_ik )
 #define pdRobotCellNum(r)  (r)->_cell_num
-#define pdRobotBaseID(r)   (r)->_base_id
-#define pdRobotLFID(r)     (r)->_lf_id
-#define pdRobotRFID(r)     (r)->_rf_id
-#define pdRobotLHID(r)     (r)->_lh_id
-#define pdRobotRHID(r)     (r)->_rh_id
 
 #define pdRobotFlagIsOn(r,id) ( (r)->_ref_set_flag[id] )
 #define pdRobotCOMFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_COM )
@@ -61,6 +58,11 @@ void pdRobotDestroy(pdRobot *robot);
 #define pdRobotRHPosFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_RH_POS )
 #define pdRobotRHAttFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_RH_ATT )
 
+#define pdRobotBaseID(r)   (r)->_base_id
+#define pdRobotLFID(r)     (r)->_lf_id
+#define pdRobotRFID(r)     (r)->_rf_id
+#define pdRobotLHID(r)     (r)->_lh_id
+#define pdRobotRHID(r)     (r)->_rh_id
 
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);
@@ -77,8 +79,9 @@ __EXPORT void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefRHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_ATT )
 __EXPORT void pdRobotSolveIK(pdRobot *robot);
 
+/* methods to get parameters */
 #define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )
-#define pdRobotJointDis(r)  (r)->_dis
+#define pdRobotJointDis(r)  (r)->dis
 
 __END_DECLS
 

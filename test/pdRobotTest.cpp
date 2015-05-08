@@ -141,14 +141,6 @@ TEST_F(pdRobotTest, Load_CheckCell)
   EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
 }
 
-TEST_F(pdRobotTest, DISABLED_Load_CheckCell_2)
-{
-  char model[] = "model/mighty2.zkc";
-
-  pdRobotLoad( &robot, model );
-  EXPECT_EQ( 6, pdRobotCellNum( &robot ) );
-}
-
 TEST_F(pdRobotTest, Load_AllocCellPtr)
 {
   char model[] = "model/mighty.zkc";

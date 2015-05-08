@@ -49,6 +49,19 @@ void pdRobotDestroy(pdRobot *robot);
 #define pdRobotLHID(r)     (r)->_lh_id
 #define pdRobotRHID(r)     (r)->_rh_id
 
+#define pdRobotFlagIsOn(r,id) ( (r)->_ref_set_flag[id] )
+#define pdRobotCOMFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_COM )
+#define pdRobotBaseAttFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_BASE_ATT )
+#define pdRobotLFPosFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_LF_POS )
+#define pdRobotLFAttFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_LF_ATT )
+#define pdRobotRFPosFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_RF_POS )
+#define pdRobotRFAttFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_RF_ATT )
+#define pdRobotLHPosFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_LH_POS )
+#define pdRobotLHAttFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_LH_ATT )
+#define pdRobotRHPosFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_RH_POS )
+#define pdRobotRHAttFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_RH_ATT )
+
+
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);
 __EXPORT void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);

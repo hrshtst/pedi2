@@ -187,3 +187,37 @@ void pdRobotSolveIK(pdRobot *robot)
   rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, 0 );
   pdRobotUnsetAllFlags( robot );
 }
+
+void pdRobotCOMPos(pdRobot *robot, zVec3D *com)
+{
+  zVec3DCopy( rkChainWldCOM( pdRobotChainPtr( robot ) ), com );
+}
+
+void pdRobotBaseAtt(pdRobot *robot, zVec3D *att)
+{
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotBaseID( robot ) ), att );
+}
+
+void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf)
+{
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotLFID( robot ) ), lf );
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotRFID( robot ) ), rf );
+}
+
+void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf)
+{
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotLFID( robot ) ), lf );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotRFID( robot ) ), rf );
+}
+
+void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh)
+{
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotLHID( robot ) ), lh );
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotRHID( robot ) ), rh );
+}
+
+void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh)
+{
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotLHID( robot ) ), lh );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotRHID( robot ) ), rh );
+}

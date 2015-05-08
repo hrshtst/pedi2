@@ -27,6 +27,35 @@ class pdRobotTest : public testing::Test {
     pdRobotCellNum( &robot ) = 100;
   };
 
+  void LoadAndSolveIK() {
+    char model[] = "model/mighty.zkc";
+    zVec3D com_pos, lf_pos, rf_pos, lh_pos, rh_pos;
+    zVec3D base_att, lf_att, rf_att, lh_att, rh_att;
+
+    pdRobotLoad( &robot, model );
+    zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
+    zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
+    zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
+    zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
+    zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
+    zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+    zVec3DCreate(   &lh_pos, 0.0, 0.13, 0.25 );
+    zVec3DCreate(   &lh_att, 0.0, 0.0, 0.0 );
+    zVec3DCreate(   &rh_pos, 0.0, -0.13, 0.25 );
+    zVec3DCreate(   &rh_att, 0.0, 0.0, 0.0 );
+    pdRobotSetRefCOM( &robot, &com_pos );
+    pdRobotSetRefBaseAtt( &robot, &base_att );
+    pdRobotSetRefLFPos( &robot, &lf_pos );
+    pdRobotSetRefLFAtt( &robot, &lf_att );
+    pdRobotSetRefRFPos( &robot, &rf_pos );
+    pdRobotSetRefRFAtt( &robot, &rf_att );
+    pdRobotSetRefLHPos( &robot, &lh_pos );
+    pdRobotSetRefRHPos( &robot, &rh_pos );
+    // pdRobotSetRefLHAtt( &robot, &lh_att );
+    // pdRobotSetRefRHAtt( &robot, &rh_att );
+    pdRobotSolveIK( &robot );
+  }
+
   bool destroy_flag;
   pdRobot robot;
 };
@@ -402,34 +431,9 @@ TEST_F(pdRobotTest, SetRefRHAtt)
 
 TEST_F(pdRobotTest, SolveIK)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D com_pos, lf_pos, rf_pos, lh_pos, rh_pos;
-  zVec3D base_att, lf_att, rf_att, lh_att, rh_att;
   zVec3D v;
 
-  pdRobotLoad( &robot, model );
-  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
-  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
-  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
-  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &lh_pos, 0.0, 0.13, 0.25 );
-  zVec3DCreate(   &lh_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &rh_pos, 0.0, -0.13, 0.25 );
-  zVec3DCreate(   &rh_att, 0.0, 0.0, 0.0 );
-  pdRobotSetRefCOM( &robot, &com_pos );
-  pdRobotSetRefBaseAtt( &robot, &base_att );
-  pdRobotSetRefLFPos( &robot, &lf_pos );
-  pdRobotSetRefLFAtt( &robot, &lf_att );
-  pdRobotSetRefRFPos( &robot, &rf_pos );
-  pdRobotSetRefRFAtt( &robot, &rf_att );
-  pdRobotSetRefLHPos( &robot, &lh_pos );
-  pdRobotSetRefRHPos( &robot, &rh_pos );
-  // pdRobotSetRefLHAtt( &robot, &lh_att );
-  // pdRobotSetRefRHAtt( &robot, &rh_att );
-  pdRobotSolveIK( &robot );
-
+  LoadAndSolveIK();
   EXPECT_NEAR( 0.0,    rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0,    rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.26,   rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[2], GTEST_TOL_LOOSE );
@@ -465,4 +469,92 @@ TEST_F(pdRobotTest, SolveIK)
   // EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL_LOOSE );
   // EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL_LOOSE );
   // EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, COMPos)
+{
+  zVec3D com;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &com, 1, 2, 3 );
+  pdRobotCOMPos( &robot, &com );
+  EXPECT_NEAR( 0.0,  com.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  com.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.26, com.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, BaseAtt)
+{
+  zVec3D att;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &att, 1, 2, 3 );
+  pdRobotBaseAtt( &robot, &att );
+  EXPECT_NEAR( 0.0,  att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, FootPos)
+{
+  zVec3D lf, rf;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &lf, 1, 2, 3 );
+  zVec3DCreate( &rf, 4, 5, 6 );
+  pdRobotFootPos( &robot, &lf, &rf );
+  EXPECT_NEAR( 0.0,    lf.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.042,  lf.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    lf.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rf.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.042, rf.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rf.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, FootAtt)
+{
+  zVec3D lf, rf;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &lf, 1, 2, 3 );
+  zVec3DCreate( &rf, 4, 5, 6 );
+  pdRobotFootAtt( &robot, &lf, &rf );
+  EXPECT_NEAR( 0.0, lf.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, HandPos)
+{
+  zVec3D lh, rh;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &lh, 1, 2, 3 );
+  zVec3DCreate( &rh, 4, 5, 6 );
+  pdRobotHandPos( &robot, &lh, &rh );
+  EXPECT_NEAR(  0.0,  lh.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR(  0.13, lh.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR(  0.25, lh.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR(  0.0,  rh.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.13, rh.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR(  0.25, rh.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, HandAtt)
+{
+  zVec3D lh, rh;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &lh, 1, 2, 3 );
+  zVec3DCreate( &rh, 4, 5, 6 );
+  pdRobotHandAtt( &robot, &lh, &rh );
+  // EXPECT_NEAR( 0.0, lh.e[0], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0, lh.e[1], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0, lh.e[2], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0, rh.e[0], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0, rh.e[1], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0, rh.e[2], GTEST_TOL_LOOSE );
 }

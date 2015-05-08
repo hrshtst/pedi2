@@ -82,6 +82,12 @@ __EXPORT void pdRobotSolveIK(pdRobot *robot);
 /* methods to get parameters */
 #define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )
 #define pdRobotJointDis(r)  (r)->dis
+__EXPORT void pdRobotCOMPos(pdRobot *robot, zVec3D *com);
+__EXPORT void pdRobotBaseAtt(pdRobot *robot, zVec3D *att);
+__EXPORT void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);
+__EXPORT void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf);
+__EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
+__EXPORT void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 
 __END_DECLS
 

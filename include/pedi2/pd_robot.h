@@ -30,6 +30,7 @@ typedef struct{
   int _lf_id, _rf_id;  /* identifier of foot link */
   int _lh_id, _rh_id;  /* identifief of hand link */
   zVec3D *_ref_vec;    /* reference vector to set as constraint */
+  bool *_ref_set_flag; /* flag to set IKCell reference */
   zVec _dis;           /* displacement vector */
 } pdRobot;
 
@@ -43,6 +44,7 @@ void pdRobotDestroy(pdRobot *robot);
 #define pdRobotIKPtr(r)    ( &(r)->_ik )
 
 /* methods to solve IK */
+__EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);
 __EXPORT void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefCOM(r,v)     pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotSetRefBaseAtt(r,v) pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_BASE_ATT )

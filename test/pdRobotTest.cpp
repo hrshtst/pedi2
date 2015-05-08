@@ -41,6 +41,8 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_EQ( 0, robot._num_cell );
   EXPECT_EQ( NULL, robot._cell );
+  EXPECT_EQ( NULL, robot._ref_vec );
+  EXPECT_EQ( NULL, robot._ref_set_flag );
   EXPECT_EQ( -1, robot._base_id );
   EXPECT_EQ( -1, robot._lf_id );
   EXPECT_EQ( -1, robot._rf_id );
@@ -56,6 +58,8 @@ TEST_F(pdRobotTest, Destroy)
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( 0, robot._num_cell );
   EXPECT_EQ( NULL, robot._cell );
+  EXPECT_EQ( NULL, robot._ref_vec );
+  EXPECT_EQ( NULL, robot._ref_set_flag );
   destroy_flag = true;
 }
 
@@ -65,6 +69,27 @@ TEST_F(pdRobotTest, Load)
 
   pdRobotLoad( &robot, model );
   EXPECT_EQ( 25, (int)rkChainNum( pdRobotChainPtr( &robot ) ) );
+}
+
+TEST_F(pdRobotTest, Load_UnsetAllFlag)
+{
+  char model[] = "model/mighty.zkc";
+  int i;
+
+  pdRobotLoad( &robot, model );
+  for( i=0; i<robot._num_cell; i++ )
+    robot._ref_set_flag[i] = true;
+  pdRobotUnsetAllFlags( &robot );
+  EXPECT_FALSE( robot._ref_set_flag[0] );
+  EXPECT_FALSE( robot._ref_set_flag[1] );
+  EXPECT_FALSE( robot._ref_set_flag[2] );
+  EXPECT_FALSE( robot._ref_set_flag[3] );
+  EXPECT_FALSE( robot._ref_set_flag[4] );
+  EXPECT_FALSE( robot._ref_set_flag[5] );
+  EXPECT_FALSE( robot._ref_set_flag[6] );
+  EXPECT_FALSE( robot._ref_set_flag[7] );
+  EXPECT_FALSE( robot._ref_set_flag[8] );
+  EXPECT_FALSE( robot._ref_set_flag[9] );
 }
 
 TEST_F(pdRobotTest, JointSize)
@@ -254,6 +279,7 @@ TEST_F(pdRobotTest, SetRefCOM)
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[0], zX ) );
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[0], zY ) );
   EXPECT_DOUBLE_EQ( 0.26, zVec3DElem( &robot._ref_vec[0], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[0] );
 }
 
 TEST_F(pdRobotTest, SetRefBaseAtt)
@@ -267,6 +293,7 @@ TEST_F(pdRobotTest, SetRefBaseAtt)
   EXPECT_DOUBLE_EQ( 0.1*zPI_2, zVec3DElem( &robot._ref_vec[1], zX ) );
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[1], zY ) );
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[1], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[1] );
 }
 
 TEST_F(pdRobotTest, SetRefLFPos)
@@ -280,6 +307,7 @@ TEST_F(pdRobotTest, SetRefLFPos)
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[2], zX ) );
   EXPECT_DOUBLE_EQ( 0.042, zVec3DElem( &robot._ref_vec[2], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[2], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[2] );
 }
 
 TEST_F(pdRobotTest, SetRefLFAtt)
@@ -293,6 +321,7 @@ TEST_F(pdRobotTest, SetRefLFAtt)
   EXPECT_DOUBLE_EQ( 0.2*zPI_2, zVec3DElem( &robot._ref_vec[3], zX ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[3], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[3], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[3] );
 }
 
 TEST_F(pdRobotTest, SetRefRFPos)
@@ -306,6 +335,7 @@ TEST_F(pdRobotTest, SetRefRFPos)
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[4], zX ) );
   EXPECT_DOUBLE_EQ( -0.042, zVec3DElem( &robot._ref_vec[4], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[4], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[4] );
 }
 
 TEST_F(pdRobotTest, SetRefRFAtt)
@@ -319,6 +349,7 @@ TEST_F(pdRobotTest, SetRefRFAtt)
   EXPECT_DOUBLE_EQ( 0.3*zPI_2, zVec3DElem( &robot._ref_vec[5], zX ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[5], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[5], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[5] );
 }
 
 TEST_F(pdRobotTest, SetRefLHPos)
@@ -332,6 +363,7 @@ TEST_F(pdRobotTest, SetRefLHPos)
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[6], zX ) );
   EXPECT_DOUBLE_EQ( 0.05, zVec3DElem( &robot._ref_vec[6], zY ) );
   EXPECT_DOUBLE_EQ( 0.27, zVec3DElem( &robot._ref_vec[6], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[6] );
 }
 
 TEST_F(pdRobotTest, SetRefLHAtt)
@@ -345,6 +377,7 @@ TEST_F(pdRobotTest, SetRefLHAtt)
   EXPECT_DOUBLE_EQ( 0.4*zPI_2, zVec3DElem( &robot._ref_vec[7], zX ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[7], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[7], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[7] );
 }
 
 TEST_F(pdRobotTest, SetRefRHPos)
@@ -358,6 +391,7 @@ TEST_F(pdRobotTest, SetRefRHPos)
   EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[8], zX ) );
   EXPECT_DOUBLE_EQ( -0.05, zVec3DElem( &robot._ref_vec[8], zY ) );
   EXPECT_DOUBLE_EQ( 0.27, zVec3DElem( &robot._ref_vec[8], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[8] );
 }
 
 TEST_F(pdRobotTest, SetRefRHAtt)
@@ -371,6 +405,7 @@ TEST_F(pdRobotTest, SetRefRHAtt)
   EXPECT_DOUBLE_EQ( 0.5*zPI_2, zVec3DElem( &robot._ref_vec[9], zX ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zZ ) );
+  EXPECT_TRUE( robot._ref_set_flag[9] );
 }
 
 TEST_F(pdRobotTest, SolveIK)

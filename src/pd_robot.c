@@ -6,6 +6,8 @@ void pdRobotInit(pdRobot *robot)
   pdRobotJointDis( robot ) = NULL;
   robot->_cell = NULL;
   robot->_num_cell = 0;
+  robot->_ref_vec = NULL;
+  robot->_ref_set_flag = NULL;
   robot->_base_id = -1;
   robot->_lf_id = -1;
   robot->_rf_id = -1;
@@ -129,6 +131,9 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
   /* initialize reference vector */
   if( !( robot->_ref_vec = zAlloc( zVec3D, robot->_num_cell ) ) )
     goto ERROR;
+  if( !( robot->_ref_set_flag = zAlloc( bool, robot->_num_cell ) ) )
+    goto ERROR;
+  pdRobotUnsetAllFlags( robot );
   if( !_pdRobotSetLinkID( robot ) )
     goto ERROR;
   if( !_pdRobotInitRefVec( robot ) )
@@ -146,17 +151,28 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
 void pdRobotDestroy(pdRobot *robot)
 {
   zVecFree( pdRobotJointDis( robot ) );
+  zFree( robot->_ref_set_flag );
+  zFree( robot->_ref_vec );
   zFree( robot->_cell );
   robot->_num_cell = 0;
   rkIKDestroy( pdRobotIKPtr( robot ) );
   rkChainDestroy( pdRobotChainPtr( robot ) );
 }
 
+void pdRobotUnsetAllFlags(pdRobot *robot)
+{
+  register int i;
+
+  for( i=0; i<robot->_num_cell; i++ )
+    robot->_ref_set_flag[i] = false;
+}
+
 void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
 {
-  if( id < robot->_num_cell )
+  if( id < robot->_num_cell ){
     zVec3DCopy( ref, &robot->_ref_vec[id] );
-  else
+    robot->_ref_set_flag[id] = true;
+  } else
     ZRUNERROR( "IK Cell id %d is invalid.", id );
 }
 

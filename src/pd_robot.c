@@ -152,6 +152,14 @@ void pdRobotDestroy(pdRobot *robot)
   rkChainDestroy( pdRobotChainPtr( robot ) );
 }
 
+void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
+{
+  if( id < robot->_num_cell )
+    zVec3DCopy( ref, &robot->_ref_vec[id] );
+  else
+    ZRUNERROR( "IK Cell id %d is invalid.", id );
+}
+
 void pdRobotSolveIK(pdRobot *robot)
 {
   zVec3D v;

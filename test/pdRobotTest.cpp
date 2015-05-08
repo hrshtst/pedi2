@@ -232,6 +232,147 @@ TEST_F(pdRobotTest, Load_NotImplementedError)
   destroy_flag = true;
 }
 
+TEST_F(pdRobotTest, SetRefVec_Error)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, 0, 0.26 );
+  pdRobotSetRefVec( &robot, &v, 10 );
+  SUCCEED();
+}
+
+TEST_F(pdRobotTest, SetRefCOM)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, 0, 0.26 );
+  pdRobotSetRefCOM( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[0], zX ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[0], zY ) );
+  EXPECT_DOUBLE_EQ( 0.26, zVec3DElem( &robot._ref_vec[0], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefBaseAtt)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0.1*zPI_2, 0, 0 );
+  pdRobotSetRefBaseAtt( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0.1*zPI_2, zVec3DElem( &robot._ref_vec[1], zX ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[1], zY ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[1], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefLFPos)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, 0.042, 0.0 );
+  pdRobotSetRefLFPos( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[2], zX ) );
+  EXPECT_DOUBLE_EQ( 0.042, zVec3DElem( &robot._ref_vec[2], zY ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[2], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefLFAtt)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0.2*zPI_2, 0.0, 0.0 );
+  pdRobotSetRefLFAtt( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0.2*zPI_2, zVec3DElem( &robot._ref_vec[3], zX ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[3], zY ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[3], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefRFPos)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, -0.042, 0.0 );
+  pdRobotSetRefRFPos( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[4], zX ) );
+  EXPECT_DOUBLE_EQ( -0.042, zVec3DElem( &robot._ref_vec[4], zY ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[4], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefRFAtt)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0.3*zPI_2, 0.0, 0.0 );
+  pdRobotSetRefRFAtt( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0.3*zPI_2, zVec3DElem( &robot._ref_vec[5], zX ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[5], zY ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[5], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefLHPos)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, 0.05, 0.27 );
+  pdRobotSetRefLHPos( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[6], zX ) );
+  EXPECT_DOUBLE_EQ( 0.05, zVec3DElem( &robot._ref_vec[6], zY ) );
+  EXPECT_DOUBLE_EQ( 0.27, zVec3DElem( &robot._ref_vec[6], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefLHAtt)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0.4*zPI_2, 0.0, 0.0 );
+  pdRobotSetRefLHAtt( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0.4*zPI_2, zVec3DElem( &robot._ref_vec[7], zX ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[7], zY ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[7], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefRHPos)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, -0.05, 0.27 );
+  pdRobotSetRefRHPos( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[8], zX ) );
+  EXPECT_DOUBLE_EQ( -0.05, zVec3DElem( &robot._ref_vec[8], zY ) );
+  EXPECT_DOUBLE_EQ( 0.27, zVec3DElem( &robot._ref_vec[8], zZ ) );
+}
+
+TEST_F(pdRobotTest, SetRefRHAtt)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0.5*zPI_2, 0.0, 0.0 );
+  pdRobotSetRefRHAtt( &robot, &v );
+  EXPECT_DOUBLE_EQ( 0.5*zPI_2, zVec3DElem( &robot._ref_vec[9], zX ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zY ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zZ ) );
+}
+
 TEST_F(pdRobotTest, SolveIK)
 {
   char model[] = "model/mighty.zkc";

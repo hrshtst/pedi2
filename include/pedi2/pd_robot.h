@@ -43,6 +43,17 @@ void pdRobotDestroy(pdRobot *robot);
 #define pdRobotIKPtr(r)    ( &(r)->_ik )
 
 /* methods to solve IK */
+__EXPORT void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
+#define pdRobotSetRefCOM(r,v)     pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_COM )
+#define pdRobotSetRefBaseAtt(r,v) pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_BASE_ATT )
+#define pdRobotSetRefLFPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LF_POS )
+#define pdRobotSetRefLFAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LF_ATT )
+#define pdRobotSetRefRFPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RF_POS )
+#define pdRobotSetRefRFAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RF_ATT )
+#define pdRobotSetRefLHPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LH_POS )
+#define pdRobotSetRefLHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LH_ATT )
+#define pdRobotSetRefRHPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_POS )
+#define pdRobotSetRefRHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_ATT )
 __EXPORT void pdRobotSolveIK(pdRobot *robot);
 
 #define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )

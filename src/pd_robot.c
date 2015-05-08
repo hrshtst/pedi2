@@ -247,3 +247,41 @@ void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh)
   zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotLHID( robot ) ), lh );
   zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotRHID( robot ) ), rh );
 }
+
+#define PD_ROBOT_TOL (1.0e-3)
+void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr)
+{
+  int i, nl, nr, n;
+  rkLink *foot;
+  zShape3D *sole;
+  zVec3D v;
+
+  nl = nr = n = 0;
+  /* left foot */
+  foot = rkChainLink( pdRobotChainPtr( robot ), pdRobotLFID( robot ) );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  for( i=0; i<(int)zShape3DVertNum(sole); i++ ){
+    zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
+    if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){
+      zVec3DCopy( &v, &robot->_sr_lf_vert[nl++] );
+      zVec3DCopy( &v, &robot->_sr_vert[n++] );
+    }
+  }
+  /* right foot */
+  foot = rkChainLink( pdRobotChainPtr( robot ), pdRobotRFID( robot ) );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  for( i=0; i<(int)zShape3DVertNum(sole); i++ ){
+    zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
+    if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){
+      zVec3DCopy( &v, &robot->_sr_rf_vert[nr++] );
+      zVec3DCopy( &v, &robot->_sr_vert[n++] );
+    }
+  }
+  /* supporting region */
+  zVec3DListDestroy( sr_lf, false );
+  zVec3DListDestroy( sr_rf, false );
+  zVec3DListDestroy( sr, false );
+  if( nl > 0 ) zCH2D( sr_lf, robot->_sr_lf_vert, nl );
+  if( nr > 0 ) zCH2D( sr_rf, robot->_sr_rf_vert, nr );
+  if( n  > 0 ) zCH2D( sr, robot->_sr_vert, n );
+}

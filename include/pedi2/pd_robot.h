@@ -92,6 +92,7 @@ __EXPORT void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);
 __EXPORT void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf);
 __EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh);
+__EXPORT void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr);
 
 __END_DECLS
 

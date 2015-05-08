@@ -564,3 +564,221 @@ TEST_F(pdRobotTest, HandAtt)
   // EXPECT_NEAR( 0.0, rh.e[1], GTEST_TOL_LOOSE );
   // EXPECT_NEAR( 0.0, rh.e[2], GTEST_TOL_LOOSE );
 }
+
+TEST_F(pdRobotTest, SupportRegion_Double)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D com_pos, lf_pos, rf_pos;
+  zVec3D base_att, lf_att, rf_att;
+  zVec3DList sr_lf, sr_rf, sr;
+  zVec3DListCell *cp;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
+  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSetRefLFPos( &robot, &lf_pos );
+  pdRobotSetRefRFPos( &robot, &rf_pos );
+  pdRobotSetRefBaseAtt( &robot, &base_att );
+  pdRobotSetRefLFAtt( &robot, &lf_att );
+  pdRobotSetRefRFAtt( &robot, &rf_att );
+  pdRobotSolveIK( &robot );
+
+  pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
+
+  // sr_lf
+  cp = zListTail( &sr_lf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+
+  // sr_rf
+  cp = zListTail( &sr_rf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+
+  // sr
+  cp = zListTail( &sr );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, SupportRegion_Single_Left)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D com_pos, lf_pos, rf_pos;
+  zVec3D base_att, lf_att, rf_att;
+  zVec3DList sr_lf, sr_rf, sr;
+  zVec3DListCell *cp;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.01 );
+  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSetRefLFPos( &robot, &lf_pos );
+  pdRobotSetRefRFPos( &robot, &rf_pos );
+  pdRobotSetRefBaseAtt( &robot, &base_att );
+  pdRobotSetRefLFAtt( &robot, &lf_att );
+  pdRobotSetRefRFAtt( &robot, &rf_att );
+  pdRobotSolveIK( &robot );
+
+  pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
+
+  // sr_lf
+  cp = zListTail( &sr_lf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+
+  // sr_rf
+  EXPECT_EQ( 0, zListNum( &sr_rf ) );
+
+  // sr
+  cp = zListTail( &sr );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, SupportRegion_Single_Right)
+{
+  char model[] = "model/mighty.zkc";
+  zVec3D com_pos, lf_pos, rf_pos;
+  zVec3D base_att, lf_att, rf_att;
+  zVec3DList sr_lf, sr_rf, sr;
+  zVec3DListCell *cp;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.01 );
+  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
+  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSetRefLFPos( &robot, &lf_pos );
+  pdRobotSetRefRFPos( &robot, &rf_pos );
+  pdRobotSetRefBaseAtt( &robot, &base_att );
+  pdRobotSetRefLFAtt( &robot, &lf_att );
+  pdRobotSetRefRFAtt( &robot, &rf_att );
+  pdRobotSolveIK( &robot );
+
+  pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
+
+  // sr_lf
+  EXPECT_EQ( 0, zListNum( &sr_lf ) );
+
+  // sr_rf
+  cp = zListTail( &sr_rf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+
+  // sr
+  cp = zListTail( &sr_rf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+}

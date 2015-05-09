@@ -14,7 +14,8 @@ OBJ=pd_cz_vrt.o \
     pd_cz.o \
     pd_foot_uw.o pd_foot_z.o pd_foot.o \
     pd_robot.o \
-    pd_state.o
+    pd_state.o \
+    pd_cmd.o
 DLIB=libpedi2.so
 
 TARGET=$(DLIB)

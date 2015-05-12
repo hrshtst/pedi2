@@ -31,6 +31,7 @@ void pdCmdDefaultInit(pdCmd *cmd)
   cmd->qz2 = 0.5;
   cmd->rho = 0.0;
   cmd->kr = 1.0;
+  cmd->thetad = -zPI_2;
   cmd->lfkx = cmd->lfky = cmd->lfkz = 3000;
   cmd->lfcx = cmd->lfcy = cmd->lfcz = 50;
   cmd->rfkx = cmd->rfky = cmd->rfkz = 3000;

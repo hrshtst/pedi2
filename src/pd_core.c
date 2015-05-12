@@ -1,5 +1,13 @@
 #include <pedi2/pd_core.h>
 
+static void _pdCoreUpdateCommand(pdCore *core);
+static void _pdCoreUpdateCZ(pdCore *core);
+static void _pdCoreUpdateFoot(pdCore *core);
+static void _pdCoreUpdateHand(pdCore *core);
+static void _pdCoreUpdateRobot(pdCore *core);
+static void _pdCoreUpdateRef(pdCore *core);
+static void _pdCoreUpdateState(pdCore *core);
+
 void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
 {
   pdCoreResetTime( core );

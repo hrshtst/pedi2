@@ -20,9 +20,9 @@ typedef struct{
   zVec3D lh_att, rh_att;
   zVec3D zmp;
   double fz;
-  zVec3DList *sr_lf;
-  zVec3DList *sr_rf;
-  zVec3DList *sr;
+  zVec3DList sr_lf;
+  zVec3DList sr_rf;
+  zVec3DList sr;
 } pdState;
 
 /* c'tor and d'tor */

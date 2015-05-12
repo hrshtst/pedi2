@@ -74,7 +74,7 @@ void _pdCoreUpdateCZ(pdCore *core)
               &core->state.com_acc,
               &core->state.zmp,
               core->state.base_att.e[0],
-              core->state.sr );
+              &core->state.sr );
 }
 
 void _pdCoreUpdateFoot(pdCore *core)
@@ -85,8 +85,8 @@ void _pdCoreUpdateFoot(pdCore *core)
                 &core->state.zmp,
                 &core->state.lf_pos,
                 &core->state.rf_pos,
-                core->state.sr_lf,
-                core->state.sr_rf );
+                &core->state.sr_lf,
+                &core->state.sr_rf );
 }
 
 void _pdCoreUpdateHand(pdCore *core)
@@ -140,7 +140,7 @@ void _pdCoreUpdateState(pdCore *core)
   pdRobotFootAtt( pdCoreRobotPtr(core), &core->state.lh_att, &core->state.rh_att );
   zVec3DCopy( pdCZRefZMP( pdCoreCZPtr(core) ), &core->state.zmp );
   core->state.fz = pdCZVrtRF( &core->cz._vrt );
-  pdRobotSupportRegion( pdCoreRobotPtr(core), core->state.sr_lf, core->state.sr_rf, core->state.sr );
+  pdRobotSupportRegion( pdCoreRobotPtr(core), &core->state.sr_lf, &core->state.sr_rf, &core->state.sr );
 }
 
 void pdCoreUpdate(pdCore *core)

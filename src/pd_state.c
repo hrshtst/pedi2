@@ -21,9 +21,9 @@ void pdStateInit(pdState *state)
   zVec3DClear( &state->rh_att );
   zVec3DClear( &state->zmp );
   state->fz = 0;
-  state->sr_lf = NULL;
-  state->sr_rf = NULL;
-  state->sr = NULL;
+  zListInit( &state->sr_lf );
+  zListInit( &state->sr_rf );
+  zListInit( &state->sr );
 }
 
 void pdStateDestroy(pdState *state)

@@ -11,6 +11,7 @@ typedef struct{
   double qz1, qz2;
   double kappa, rho, kr;
   double xd, yd, zd;
+  double thetad;
   double vud, vwd, dist;
   double lfkx, lfky, lfkz;
   double lfcx, lfcy, lfcz;

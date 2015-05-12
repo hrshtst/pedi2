@@ -9,6 +9,7 @@ void pdCmdInit(pdCmd *cmd)
   cmd->rho = 0;
   cmd->kr = 0;
   cmd->xd = cmd->yd = cmd->zd = 0;
+  cmd->thetad = 0;
   cmd->vud = 0;
   cmd->vwd = 0;
   cmd->dist = 0;

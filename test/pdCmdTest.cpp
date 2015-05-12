@@ -27,6 +27,7 @@ TEST_F(pdCmdTest, Init)
   EXPECT_EQ( 0, cmd.xd );
   EXPECT_EQ( 0, cmd.yd );
   EXPECT_EQ( 0, cmd.zd );
+  EXPECT_EQ( 0, cmd.thetad );
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
   EXPECT_EQ( 0, cmd.dist );
@@ -60,6 +61,7 @@ TEST_F(pdCmdTest, Destroy)
   EXPECT_EQ( 0, cmd.xd );
   EXPECT_EQ( 0, cmd.yd );
   EXPECT_EQ( 0, cmd.zd );
+  EXPECT_EQ( 0, cmd.thetad );
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
   EXPECT_EQ( 0, cmd.dist );

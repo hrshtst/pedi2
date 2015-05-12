@@ -14789,7 +14789,11 @@ joint: rwrist_r     0 15
 joint: rwrist_p     0 0
 constraint: com
 constraint: world_att waist_base
-constraint: world_pos left_foot f
-constraint: world_att left_foot f
-constraint: world_pos right_foot f
-constraint: world_att right_foot f
+constraint: world_pos left_foot
+constraint: world_att left_foot
+constraint: world_pos right_foot
+constraint: world_att right_foot
+constraint: world_pos lwrist_p
+constraint: world_att lwrist_p
+constraint: world_pos rwrist_p
+constraint: world_att rwrist_p

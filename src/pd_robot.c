@@ -124,47 +124,72 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
   }
 
   /* IK solver */
-  if( !rkIKCreate( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ) ) )
+  if( !rkIKCreate( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ) ) ){
+    ZRUNERROR( "failed to create IK solver" );
     goto ERROR;
-  if( !rkIKConfReadFile( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ), (char *) model_file ) )
+  }
+  if( !rkIKConfReadFile( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ), (char *) model_file ) ){
+    ZRUNERROR( "failed to read IK conf file %s", model_file );
     goto ERROR;
-  if( ( pdRobotCellNum( robot ) = zListNum( &pdRobotIKPtr( robot )->clist ) ) < PD_ROBOT_REQUIRED_CONST_NUM )
+  }
+  if( ( pdRobotCellNum( robot ) = zListNum( &pdRobotIKPtr( robot )->clist ) ) < PD_ROBOT_REQUIRED_CONST_NUM ){
+    ZRUNERROR( "lack sufficient constraints, you need %d constraints but only %d specified",
+               PD_ROBOT_REQUIRED_CONST_NUM, pdRobotCellNum( robot ) );
     goto ERROR;
-  if( !( robot->_cell = zAlloc( rkIKCell*, pdRobotCellNum( robot ) ) ) )
+  }
+  if( !( robot->_cell = zAlloc( rkIKCell*, pdRobotCellNum( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate IK cell" );
     goto ERROR;
+  }
   for( i=0; i<pdRobotCellNum( robot ); i++ )
     robot->_cell[i] = rkIKFindCell( pdRobotIKPtr(robot), i );
   /* initialize reference vector */
-  if( !( robot->_ref_vec = zAlloc( zVec3D, pdRobotCellNum( robot ) ) ) )
+  if( !( robot->_ref_vec = zAlloc( zVec3D, pdRobotCellNum( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate reference vectors" );
     goto ERROR;
-  if( !( robot->_ref_set_flag = zAlloc( bool, pdRobotCellNum( robot ) ) ) )
+  }
+  if( !( robot->_ref_set_flag = zAlloc( bool, pdRobotCellNum( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate reference set flags" );
     goto ERROR;
+  }
   pdRobotUnsetAllFlags( robot );
-  if( !_pdRobotSetLinkID( robot ) )
+  if( !_pdRobotSetLinkID( robot ) ){
+    ZRUNERROR( "failed to set link IDs" );
     goto ERROR;
-  if( !_pdRobotInitRefVec( robot ) )
+  }
+  if( !_pdRobotInitRefVec( robot ) ){
+    ZRUNERROR( "failed to init referential vector" );
     goto ERROR;
+  }
 
   /* vertices of supporting region */
   /* left foot */
   foot = rkChainLink( pdRobotChainPtr(robot), pdRobotLFID(robot) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
   n_vert_lf = zShape3DVertNum( sole );
-  if( !( robot->_sr_lf_vert = zAlloc( zVec3D, n_vert_lf ) ) )
+  if( !( robot->_sr_lf_vert = zAlloc( zVec3D, n_vert_lf ) ) ){
+    ZRUNERROR( "cannot allocate vertices of left foot suuport region" );
     goto ERROR;
+  }
   /* right foot */
   foot = rkChainLink( pdRobotChainPtr(robot), pdRobotRFID(robot) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
   n_vert_rf = zShape3DVertNum( sole );
-  if( !( robot->_sr_rf_vert = zAlloc( zVec3D, n_vert_rf ) ) )
+  if( !( robot->_sr_rf_vert = zAlloc( zVec3D, n_vert_rf ) ) ){
+    ZRUNERROR( "cannot allocate vertices of right foot suuport region" );
     goto ERROR;
+  }
   /* both feet */
-  if( !( robot->_sr_vert = zAlloc( zVec3D, n_vert_lf + n_vert_rf ) ) )
+  if( !( robot->_sr_vert = zAlloc( zVec3D, n_vert_lf + n_vert_rf ) ) ){
+    ZRUNERROR( "cannot allocate vertices of suuport region" );
     goto ERROR;
+  }
 
   /* joint displacement vector */
-  if( !( pdRobotJointDis( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) )
+  if( !( pdRobotJointDis( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate joint displacement vector" );
     goto ERROR;
+  }
   return true;
  ERROR:
   pdRobotDestroy( robot );

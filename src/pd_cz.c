@@ -206,11 +206,3 @@ void pdCZDataFWrite(FILE *fp, pdCZ *cz)
 /*31-33*/  pdCZRefAccX(cz), pdCZRefAccY(cz), pdCZRefAccZ(cz),
 /*34-36*/  pdCZRefZMPX(cz), pdCZRefZMPY(cz), pdCZRefZMPZ(cz) );
 }
-
-#if 0
-void pdCZZMPPhase(pdCZ *c, double dw, double vw, zComplex *pz)
-{
-  /* zComplexCreate( pz, pdCZZMPRad(c) - dw, -(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2+1)*vw/(pdCZZeta(c)*sqrt(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2)) ); */
-  zComplexCreate( pz, pdCZZMPRad(c), -(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2+1)*vw/(pdCZZeta(c)*sqrt(pdCZPrmRad(c)->q1*pdCZPrmRad(c)->q2)) );
-}
-#endif

@@ -24,7 +24,11 @@ void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
 
 bool pdCoreLoad(pdCore *core, char *filename)
 {
-  return pdRobotLoad( pdCoreRobotPtr( core ), filename );
+  if( !pdRobotLoad( pdCoreRobotPtr( core ), filename ) )
+    return false;
+  _pdCoreUpdateRobot( core );
+  _pdCoreUpdateState( core );
+  return true;
 }
 
 void pdCoreDestroy(pdCore *core)

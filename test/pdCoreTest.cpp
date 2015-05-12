@@ -2,6 +2,8 @@
 #include <pedi2/pd_core.h>
 
 const double TIME_STEP = 0.01;
+#define GTEST_TOL 1e-12
+#define GTEST_TOL_LOOSE 1e-04
 
 class pdCoreTest : public testing::Test {
  protected:
@@ -93,4 +95,23 @@ TEST_F(pdCoreTest, Load)
   pdCoreInit( &core, &cmd, TIME_STEP );
   pdCoreLoad( &core, filename );
   EXPECT_EQ( 25, (int)rkChainNum(pdRobotChainPtr(pdCoreRobotPtr(&core))));
+}
+
+TEST_F(pdCoreTest, JointSize)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdCoreLoad( &core, model );
+  EXPECT_EQ( 26, pdCoreJointSize( &core ) );
+}
+
+TEST_F(pdCoreTest, JointDis)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdCoreLoad( &core, model );
+  EXPECT_EQ( 26, pdCoreJointSize( &core ) );
+  EXPECT_NEAR( 0.0, zVecElem( pdCoreJointDis( &core ), 0 ), GTEST_TOL );
+  EXPECT_NEAR( 0.0, zVecElem( pdCoreJointDis( &core ), 1 ), GTEST_TOL );
+  EXPECT_NEAR( 0.0, zVecElem( pdCoreJointDis( &core ), 2 ), GTEST_TOL );
 }

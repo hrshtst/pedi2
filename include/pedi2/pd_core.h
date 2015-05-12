@@ -24,14 +24,16 @@ __EXPORT bool pdCoreLoad(pdCore *core, char *filename);
 __EXPORT void pdCoreDestroy(pdCore *core);
 
 /* methods to get parameters */
-#define pdCoreTime(c)     (c)->_t
-#define pdCoreTimeStep(c) (c)->_dt
-#define pdCoreCZPtr(c)    ( &(c)->cz )
-#define pdCoreLFPtr(c)    ( &(c)->lf )
-#define pdCoreRFPtr(c)    ( &(c)->rf )
-#define pdCoreRobotPtr(c) ( &(c)->robot )
-#define pdCoreStatePtr(c) ( &(c)->state )
-#define pdCoreCmd(c)      ( (c)->cmd )
+#define pdCoreTime(c)      (c)->_t
+#define pdCoreTimeStep(c)  (c)->_dt
+#define pdCoreCZPtr(c)     ( &(c)->cz )
+#define pdCoreLFPtr(c)     ( &(c)->lf )
+#define pdCoreRFPtr(c)     ( &(c)->rf )
+#define pdCoreRobotPtr(c)  ( &(c)->robot )
+#define pdCoreStatePtr(c)  ( &(c)->state )
+#define pdCoreCmd(c)       ( (c)->cmd )
+#define pdCoreJointSize(c) pdRobotJointSize( pdCoreRobotPtr( c ) )
+#define pdCoreJointDis(c)  pdRobotJointDis( pdCoreRobotPtr( c ) )
 
 /* methods to set parameters */
 #define pdCoreSetTime(c,t) do{ \

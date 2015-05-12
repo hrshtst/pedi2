@@ -111,7 +111,14 @@ TEST_F(pdCoreTest, JointDis)
 
   pdCoreLoad( &core, model );
   EXPECT_EQ( 26, pdCoreJointSize( &core ) );
-  EXPECT_NEAR( 0.0, zVecElem( pdCoreJointDis( &core ), 0 ), GTEST_TOL );
-  EXPECT_NEAR( 0.0, zVecElem( pdCoreJointDis( &core ), 1 ), GTEST_TOL );
-  EXPECT_NEAR( 0.0, zVecElem( pdCoreJointDis( &core ), 2 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 0 ),
+               zVecElem( pdCoreJointDis( &core ), 0 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 1 ),
+               zVecElem( pdCoreJointDis( &core ), 1 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 2 ),
+               zVecElem( pdCoreJointDis( &core ), 2 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 10 ),
+               zVecElem( pdCoreJointDis( &core ), 10 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 20 ),
+               zVecElem( pdCoreJointDis( &core ), 20 ), GTEST_TOL );
 }

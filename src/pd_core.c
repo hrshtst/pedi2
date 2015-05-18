@@ -148,8 +148,8 @@ void _pdCoreUpdateState(pdCore *core)
   pdRobotBaseAtt( pdCoreRobotPtr(core), &core->state.base_att );
   pdRobotFootPos( pdCoreRobotPtr(core), &core->state.lf_pos, &core->state.rf_pos );
   pdRobotFootAtt( pdCoreRobotPtr(core), &core->state.lf_att, &core->state.rf_att );
-  pdRobotFootPos( pdCoreRobotPtr(core), &core->state.lh_pos, &core->state.rh_pos );
-  pdRobotFootAtt( pdCoreRobotPtr(core), &core->state.lh_att, &core->state.rh_att );
+  pdRobotHandPos( pdCoreRobotPtr(core), &core->state.lh_pos, &core->state.rh_pos );
+  pdRobotHandAtt( pdCoreRobotPtr(core), &core->state.lh_att, &core->state.rh_att );
   zVec3DCopy( pdCZRefZMP( pdCoreCZPtr(core) ), &core->state.zmp );
   core->state.fz = pdCZVrtRF( &core->cz._vrt );
   pdRobotSupportRegion( pdCoreRobotPtr(core), &core->state.sr_lf, &core->state.sr_rf, &core->state.sr );

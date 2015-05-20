@@ -22,11 +22,55 @@ void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
   core->cmd = cmd;
 }
 
+void _pdCorePoseInit(pdCore *core)
+{
+  zVec3D v;
+  double foot_dist, com_height;
+  double s, c, d, x, y, theta;
+
+  foot_dist = zVec3DDist( &core->state.lf_pos, &core->state.rf_pos );
+  com_height = zVec3DElem(&core->state.com_pos,zZ) - zVec3DElem(&core->state.lf_pos,zZ);
+  pdCZSetDist( pdCoreCZPtr(core), foot_dist );
+  theta = core->cmd->thetad;
+  zSinCos( theta, &s, &c );
+  d = 0.5 * foot_dist;
+  x = zVec3DElem( &core->state.com_pos, zX );
+  y = zVec3DElem( &core->state.com_pos, zY );
+
+  zVec3DCopy( &core->state.com_pos, &v );
+  zVec3DSetElem( &v, zZ, com_height*0.95 );
+  pdRobotSetRefCOM( pdCoreRobotPtr(core), &v );
+
+  zVec3DCopy( &core->state.base_att, &v );
+  zVec3DSetElem( &v, zX, theta );
+  zVec3DCreate( &v, theta, 0, 0 );
+  pdRobotSetRefBaseAtt( pdCoreRobotPtr(core), &v );
+
+  zVec3DCreate( &v, x-d*c, y-d*s, 0 );
+  pdRobotSetRefLFPos( pdCoreRobotPtr(core), &v );
+
+  zVec3DCopy( &core->state.lf_att, &v );
+  zVec3DSetElem( &v, zX, theta );
+  zVec3DCreate( &v, theta, 0, 0 );
+  pdRobotSetRefLFAtt( pdCoreRobotPtr(core), &v );
+
+  zVec3DCreate( &v, x+d*c, y+d*s, 0 );
+  pdRobotSetRefRFPos( pdCoreRobotPtr(core), &v );
+
+  zVec3DCopy( &core->state.rf_att, &v );
+  zVec3DSetElem( &v, zX, theta );
+  zVec3DCreate( &v, theta, 0, 0 );
+  pdRobotSetRefRFAtt( pdCoreRobotPtr(core), &v );
+
+  pdRobotSolveIK( pdCoreRobotPtr( core ) );
+}
+
 bool pdCoreLoad(pdCore *core, char *filename)
 {
   if( !pdRobotLoad( pdCoreRobotPtr( core ), filename ) )
     return false;
-  _pdCoreUpdateRobot( core );
+  _pdCoreUpdateState( core );
+  _pdCorePoseInit( core );
   _pdCoreUpdateState( core );
   return true;
 }
@@ -137,7 +181,7 @@ void _pdCoreUpdateRef(pdCore *core)
     pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
   core->cmd->xd = pd.e[zX];
   core->cmd->yd = pd.e[zY];
-  core->cmd->zd = pd.e[zZ];
+  /* core->cmd->zd = pd.e[zZ]; */
 }
 
 void _pdCoreUpdateState(pdCore *core)

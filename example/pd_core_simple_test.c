@@ -1,6 +1,8 @@
 #include <pedi2/pd_cmd.h>
 #include <pedi2/pd_core.h>
 
+#define DEBUG_MODE
+
 #define DT   0.01
 #define STEP 1000
 int main(void)
@@ -40,13 +42,23 @@ int main(void)
 
     /* update */
     pdCoreUpdate( &ctrl );
+#ifdef DEBUG_MODE
+    pdCZVrtWrite( pdCZVrtPtr( pdCoreCZPtr(&ctrl) ) );
+    pdCZHrzUWWrite( pdCZHrzUWPtr( pdCZHrzPtr( pdCoreCZPtr(&ctrl) ) ) );
+    pdCZHrzWrite( pdCZHrzPtr( pdCoreCZPtr(&ctrl) ) );
+    pdCZWrite( pdCoreCZPtr(&ctrl) );
+    pdFootWrite( pdCoreLFPtr(&ctrl), pdCoreRFPtr(&ctrl) );
+    getchar();
+#endif
 
     /* output */
     /* obtain desired joint displacement as a zVec instance */
     zVecCopy( pdCoreJointDis( &ctrl ), dis );
     /* you can visualize the motion by executing the following command, e.g. */
     /*   $ rk_anim model/hydra.zkc motion.zvs -x 13 -y 0.5 -z 0.8            */
+#ifndef DEBUG_MODE
     printf( "%f ", DT );zVecWrite( dis );
+#endif
   }
 
   /* destroy */

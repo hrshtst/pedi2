@@ -30,12 +30,12 @@ double _pdCZVrtXi(pdCZVrt *vrt)
 
 double _pdCZVrtK1(pdCZVrt *vrt)
 {
-  return zSqr(_pdCZVrtXi(vrt)) * pdCZVrtQ1(vrt) * pdCZVrtQ1(vrt);
+  return zSqr(_pdCZVrtXi(vrt)) * pdCZVrtQ1(vrt) * pdCZVrtQ2(vrt);
 }
 
 double _pdCZVrtK2(pdCZVrt *vrt)
 {
-  return _pdCZVrtXi(vrt) * ( pdCZVrtQ1(vrt) + pdCZVrtQ1(vrt) );
+  return _pdCZVrtXi(vrt) * ( pdCZVrtQ1(vrt) + pdCZVrtQ2(vrt) );
 }
 
 double _pdCZVrtBias(pdCZVrt *vrt)

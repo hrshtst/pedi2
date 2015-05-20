@@ -477,6 +477,21 @@ TEST_F(pdRobotTest, SolveIK)
   // EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
 }
 
+TEST_F(pdRobotTest, AllFlagsAreFlaseAfterSolveIK)
+{
+  LoadAndSolveIK();
+  EXPECT_FALSE( pdRobotCOMFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotBaseAttFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotLFPosFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotLFAttFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotRFPosFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotRFAttFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotLHPosFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotLHAttFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotRHPosFlagIsOn( &robot ) );
+  EXPECT_FALSE( pdRobotRHAttFlagIsOn( &robot ) );
+}
+
 TEST_F(pdRobotTest, COMPos)
 {
   zVec3D com;

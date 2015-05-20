@@ -310,3 +310,19 @@ void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, 
   if( nr > 0 ) zCH2D( sr_rf, robot->_sr_rf_vert, nr );
   if( n  > 0 ) zCH2D( sr, robot->_sr_vert, n );
 }
+
+void pdRobotFWrite(FILE *fp, pdRobot *r)
+{
+  register int i;
+
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "cell num:%d\n", pdRobotCellNum(r) );
+  for( i=0; i<pdRobotCellNum(r); i++ ){
+    fprintf( fp, "ref %d(%s):", i, r->_ref_set_flag[i] ? "true" : "false" );
+    zVec3DFWrite( fp, &r->_ref_vec[i] );
+  }
+  fprintf( fp, "base id:%d\n", pdRobotBaseID(r) );
+  fprintf( fp, "lf id:%d, rf id:%d\n", pdRobotLFID(r), pdRobotRFID(r) );
+  fprintf( fp, "lh id:%d, rh id:%d\n", pdRobotLHID(r), pdRobotRHID(r) );
+}

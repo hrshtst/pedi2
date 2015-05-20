@@ -94,6 +94,10 @@ __EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr);
 
+/* output method */
+__EXPORT void pdRobotFWrite(FILE *fp, pdRobot *robot);
+#define pdRobotWrite(r) pdRobotFWrite( stdout, r )
+
 __END_DECLS
 
 #endif /* __PD_ROBOT_H__ */

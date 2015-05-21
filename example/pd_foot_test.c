@@ -155,7 +155,7 @@ int main(void)
 
     /* update */
     pdCZUpdate( &cz, &com, &vel, &acc, &zmp, theta, &sr );
-    pdFootUpdate( &lf, &rf, pdCZDelta(&cz), pdCZVelUW(&cz), &zmp, &lfp, &rfp, &sr_lf, &sr_rf );
+    pdFootUpdate( &lf, &rf, pdCZDelta(&cz), pdCZVelUW(&cz), &zmp, &lfp, &rfp, &lfa, &rfa, &sr_lf, &sr_rf );
     /* output */
     pdCZDataWrite( &cz );
     /* auto reference update */

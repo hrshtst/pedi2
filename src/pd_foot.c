@@ -140,10 +140,11 @@ void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D delta, zVec2D vel, zVec3
   pdFootSetDesPos( kf, xy[zX], xy[zY], pdFootZRefZ( pdFootZPtr( kf ) ) );
 }
 
-void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3DList *kfsr)
+void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
 {
   /* update current position */
   pdFootSetPosVec( kf, kfp );
+  pdFootSetAttVec( kf, kfa );
   /* update referential position */
   if( !kfsr || pdFootDesPosZ(kf) > 0 || pdFootRefPosZ(kf) > 0 ){
     pdFootCalcRefPos( kf, pdFootPos( kf ), pdFootDesPos( kf ), pdFootRefPos( kf ) );
@@ -154,12 +155,12 @@ void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3DList *kfsr)
   }
 }
 
-void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3DList *lfsr, zVec3DList *rfsr)
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr)
 {
   _pdFootDesPosUpdate( lf, rf, delta, vel, zmp, rfsr );
   _pdFootDesPosUpdate( rf, lf, delta, vel, zmp, lfsr );
-  _pdFootRefPosUpdate( lf, lfp, lfsr );
-  _pdFootRefPosUpdate( rf, rfp, rfsr );
+  _pdFootRefPosUpdate( lf, lfp, lfa, lfsr );
+  _pdFootRefPosUpdate( rf, rfp, rfa, rfsr );
 }
 
 void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)

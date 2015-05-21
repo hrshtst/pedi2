@@ -141,6 +141,8 @@ void _pdCoreUpdateFoot(pdCore *core)
                 &core->state.zmp,
                 &core->state.lf_pos,
                 &core->state.rf_pos,
+                &core->state.lf_att,
+                &core->state.rf_att,
                 &core->state.sr_lf,
                 &core->state.sr_rf );
 }

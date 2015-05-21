@@ -118,8 +118,8 @@ void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
   theta = pdCZHrzTheta( pdFootCZPtr( f ) );
   /* rotational angle of foot w.r.t moving frame */
   phi = pdFootUWPhi( pdFootUWPtr( f ) );
-  zVec3DCreate( refa, theta + phi, 0, 0 );
-  /* zVec3DCreate( refa, ( theta + zPI_2 ) + phi, 0, 0 ); */
+  /* zVec3DCreate( refa, theta + phi, 0, 0 ); */
+  zVec3DCreate( refa, ( theta + zPI_2 ) + phi, 0, 0 );
 }
 
 void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3DList *pfsr)

@@ -1,7 +1,7 @@
 #include <pedi2/pd_cmd.h>
 #include <pedi2/pd_core.h>
 
-#define DEBUG_MODE
+/* #define DEBUG_MODE */
 
 #define DT   0.01
 #define STEP 1000
@@ -48,6 +48,7 @@ int main(void)
     pdCZHrzWrite( pdCZHrzPtr( pdCoreCZPtr(&ctrl) ) );
     pdCZWrite( pdCoreCZPtr(&ctrl) );
     pdFootWrite( pdCoreLFPtr(&ctrl), pdCoreRFPtr(&ctrl) );
+    pdRobotWrite( pdCoreRobotPtr(&ctrl) );
     getchar();
 #endif
 

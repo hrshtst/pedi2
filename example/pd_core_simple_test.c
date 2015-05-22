@@ -56,7 +56,7 @@ int main(void)
     /* obtain desired joint displacement as a zVec instance */
     zVecCopy( pdCoreJointDis( &ctrl ), dis );
     /* you can visualize the motion by executing the following command, e.g. */
-    /*   $ rk_anim model/hydra.zkc motion.zvs -x 13 -y 0.5 -z 0.8            */
+    /*   $ rk_anim model/hydra.zkc motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
 #ifndef DEBUG_MODE
     printf( "%f ", DT );zVecWrite( dis );
 #endif

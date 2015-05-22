@@ -102,8 +102,7 @@ typedef struct{
 
 void dmFlagsetInit(dmFlagset *flag)
 {
-  /* flag->pause = false; */
-  flag->pause = true;
+  flag->pause = false;
   flag->frame = false;
   flag->perturb_x = false;
   flag->perturb_y = false;
@@ -127,10 +126,10 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
     if( flag->frame ) flag->frame = false;
     /* udpate state */
    pdCoreUpdate( core );
-   pdCZVrtWrite( pdCZVrtPtr( pdCoreCZPtr(core) ) );
-   pdCZHrzUWWrite( pdCZHrzUWPtr( pdCZHrzPtr( pdCoreCZPtr(core) ) ) );
-   pdCZHrzWrite( pdCZHrzPtr( pdCoreCZPtr(core) ) );
-   pdCZWrite( pdCoreCZPtr(core) );
+   /* pdCZVrtWrite( pdCZVrtPtr( pdCoreCZPtr(core) ) ); */
+   /* pdCZHrzUWWrite( pdCZHrzUWPtr( pdCZHrzPtr( pdCoreCZPtr(core) ) ) ); */
+   /* pdCZHrzWrite( pdCZHrzPtr( pdCoreCZPtr(core) ) ); */
+   /* pdCZWrite( pdCoreCZPtr(core) ); */
     /* if( fp ) */
     /*   pdCoreFWrite( core, fp ); */
   }

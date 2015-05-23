@@ -127,10 +127,6 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
     if( flag->frame ) flag->frame = false;
     /* udpate state */
    pdCoreUpdate( core );
-   /* pdCZVrtWrite( pdCZVrtPtr( pdCoreCZPtr(core) ) ); */
-   /* pdCZHrzUWWrite( pdCZHrzUWPtr( pdCZHrzPtr( pdCoreCZPtr(core) ) ) ); */
-   /* pdCZHrzWrite( pdCZHrzPtr( pdCoreCZPtr(core) ) ); */
-   /* pdCZWrite( pdCoreCZPtr(core) ); */
     /* if( fp ) */
     /*   pdCoreFWrite( core, fp ); */
   }

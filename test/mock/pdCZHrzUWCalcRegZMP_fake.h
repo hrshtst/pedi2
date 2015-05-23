@@ -19,6 +19,9 @@ static double __expected_value_pdCZHrzUCalcRegZMP;
 #define pdCZHrzUCalcRegZMP(u,d,v) pdCZHrzUCalcRegZMP_fake( u, d, v )
 double pdCZHrzUCalcRegZMP_fake(pdCZHrzU *u, zVec2D delta, zVec2D vel)
 {
+  (void)u;
+  (void)delta;
+  (void)vel;
   return __expected_value_pdCZHrzUCalcRegZMP;
 }
 
@@ -26,6 +29,9 @@ static double __expected_value_pdCZHrzWCalcRegZMP;
 #define pdCZHrzWCalcRegZMP(u,d,v) pdCZHrzWCalcRegZMP_fake( u, d, v )
 double pdCZHrzWCalcRegZMP_fake(pdCZHrzW *w, zVec2D delta, zVec2D vel)
 {
+  (void)w;
+  (void)delta;
+  (void)vel;
   return __expected_value_pdCZHrzWCalcRegZMP;
 }
 

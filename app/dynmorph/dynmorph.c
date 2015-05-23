@@ -127,8 +127,8 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
     if( flag->frame ) flag->frame = false;
     /* udpate state */
    pdCoreUpdate( core );
-    /* if( fp ) */
-    /*   pdCoreFWrite( core, fp ); */
+    if( fp )
+      pdCoreDataFWrite( fp, core );
   }
   theta = zVec3DElem( &core->state.base_att, 0 );
   zSinCos( theta, &s, &c );

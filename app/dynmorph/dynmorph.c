@@ -110,7 +110,7 @@ void dmFlagsetInit(dmFlagset *flag)
   flag->log = false;
 }
 
-#define DT 0.01
+#define ANIM_SKEW 2
 void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmFlagset *flag, dmModel model, FILE *fp)
 {
   zVec3D force = { { 0, 0, 0 } };
@@ -118,6 +118,7 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
   double s, c;
   double xd, yd;
   zVec dis;
+  static int anim_skew_cnt;
 
   dis = zVecAlloc( pdCoreJointSize(core) );
   zVecCopy( pdCoreJointDis( core ), dis );
@@ -144,8 +145,11 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
     dmSceneLookAt( sx, xd-10*c, yd-10*s, 1, xd, yd, 0.8 );
     dmSceneLookAt( sy, xd+10*s, yd-10*c, 1, xd, yd, 0.8 );
   }
-  dmSceneDraw( sx, dis, &force );
-  dmSceneDraw( sy, dis, &force );
+  if( ++anim_skew_cnt > ANIM_SKEW ){
+    dmSceneDraw( sx, dis, &force );
+    dmSceneDraw( sy, dis, &force );
+    anim_skew_cnt = 0;
+  }
   zVecFree( dis );
 }
 
@@ -211,6 +215,7 @@ void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene 
 
 #define WIDTH 960
 #define HEIGHT 640
+#define DT 0.01
 int main(int argc, char *argv[])
 {
   zxWindow mainwin;

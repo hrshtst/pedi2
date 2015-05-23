@@ -162,7 +162,7 @@ void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
   pdFootSetPosVec( kf, kfp );
   pdFootSetAttVec( kf, kfa );
   /* update referential position */
-  if( !kfsr || pdFootDesPosZ(kf) > 0 || pdFootRefPosZ(kf) > 0 ){
+  if( pdFootIsOff(kf) || pdFootIsOffNext(kf) || pdFootIsOffAttempt(kf) ){
     pdFootCalcRefPos( kf, pdFootPos( kf ), pdFootDesPos( kf ), pdFootRefPos( kf ) );
     pdFootCalcRefAtt( kf, pdFootDesPos( kf ), pdFootRefAtt( kf ) );
   } else {

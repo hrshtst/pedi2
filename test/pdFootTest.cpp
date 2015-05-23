@@ -350,6 +350,51 @@ TEST_F(pdFootTest, TimeIncr)
   EXPECT_DOUBLE_EQ( 3*TIME_STEP, pdFootTime( &lf ) );
 }
 
+TEST_F(pdFootTest, IsOn_IsOff)
+{
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootSR( &lf ) = &sr;
+  EXPECT_TRUE( pdFootIsOn( &lf ) );
+  EXPECT_FALSE( pdFootIsOff( &lf ) );
+
+  pdFootPosZ( &lf ) = 0.1;
+  pdFootSR( &lf ) = NULL;
+  EXPECT_FALSE( pdFootIsOn( &lf ) );
+  EXPECT_TRUE( pdFootIsOff( &lf ) );
+
+  pdFootPosZ( &lf ) = 0.1;
+  pdFootSR( &lf ) = &sr;
+  EXPECT_FALSE( pdFootIsOn( &lf ) );
+  EXPECT_TRUE( pdFootIsOff( &lf ) );
+
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootSR( &lf ) = NULL;
+  EXPECT_FALSE( pdFootIsOn( &lf ) );
+  EXPECT_TRUE( pdFootIsOff( &lf ) );
+}
+
+TEST_F(pdFootTest, IsOnNext_IsOffNext)
+{
+  pdFootRefPosZ( &lf ) = 0.0;
+  EXPECT_TRUE( pdFootIsOnNext( &lf ) );
+  EXPECT_FALSE( pdFootIsOffNext( &lf ) );
+
+  pdFootRefPosZ( &lf ) = 0.1;
+  EXPECT_FALSE( pdFootIsOnNext( &lf ) );
+  EXPECT_TRUE( pdFootIsOffNext( &lf ) );
+}
+
+TEST_F(pdFootTest, IsOnAttempt_IsOffAttempt)
+{
+  pdFootDesPosZ( &lf ) = 0.0;
+  EXPECT_TRUE( pdFootIsOnAttempt( &lf ) );
+  EXPECT_FALSE( pdFootIsOffAttempt( &lf ) );
+
+  pdFootDesPosZ( &lf ) = 0.1;
+  EXPECT_FALSE( pdFootIsOnAttempt( &lf ) );
+  EXPECT_TRUE( pdFootIsOffAttempt( &lf ) );
+}
+
 TEST_F(pdFootTest, RotUWtoXY_1)
 {
   zVec2D vuw, vxy;

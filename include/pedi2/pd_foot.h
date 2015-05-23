@@ -131,6 +131,13 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 } while(0)
 
 /* calculation method */
+__EXPORT bool pdFootIsOn(pdFoot *f);
+__EXPORT bool pdFootIsOnNext(pdFoot *f);
+__EXPORT bool pdFootIsOnAttempt(pdFoot *f);
+#define pdFootIsOff(f) !pdFootIsOn( f )
+#define pdFootIsOffNext(f) !pdFootIsOnNext( f )
+#define pdFootIsOffAttempt(f) !pdFootIsOnAttempt( f )
+
 #define pdFootRotUWtoXY(f,vuw,vxy) pdCZHrzRotUWtoXY( pdFootCZPtr(f), vuw, vxy )
 #define pdFootRotXYtoUW(f,vxy,vuw) pdCZHrzRotXYtoUW( pdFootCZPtr(f), vxy, vuw )
 #define pdFootXformUWtoXY(f,uw,xy) pdCZHrzXformUWtoXY( pdFootCZPtr(f), uw, xy )

@@ -69,6 +69,22 @@ void pdFootDestroy(pdFoot *f)
   pdFootRefAttZ( f ) = 0;
 }
 
+#define PD_FOOT_TOL  (1e-03)
+bool pdFootIsOn(pdFoot *f)
+{
+  return pdFootPosZ( f ) < PD_FOOT_TOL && pdFootSR( f );
+}
+
+bool pdFootIsOnNext(pdFoot *f)
+{
+  return pdFootRefPosZ( f ) < PD_FOOT_TOL;
+}
+
+bool pdFootIsOnAttempt(pdFoot *f)
+{
+  return pdFootDesPosZ( f ) < PD_FOOT_TOL;
+}
+
 void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
 {
   zVec3D *p, *pp;

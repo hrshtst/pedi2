@@ -157,6 +157,8 @@ void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
 
 void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr)
 {
+  pdFootSR( lf ) = lfsr;
+  pdFootSR( rf ) = rfsr;
   _pdFootDesPosUpdate( lf, rf, delta, vel, zmp, rfsr );
   _pdFootDesPosUpdate( rf, lf, delta, vel, zmp, lfsr );
   _pdFootRefPosUpdate( lf, lfp, lfa, lfsr );

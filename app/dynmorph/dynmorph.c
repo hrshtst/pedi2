@@ -73,8 +73,8 @@ void resize(zxWindow *win, dmConsole *con, dmScene *sx, dmScene *sy)
 
   zxwSepBoxLower( win, 6, 6, w-4, 2*h-12 );
   zxwSepBoxLower( win, w+6, 6, w-4, 2*h-12 );
-  dmSceneResize( sx, w, 0, w, h );
-  dmSceneResize( sy, 0, 0, w, h );
+  dmSceneResize( sx, 0, 0, w, h );
+  dmSceneResize( sy, w, 0, w, h );
 
   zxDequeueEvent(); /* flush unprocessed events */
 }

@@ -10,6 +10,13 @@
 __BEGIN_DECLS
 
 typedef struct{
+  bool stand;
+  bool step;
+  bool walk;
+  bool sidewalk;
+} pdCoreMode;
+
+typedef struct{
   double _t;
   double _dt;
   pdCZ cz;
@@ -17,6 +24,7 @@ typedef struct{
   pdRobot robot;
   pdState state;
   pdCmd *cmd;
+  pdCoreMode mode;
 } pdCore;
 
 __EXPORT void pdCoreInit(pdCore *core, pdCmd *cmd, double dt);
@@ -60,6 +68,8 @@ __EXPORT void pdCoreDestroy(pdCore *core);
   pdFootIncrTime( pdCoreLFPtr( c ) ); \
   pdFootIncrTime( pdCoreRFPtr( c ) ); \
 } while(0)
+
+__EXPORT void pdCoreInitMode(pdCore *core);
 
 /* update method */
 __EXPORT void pdCoreUpdate(pdCore *core);

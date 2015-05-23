@@ -88,6 +88,14 @@ void pdCoreDestroy(pdCore *core)
   pdCoreResetTime( core );
 }
 
+void pdCoreInitMode(pdCore *core)
+{
+  core->mode.stand = true;
+  core->mode.step = false;
+  core->mode.walk = false;
+  core->mode.sidewalk = false;
+}
+
 void _pdCoreUpdateCommand(pdCore *core)
 {
   pdCZSetQ1U( pdCoreCZPtr( core ), core->cmd->qu1 );

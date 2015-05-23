@@ -122,3 +122,17 @@ TEST_F(pdCoreTest, JointDis)
   EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 20 ),
                zVecElem( pdCoreJointDis( &core ), 20 ), GTEST_TOL );
 }
+
+TEST_F(pdCoreTest, InitMode)
+{
+  core.mode.stand    = false;
+  core.mode.step     = true;
+  core.mode.walk     = true;
+  core.mode.sidewalk = true;
+  pdCoreInitMode( &core );
+  EXPECT_TRUE( core.mode.stand );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_FALSE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  destroy_flag = true;
+}

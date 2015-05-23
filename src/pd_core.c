@@ -38,6 +38,8 @@ void _pdCorePoseInit(pdCore *core)
   d = 0.5 * foot_dist;
   x = zVec3DElem( &core->state.com_pos, zX );
   y = zVec3DElem( &core->state.com_pos, zY );
+  core->cmd->xd = x;
+  core->cmd->yd = y;
 
   zVec3DCopy( &core->state.com_pos, &v );
   zVec3DSetElem( &v, zZ, com_height*0.95 );
@@ -197,11 +199,11 @@ void _pdCoreUpdateRef(pdCore *core)
   else
     pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
 
-  if( !zIsTiny( pdCZRefVelU( pdCoreCZPtr(core) ) ) )
+  if( !zIsTiny( pdCZRefVelU( pdCoreCZPtr(core) ) ) ){
     pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
-  core->cmd->xd = pd.e[zX];
-  core->cmd->yd = pd.e[zY];
-  /* core->cmd->zd = pd.e[zZ]; */
+    core->cmd->xd = pd.e[zX];
+    core->cmd->yd = pd.e[zY];
+  }
 }
 
 void _pdCoreUpdateState(pdCore *core)

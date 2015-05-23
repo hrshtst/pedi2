@@ -139,7 +139,7 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
   xd = core->cmd->xd;
   yd = core->cmd->yd;
   if( model == DM_MODEL_MIGHTY ){
-    dmSceneLookAt( sx, xd-4*c, yd-4*s, 0.4, xd, yd, 0.3);
+    dmSceneLookAt( sx, xd-4*c, yd-4*s, 0.4, xd, yd, 0.3 );
     dmSceneLookAt( sy, xd+4*s, yd-4*c, 0.4, xd, yd, 0.3 );
   } else if ( model == DM_MODEL_HYDRA ) {
     dmSceneLookAt( sx, xd-10*c, yd-10*s, 1, xd, yd, 0.8 );

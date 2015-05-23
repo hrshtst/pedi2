@@ -10,3 +10,4 @@
 /app/dynmorph/dynmorph
 /app/pedi2-config
 *.pyc
+/tmp

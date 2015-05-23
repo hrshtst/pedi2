@@ -61,8 +61,12 @@ __EXPORT void pdCoreDestroy(pdCore *core);
   pdFootIncrTime( pdCoreRFPtr( c ) ); \
 } while(0)
 
-/* update methoed */
+/* update method */
 __EXPORT void pdCoreUpdate(pdCore *core);
+
+/* output method */
+__EXPORT void pdCoreDataFWrite(FILE *fp, pdCore *core);
+#define pdCoreDataWrite(c) pdCoreDataFWrite( stdout, c )
 
 __END_DECLS
 

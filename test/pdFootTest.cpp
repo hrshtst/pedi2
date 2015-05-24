@@ -1,351 +1,718 @@
 #include "gtest/gtest.h"
-#include <zm/zm_complex.h>
-#include <pedi2/pd_cz.h>
 #include <pedi2/pd_foot.h>
 
-class pdFootTest : public testing::Test {
-protected:
-  virtual void SetUp() {
-    pdCZInit( &ctrl );
-    pdCZPrmRad(&ctrl)->rho = 1;
-    pdCZPrmRad(&ctrl)->dist = 2;
-    // left foot
-    lf.dy = 1;
-    lf.sole_w = 0.07;
-    lf.h = 1;
-    zVec3DCreate( &lf.p, -1, 0, 0 );
-    zVec3DClear(&lf.pd);
-    zVec3DClear(&lf.ps);
-    zVec3DClear(&lf.a);
-    zVec3DClear(&lf.as);
-    // right foot
-    rf.dy = -1;
-    rf.sole_w = 0.07;
-    rf.h = 1;
-    zVec3DCreate( &rf.p,  1, 0, 0 );
-    zVec3DClear(&rf.pd);
-    zVec3DClear(&rf.ps);
-    zVec3DClear(&rf.a);
-    zVec3DClear(&rf.as);
-    // set dummy values
-    lf.phase = rf.phase = 100;
-  };
-  virtual void TearDown() {};
+const double TIME_STEP = 0.01;
 
-  pdCZ ctrl;
-  pdFoot lf;
-  pdFoot rf;
-  zComplex pz;
+class pdFootTest : public testing::Test {
+ protected:
+  virtual void SetUp() {
+    pdCZVrtInit( &vrt );
+    pdCZHrzInit( &cz, &vrt );
+    pdFootInit( &lf, &cz, PD_FOOT_LEFT, TIME_STEP );
+    pdFootInit( &rf, &cz, PD_FOOT_RIGHT, TIME_STEP );
+  };
+  virtual void TearDown() {
+    pdFootDestroy( &lf );
+    pdFootDestroy( &rf );
+    pdCZHrzDestroy( &cz );
+  };
+
+  void SetVacuousPrm(pdFoot *f) {
+    pdFootSetPosX( f, 1 );
+    pdFootSetPosY( f, 2 );
+    pdFootSetPosZ( f, 3 );
+    pdFootSetDesPosX( f, 4 );
+    pdFootSetDesPosY( f, 5 );
+    pdFootSetDesPosZ( f, 6 );
+    pdFootSetAttX( f, 7 );
+    pdFootSetAttY( f, 8 );
+    pdFootSetAttZ( f, 9 );
+    pdFootSetDesAttX( f, 10 );
+    pdFootSetDesAttY( f, 11 );
+    pdFootSetDesAttZ( f, 12 );
+    pdFootSetSR( f, &dummy );
+    pdFootSetTrXK( f, 13 );
+    pdFootSetTrXC( f, 14 );
+    pdFootSetTrXOld( f, 15 );
+    pdFootSetTrYK( f, 16 );
+    pdFootSetTrYC( f, 17 );
+    pdFootSetTrYOld( f, 18 );
+    pdFootSetTrZK( f, 19 );
+    pdFootSetTrZC( f, 20 );
+    pdFootSetTrZOld( f, 21 );
+    pdFootSetMaxHeight( f, 22 );
+    pdFootRefPosX( f ) = 23;
+    pdFootRefPosY( f ) = 24;
+    pdFootRefPosZ( f ) = 25;
+    pdFootRefAttX( f ) = 26;
+    pdFootRefAttY( f ) = 27;
+    pdFootRefAttZ( f ) = 28;
+    pdFootUWSign( pdFootUWPtr( f ) ) = 100;
+    pdFootZSign( pdFootZPtr( f ) ) = -100;
+  };
+
+  zVec3DList sr, dummy;
+  pdCZVrt vrt;
+  pdCZHrz cz;
+  pdFoot lf, rf;
 };
 
-TEST_F(pdFootTest, CalcFootPhaseDoubleSupport)
+TEST_F(pdFootTest, Init)
 {
-  zComplexCreate(&pz, 0, 1 );
-  pdFootPhase( &lf, &rf, 0, 0, 0, &pz );
-  pdFootPhase( &rf, &lf, 0, 0, 0, &pz );
-  EXPECT_EQ( 0, lf.phase );
-  EXPECT_EQ( 1, rf.phase );
+  SetVacuousPrm( &lf );
+  pdFootInit( &lf, &cz, PD_FOOT_LEFT, TIME_STEP );
+  EXPECT_EQ( 0, pdFootPosX( &lf ) );
+  EXPECT_EQ( 0, pdFootPosY( &lf ) );
+  EXPECT_EQ( 0, pdFootPosZ( &lf ) );
+  EXPECT_EQ( 0, pdFootDesPosX( &lf ) );
+  EXPECT_EQ( 0, pdFootDesPosY( &lf ) );
+  EXPECT_EQ( 0, pdFootDesPosZ( &lf ) );
+  EXPECT_EQ( 0, pdFootAttX( &lf ) );
+  EXPECT_EQ( 0, pdFootAttY( &lf ) );
+  EXPECT_EQ( 0, pdFootAttZ( &lf ) );
+  EXPECT_EQ( 0, pdFootDesAttX( &lf ) );
+  EXPECT_EQ( 0, pdFootDesAttY( &lf ) );
+  EXPECT_EQ( 0, pdFootDesAttZ( &lf ) );
+  EXPECT_EQ( NULL, pdFootSR( &lf ) );
+  EXPECT_EQ( &cz, pdFootCZPtr( &lf ) );
+  EXPECT_EQ( 0, lf._sol._k[0] );
+  EXPECT_EQ( 0, lf._sol._c[0] );
+  EXPECT_EQ( 0, lf._sol._old[0] );
+  EXPECT_EQ( 0, lf._sol._k[1] );
+  EXPECT_EQ( 0, lf._sol._c[1] );
+  EXPECT_EQ( 0, lf._sol._old[1] );
+  EXPECT_EQ( 0, lf._sol._k[2] );
+  EXPECT_EQ( 0, lf._sol._c[2] );
+  EXPECT_EQ( 0, lf._sol._old[2] );
+  EXPECT_EQ( 0, pdFootRefPosX( &lf ) );
+  EXPECT_EQ( 0, pdFootRefPosY( &lf ) );
+  EXPECT_EQ( 0, pdFootRefPosZ( &lf ) );
+  EXPECT_EQ( 0, pdFootRefAttX( &lf ) );
+  EXPECT_EQ( 0, pdFootRefAttY( &lf ) );
+  EXPECT_EQ( 0, pdFootRefAttZ( &lf ) );
+  EXPECT_EQ( 1, pdFootUWSign( pdFootUWPtr( &lf ) ) );
+  EXPECT_EQ( 1, pdFootZSign( pdFootZPtr( &lf ) ) );
 
-  zComplexCreate(&pz, 0, -1 );
-  pdFootPhase( &lf, &rf, 0, 0, 0, &pz );
-  pdFootPhase( &rf, &lf, 0, 0, 0, &pz );
-  EXPECT_EQ( 1, lf.phase );
-  EXPECT_EQ( 0, rf.phase );
+  SetVacuousPrm( &rf );
+  pdFootInit( &rf, &cz, PD_FOOT_RIGHT, TIME_STEP );
+  EXPECT_EQ( -1, pdFootUWSign( pdFootUWPtr( &rf ) ) );
+  EXPECT_EQ( -1, pdFootZSign( pdFootZPtr( &rf ) ) );
 }
 
-TEST_F(pdFootTest, CalcFootPhaseSingleSupport)
+TEST_F(pdFootTest, Destroy)
 {
-  zComplexCreate(&pz, 1, 0 );
-  pdFootPhase( &lf, &rf, 0, 0, 0, &pz );
-  pdFootPhase( &rf, &lf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 0, lf.phase );
-  EXPECT_DOUBLE_EQ( 0.5, rf.phase );
-
-  zComplexCreate(&pz, -1, 0 );
-  pdFootPhase( &lf, &rf, 0, 0, 0, &pz );
-  pdFootPhase( &rf, &lf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 0.5, lf.phase );
-  EXPECT_DOUBLE_EQ( 0, rf.phase );
+  SetVacuousPrm( &lf );
+  pdFootInit( &lf, &cz, PD_FOOT_LEFT, TIME_STEP );
+  pdFootDestroy( &lf );
+  EXPECT_EQ( 0, pdFootPosX( &lf ) );
+  EXPECT_EQ( 0, pdFootPosY( &lf ) );
+  EXPECT_EQ( 0, pdFootPosZ( &lf ) );
+  EXPECT_EQ( 0, pdFootDesPosX( &lf ) );
+  EXPECT_EQ( 0, pdFootDesPosY( &lf ) );
+  EXPECT_EQ( 0, pdFootDesPosZ( &lf ) );
+  EXPECT_EQ( 0, pdFootAttX( &lf ) );
+  EXPECT_EQ( 0, pdFootAttY( &lf ) );
+  EXPECT_EQ( 0, pdFootAttZ( &lf ) );
+  EXPECT_EQ( 0, pdFootDesAttX( &lf ) );
+  EXPECT_EQ( 0, pdFootDesAttY( &lf ) );
+  EXPECT_EQ( 0, pdFootDesAttZ( &lf ) );
+  EXPECT_EQ( NULL, pdFootSR( &lf ) );
+  EXPECT_EQ( NULL, pdFootCZPtr( &lf ) );
+  EXPECT_EQ( 0, lf._sol._k[0] );
+  EXPECT_EQ( 0, lf._sol._c[0] );
+  EXPECT_EQ( 0, lf._sol._old[0] );
+  EXPECT_EQ( 0, lf._sol._k[1] );
+  EXPECT_EQ( 0, lf._sol._c[1] );
+  EXPECT_EQ( 0, lf._sol._old[1] );
+  EXPECT_EQ( 0, lf._sol._k[2] );
+  EXPECT_EQ( 0, lf._sol._c[2] );
+  EXPECT_EQ( 0, lf._sol._old[2] );
+  EXPECT_EQ( 0, pdFootRefPosX( &lf ) );
+  EXPECT_EQ( 0, pdFootRefPosY( &lf ) );
+  EXPECT_EQ( 0, pdFootRefPosZ( &lf ) );
+  EXPECT_EQ( 0, pdFootRefAttX( &lf ) );
+  EXPECT_EQ( 0, pdFootRefAttY( &lf ) );
+  EXPECT_EQ( 0, pdFootRefAttZ( &lf ) );
+  EXPECT_EQ( 0, pdFootUWSign( pdFootUWPtr( &lf ) ) );
+  EXPECT_EQ( 0, pdFootZSign( pdFootZPtr( &lf ) ) );
 }
 
-// TODO: add test for calculation of foot phase
-//       when (dx, dy) != (0, 0) and theta != 0
-
-TEST_F(pdFootTest, FootLiftDoubleSupport)
+TEST_F(pdFootTest, SetPos)
 {
-  zVec3DElem(&lf.pd,zZ) = 100;
-  zVec3DElem(&rf.pd,zZ) = 100;
-
-  zComplexCreate(&pz, 0, 1 );
-  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
-
-  zComplexCreate(&pz, 0, -1 );
-  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+  SetVacuousPrm( &lf );
+  pdFootSetPos( &lf, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootPosX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootPosY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootPosZ( &lf ) );
 }
 
-TEST_F(pdFootTest, FootLiftSingleSupport)
+TEST_F(pdFootTest, SetPosVec)
 {
-  zVec3DElem(&lf.pd,zZ) = 100;
-  zVec3DElem(&rf.pd,zZ) = 100;
+  zVec3D v;
 
-  zComplexCreate(&pz, 1, 0 );
-  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
-  EXPECT_DOUBLE_EQ( 1, zVec3DElem(&rf.pd,zZ) );
-
-  zComplexCreate(&pz, -1, 0 );
-  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 1, zVec3DElem(&lf.pd,zZ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+  SetVacuousPrm( &lf );
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdFootSetPosVec( &lf, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootPosX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootPosY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootPosZ( &lf ) );
 }
 
-TEST_F(pdFootTest, FootLiftRhoIsZero)
+TEST_F(pdFootTest, SetPosXYZ)
 {
-  pdCZPrmRad(&ctrl)->rho = 0;
-  zVec3DElem(&lf.pd,zZ) = 100;
-  zVec3DElem(&rf.pd,zZ) = 100;
-
-  zComplexCreate(&pz, 1, 0 );
-  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
-
-  zComplexCreate(&pz, -1, 0 );
-  pdFootLift( &ctrl, &lf, &rf, 0, 0, 0, &pz );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&lf.pd,zZ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zZ) );
+  SetVacuousPrm( &lf );
+  pdFootSetPosX( &lf, 0.1 );
+  pdFootSetPosY( &lf, 0.2 );
+  pdFootSetPosZ( &lf, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootPosX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootPosY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootPosZ( &lf ) );
 }
 
-// TODO: add test for calculation of foot phase
-//       when (dx, dy) != (0, 0) and theta != 0
-
-TEST_F(pdFootTest, FootIsOn)
+TEST_F(pdFootTest, SetDesPos)
 {
-  zVec3DElem(&lf.p,zZ) = 0;
-  zVec3DElem(&rf.p,zZ) = 0;
+  SetVacuousPrm( &lf );
+  pdFootSetDesPos( &lf, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootDesPosX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootDesPosY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootDesPosZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetDesPosVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm( &lf );
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdFootSetDesPosVec( &lf, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootDesPosX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootDesPosY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootDesPosZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetDesPosXYZ)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetDesPosX( &lf, 0.1 );
+  pdFootSetDesPosY( &lf, 0.2 );
+  pdFootSetDesPosZ( &lf, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootDesPosX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootDesPosY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootDesPosZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetAtt)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetAtt( &lf, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootAttX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootAttY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootAttZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetAttVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm( &lf );
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdFootSetAttVec( &lf, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootAttX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootAttY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootAttZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetAttXYZ)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetAttX( &lf, 0.1 );
+  pdFootSetAttY( &lf, 0.2 );
+  pdFootSetAttZ( &lf, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootAttX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootAttY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootAttZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetDesAtt)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetDesAtt( &lf, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootDesAttX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootDesAttY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootDesAttZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetDesAttVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm( &lf );
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdFootSetDesAttVec( &lf, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootDesAttX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootDesAttY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootDesAttZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetDesAttXYZ)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetDesAttX( &lf, 0.1 );
+  pdFootSetDesAttY( &lf, 0.2 );
+  pdFootSetDesAttZ( &lf, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootDesAttX( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.2, pdFootDesAttY( &lf ) );
+  EXPECT_DOUBLE_EQ( 0.3, pdFootDesAttZ( &lf ) );
+}
+
+TEST_F(pdFootTest, SetTrX)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetTrXK( &lf, 0.1 );
+  pdFootSetTrXC( &lf, 0.2 );
+  pdFootSetTrXOld( &lf, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, lf._sol._k[0] );
+  EXPECT_DOUBLE_EQ( 0.2, lf._sol._c[0] );
+  EXPECT_DOUBLE_EQ( 0.3, lf._sol._old[0] );
+}
+
+TEST_F(pdFootTest, SetTrY)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetTrYK( &lf, 0.1 );
+  pdFootSetTrYC( &lf, 0.2 );
+  pdFootSetTrYOld( &lf, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, lf._sol._k[1] );
+  EXPECT_DOUBLE_EQ( 0.2, lf._sol._c[1] );
+  EXPECT_DOUBLE_EQ( 0.3, lf._sol._old[1] );
+}
+
+TEST_F(pdFootTest, SetTrZ)
+{
+  SetVacuousPrm( &lf );
+  pdFootSetTrZK( &lf, 0.1 );
+  pdFootSetTrZC( &lf, 0.2 );
+  pdFootSetTrZOld( &lf, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, lf._sol._k[2] );
+  EXPECT_DOUBLE_EQ( 0.2, lf._sol._c[2] );
+  EXPECT_DOUBLE_EQ( 0.3, lf._sol._old[2] );
+}
+
+TEST_F(pdFootTest, ReferMaxHeight)
+{
+  EXPECT_EQ( 0, pdFootMaxHeight( &lf ) );
+  pdFootZSetMaxHeight( pdFootZPtr( &lf ), 0.2 );
+  EXPECT_EQ( 0.2, pdFootMaxHeight( &lf ) );
+  pdFootZSetMaxHeight( pdFootZPtr( &lf ), 1.0 );
+  EXPECT_EQ( 1.0, pdFootMaxHeight( &lf ) );
+}
+
+TEST_F(pdFootTest, SetMaxHeight)
+{
+  pdFootSetMaxHeight( &lf, 0.2 );
+  EXPECT_EQ( 0.2, pdFootZMaxHeight( pdFootZPtr( &lf ) ) );
+  pdFootSetMaxHeight( &lf, 1.0 );
+  EXPECT_EQ( 1.0, pdFootZMaxHeight( pdFootZPtr( &lf ) ) );
+}
+
+TEST_F(pdFootTest, SetTime)
+{
+  SetVacuousPrm( &lf );
+  lf._sol._t = 1000;
+
+  pdFootInit( &lf, &cz, PD_FOOT_LEFT, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 0.0, pdFootTime(&lf) );
+
+  pdFootSetTime( &lf, 10 );
+  EXPECT_DOUBLE_EQ( 10.0, pdFootTime(&lf) );
+}
+
+TEST_F(pdFootTest, SetTimeStep)
+{
+  SetVacuousPrm( &lf );
+  lf._sol._dt = 1000;
+
+  pdFootInit( &lf, &cz, PD_FOOT_LEFT, TIME_STEP );
+  EXPECT_DOUBLE_EQ( TIME_STEP, pdFootTimeStep(&lf) );
+
+  pdFootSetTimeStep( &lf, 0.001 );
+  EXPECT_DOUBLE_EQ( 0.001, pdFootTimeStep(&lf) );
+}
+
+TEST_F(pdFootTest, TimeIncr)
+{
+  EXPECT_DOUBLE_EQ( 0, pdFootTime( &lf ) );
+  pdFootIncrTime( &lf );
+  EXPECT_DOUBLE_EQ( TIME_STEP, pdFootTime( &lf ) );
+  pdFootIncrTime( &lf );
+  EXPECT_DOUBLE_EQ( 2*TIME_STEP, pdFootTime( &lf ) );
+  pdFootIncrTime( &lf );
+  EXPECT_DOUBLE_EQ( 3*TIME_STEP, pdFootTime( &lf ) );
+}
+
+TEST_F(pdFootTest, IsOn_IsOff)
+{
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootSR( &lf ) = &sr;
   EXPECT_TRUE( pdFootIsOn( &lf ) );
-  EXPECT_TRUE( pdFootIsOn( &rf ) );
+  EXPECT_FALSE( pdFootIsOff( &lf ) );
 
-  zVec3DElem(&lf.p,zZ) = 0.1;
-  zVec3DElem(&rf.p,zZ) = 0.1;
+  pdFootPosZ( &lf ) = 0.1;
+  pdFootSR( &lf ) = NULL;
   EXPECT_FALSE( pdFootIsOn( &lf ) );
-  EXPECT_FALSE( pdFootIsOn( &rf ) );
+  EXPECT_TRUE( pdFootIsOff( &lf ) );
+
+  pdFootPosZ( &lf ) = 0.1;
+  pdFootSR( &lf ) = &sr;
+  EXPECT_FALSE( pdFootIsOn( &lf ) );
+  EXPECT_TRUE( pdFootIsOff( &lf ) );
+
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootSR( &lf ) = NULL;
+  EXPECT_FALSE( pdFootIsOn( &lf ) );
+  EXPECT_TRUE( pdFootIsOff( &lf ) );
 }
 
-TEST_F(pdFootTest, FootDoesAttemptToLift)
+TEST_F(pdFootTest, IsOnNext_IsOffNext)
 {
-  zVec3DElem(&lf.pd,zZ) = 0;
-  zVec3DElem(&rf.pd,zZ) = 0;
-  EXPECT_FALSE( pdFootDoesAttemptToLift( &lf ) );
-  EXPECT_FALSE( pdFootDoesAttemptToLift( &rf ) );
+  pdFootRefPosZ( &lf ) = 0.0;
+  EXPECT_TRUE( pdFootIsOnNext( &lf ) );
+  EXPECT_FALSE( pdFootIsOffNext( &lf ) );
 
-  zVec3DElem(&lf.pd,zZ) = 0.1;
-  zVec3DElem(&rf.pd,zZ) = 0.1;
-  EXPECT_TRUE( pdFootDoesAttemptToLift( &lf ) );
-  EXPECT_TRUE( pdFootDoesAttemptToLift( &rf ) );
+  pdFootRefPosZ( &lf ) = 0.1;
+  EXPECT_FALSE( pdFootIsOnNext( &lf ) );
+  EXPECT_TRUE( pdFootIsOffNext( &lf ) );
 }
 
-TEST_F(pdFootTest, FootMoveWhenBothFeetOn)
+TEST_F(pdFootTest, IsOnAttempt_IsOffAttempt)
 {
-  zVec3DElem(&lf.p,zZ) = 0;
-  zVec3DElem(&rf.p,zZ) = 0;
-  zVec3DCreate(&lf.pd, 1, 2, 0);
-  zVec3DCreate(&rf.pd, 3, 4, 0);
-  pdFootMove( &ctrl, &lf, &rf, 0, 0, 0 );
-  EXPECT_EQ( 1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_EQ( 2, zVec3DElem(&lf.pd,zY) );
-  EXPECT_EQ( 3, zVec3DElem(&rf.pd,zX) );
-  EXPECT_EQ( 4, zVec3DElem(&rf.pd,zY) );
+  pdFootDesPosZ( &lf ) = 0.0;
+  EXPECT_TRUE( pdFootIsOnAttempt( &lf ) );
+  EXPECT_FALSE( pdFootIsOffAttempt( &lf ) );
+
+  pdFootDesPosZ( &lf ) = 0.1;
+  EXPECT_FALSE( pdFootIsOnAttempt( &lf ) );
+  EXPECT_TRUE( pdFootIsOffAttempt( &lf ) );
 }
 
-TEST_F(pdFootTest, FootMoveLeftFootFloating)
+TEST_F(pdFootTest, IsBothOn)
 {
-  // left foot is floating
-  pdCZPrmRad(&ctrl)->dist = 2;
-  zVec3DElem(&lf.p,zZ) = 0.1;
-  zVec3DElem(&rf.p,zZ) = 0;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, 0, 0 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&rf.pd,zY) );
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootPosZ( &rf ) = 0.0;
+  pdFootSR( &lf ) = &sr;
+  pdFootSR( &rf ) = &sr;
+  EXPECT_TRUE( pdFootIsBothOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+  EXPECT_FALSE( pdFootIsEitherOff( &lf, &rf ) );
 
-  pdCZPrmRad(&ctrl)->dist = 3;
-  zVec3DElem(&lf.p,zZ) = 0.1;
-  zVec3DElem(&rf.p,zZ) = 0;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, 0, 0 );
-  EXPECT_DOUBLE_EQ( -1.5, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(    0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(    1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(    0, zVec3DElem(&rf.pd,zY) );
+  pdFootPosZ( &lf ) = 0.1;
+  pdFootPosZ( &rf ) = 0.0;
+  pdFootSR( &lf ) = NULL;
+  pdFootSR( &rf ) = &sr;
+  EXPECT_FALSE( pdFootIsBothOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOff( &lf, &rf ) );
+
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootPosZ( &rf ) = 0.1;
+  pdFootSR( &lf ) = &sr;
+  pdFootSR( &rf ) = NULL;
+  EXPECT_FALSE( pdFootIsBothOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOff( &lf, &rf ) );
 }
 
-TEST_F(pdFootTest, FootMoveRightFootFloating)
+TEST_F(pdFootTest, IsBothOnNext)
 {
-  // right foot is floating
-  pdCZPrmRad(&ctrl)->dist = 2;
-  zVec3DElem(&lf.p,zZ) = 0;
-  zVec3DElem(&rf.p,zZ) = 0.1;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, 0, 0 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&rf.pd,zY) );
+  pdFootRefPosZ( &lf ) = 0.0;
+  pdFootRefPosZ( &rf ) = 0.0;
+  EXPECT_TRUE( pdFootIsBothOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+  EXPECT_FALSE( pdFootIsEitherOffNext( &lf, &rf ) );
 
-  pdCZPrmRad(&ctrl)->dist = 3;
-  zVec3DElem(&lf.p,zZ) = 0;
-  zVec3DElem(&rf.p,zZ) = 0.1;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, 0, 0 );
-  EXPECT_DOUBLE_EQ(  -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(   0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 1.5, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(   0, zVec3DElem(&rf.pd,zY) );
+  pdFootRefPosZ( &lf ) = 0.1;
+  pdFootRefPosZ( &rf ) = 0.0;
+  EXPECT_FALSE( pdFootIsBothOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffNext( &lf, &rf ) );
+
+  pdFootRefPosZ( &lf ) = 0.0;
+  pdFootRefPosZ( &rf ) = 0.1;
+  EXPECT_FALSE( pdFootIsBothOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffNext( &lf, &rf ) );
 }
 
-TEST_F(pdFootTest, FootMoveLeftFootFloatingRefChange)
+TEST_F(pdFootTest, IsBothOnAttempt)
 {
-  // left foot is floating
-  pdCZPrmRad(&ctrl)->dist = 2;
-  zVec3DElem(&lf.p,zZ) = 0.1;
-  zVec3DElem(&rf.p,zZ) = 0;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, 1, 0 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&rf.pd,zY) );
+  pdFootDesPosZ( &lf ) = 0.0;
+  pdFootDesPosZ( &rf ) = 0.0;
+  EXPECT_TRUE( pdFootIsBothOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+  EXPECT_FALSE( pdFootIsEitherOffAttempt( &lf, &rf ) );
 
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, -1, 0 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&rf.pd,zY) );
+  pdFootDesPosZ( &lf ) = 0.1;
+  pdFootDesPosZ( &rf ) = 0.0;
+  EXPECT_FALSE( pdFootIsBothOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffAttempt( &lf, &rf ) );
 
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0.5, 0, 0 );
-  EXPECT_DOUBLE_EQ( -0.5, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(    0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(    1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(    0, zVec3DElem(&rf.pd,zY) );
-
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, -0.5, 0, 0 );
-  EXPECT_DOUBLE_EQ( -1.5, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(    0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(    1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(    0, zVec3DElem(&rf.pd,zY) );
+  pdFootDesPosZ( &lf ) = 0.0;
+  pdFootDesPosZ( &rf ) = 0.1;
+  EXPECT_FALSE( pdFootIsBothOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffAttempt( &lf, &rf ) );
 }
 
-TEST_F(pdFootTest, FootMoveRightFootFloatingRefChange)
+
+TEST_F(pdFootTest, RotUWtoXY_1)
 {
-  // right foot is floating
-  pdCZPrmRad(&ctrl)->dist = 2;
-  zVec3DElem(&lf.p,zZ) = 0;
-  zVec3DElem(&rf.p,zZ) = 0.1;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, 1, 0 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&rf.pd,zY) );
+  zVec2D vuw, vxy;
 
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0, -1, 0 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(  1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&rf.pd,zY) );
-
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0.5, 0, 0 );
-  EXPECT_DOUBLE_EQ(  -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(   0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 1.5, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(   0, zVec3DElem(&rf.pd,zY) );
-
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, -0.5, 0, 0 );
-  EXPECT_DOUBLE_EQ(  -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(   0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 0.5, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ(   0, zVec3DElem(&rf.pd,zY) );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/4 );
+  zVec2DCreate( vuw, 2, 2 );
+  pdFootRotUWtoXY( &lf, vuw, vxy );
+  EXPECT_NEAR( -2*sqrt(2), vxy[zX], 1e-12 );
+  EXPECT_NEAR( 0,          vxy[zY], 1e-12 );
 }
 
-TEST_F(pdFootTest, FootMoveLeftFootFloatingRotate)
+TEST_F(pdFootTest, RotUWtoXY_2)
 {
-  double cosPI_4 = 0.5 * sqrt(2);
+  zVec2D vuw, vxy;
 
-  // left foot is floating
-  pdCZPrmRad(&ctrl)->dist = 2;
-  zVec3DElem(&lf.p,zZ) = 0.1;
-  zVec3DElem(&rf.p,zZ) = 0;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0.5, 0.5, 0.5*zPI_2 );
-  EXPECT_DOUBLE_EQ( 0.5-cosPI_4, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ( 0.5-cosPI_4, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 1.5*zPI_2, zVec3DElem(&lf.as,zX) );
-
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0.5, -0.5, -0.5*zPI_2 );
-  EXPECT_DOUBLE_EQ(  0.5-cosPI_4, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ( -0.5+cosPI_4, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 1, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem(&rf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 0.5*zPI_2, zVec3DElem(&lf.as,zX) );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/6 );
+  zVec2DCreate( vuw, 4, 2 );
+  pdFootRotUWtoXY( &lf, vuw, vxy );
+  EXPECT_NEAR( -sqrt(3)-2,  vxy[zX], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)-1, vxy[zY], 1e-12 );
 }
 
-TEST_F(pdFootTest, FootMoveRightFootFloatingRotate)
+TEST_F(pdFootTest, RotXYtoUW_1)
 {
-  double cosPI_4 = 0.5 * sqrt(2);
+  zVec2D vuw, vxy;
 
-  // right foot is floating
-  pdCZPrmRad(&ctrl)->dist = 2;
-  zVec3DElem(&lf.p,zZ) = 0;
-  zVec3DElem(&rf.p,zZ) = 0.1;
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0.5, 0.5, 0.5*zPI_2 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 0.5+cosPI_4, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ( 0.5+cosPI_4, zVec3DElem(&rf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 1.5*zPI_2, zVec3DElem(&rf.as,zX) );
-
-  zVec3DCopy(&lf.p, &lf.pd);
-  zVec3DCopy(&rf.p, &rf.pd);
-  pdFootMove( &ctrl, &lf, &rf, 0.5, -0.5, -0.5*zPI_2 );
-  EXPECT_DOUBLE_EQ( -1, zVec3DElem(&lf.pd,zX) );
-  EXPECT_DOUBLE_EQ(  0, zVec3DElem(&lf.pd,zY) );
-  EXPECT_DOUBLE_EQ(  0.5+cosPI_4, zVec3DElem(&rf.pd,zX) );
-  EXPECT_DOUBLE_EQ( -0.5-cosPI_4, zVec3DElem(&rf.pd,zY) );
-  EXPECT_DOUBLE_EQ( 0.5*zPI_2, zVec3DElem(&rf.as,zX) );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/4 );
+  zVec2DCreate( vxy, 2, 2 );
+  pdFootRotXYtoUW( &lf, vxy, vuw );
+  EXPECT_NEAR( 0,          vuw[pdU], 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), vuw[pdW], 1e-12 );
 }
 
-// TODO: add test for pdFootUpdate
-// TEST_F(pdFootTest, FootUpdate)
-// {}
+TEST_F(pdFootTest, RotXYtoUW_2)
+{
+  zVec2D vuw, vxy;
+
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/6 );
+  zVec2DCreate( vxy, -2, 2 );
+  pdFootRotXYtoUW( &lf, vxy, vuw );
+  EXPECT_NEAR( sqrt(3)+1, vuw[pdU], 1e-12 );
+  EXPECT_NEAR( sqrt(3)-1, vuw[pdW], 1e-12 );
+}
+
+TEST_F(pdFootTest, XformUWtoXY_1)
+{
+  zVec2D uw, xy;
+
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 0, 0 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/4 );
+  zVec2DCreate( uw, 2, -2 );
+  pdFootXformUWtoXY( &lf, uw, xy );
+  EXPECT_NEAR( 0,         xy[zX], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(2), xy[zY], 1e-12 );
+}
+
+TEST_F(pdFootTest, XformUWtoXY_2)
+{
+  zVec2D uw, xy;
+
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 2, 1 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/6 );
+  zVec2DCreate( uw, 2, 4 );
+  pdFootXformUWtoXY( &lf, uw, xy );
+  EXPECT_NEAR( -2*sqrt(3)+1, xy[zX], 1e-12 );
+  EXPECT_NEAR( sqrt(3)-1,    xy[zY], 1e-12 );
+}
+
+TEST_F(pdFootTest, XformXYtoUW_1)
+{
+  zVec2D uw, xy;
+
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 0, 0 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/4 );
+  zVec2DCreate( xy, 2, -2 );
+  pdFootXformXYtoUW( &lf, xy, uw );
+  EXPECT_NEAR( -2*sqrt(2), uw[pdU], 1e-12 );
+  EXPECT_NEAR( 0,          uw[pdW], 1e-12 );
+}
+
+TEST_F(pdFootTest, XformXYtoUW_2)
+{
+  zVec2D uw, xy;
+
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 2, 1 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/6 );
+  zVec2DCreate( xy, 4, 5 );
+  pdFootXformXYtoUW( &lf, xy, uw);
+  EXPECT_NEAR( -1+2*sqrt(3), uw[pdU], 1e-12 );
+  EXPECT_NEAR( -sqrt(3)-2,   uw[pdW], 1e-12 );
+}
+
+TEST_F(pdFootTest, XformSRXYtoUW_1)
+{
+  zVec3DList sr_w;
+  zVec3D sr_w_vert[4];
+  zVec3D *sr_m_vert;
+
+  // make a convex hull
+  zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
+  zVec3DCreate( &sr_w_vert[1], 0, 4, 0 );
+  zVec3DCreate( &sr_w_vert[2], 2, 4, 0 );
+  zVec3DCreate( &sr_w_vert[3], 2, 2, 0 );
+  zCH2D( &sr_w, sr_w_vert, 4 );
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 0, 0 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/4 );
+
+  // method to be tested
+  pdFootXformSRXYtoUW( &lf, &sr_w );
+
+  sr_m_vert = pdFootZSRVert( pdFootZPtr( &lf ) );
+  EXPECT_NEAR( sqrt(2),    zVec3DElem(&sr_m_vert[0], zX), 1e-12 );
+  EXPECT_NEAR( -sqrt(2),   zVec3DElem(&sr_m_vert[0], zY), 1e-12 );
+  EXPECT_NEAR( 0,          zVec3DElem(&sr_m_vert[1], zX), 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), zVec3DElem(&sr_m_vert[1], zY), 1e-12 );
+  EXPECT_NEAR( sqrt(2),    zVec3DElem(&sr_m_vert[2], zX), 1e-12 );
+  EXPECT_NEAR( -3*sqrt(2), zVec3DElem(&sr_m_vert[2], zY), 1e-12 );
+  EXPECT_NEAR( 2*sqrt(2),  zVec3DElem(&sr_m_vert[3], zX), 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), zVec3DElem(&sr_m_vert[3], zY), 1e-12 );
+}
+
+TEST_F(pdFootTest, XformSRXYtoUW_2)
+{
+  zVec3DList sr_w;
+  zVec3D sr_w_vert[3];
+  zVec3D *sr_m_vert;
+
+  // make a convex hull
+  zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
+  zVec3DCreate( &sr_w_vert[1], 4, 5, 0 );
+  zVec3DCreate( &sr_w_vert[2], 5, 1, 0 );
+  zCH2D( &sr_w, sr_w_vert, 3 );
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 4, 3 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/6 );
+
+  // method to be tested
+  pdFootXformSRXYtoUW( &lf, &sr_w );
+
+  sr_m_vert = pdFootZSRVert( pdFootZPtr( &lf ) );
+  EXPECT_NEAR( -0.5*sqrt(3)+2, zVec3DElem(&sr_m_vert[0], zX), 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)+0.5,  zVec3DElem(&sr_m_vert[0], zY), 1e-12 );
+  EXPECT_NEAR( -sqrt(3)-0.5,   zVec3DElem(&sr_m_vert[1], zX), 1e-12 );
+  EXPECT_NEAR( -0.5*sqrt(3)+1, zVec3DElem(&sr_m_vert[1], zY), 1e-12 );
+  EXPECT_NEAR( sqrt(3),        zVec3DElem(&sr_m_vert[2], zX), 1e-12 );
+  EXPECT_NEAR( -1,             zVec3DElem(&sr_m_vert[2], zY), 1e-12 );
+}
+
+TEST_F(pdFootTest, XformSRXYtoUW_NULL)
+{
+  zVec3D sr_w_vert[3];
+  zVec3DList sr_w, sr_dummy;
+
+  // make a convex hull
+  zVec3DCreate( &sr_w_vert[0], 0, 2, 0 );
+  zVec3DCreate( &sr_w_vert[1], 4, 5, 0 );
+  zVec3DCreate( &sr_w_vert[2], 5, 1, 0 );
+  zCH2D( &sr_w, sr_w_vert, 3 );
+  pdCZHrzSetPos( pdFootCZPtr( &lf ), 4, 3 );
+  pdCZHrzSetTheta( pdFootCZPtr( &lf ), zPI/6 );
+
+  pdFootXformSRXYtoUW( &lf, &sr_w );
+  EXPECT_EQ( 3, pdFootZPtr(&lf)->_vert_num );
+
+  zListInit( &sr_dummy );
+  pdFootXformSRXYtoUW( &lf, &sr_dummy );
+  EXPECT_EQ( 0, pdFootZPtr(&lf)->_vert_num );
+
+  pdFootXformSRXYtoUW( &lf, NULL );
+  EXPECT_EQ( 0, pdFootZPtr(&lf)->_vert_num );
+}
+
+TEST_F(pdFootTest, pdFootCalcRefPos)
+{
+  zVec3D p, pd, refp;
+  int i;
+
+  pdFootSetTimeStep( &lf, 0.01 );
+  zVec3DCreate( &p, 0, 0, 0 );
+  zVec3DCreate( &pd, 0.5, 0.5, 0.5 );
+  pdFootSetTrXK( &lf, 3000 );
+  pdFootSetTrXC( &lf, 50 );
+  pdFootSetTrXOld( &lf, 0 );
+  pdFootSetTrYK( &lf, 3000 );
+  pdFootSetTrYC( &lf, 50 );
+  pdFootSetTrYOld( &lf, 0 );
+  pdFootSetTrZK( &lf, 3000 );
+  pdFootSetTrZC( &lf, 50 );
+  pdFootSetTrZOld( &lf, 0 );
+  for( i=0; i<100; i++ ){
+    pdFootCalcRefPos( &lf, &p, &pd, &refp );
+    zVec3DCopy( &refp, &p );
+  }
+  EXPECT_NEAR( 0.5, zVec3DElem( &p, zX ), 1e-12 );
+  EXPECT_NEAR( 0.5, zVec3DElem( &p, zY ), 1e-12 );
+  EXPECT_NEAR( 0.5, zVec3DElem( &p, zY ), 1e-12 );
+}
+
+TEST_F(pdFootTest, pdFootCalcRefPos_2)
+{
+  zVec3D p, pd, refp;
+  int i;
+
+  pdFootSetTimeStep( &lf, 0.01 );
+  zVec3DCreate( &p, 0.1, 0.1, 0.1 );
+  zVec3DCreate( &pd, 0.1, 0.1, 0.1 );
+  pdFootSetTrXK( &lf, 7000 );
+  pdFootSetTrXC( &lf, 200 );
+  pdFootSetTrXOld( &lf, 0 );
+  pdFootSetTrYK( &lf, 7000 );
+  pdFootSetTrYC( &lf, 200 );
+  pdFootSetTrYOld( &lf, 0 );
+  pdFootSetTrZK( &lf, 7000 );
+  pdFootSetTrZC( &lf, 200 );
+  pdFootSetTrZOld( &lf, 0 );
+  for( i=0; i<100; i++ ){
+    pdFootCalcRefPos( &lf, &p, &pd, &refp );
+    zVec3DCopy( &refp, &p );
+  }
+  EXPECT_NEAR( 0.1, zVec3DElem( &p, zX ), 1e-12 );
+  EXPECT_NEAR( 0.1, zVec3DElem( &p, zY ), 1e-12 );
+  EXPECT_NEAR( 0.1, zVec3DElem( &p, zY ), 1e-12 );
+}
+
+TEST_F(pdFootTest, pdFootCalcRefAtt)
+{
+  zVec3D pd, refa;
+  double offset;
+
+  offset = zPI_2;
+  zVec3DClear( &pd );
+  pdFootCalcRefAtt( &lf, &pd, &refa );
+  // EXPECT_NEAR( 0, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( offset, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( 0, zVec3DElem( &refa, zY ), 1e-12 );
+  EXPECT_NEAR( 0, zVec3DElem( &refa, zZ ), 1e-12 );
+
+  pdCZHrzSetTheta( &cz, zPI_2 );
+  pdFootCalcRefAtt( &lf, &pd, &refa );
+  // EXPECT_NEAR( zPI_2, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( zPI_2+offset, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zY ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zZ ), 1e-12 );
+
+  pdCZHrzSetTheta( &cz, zPI_2 );
+  pdFootUWPhi( pdFootUWPtr( &lf ) ) = zPI / 6.0;
+  pdFootCalcRefAtt( &lf, &pd, &refa );
+  // EXPECT_NEAR( 2.0*zPI/3.0, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( 2.0*zPI/3.0+offset, zVec3DElem( &refa, zX ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zY ), 1e-12 );
+  EXPECT_NEAR( 0,     zVec3DElem( &refa, zZ ), 1e-12 );
+}

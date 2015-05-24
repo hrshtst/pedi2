@@ -2280,7 +2280,3 @@ constraint: world_pos left_foot
 constraint: world_att left_foot
 constraint: world_pos right_foot
 constraint: world_att right_foot
-constraint: world_pos left_hand
-constraint: world_att left_hand
-constraint: world_pos right_hand
-constraint: world_att right_hand

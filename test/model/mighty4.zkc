@@ -2274,7 +2274,7 @@ joint: right_knee_rotation       0.001
 joint: right_knee_flexion        0.001
 joint: right_ankle_flexion       0.001
 joint: right_ankle_abduction     0.001
-constraint: com
+constraint: amcom
 constraint: world_att body
 constraint: world_pos left_foot
 constraint: world_att left_foot

@@ -1,99 +1,280 @@
 #include <pedi2/pd_robot.h>
 
-void _pdRobotWriteRefVec(pdRobot *robot)
-{
-  /* for debug */
-  printf("d_com_pos:");zVec3DWrite(&robot->d_com_pos);
-  printf("d_lf_pos :");zVec3DWrite(&robot->d_lf_pos);
-  printf("d_rf_pos :");zVec3DWrite(&robot->d_rf_pos);
-  printf("d_bod_att:");zVec3DWrite(&robot->d_body_att);
-  printf("d_lf_att :");zVec3DWrite(&robot->d_lf_att);
-  printf("d_rf_att :");zVec3DWrite(&robot->d_rf_att);
-}
-
 void pdRobotInit(pdRobot *robot)
 {
-  rkChainInit( &robot->chain );
-
-  robot->body_id = -1;
-  robot->lf_id = -1;
-  robot->rf_id = -1;
-
-  zListInit( &robot->sr_lf );
-  zListInit( &robot->sr_rf );
-  zListInit( &robot->sr );
+  rkChainInit( pdRobotChainPtr( robot ) );
+  pdRobotJointDis( robot ) = NULL;
+  robot->_cell = NULL;
+  pdRobotCellNum( robot ) = 0;
+  robot->_ref_vec = NULL;
+  robot->_ref_set_flag = NULL;
+  robot->_base_id = -1;
+  robot->_lf_id = -1;
+  robot->_rf_id = -1;
+  robot->_lh_id = -1;
+  robot->_rh_id = -1;
+  robot->_sr_lf_vert = NULL;
+  robot->_sr_rf_vert = NULL;
+  robot->_sr_vert = NULL;
 }
 
-void pdRobotLoad(pdRobot *robot, const char* model_file)
+int _pdRobotCheckLinkID(pdRobot *robot, pdRobotIKCellID pos_id, pdRobotIKCellID att_id )
+{
+  if( robot->_cell[pos_id]->data.attr.id == robot->_cell[att_id]->data.attr.id )
+    return robot->_cell[pos_id]->data.attr.id;
+  else{
+    ZRUNERROR( "Link ID is mismatched!" );
+    return -1;
+  }
+}
+
+bool _pdRobotSetLinkID(pdRobot *robot)
+{
+  robot->_base_id = robot->_cell[PD_ROBOT_IKCELL_ID_BASE_ATT]->data.attr.id;
+  robot->_lf_id = _pdRobotCheckLinkID( robot,
+                                       PD_ROBOT_IKCELL_ID_LF_POS,
+                                       PD_ROBOT_IKCELL_ID_LF_ATT );
+  robot->_rf_id = _pdRobotCheckLinkID( robot,
+                                       PD_ROBOT_IKCELL_ID_RF_POS,
+                                       PD_ROBOT_IKCELL_ID_RF_ATT );
+  robot->_lh_id = _pdRobotCheckLinkID( robot,
+                                       PD_ROBOT_IKCELL_ID_LH_POS,
+                                       PD_ROBOT_IKCELL_ID_LH_ATT );
+  robot->_rh_id = _pdRobotCheckLinkID( robot,
+                                       PD_ROBOT_IKCELL_ID_RH_POS,
+                                       PD_ROBOT_IKCELL_ID_RH_ATT );
+  if( robot->_base_id < 0 ||
+      robot->_lf_id < 0 || robot->_rf_id < 0 ||
+      robot->_lh_id < 0 || robot->_rh_id < 0 )
+    return false;
+  else
+    return true;
+}
+
+static struct _pdRobotLookup{
+  rkIKCMat_fp cmat_fp;
+  char *str;
+} __pd_robot_lookup[] = {
+  { rkIKJacobiLinkWldLin, "world_pos" },
+  { rkIKJacobiLinkWldAng, "world_att" },
+  { rkIKJacobiLinkL2LLin, "l2l_pos"   },
+  { rkIKJacobiLinkL2LAng, "l2l_att"   },
+  { rkIKJacobiCOM,        "com"       },
+  { rkIKJacobiAM,         "am"        },
+  { rkIKJacobiAMCOM,      "amcom"     },
+  { NULL, NULL },
+};
+
+struct _pdRobotLookup *_pdRobotLookupCell(rkIKCMat_fp cmat_fp)
+{
+  struct _pdRobotLookup *lookup;
+
+  for( lookup=__pd_robot_lookup; lookup->cmat_fp; lookup++ )
+    if( cmat_fp == lookup->cmat_fp ) return lookup;
+  ZRUNERROR( "unknown Jacobian matrix" );
+  return NULL;
+}
+
+bool _pdRobotInitRefVec(pdRobot *robot)
+{
+  struct _pdRobotLookup *lookup;
+  int id;
+  register int i;
+
+  for( i=0; i<pdRobotCellNum( robot ); i++ ){
+    lookup = _pdRobotLookupCell( robot->_cell[i]->data._cmat_fp );
+    id = robot->_cell[i]->data.attr.id;
+    if( strcmp( lookup->str, "world_pos" ) == 0 ) {
+      zVec3DCopy( rkChainLinkWldPos(pdRobotChainPtr(robot), id ),
+                  &robot->_ref_vec[i] );
+    } else if( strcmp( lookup->str, "world_att" ) == 0 ) {
+      zMat3DToZYX( rkChainLinkWldAtt(pdRobotChainPtr(robot), id ),
+                   &robot->_ref_vec[i] );
+    } else if( strcmp( lookup->str, "l2l_pos" ) == 0 ) {
+      ZRUNERROR( "Sorry, not implemented! (l2l_pos)" );
+      return false;
+    } else if( strcmp( lookup->str, "l2l_att" ) == 0 ) {
+      ZRUNERROR( "Sorry, not implemented! (l2l_att)" );
+      return false;
+    } else if( strcmp( lookup->str, "com" ) == 0 ) {
+      zVec3DCopy( rkChainWldCOM(pdRobotChainPtr(robot) ),
+                  &robot->_ref_vec[i] );
+    } else if( strcmp( lookup->str, "am" ) == 0 ) {
+      ZRUNERROR( "Sorry, not implemented! (am)" );
+      return false;
+    } else if( strcmp( lookup->str, "amcom" ) == 0 ) {
+      ZRUNERROR( "Sorry, not implemented! (amcom)" );
+      return false;
+    }
+  }
+  return true;
+}
+
+bool pdRobotLoad(pdRobot *robot, const char model_file[])
+{
+  register int i;
+  rkLink *foot;
+  zShape3D *sole;
+  int n_vert_lf, n_vert_rf;
+
+  /* load robot model file */
+  if( !rkChainReadFile( pdRobotChainPtr( robot ), (char *)model_file ) ){
+    ZRUNERROR( "cannot load %s", model_file );
+    goto ERROR;
+  }
+
+  /* IK solver */
+  if( !rkIKCreate( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ) ) ){
+    ZRUNERROR( "failed to create IK solver" );
+    goto ERROR;
+  }
+  if( !rkIKConfReadFile( pdRobotIKPtr( robot ), pdRobotChainPtr( robot ), (char *) model_file ) ){
+    ZRUNERROR( "failed to read IK conf file %s", model_file );
+    goto ERROR;
+  }
+  if( ( pdRobotCellNum( robot ) = zListNum( &pdRobotIKPtr( robot )->clist ) ) < PD_ROBOT_REQUIRED_CONST_NUM ){
+    ZRUNERROR( "lack sufficient constraints, you need %d constraints but only %d specified",
+               PD_ROBOT_REQUIRED_CONST_NUM, pdRobotCellNum( robot ) );
+    goto ERROR;
+  }
+  if( !( robot->_cell = zAlloc( rkIKCell*, pdRobotCellNum( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate IK cell" );
+    goto ERROR;
+  }
+  for( i=0; i<pdRobotCellNum( robot ); i++ )
+    robot->_cell[i] = rkIKFindCell( pdRobotIKPtr(robot), i );
+  /* initialize reference vector */
+  if( !( robot->_ref_vec = zAlloc( zVec3D, pdRobotCellNum( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate reference vectors" );
+    goto ERROR;
+  }
+  if( !( robot->_ref_set_flag = zAlloc( bool, pdRobotCellNum( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate reference set flags" );
+    goto ERROR;
+  }
+  pdRobotUnsetAllFlags( robot );
+  if( !_pdRobotSetLinkID( robot ) ){
+    ZRUNERROR( "failed to set link IDs" );
+    goto ERROR;
+  }
+  if( !_pdRobotInitRefVec( robot ) ){
+    ZRUNERROR( "failed to init referential vector" );
+    goto ERROR;
+  }
+
+  /* vertices of supporting region */
+  /* left foot */
+  foot = rkChainLink( pdRobotChainPtr(robot), pdRobotLFID(robot) );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  n_vert_lf = zShape3DVertNum( sole );
+  if( !( robot->_sr_lf_vert = zAlloc( zVec3D, n_vert_lf ) ) ){
+    ZRUNERROR( "cannot allocate vertices of left foot suuport region" );
+    goto ERROR;
+  }
+  /* right foot */
+  foot = rkChainLink( pdRobotChainPtr(robot), pdRobotRFID(robot) );
+  sole = zListHead( rkLinkShapeList(foot) )->data;
+  n_vert_rf = zShape3DVertNum( sole );
+  if( !( robot->_sr_rf_vert = zAlloc( zVec3D, n_vert_rf ) ) ){
+    ZRUNERROR( "cannot allocate vertices of right foot suuport region" );
+    goto ERROR;
+  }
+  /* both feet */
+  if( !( robot->_sr_vert = zAlloc( zVec3D, n_vert_lf + n_vert_rf ) ) ){
+    ZRUNERROR( "cannot allocate vertices of suuport region" );
+    goto ERROR;
+  }
+
+  /* joint displacement vector */
+  if( !( pdRobotJointDis( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate joint displacement vector" );
+    goto ERROR;
+  }
+  return true;
+ ERROR:
+  pdRobotDestroy( robot );
+  return false;
+}
+
+void pdRobotDestroy(pdRobot *robot)
+{
+  zVecFree( pdRobotJointDis( robot ) );
+  zFree( robot->_sr_vert );
+  zFree( robot->_sr_rf_vert );
+  zFree( robot->_sr_lf_vert );
+  zFree( robot->_ref_set_flag );
+  zFree( robot->_ref_vec );
+  zFree( robot->_cell );
+  pdRobotCellNum( robot ) = 0;
+  rkIKDestroy( pdRobotIKPtr( robot ) );
+  rkChainDestroy( pdRobotChainPtr( robot ) );
+}
+
+void pdRobotUnsetAllFlags(pdRobot *robot)
 {
   register int i;
 
-  /* load robot model_file */
-  if( !rkChainReadFile( &robot->chain, (char *)model_file ) )
-    exit( EXIT_FAILURE );
-
-  /* find attending links by name */
-  for( i=0; i<rkChainNum(&robot->chain); i++ ){
-    if( !strcmp( "body", rkChainLinkName(&robot->chain,i) ) )
-      robot->body_id = i;
-    else if( !strcmp( "waist_base", rkChainLinkName(&robot->chain,i) ) )
-      robot->body_id = i;       /* for hydra */
-    else if( !strcmp( "left_foot", rkChainLinkName(&robot->chain,i) ) )
-      robot->lf_id = i;
-    else if( !strcmp( "right_foot", rkChainLinkName(&robot->chain,i) ) )
-      robot->rf_id = i;
-  }
-  if( robot->body_id < 0 || robot->lf_id < 0 || robot->rf_id < 0 ){
-    ZRUNERROR( "Check if links named 'body', 'left_foot' and 'right_foot' are exist in %s", model_file );
-    exit( EXIT_FAILURE );
-  }
-
-  /* initialize constraints for IK solver */
-  zVec3DCopy( rkChainWldCOM(&robot->chain), &robot->d_com_pos );
-  zVec3DCopy( rkChainLinkWldPos(&robot->chain,robot->lf_id), &robot->d_lf_pos );
-  zVec3DCopy( rkChainLinkWldPos(&robot->chain,robot->rf_id), &robot->d_rf_pos );
-  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->body_id), &robot->d_body_att );
-  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->lf_id), &robot->d_lf_att );
-  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->rf_id), &robot->d_rf_att );
-
-  /* IK solver */
-  if( !rkIKCreate( &robot->ik, &robot->chain ) )
-    exit( EXIT_FAILURE );
-  if( !rkIKConfReadFile( &robot->ik, &robot->chain, (char *)model_file ) )
-    exit( EXIT_FAILURE );
-  for( i=0; i<6; i++ )
-    robot->cell[i] = rkIKFindCell( &robot->ik, i );
-
-  /* joint displacement vector */
-  if( !( robot->dis = zVecAlloc( rkChainJointSize(&robot->chain) ) ) )
-    exit( EXIT_FAILURE );
+  for( i=0; i<pdRobotCellNum( robot ); i++ )
+    robot->_ref_set_flag[i] = false;
 }
 
-void pdRobotExit(pdRobot *robot)
+void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
 {
-  zVecFree( robot->dis );
-  rkIKDestroy( &robot->ik );
-  zVec3DListDestroy( &robot->sr_lf, false );
-  zVec3DListDestroy( &robot->sr_rf, false );
-  zVec3DListDestroy( &robot->sr, false );
-  rkChainDestroy( &robot->chain );
+  if( id < pdRobotCellNum( robot ) ){
+    zVec3DCopy( ref, &robot->_ref_vec[id] );
+    robot->_ref_set_flag[id] = true;
+  } else
+    ZRUNERROR( "IK Cell id %d is invalid.", id );
 }
 
 void pdRobotSolveIK(pdRobot *robot)
 {
-  /* _pdRobotWriteRefVec( robot ); */
-  rkIKDeactivate( &robot->ik );
-  rkIKCellSetRefVec( robot->cell[0], &robot->d_com_pos );
-  rkIKCellSetRefVec( robot->cell[1], &robot->d_body_att );
-  rkIKCellSetRefVec( robot->cell[2], &robot->d_lf_pos );
-  rkIKCellSetRefVec( robot->cell[3], &robot->d_lf_att );
-  rkIKCellSetRefVec( robot->cell[4], &robot->d_rf_pos );
-  rkIKCellSetRefVec( robot->cell[5], &robot->d_rf_att );
-  rkIKSolve( &robot->ik, robot->dis, zTOL, 0 );
+  register int i;
+
+  rkIKDeactivate( &robot->_ik );
+  for( i=0; i<pdRobotCellNum( robot ); i++ )
+    if( pdRobotFlagIsOn( robot, i ) )
+      rkIKCellSetRefVec( robot->_cell[i], &robot->_ref_vec[i] );
+  rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, 0 );
+  pdRobotUnsetAllFlags( robot );
+}
+
+void pdRobotCOMPos(pdRobot *robot, zVec3D *com)
+{
+  zVec3DCopy( rkChainWldCOM( pdRobotChainPtr( robot ) ), com );
+}
+
+void pdRobotBaseAtt(pdRobot *robot, zVec3D *att)
+{
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotBaseID( robot ) ), att );
+}
+
+void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf)
+{
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotLFID( robot ) ), lf );
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotRFID( robot ) ), rf );
+}
+
+void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf)
+{
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotLFID( robot ) ), lf );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotRFID( robot ) ), rf );
+}
+
+void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh)
+{
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotLHID( robot ) ), lh );
+  zVec3DCopy( rkChainLinkWldPos( pdRobotChainPtr( robot ), pdRobotRHID( robot ) ), rh );
+}
+
+void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh)
+{
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotLHID( robot ) ), lh );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotRHID( robot ) ), rh );
 }
 
 #define PD_ROBOT_TOL (1.0e-3)
-void pdRobotSupportRegion(pdRobot *robot)
+void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr)
 {
   int i, nl, nr, n;
   rkLink *foot;
@@ -102,52 +283,46 @@ void pdRobotSupportRegion(pdRobot *robot)
 
   nl = nr = n = 0;
   /* left foot */
-  foot = rkChainLink( &robot->chain, robot->lf_id );
+  foot = rkChainLink( pdRobotChainPtr( robot ), pdRobotLFID( robot ) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
-  for( i=0; i<4; i++ ){
+  for( i=0; i<(int)zShape3DVertNum(sole); i++ ){
     zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
     if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){
-      zVec3DCopy( &v, &robot->sr_lf_vert[nl++] );
-      zVec3DCopy( &v, &robot->sr_vert[n++] );
+      zVec3DCopy( &v, &robot->_sr_lf_vert[nl++] );
+      zVec3DCopy( &v, &robot->_sr_vert[n++] );
     }
   }
   /* right foot */
-  foot = rkChainLink( &robot->chain, robot->rf_id );
+  foot = rkChainLink( pdRobotChainPtr( robot ), pdRobotRFID( robot ) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
-  for( i=0; i<4; i++ ){
+  for( i=0; i<(int)zShape3DVertNum(sole); i++ ){
     zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
     if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){
-      zVec3DCopy( &v, &robot->sr_rf_vert[nr++] );
-      zVec3DCopy( &v, &robot->sr_vert[n++] );
+      zVec3DCopy( &v, &robot->_sr_rf_vert[nr++] );
+      zVec3DCopy( &v, &robot->_sr_vert[n++] );
     }
   }
   /* supporting region */
-  zVec3DListDestroy( &robot->sr_lf, false );
-  zVec3DListDestroy( &robot->sr_rf, false );
-  zVec3DListDestroy( &robot->sr, false );
-  if( nl > 0 ) zCH2D( &robot->sr_lf, robot->sr_lf_vert, nl );
-  if( nr > 0 ) zCH2D( &robot->sr_rf, robot->sr_rf_vert, nr );
-  if( n  > 0 ) zCH2D( &robot->sr, robot->sr_vert, n );
+  zVec3DListDestroy( sr_lf, false );
+  zVec3DListDestroy( sr_rf, false );
+  zVec3DListDestroy( sr, false );
+  if( nl > 0 ) zCH2D( sr_lf, robot->_sr_lf_vert, nl );
+  if( nr > 0 ) zCH2D( sr_rf, robot->_sr_rf_vert, nr );
+  if( n  > 0 ) zCH2D( sr, robot->_sr_vert, n );
 }
 
-void pdRobotCOMPos(pdRobot *robot, zVec3D *com)
+void pdRobotFWrite(FILE *fp, pdRobot *r)
 {
-  zVec3DCopy( rkChainWldCOM(&robot->chain), com );
-}
+  register int i;
 
-void pdRobotBodyAtt(pdRobot *robot, zVec3D *att)
-{
-  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->body_id), att );
-}
-
-void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf)
-{
-  zVec3DCopy( rkChainLinkWldPos(&robot->chain,robot->lf_id), lf );
-  zVec3DCopy( rkChainLinkWldPos(&robot->chain,robot->rf_id), rf );
-}
-
-void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf)
-{
-  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->lf_id), lf );
-  zMat3DToZYX( rkChainLinkWldAtt(&robot->chain,robot->rf_id), rf );
+  /* for debug */
+  fprintf( fp, "--\n" );
+  fprintf( fp, "cell num:%d\n", pdRobotCellNum(r) );
+  for( i=0; i<pdRobotCellNum(r); i++ ){
+    fprintf( fp, "ref %d(%s):", i, r->_ref_set_flag[i] ? "true" : "false" );
+    zVec3DFWrite( fp, &r->_ref_vec[i] );
+  }
+  fprintf( fp, "base id:%d\n", pdRobotBaseID(r) );
+  fprintf( fp, "lf id:%d, rf id:%d\n", pdRobotLFID(r), pdRobotRFID(r) );
+  fprintf( fp, "lh id:%d, rh id:%d\n", pdRobotLHID(r), pdRobotRHID(r) );
 }

@@ -1,81 +1,288 @@
 #include "gtest/gtest.h"
 #include <pedi2/pd_core.h>
 
-__BEGIN_DECLS
-
-void _pdCoreLoad(pdCore *core, const char* model_file);
-void _pdCorePoseInit(pdCore *core);
-
-__END_DECLS
+const double TIME_STEP = 0.01;
+#define GTEST_TOL 1e-12
+#define GTEST_TOL_LOOSE 1e-04
 
 class pdCoreTest : public testing::Test {
  protected:
-  virtual void SetUp() {};
-  virtual void TearDown() {};
+  virtual void SetUp() {
+    pdCoreInit( &core, &cmd, TIME_STEP );
+    destroy_flag = false;
+  };
+  virtual void TearDown() {
+    if( !destroy_flag )
+      pdCoreDestroy( &core );
+  };
 
+  void SupportOnBothFeet() {
+    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
+    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
+    pdFootSR( pdCoreLFPtr(&core) ) = &core.state.sr_lf;
+    pdFootSR( pdCoreRFPtr(&core) ) = &core.state.sr_lf;
+  };
+
+  void SupportOnLeftFoot() {
+    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
+    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.01;
+    pdFootSR( pdCoreLFPtr(&core) ) = &core.state.sr_lf;
+    pdFootSR( pdCoreRFPtr(&core) ) = NULL;
+  };
+
+  void SupportOnRightFoot() {
+    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.01;
+    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
+    pdFootSR( pdCoreLFPtr(&core) ) = NULL;
+    pdFootSR( pdCoreRFPtr(&core) ) = &core.state.sr_lf;
+  };
+
+  bool destroy_flag;
   pdCore core;
-  pdCommand com;
+  pdCmd cmd;
 };
 
-TEST_F(pdCoreTest, InitProcess)
+TEST_F(pdCoreTest, Init)
+{
+  EXPECT_EQ( 0, pdCoreTime( &core ) );
+  EXPECT_EQ( TIME_STEP, pdCoreTimeStep( &core ) );
+  EXPECT_EQ( &cmd, pdCoreCmd( &core ) );
+  EXPECT_EQ( &core.cz, pdCoreCZPtr( &core ) );
+  EXPECT_EQ( &core.lf, pdCoreLFPtr( &core ) );
+  EXPECT_EQ( &core.rf, pdCoreRFPtr( &core ) );
+  EXPECT_EQ( &core.robot, pdCoreRobotPtr( &core ) );
+  EXPECT_EQ( &core.state, pdCoreStatePtr( &core ) );
+  EXPECT_TRUE( core.mode.stand );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_FALSE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+}
+
+TEST_F(pdCoreTest, Destroy)
+{
+  pdCoreDestroy( &core );
+  EXPECT_EQ( 0, pdCoreTime( &core ) );
+  EXPECT_EQ( 0, pdCoreTimeStep( &core ) );
+  EXPECT_EQ( NULL, pdCoreCmd( &core ) );
+  destroy_flag = true;
+}
+
+TEST_F(pdCoreTest, SetTime)
+{
+  pdCoreSetTime( &core, 10 );
+  EXPECT_EQ( 10, pdCoreTime( &core ) );
+  EXPECT_EQ( 10, pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( 10, pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( 10, pdFootTime( pdCoreRFPtr( &core ) ) );
+}
+
+TEST_F(pdCoreTest, ResetTime)
+{
+  pdCoreSetTime( &core, 5 );
+  EXPECT_EQ( 5, pdCoreTime( &core ) );
+  EXPECT_EQ( 5, pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( 5, pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( 5, pdFootTime( pdCoreRFPtr( &core ) ) );
+  pdCoreResetTime( &core );
+  EXPECT_EQ( 0, pdCoreTime( &core ) );
+  EXPECT_EQ( 0, pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( 0, pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( 0, pdFootTime( pdCoreRFPtr( &core ) ) );
+}
+
+TEST_F(pdCoreTest, SetTimeStep)
+{
+  pdCoreSetTimeStep( &core, 0.005 );
+  EXPECT_EQ( 0.005, pdCoreTimeStep( &core ) );
+  EXPECT_EQ( 0.005, pdCZTimeStep( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( 0.005, pdFootTimeStep( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( 0.005, pdFootTimeStep( pdCoreRFPtr( &core ) ) );
+}
+
+TEST_F(pdCoreTest, IncrTime)
+{
+  pdCoreIncrTime( &core );
+  EXPECT_EQ( TIME_STEP, pdCoreTime( &core ) );
+  EXPECT_EQ( TIME_STEP, pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( TIME_STEP, pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( TIME_STEP, pdFootTime( pdCoreRFPtr( &core ) ) );
+  pdCoreIncrTime( &core );
+  EXPECT_EQ( 2*TIME_STEP, pdCoreTime( &core ) );
+  EXPECT_EQ( 2*TIME_STEP, pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( 2*TIME_STEP, pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( 2*TIME_STEP, pdFootTime( pdCoreRFPtr( &core ) ) );
+}
+
+TEST_F(pdCoreTest, Load)
+{
+  char filename[] = "model/mighty.zkc";
+
+  pdCoreInit( &core, &cmd, TIME_STEP );
+  pdCoreLoad( &core, filename );
+  EXPECT_EQ( 25, (int)rkChainNum(pdRobotChainPtr(pdCoreRobotPtr(&core))));
+}
+
+TEST_F(pdCoreTest, JointSize)
 {
   char model[] = "model/mighty.zkc";
 
-  pdCoreInit( &core, &com );
-  _pdCoreLoad( &core, model );
+  pdCoreLoad( &core, model );
+  EXPECT_EQ( 26, pdCoreJointSize( &core ) );
+}
 
-  // feet position and attitude
-  EXPECT_NEAR( 0.034, zVec3DElem(&core.lf.p,zX), 1e-04 );
-  EXPECT_NEAR( 0.042, zVec3DElem(&core.lf.p,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.p,zZ), 1e-04 );
-  EXPECT_NEAR( 0.034, zVec3DElem(&core.rf.p,zX), 1e-04 );
-  EXPECT_NEAR( -0.042, zVec3DElem(&core.rf.p,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.p,zZ), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.a,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.a,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.a,zZ), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.a,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.a,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.a,zZ), 1e-04 );
-  // sole width
-  EXPECT_NEAR( 0.072, core.lf.sole_w, 1e-04 );
-  EXPECT_NEAR( 0.072, core.rf.sole_w, 1e-04 );
-  // default distance
-  EXPECT_NEAR( 0.084, pdCZPrmRad(&core.cz)->dist, 1e-04 );
-  // COM height
-  // EXPECT_NEAR( 0.29286402589651961, core.cz.vrt.zd, 1e-04 );
-  EXPECT_NEAR( 0.26357762330686768, core.cz.vrt.zd, 1e-04 );
+TEST_F(pdCoreTest, JointDis)
+{
+  char model[] = "model/mighty.zkc";
 
-  _pdCorePoseInit( &core );
-  // feet position and attitude
-  EXPECT_NEAR( -0.042, zVec3DElem(&core.lf.p,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.p,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.p,zZ), 1e-04 );
-  EXPECT_NEAR( 0.042, zVec3DElem(&core.rf.p,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.p,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.p,zZ), 1e-04 );
-  EXPECT_NEAR( zPI_2, zVec3DElem(&core.lf.a,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.a,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.lf.a,zZ), 1e-04 );
-  EXPECT_NEAR( zPI_2, zVec3DElem(&core.rf.a,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.a,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&core.rf.a,zZ), 1e-04 );
-  // COM height
-  zVec3D com_pos, body_att;
-  zVec3DCopy( rkChainWldCOM(&core.robot.chain), &com_pos );
-  zMat3DToZYX( rkChainLinkWldAtt(&core.robot.chain,core.robot.body_id), &body_att );
-  EXPECT_NEAR( 0, zVec3DElem(&com_pos,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&com_pos,zY), 1e-04 );
-  // EXPECT_NEAR( 0.29286402589651961, zVec3DElem(&com_pos,zZ), 1e-04 );
-  EXPECT_NEAR( 0.26357762330686768, zVec3DElem(&com_pos,zZ), 1e-04 );
-  EXPECT_NEAR( zPI_2, zVec3DElem(&body_att,zX), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&body_att,zY), 1e-04 );
-  EXPECT_NEAR( 0, zVec3DElem(&body_att,zZ), 1e-04 );
-  // spring-damper tracking
-  EXPECT_NEAR( -0.042, core.lf.track_old[0], 1e-04 );
-  EXPECT_NEAR( 0     , core.lf.track_old[1], 1e-04 );
-  EXPECT_NEAR( 0     , core.lf.track_old[2], 1e-04 );
-  EXPECT_NEAR( 0.042 , core.rf.track_old[0], 1e-04 );
-  EXPECT_NEAR( 0     , core.rf.track_old[1], 1e-04 );
-  EXPECT_NEAR( 0     , core.rf.track_old[2], 1e-04 );
+  pdCoreLoad( &core, model );
+  EXPECT_EQ( 26, pdCoreJointSize( &core ) );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 0 ),
+               zVecElem( pdCoreJointDis( &core ), 0 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 1 ),
+               zVecElem( pdCoreJointDis( &core ), 1 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 2 ),
+               zVecElem( pdCoreJointDis( &core ), 2 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 10 ),
+               zVecElem( pdCoreJointDis( &core ), 10 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 20 ),
+               zVecElem( pdCoreJointDis( &core ), 20 ), GTEST_TOL );
+}
+
+TEST_F(pdCoreTest, DoesIntendToStand_Step_Walk)
+{
+  pdCmdDefaultInit( &cmd );
+
+  EXPECT_TRUE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToWalk( &core ) );
+
+  cmd.rho = 1.0;
+  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToWalk( &core ) );
+
+  cmd.rho = 1.0;
+  cmd.vud = 0.1;
+  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToWalk( &core ) );
+
+  destroy_flag = true;
+}
+
+TEST_F(pdCoreTest, BothFeetOn)
+{
+  SupportOnBothFeet();
+  EXPECT_TRUE( pdCoreIsBothFeetOn( &core ) );
+  EXPECT_TRUE( pdCoreIsEitherFootOn( &core ) );
+  EXPECT_FALSE( pdCoreIsEitherFootOff( &core ) );
+
+  SupportOnLeftFoot();
+  EXPECT_FALSE( pdCoreIsBothFeetOn( &core ) );
+  EXPECT_TRUE( pdCoreIsEitherFootOn( &core ) );
+  EXPECT_TRUE( pdCoreIsEitherFootOff( &core ) );
+
+  SupportOnRightFoot();
+  EXPECT_FALSE( pdCoreIsBothFeetOn( &core ) );
+  EXPECT_TRUE( pdCoreIsEitherFootOn( &core ) );
+  EXPECT_TRUE( pdCoreIsEitherFootOff( &core ) );
+
+  destroy_flag = true;
+}
+
+
+TEST_F(pdCoreTest, InitMode)
+{
+  core.mode.stand    = false;
+  core.mode.step     = true;
+  core.mode.walk     = true;
+  core.mode.sidewalk = true;
+  pdCoreInitMode( &core );
+  EXPECT_TRUE( core.mode.stand );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_FALSE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  destroy_flag = true;
+}
+
+TEST_F(pdCoreTest, UpdateMode_stand)
+{
+  pdCoreInitMode( &core );
+
+  SupportOnBothFeet();
+  pdCmdDefaultInit( &cmd );
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.stand );
+
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  pdCmdDefaultInit( &cmd );
+  cmd.vud = 0.1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  pdCmdDefaultInit( &cmd );
+  cmd.vwd = 0.1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  pdCmdDefaultInit( &cmd );
+  cmd.rho = 1.0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  destroy_flag = true;
+}
+
+TEST_F(pdCoreTest, UpdateMode_step)
+{
+  pdCoreInitMode( &core );
+
+  pdCmdDefaultInit( &cmd );
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.step );
+  // attempt to step, but not initiate yet
+  cmd.rho = 1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_TRUE( core.mode.stand );
+  // initiate stepping
+  cmd.rho = 1;
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // still stepping
+  cmd.rho = 1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // still stepping
+  cmd.rho = 1;
+  SupportOnRightFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // attempt to stop, but still continue
+  cmd.rho = 0;
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // stop stepping
+  cmd.rho = 0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_TRUE( core.mode.stand );
+
+  destroy_flag = true;
 }

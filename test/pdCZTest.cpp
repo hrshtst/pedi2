@@ -1,18 +1,474 @@
 #include "gtest/gtest.h"
 #include <pedi2/pd_cz.h>
 
+const double TIME_STEP = 0.01;
+
 class pdCZTest : public testing::Test {
  protected:
   virtual void SetUp() {
-    pdCZInit( &cz );
+    pdCZInit( &cz, TIME_STEP );
+    destroyed_flag = false;
   };
   virtual void TearDown() {
-    pdCZDestroy( &cz );
+    if( !destroyed_flag )
+      pdCZDestroy( &cz );
   };
 
+  void SetVacuousPrm() {
+    pdCZSetCmdCOMX( &cz, 1 );
+    pdCZSetCmdCOMY( &cz, 2 );
+    pdCZSetCmdCOMZ( &cz, 3 );
+    pdCZSetCmdTheta( &cz, 4 );
+    pdCZSetCOMX( &cz, 5 );
+    pdCZSetCOMY( &cz, 6 );
+    pdCZSetCOMZ( &cz, 7 );
+    pdCZSetVelX( &cz, 8 );
+    pdCZSetVelY( &cz, 9 );
+    pdCZSetVelZ( &cz, 10 );
+    pdCZSetAccX( &cz, 11 );
+    pdCZSetAccY( &cz, 12 );
+    pdCZSetAccZ( &cz, 13 );
+    pdCZSetZMPX( &cz, 14 );
+    pdCZSetZMPY( &cz, 15 );
+    pdCZSetZMPZ( &cz, 16 );
+    pdCZSetTheta( &cz, 17 );
+    pdCZSetSR( &cz, &sr );
+    pdCZSetQ1Z( &cz, 19 );
+    pdCZSetQ2Z( &cz, 20 );
+    pdCZSetRefVelU( &cz, 21 );
+    pdCZSetQ1U( &cz, 22 );
+    pdCZSetQ2U( &cz, 23 );
+    pdCZSetRefVelW( &cz, 24 );
+    pdCZSetQ1W( &cz, 25 );
+    pdCZSetQ2W( &cz, 26 );
+    pdCZSetRho( &cz, 27 );
+    pdCZSetKr( &cz, 28 );
+    pdCZSetDist( &cz, 29 );
+    pdCZSetKappa( &cz, 30 );
+    pdCZSetRefPosU( &cz, 31 );
+    pdCZSetRefPosW( &cz, 32 );
+    pdCZSetDeltaU( &cz, 33 );
+    pdCZSetDeltaW( &cz, 34 );
+    pdCZSetVelU( &cz, 35 );
+    pdCZSetVelW( &cz, 36 );
+    pdCZRefCOMX( &cz ) = 37;
+    pdCZRefCOMY( &cz ) = 38;
+    pdCZRefCOMZ( &cz ) = 39;
+    pdCZRefVelX( &cz ) = 40;
+    pdCZRefVelY( &cz ) = 41;
+    pdCZRefVelZ( &cz ) = 42;
+    pdCZRefAccX( &cz ) = 43;
+    pdCZRefAccY( &cz ) = 44;
+    pdCZRefAccZ( &cz ) = 45;
+    pdCZRefZMPX( &cz ) = 46;
+    pdCZRefZMPY( &cz ) = 47;
+    pdCZRefZMPZ( &cz ) = 48;
+  };
+
+  zVec3DList sr;
   pdCZ cz;
+  bool destroyed_flag;
 };
 
+TEST_F(pdCZTest, Init)
+{
+  SetVacuousPrm();
+  pdCZInit( &cz, TIME_STEP );
+  EXPECT_EQ( 0, pdCZCmdCOMX( &cz )  );
+  EXPECT_EQ( 0, pdCZCmdCOMY( &cz )  );
+  EXPECT_EQ( 0, pdCZCmdCOMZ( &cz )  );
+  EXPECT_EQ( 0, pdCZCmdTheta( &cz ) );
+  EXPECT_EQ( 0, pdCZCOMX( &cz )     );
+  EXPECT_EQ( 0, pdCZCOMY( &cz )     );
+  EXPECT_EQ( 0, pdCZCOMZ( &cz )     );
+  EXPECT_EQ( 0, pdCZVelX( &cz )     );
+  EXPECT_EQ( 0, pdCZVelY( &cz )     );
+  EXPECT_EQ( 0, pdCZVelZ( &cz )     );
+  EXPECT_EQ( 0, pdCZAccX( &cz )     );
+  EXPECT_EQ( 0, pdCZAccY( &cz )     );
+  EXPECT_EQ( 0, pdCZAccZ( &cz )     );
+  EXPECT_EQ( 0, pdCZZMPX( &cz )     );
+  EXPECT_EQ( 0, pdCZZMPY( &cz )     );
+  EXPECT_EQ( 0, pdCZZMPZ( &cz )     );
+  EXPECT_EQ( 0, pdCZTheta( &cz )    );
+  EXPECT_EQ( NULL, pdCZSR( &cz )    );
+  EXPECT_EQ( 0, pdCZQ1Z( &cz )      );
+  EXPECT_EQ( 0, pdCZQ2Z( &cz )      );
+  EXPECT_EQ( 0, pdCZRefVelU( &cz )  );
+  EXPECT_EQ( 0, pdCZQ1U( &cz )      );
+  EXPECT_EQ( 0, pdCZQ2U( &cz )      );
+  EXPECT_EQ( 0, pdCZRefVelW( &cz )  );
+  EXPECT_EQ( 0, pdCZQ1W( &cz )      );
+  EXPECT_EQ( 0, pdCZQ2W( &cz )      );
+  EXPECT_EQ( 0, pdCZRho( &cz )      );
+  EXPECT_EQ( 0, pdCZKr( &cz )       );
+  EXPECT_EQ( 0, pdCZDist( &cz )     );
+  EXPECT_EQ( 0, pdCZKappa( &cz )    );
+  EXPECT_EQ( 0, pdCZRefPosU( &cz )  );
+  EXPECT_EQ( 0, pdCZRefPosW( &cz )  );
+  EXPECT_EQ( 0, pdCZDeltaU( &cz )  );
+  EXPECT_EQ( 0, pdCZDeltaW( &cz )  );
+  EXPECT_EQ( 0, pdCZVelU( &cz )  );
+  EXPECT_EQ( 0, pdCZVelW( &cz )  );
+  EXPECT_EQ( 0, pdCZRefCOMX( &cz )  );
+  EXPECT_EQ( 0, pdCZRefCOMY( &cz )  );
+  EXPECT_EQ( 0, pdCZRefCOMZ( &cz )  );
+  EXPECT_EQ( 0, pdCZRefVelX( &cz )  );
+  EXPECT_EQ( 0, pdCZRefVelY( &cz )  );
+  EXPECT_EQ( 0, pdCZRefVelZ( &cz )  );
+  EXPECT_EQ( 0, pdCZRefAccX( &cz )  );
+  EXPECT_EQ( 0, pdCZRefAccY( &cz )  );
+  EXPECT_EQ( 0, pdCZRefAccZ( &cz )  );
+  EXPECT_EQ( 0, pdCZRefZMPX( &cz )  );
+  EXPECT_EQ( 0, pdCZRefZMPY( &cz )  );
+  EXPECT_EQ( 0, pdCZRefZMPZ( &cz )  );
+}
+
+TEST_F(pdCZTest, Destroy)
+{
+  SetVacuousPrm();
+  pdCZDestroy( &cz );
+  EXPECT_EQ( 0, pdCZCmdCOMX( &cz )  );
+  EXPECT_EQ( 0, pdCZCmdCOMY( &cz )  );
+  EXPECT_EQ( 0, pdCZCmdCOMZ( &cz )  );
+  EXPECT_EQ( 0, pdCZCmdTheta( &cz ) );
+  EXPECT_EQ( 0, pdCZCOMX( &cz )     );
+  EXPECT_EQ( 0, pdCZCOMY( &cz )     );
+  EXPECT_EQ( 0, pdCZCOMZ( &cz )     );
+  EXPECT_EQ( 0, pdCZVelX( &cz )     );
+  EXPECT_EQ( 0, pdCZVelY( &cz )     );
+  EXPECT_EQ( 0, pdCZVelZ( &cz )     );
+  EXPECT_EQ( 0, pdCZAccX( &cz )     );
+  EXPECT_EQ( 0, pdCZAccY( &cz )     );
+  EXPECT_EQ( 0, pdCZAccZ( &cz )     );
+  EXPECT_EQ( 0, pdCZZMPX( &cz )     );
+  EXPECT_EQ( 0, pdCZZMPY( &cz )     );
+  EXPECT_EQ( 0, pdCZZMPZ( &cz )     );
+  EXPECT_EQ( 0, pdCZTheta( &cz )    );
+  EXPECT_EQ( NULL, pdCZSR( &cz )    );
+  EXPECT_EQ( 0, pdCZQ1Z( &cz )      );
+  EXPECT_EQ( 0, pdCZQ2Z( &cz )      );
+  EXPECT_EQ( 0, pdCZRefVelU( &cz )  );
+  EXPECT_EQ( 0, pdCZQ1U( &cz )      );
+  EXPECT_EQ( 0, pdCZQ2U( &cz )      );
+  EXPECT_EQ( 0, pdCZRefVelW( &cz )  );
+  EXPECT_EQ( 0, pdCZQ1W( &cz )      );
+  EXPECT_EQ( 0, pdCZQ2W( &cz )      );
+  EXPECT_EQ( 0, pdCZRho( &cz )      );
+  EXPECT_EQ( 0, pdCZKr( &cz )       );
+  EXPECT_EQ( 0, pdCZDist( &cz )     );
+  EXPECT_EQ( 0, pdCZKappa( &cz )    );
+  EXPECT_EQ( 0, pdCZRefPosU( &cz )  );
+  EXPECT_EQ( 0, pdCZRefPosW( &cz )  );
+  EXPECT_EQ( 0, pdCZDeltaU( &cz )  );
+  EXPECT_EQ( 0, pdCZDeltaW( &cz )  );
+  EXPECT_EQ( 0, pdCZVelU( &cz )  );
+  EXPECT_EQ( 0, pdCZVelW( &cz )  );
+  destroyed_flag = true;
+}
+
+TEST_F(pdCZTest, SetCmdCOM)
+{
+  SetVacuousPrm();
+  pdCZSetCmdCOM( &cz, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZCmdCOMX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZCmdCOMY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZCmdCOMZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetCmdCOMVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm();
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdCZSetCmdCOMVec( &cz, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZCmdCOMX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZCmdCOMY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZCmdCOMZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetCmdCOMXYZ)
+{
+  SetVacuousPrm();
+  pdCZSetCmdCOMX( &cz, 0.1 );
+  pdCZSetCmdCOMY( &cz, 0.2 );
+  pdCZSetCmdCOMZ( &cz, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZCmdCOMX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZCmdCOMY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZCmdCOMZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetCmdTheta)
+{
+  SetVacuousPrm();
+  pdCZSetCmdTheta( &cz, 0.1 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZCmdTheta(&cz) );
+}
+
+TEST_F(pdCZTest, SetCOM)
+{
+  SetVacuousPrm();
+  pdCZSetCOM( &cz, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZCOMX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZCOMY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZCOMZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetCOMVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm();
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdCZSetCOMVec( &cz, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZCOMX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZCOMY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZCOMZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetCOMXYZ)
+{
+  SetVacuousPrm();
+  pdCZSetCOMX( &cz, 0.1 );
+  pdCZSetCOMY( &cz, 0.2 );
+  pdCZSetCOMZ( &cz, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZCOMX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZCOMY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZCOMZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetVel)
+{
+  SetVacuousPrm();
+  pdCZSetVel( &cz, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZVelX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZVelY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZVelZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetVelVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm();
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdCZSetVelVec( &cz, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZVelX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZVelY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZVelZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetVelXYZ)
+{
+  SetVacuousPrm();
+  pdCZSetVelX( &cz, 0.1 );
+  pdCZSetVelY( &cz, 0.2 );
+  pdCZSetVelZ( &cz, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZVelX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZVelY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZVelZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetAcc)
+{
+  SetVacuousPrm();
+  pdCZSetAcc( &cz, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZAccX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZAccY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZAccZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetAccVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm();
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdCZSetAccVec( &cz, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZAccX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZAccY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZAccZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetAccXYZ)
+{
+  SetVacuousPrm();
+  pdCZSetAccX( &cz, 0.1 );
+  pdCZSetAccY( &cz, 0.2 );
+  pdCZSetAccZ( &cz, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZAccX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZAccY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZAccZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetZMP)
+{
+  SetVacuousPrm();
+  pdCZSetZMP( &cz, 0.1, 0.2, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZZMPX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZZMPY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZZMPZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetZMPVec)
+{
+  zVec3D v;
+
+  SetVacuousPrm();
+  zVec3DCreate( &v, 0.1, 0.2, 0.3 );
+  pdCZSetZMPVec( &cz, &v );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZZMPX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZZMPY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZZMPZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetZMPXYZ)
+{
+  SetVacuousPrm();
+  pdCZSetZMPX( &cz, 0.1 );
+  pdCZSetZMPY( &cz, 0.2 );
+  pdCZSetZMPZ( &cz, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZZMPX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZZMPY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZZMPZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetTheta)
+{
+  SetVacuousPrm();
+  pdCZSetTheta( &cz, 0.1 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZTheta(&cz) );
+}
+
+TEST_F(pdCZTest, SetRefPosUW)
+{
+  SetVacuousPrm();
+  pdCZSetRefPosUW( &cz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZRefPosU(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZRefPosW(&cz) );
+}
+
+TEST_F(pdCZTest, SetRefPosUWVec)
+{
+  zVec2D v;
+
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.1, 0.2 );
+  pdCZSetRefPosUWVec( &cz, v );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZRefPosU(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZRefPosW(&cz) );
+}
+
+TEST_F(pdCZTest, SetRefPosUPosW)
+{
+  SetVacuousPrm();
+  pdCZSetRefPosU( &cz, 0.1 );
+  pdCZSetRefPosW( &cz, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZRefPosU(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZRefPosW(&cz) );
+}
+
+TEST_F(pdCZTest, SetDelta)
+{
+  SetVacuousPrm();
+  pdCZSetDelta( &cz, 0.1, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZDeltaU(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZDeltaW(&cz) );
+}
+
+TEST_F(pdCZTest, SetDeltaVec)
+{
+  zVec2D v;
+
+  SetVacuousPrm();
+  zVec2DCreate( v, 0.1, 0.2 );
+  pdCZSetDeltaVec( &cz, v );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZDeltaU(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZDeltaW(&cz) );
+}
+
+TEST_F(pdCZTest, SetDeltaUW)
+{
+  SetVacuousPrm();
+  pdCZSetDeltaU( &cz, 0.1 );
+  pdCZSetDeltaW( &cz, 0.2 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZDeltaU(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZDeltaW(&cz) );
+}
+
+TEST_F(pdCZTest, SetTime)
+{
+  SetVacuousPrm();
+  cz._ode._t = 1000;
+
+  pdCZInit( &cz, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 0.0, pdCZTime(&cz) );
+
+  pdCZSetTime( &cz, 10 );
+  EXPECT_DOUBLE_EQ( 10.0, pdCZTime(&cz) );
+}
+
+TEST_F(pdCZTest, SetTimeStep)
+{
+  SetVacuousPrm();
+  cz._ode._dt = 1000;
+
+  pdCZInit( &cz, TIME_STEP );
+  EXPECT_DOUBLE_EQ( TIME_STEP, pdCZTimeStep(&cz) );
+
+  pdCZSetTimeStep( &cz, 0.001 );
+  EXPECT_DOUBLE_EQ( 0.001, pdCZTimeStep(&cz) );
+}
+
+TEST_F(pdCZTest, CalcDeltaTheta_KappaIsZero)
+{
+  zVec2D refuw;
+
+  pdCZSetKappa( &cz, 0 );
+  pdCZSetDeltaW( &cz, 2*sqrt(3) );
+  zVec2DCreate( refuw, 2, 1 );
+  EXPECT_NEAR( 0, pdCZCalcDeltaTheta( &cz, refuw ), 1e-12 );
+}
+
+TEST_F(pdCZTest, CalcDeltaTheta_KappaIsNotZero)
+{
+  zVec2D refuw;
+
+  pdCZSetKappa( &cz, 1 );
+  pdCZSetDeltaW( &cz, 2*sqrt(3) );
+  zVec2DCreate( refuw, 2, 1 );
+  EXPECT_NEAR( zPI/6.0, pdCZCalcDeltaTheta( &cz, refuw ), 1e-12 );
+}
+
+TEST_F(pdCZTest, CalcNextUW_KappaIsZero)
+{
+  zVec2D refuw, nextuwd;
+
+  pdCZSetKappa( &cz, 0 );
+  pdCZSetDeltaW( &cz, 2*sqrt(3) );
+  zVec2DCreate( refuw, 2, 1 );
+  zVec2DClear( nextuwd );
+  pdCZCalcNextUW( &cz, refuw, nextuwd );
+  EXPECT_NEAR( 2.0, nextuwd[pdU], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3), nextuwd[pdW], 1e-12 );
+}
+
+TEST_F(pdCZTest, CalcNextUW_KappaIsNotZero)
+{
+  zVec2D refuw, nextuwd;
+
+  pdCZSetKappa( &cz, 1 );
+  pdCZSetDeltaW( &cz, 2*sqrt(3) );
+  zVec2DCreate( refuw, 2, 1 );
+  zVec2DClear( nextuwd );
+  pdCZCalcNextUW( &cz, refuw,  nextuwd );
+  EXPECT_NEAR( 0.5, nextuwd[pdU], 1e-12 );
+  EXPECT_NEAR( 1.5*sqrt(3)+1, nextuwd[pdW], 1e-12 );
+}
+
+
+#if 0
 TEST_F(pdCZTest, Init)
 {
   pdCZ _cz;
@@ -161,3 +617,4 @@ TEST_F(pdCZTest, ZMPPhase)
   EXPECT_EQ( 0.3, pz.re );
   EXPECT_EQ( 0.3, pz.im );
 }
+#endif

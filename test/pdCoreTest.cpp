@@ -110,14 +110,8 @@ TEST_F(pdCoreTest, IncrTime)
 {
   pdCoreIncrTime( &core );
   EXPECT_EQ( TIME_STEP, pdCoreTime( &core ) );
-  EXPECT_EQ( TIME_STEP, pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( TIME_STEP, pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( TIME_STEP, pdFootTime( pdCoreRFPtr( &core ) ) );
   pdCoreIncrTime( &core );
   EXPECT_EQ( 2*TIME_STEP, pdCoreTime( &core ) );
-  EXPECT_EQ( 2*TIME_STEP, pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( 2*TIME_STEP, pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( 2*TIME_STEP, pdFootTime( pdCoreRFPtr( &core ) ) );
 }
 
 TEST_F(pdCoreTest, IncrTime_Update)

@@ -277,6 +277,7 @@ void pdCoreUpdate(pdCore *core)
   _pdCoreUpdateRobot( core );
   _pdCoreUpdateRef( core );
   _pdCoreUpdateState( core );
+  pdCoreUpdateMode( core );
 }
 
 void pdCoreDataFWrite(FILE *fp, pdCore *core)

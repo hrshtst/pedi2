@@ -103,8 +103,7 @@ bool pdCoreDoesIntendToStep(pdCore *core)
 
 bool pdCoreDoesIntendToWalk(pdCore *core)
 {
-  return pdCoreDoesIntendToStep(core) &&
-         !zIsTiny( core->cmd->vud );
+  return !zIsTiny( core->cmd->vud );
 }
 
 void pdCoreInitMode(pdCore *core)

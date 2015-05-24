@@ -52,6 +52,10 @@ TEST_F(pdCoreTest, Init)
   EXPECT_EQ( &core.rf, pdCoreRFPtr( &core ) );
   EXPECT_EQ( &core.robot, pdCoreRobotPtr( &core ) );
   EXPECT_EQ( &core.state, pdCoreStatePtr( &core ) );
+  EXPECT_TRUE( core.mode.stand );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_FALSE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
 }
 
 TEST_F(pdCoreTest, Destroy)

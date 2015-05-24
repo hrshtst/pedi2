@@ -19,6 +19,7 @@ void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
               PD_FOOT_RIGHT, pdCoreTimeStep( core ) );
   pdRobotInit( pdCoreRobotPtr( core ) );
   pdStateInit( pdCoreStatePtr( core ) );
+  pdCoreInitMode( core );
   core->cmd = cmd;
 }
 

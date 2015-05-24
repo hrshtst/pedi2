@@ -14137,7 +14137,7 @@ shape: whole_body_geo_v2_z_yaw_-_rhip_simple_geo-2-mesh
 [link]
 name: rhip_p
 jointtype: revolute
-max: 12.94884617
+max: 0
 min: -104.965868068
 frame: {
  0.0, 1.0, 0.0, 0.0
@@ -14177,7 +14177,7 @@ shape: whole_body_geo_v2_z_yaw_-_rthigh_simple_geo-3-mesh
 name: rknee_p
 jointtype: revolute
 max: 119.9773623
-min: -9.96946563528
+min: 0
 frame: {
  -1.0, -0.0, 0.0, -0.432
  0.0, -0.0, -1.0, 0.0
@@ -14255,7 +14255,7 @@ shape: whole_body_geo_v2_z_yaw_-_lhip_simple_geo-1-mesh
 [link]
 name: lhip_p
 jointtype: revolute
-max: 12.94884617
+max: 0
 min: -104.965868068
 frame: {
  0.0, 1.0, 0.0, 0.0
@@ -14295,7 +14295,7 @@ shape: whole_body_geo_v2_z_yaw_-_lthigh_simple_geo-1-mesh
 name: lknee_p
 jointtype: revolute
 max: 119.9773623
-min: -9.96946563528
+min: 0
 frame: {
  -1.0, -0.0, 0.0, -0.432
  0.0, -0.0, -1.0, 0.0

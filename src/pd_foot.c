@@ -124,6 +124,8 @@ void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp)
   _pdFootUpdateSOL( f, p, pd, refp, zX, pdFootTimeStep(f) );
   _pdFootUpdateSOL( f, p, pd, refp, zY, pdFootTimeStep(f) );
   _pdFootUpdateSOL( f, p, pd, refp, zZ, pdFootTimeStep(f) );
+  if( zVec3DElem( refp, zZ ) < 0 )
+    zVec3DElem( refp, zZ ) = 0;
 }
 
 void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
@@ -168,6 +170,8 @@ void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
   } else {
     zVec3DCopy( pdFootPos( kf ), pdFootRefPos( kf ) );
     zVec3DCopy( pdFootAtt( kf ), pdFootRefAtt( kf ) );
+    pdFootRefPosZ( kf ) = 0;
+    pdFootDesPosZ( kf ) = 0;
   }
 }
 

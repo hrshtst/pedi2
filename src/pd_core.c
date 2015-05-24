@@ -114,6 +114,20 @@ void pdCoreInitMode(pdCore *core)
   core->mode.sidewalk = false;
 }
 
+void pdCoreUpdateMode(pdCore *core)
+{
+  if( pdCoreIsBothFeetOn( core ) ){
+    if( pdCoreDoesIntendToStand( core ) || !core->mode.step ){
+      core->mode.stand = true;
+      core->mode.step = false;
+    }
+  }
+  if( pdCoreIsEitherFootOff( core ) ){
+    core->mode.stand = false;
+    core->mode.step = true;
+  }
+}
+
 void _pdCoreUpdateCommand(pdCore *core)
 {
   pdCZSetQ1U( pdCoreCZPtr( core ), core->cmd->qu1 );

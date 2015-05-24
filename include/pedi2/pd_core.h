@@ -84,6 +84,7 @@ bool pdCoreDoesIntendToWalk(pdCore *core);
 #define pdCoreIsEitherFootOffAttempt(c) pdFootIsEitherOffAttempt( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 
 __EXPORT void pdCoreInitMode(pdCore *core);
+__EXPORT void pdCoreUpdateMode(pdCore *core);
 
 /* update method */
 __EXPORT void pdCoreUpdate(pdCore *core);

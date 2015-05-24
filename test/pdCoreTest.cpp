@@ -200,3 +200,85 @@ TEST_F(pdCoreTest, InitMode)
   EXPECT_FALSE( core.mode.sidewalk );
   destroy_flag = true;
 }
+
+TEST_F(pdCoreTest, UpdateMode_stand)
+{
+  pdCoreInitMode( &core );
+
+  SupportOnBothFeet();
+  pdCmdDefaultInit( &cmd );
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.stand );
+
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  pdCmdDefaultInit( &cmd );
+  cmd.vud = 0.1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  pdCmdDefaultInit( &cmd );
+  cmd.vwd = 0.1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  pdCmdDefaultInit( &cmd );
+  cmd.rho = 1.0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+
+  destroy_flag = true;
+}
+
+TEST_F(pdCoreTest, UpdateMode_step)
+{
+  pdCoreInitMode( &core );
+
+  pdCmdDefaultInit( &cmd );
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.step );
+  // attempt to step, but not initiate yet
+  cmd.rho = 1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_TRUE( core.mode.stand );
+  // initiate stepping
+  cmd.rho = 1;
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // still stepping
+  cmd.rho = 1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // still stepping
+  cmd.rho = 1;
+  SupportOnRightFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // attempt to stop, but still continue
+  cmd.rho = 0;
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_FALSE( core.mode.stand );
+  // stop stepping
+  cmd.rho = 0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_TRUE( core.mode.stand );
+
+  destroy_flag = true;
+}

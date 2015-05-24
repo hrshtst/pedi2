@@ -69,6 +69,10 @@ __EXPORT void pdCoreDestroy(pdCore *core);
   pdFootIncrTime( pdCoreRFPtr( c ) ); \
 } while(0)
 
+bool pdCoreDoesIntendToStand(pdCore *core);
+bool pdCoreDoesIntendToStep(pdCore *core);
+bool pdCoreDoesIntendToWalk(pdCore *core);
+
 #define pdCoreIsBothFeetOn(c) pdFootIsBothOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsEitherFootOn(c) pdFootIsEitherOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsEitherFootOff(c) pdFootIsEitherOff( pdCoreLFPtr(c), pdCoreRFPtr(c) )

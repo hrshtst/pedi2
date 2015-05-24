@@ -144,6 +144,28 @@ TEST_F(pdCoreTest, JointDis)
                zVecElem( pdCoreJointDis( &core ), 20 ), GTEST_TOL );
 }
 
+TEST_F(pdCoreTest, DoesIntendToStand_Step_Walk)
+{
+  pdCmdDefaultInit( &cmd );
+
+  EXPECT_TRUE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToWalk( &core ) );
+
+  cmd.rho = 1.0;
+  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToWalk( &core ) );
+
+  cmd.rho = 1.0;
+  cmd.vud = 0.1;
+  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToWalk( &core ) );
+
+  destroy_flag = true;
+}
+
 TEST_F(pdCoreTest, BothFeetOn)
 {
   SupportOnBothFeet();

@@ -88,6 +88,24 @@ void pdCoreDestroy(pdCore *core)
   pdCoreResetTime( core );
 }
 
+bool pdCoreDoesIntendToStand(pdCore *core)
+{
+  return zIsTiny( core->cmd->rho ) &&
+         zIsTiny( core->cmd->vud ) &&
+         zIsTiny( core->cmd->vwd );
+}
+
+bool pdCoreDoesIntendToStep(pdCore *core)
+{
+  return !zIsTiny( core->cmd->rho );
+}
+
+bool pdCoreDoesIntendToWalk(pdCore *core)
+{
+  return pdCoreDoesIntendToStep(core) &&
+         !zIsTiny( core->cmd->vud );
+}
+
 void pdCoreInitMode(pdCore *core)
 {
   core->mode.stand = true;

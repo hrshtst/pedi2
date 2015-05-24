@@ -179,6 +179,8 @@ void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp,
   _pdFootDesPosUpdate( rf, lf, delta, vel, zmp, lfsr );
   _pdFootRefPosUpdate( lf, lfp, lfa, lfsr );
   _pdFootRefPosUpdate( rf, rfp, rfa, rfsr );
+  pdFootIncrTime( lf );
+  pdFootIncrTime( rf );
 }
 
 void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)

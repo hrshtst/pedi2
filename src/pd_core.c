@@ -157,7 +157,7 @@ void pdCoreWriteMode(pdCore *core)
 void _pdCoreUpdateCommand(pdCore *core)
 {
   pdCZSetQ1U( pdCoreCZPtr( core ), core->cmd->qu1 );
-  pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 );
+  /* pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 ); */
   pdCZSetQ1W( pdCoreCZPtr( core ), core->cmd->qw1 );
   pdCZSetQ2W( pdCoreCZPtr( core ), core->cmd->qw2 );
   pdCZSetQ1Z( pdCoreCZPtr( core ), core->cmd->qz1 );
@@ -258,11 +258,14 @@ void _pdCoreUpdateRef(pdCore *core)
   zVec3D pd;
 
   pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
+  pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 );
   pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
   if( pdCoreDoesIntendToWalk( core ) ){
     pdCZSetRho( pdCoreCZPtr(core), 1.0 );
     if( !core->mode.step )
       pdCZSetRefVelU( pdCoreCZPtr( core ), 0.0 );
+    if( core->mode.walk )
+      pdCZSetQ2U( pdCoreCZPtr( core ), 0.0 );
   }
 
   if( !zIsTiny( pdCZRefVelU( pdCoreCZPtr(core) ) ) ){

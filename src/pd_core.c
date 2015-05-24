@@ -31,7 +31,7 @@ void _pdCorePoseInit(pdCore *core)
   double offset;
 
   offset = zPI_2;
-  foot_dist = zVec3DDist( &core->state.lf_pos, &core->state.rf_pos );
+  foot_dist = core->cmd->dist;
   com_height = zVec3DElem(&core->state.com_pos,zZ) - zVec3DElem(&core->state.lf_pos,zZ);
   pdCZSetDist( pdCoreCZPtr(core), foot_dist );
   theta = core->cmd->thetad;
@@ -74,6 +74,8 @@ bool pdCoreLoad(pdCore *core, char *filename)
   _pdCoreUpdateState( core );
   _pdCorePoseInit( core );
   _pdCoreUpdateState( core );
+  pdFootSetTrOldVec( pdCoreLFPtr(core), &core->state.lf_pos );
+  pdFootSetTrOldVec( pdCoreRFPtr(core), &core->state.rf_pos );
   return true;
 }
 

@@ -126,7 +126,7 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
   if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate state */
-   pdCoreUpdate( core );
+    pdCoreUpdate( core );
     if( fp )
       pdCoreDataFWrite( fp, core );
   }

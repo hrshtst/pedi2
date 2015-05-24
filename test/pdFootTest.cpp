@@ -403,6 +403,7 @@ TEST_F(pdFootTest, IsBothOn)
   pdFootSR( &rf ) = &sr;
   EXPECT_TRUE( pdFootIsBothOn( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+  EXPECT_FALSE( pdFootIsEitherOff( &lf, &rf ) );
 
   pdFootPosZ( &lf ) = 0.1;
   pdFootPosZ( &rf ) = 0.0;
@@ -410,6 +411,7 @@ TEST_F(pdFootTest, IsBothOn)
   pdFootSR( &rf ) = &sr;
   EXPECT_FALSE( pdFootIsBothOn( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOff( &lf, &rf ) );
 
   pdFootPosZ( &lf ) = 0.0;
   pdFootPosZ( &rf ) = 0.1;
@@ -417,6 +419,7 @@ TEST_F(pdFootTest, IsBothOn)
   pdFootSR( &rf ) = NULL;
   EXPECT_FALSE( pdFootIsBothOn( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOff( &lf, &rf ) );
 }
 
 TEST_F(pdFootTest, IsBothOnNext)
@@ -425,16 +428,19 @@ TEST_F(pdFootTest, IsBothOnNext)
   pdFootRefPosZ( &rf ) = 0.0;
   EXPECT_TRUE( pdFootIsBothOnNext( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+  EXPECT_FALSE( pdFootIsEitherOffNext( &lf, &rf ) );
 
   pdFootRefPosZ( &lf ) = 0.1;
   pdFootRefPosZ( &rf ) = 0.0;
   EXPECT_FALSE( pdFootIsBothOnNext( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffNext( &lf, &rf ) );
 
   pdFootRefPosZ( &lf ) = 0.0;
   pdFootRefPosZ( &rf ) = 0.1;
   EXPECT_FALSE( pdFootIsBothOnNext( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffNext( &lf, &rf ) );
 }
 
 TEST_F(pdFootTest, IsBothOnAttempt)
@@ -443,16 +449,19 @@ TEST_F(pdFootTest, IsBothOnAttempt)
   pdFootDesPosZ( &rf ) = 0.0;
   EXPECT_TRUE( pdFootIsBothOnAttempt( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+  EXPECT_FALSE( pdFootIsEitherOffAttempt( &lf, &rf ) );
 
   pdFootDesPosZ( &lf ) = 0.1;
   pdFootDesPosZ( &rf ) = 0.0;
   EXPECT_FALSE( pdFootIsBothOnAttempt( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffAttempt( &lf, &rf ) );
 
   pdFootDesPosZ( &lf ) = 0.0;
   pdFootDesPosZ( &rf ) = 0.1;
   EXPECT_FALSE( pdFootIsBothOnAttempt( &lf, &rf ) );
   EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOffAttempt( &lf, &rf ) );
 }
 
 

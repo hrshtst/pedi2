@@ -69,14 +69,17 @@ __EXPORT void pdCoreDestroy(pdCore *core);
   pdFootIncrTime( pdCoreRFPtr( c ) ); \
 } while(0)
 
-__EXPORT void pdCoreInitMode(pdCore *core);
-
 #define pdCoreIsBothFeetOn(c) pdFootIsBothOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsEitherFootOn(c) pdFootIsEitherOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsEitherFootOff(c) pdFootIsEitherOff( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsBothFeetOnNext(c) pdFootIsBothOnNext( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsEitherFootOnNext(c) pdFootIsEitherOnNext( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsEitherFootOffNext(c) pdFootIsEitherOffNext( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsBothFeetOnAttempt(c) pdFootIsBothOnAttempt( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsEitherFootOnAttempt(c) pdFootIsEitherOnAttempt( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsEitherFootOffAttempt(c) pdFootIsEitherOffAttempt( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+
+__EXPORT void pdCoreInitMode(pdCore *core);
 
 /* update method */
 __EXPORT void pdCoreUpdate(pdCore *core);

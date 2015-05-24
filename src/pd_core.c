@@ -154,7 +154,7 @@ void _pdCoreUpdateCommand(pdCore *core)
   pdCZSetCmdCOMY( pdCoreCZPtr( core ), core->cmd->yd );
   pdCZSetCmdCOMZ( pdCoreCZPtr( core ), core->cmd->zd );
   pdCZSetCmdTheta( pdCoreCZPtr( core ), core->cmd->thetad );
-  pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
+  /* pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud ); */
   pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd );
   pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist );
   pdFootSetMaxHeight( pdCoreLFPtr( core ), core->cmd->lfh );
@@ -241,10 +241,13 @@ void _pdCoreUpdateRef(pdCore *core)
 {
   zVec3D pd;
 
-  if( !zIsTiny( core->cmd->vud ) )
+  pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
+  pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
+  if( pdCoreDoesIntendToWalk( core ) ){
     pdCZSetRho( pdCoreCZPtr(core), 1.0 );
-  else
-    pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
+    if( !core->mode.step )
+      pdCZSetRefVelU( pdCoreCZPtr( core ), 0.0 );
+  }
 
   if( !zIsTiny( pdCZRefVelU( pdCoreCZPtr(core) ) ) ){
     pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );

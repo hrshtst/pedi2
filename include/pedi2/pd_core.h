@@ -85,6 +85,7 @@ bool pdCoreDoesIntendToWalk(pdCore *core);
 
 __EXPORT void pdCoreInitMode(pdCore *core);
 __EXPORT void pdCoreUpdateMode(pdCore *core);
+__EXPORT void pdCoreWriteMode(pdCore *core);
 
 /* update method */
 __EXPORT void pdCoreUpdate(pdCore *core);

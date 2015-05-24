@@ -128,6 +128,16 @@ void pdCoreUpdateMode(pdCore *core)
   }
 }
 
+#define pdCoreBool2Str(b) ( b ? "TRUE" : "FALSE" )
+void pdCoreWriteMode(pdCore *core)
+{
+  printf( "stand:%s, step:%s, walk:%s, sidewalk:%s\n",
+          pdCoreBool2Str(core->mode.stand),
+          pdCoreBool2Str(core->mode.step),
+          pdCoreBool2Str(core->mode.walk),
+          pdCoreBool2Str(core->mode.sidewalk) );
+}
+
 void _pdCoreUpdateCommand(pdCore *core)
 {
   pdCZSetQ1U( pdCoreCZPtr( core ), core->cmd->qu1 );

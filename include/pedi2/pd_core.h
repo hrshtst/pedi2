@@ -62,12 +62,7 @@ __EXPORT void pdCoreDestroy(pdCore *core);
   pdFootSetTimeStep( pdCoreLFPtr( c ), dt ); \
   pdFootSetTimeStep( pdCoreRFPtr( c ), dt ); \
 } while(0)
-#define pdCoreIncrTime(c) do{ \
-  pdCoreTime( c ) += pdCoreTimeStep( c ); \
-  pdCZIncrTime( pdCoreCZPtr( c ) ); \
-  pdFootIncrTime( pdCoreLFPtr( c ) ); \
-  pdFootIncrTime( pdCoreRFPtr( c ) ); \
-} while(0)
+#define pdCoreIncrTime(c) pdCoreTime( c ) += pdCoreTimeStep( c )
 
 bool pdCoreDoesIntendToStand(pdCore *core);
 bool pdCoreDoesIntendToStep(pdCore *core);

@@ -16,6 +16,13 @@ class pdCoreTest : public testing::Test {
       pdCoreDestroy( &core );
   };
 
+  void LoadMighty() {
+    char model[] = "model/mighty.zkc";
+
+    pdCmdDefaultInit( &cmd );
+    pdCoreLoad( &core, model );
+  };
+
   void SupportOnBothFeet() {
     pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
     pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
@@ -111,6 +118,26 @@ TEST_F(pdCoreTest, IncrTime)
   EXPECT_EQ( 2*TIME_STEP, pdCZTime( pdCoreCZPtr( &core ) ) );
   EXPECT_EQ( 2*TIME_STEP, pdFootTime( pdCoreLFPtr( &core ) ) );
   EXPECT_EQ( 2*TIME_STEP, pdFootTime( pdCoreRFPtr( &core ) ) );
+}
+
+TEST_F(pdCoreTest, IncrTime_Update)
+{
+  LoadMighty();
+  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
+  pdCoreUpdate( &core );
+  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
+  pdCoreUpdate( &core );
+  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
+  pdCoreUpdate( &core );
+  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
+  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
 }
 
 TEST_F(pdCoreTest, Load)

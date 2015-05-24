@@ -2254,20 +2254,20 @@ body: 0 0 0.3667 0 0 0
 
 [ik]
 joint: body                      0.001
-joint: left_shoulder_flexion     0 -20
-joint: left_shoulder_abduction   0 15
-joint: left_elbow_rotation       0 70
-joint: left_elbow_flexion        0 60
+joint: left_shoulder_flexion     0.001
+joint: left_shoulder_abduction   0.001
+joint: left_elbow_rotation       0.001
+joint: left_elbow_flexion        0.001
 joint: left_hip_flexion          0.001
 joint: left_hip_abduction        0.001
 joint: left_knee_rotation        0.001
 joint: left_knee_flexion         0.001
 joint: left_ankle_flexion        0.001
 joint: left_ankle_abduction      0.001
-joint: right_shoulder_flexion    0 -20
-joint: right_shoulder_abduction  0 15
-joint: right_elbow_rotation      0 70
-joint: right_elbow_flexion       0 60
+joint: right_shoulder_flexion    0.001
+joint: right_shoulder_abduction  0.001
+joint: right_elbow_rotation      0.001
+joint: right_elbow_flexion       0.001
 joint: right_hip_flexion         0.001
 joint: right_hip_abduction       0.001
 joint: right_knee_rotation       0.001
@@ -2276,7 +2276,11 @@ joint: right_ankle_flexion       0.001
 joint: right_ankle_abduction     0.001
 constraint: com
 constraint: world_att body
-constraint: world_pos left_foot f
-constraint: world_att left_foot f
-constraint: world_pos right_foot f
-constraint: world_att right_foot f
+constraint: world_pos left_foot
+constraint: world_att left_foot
+constraint: world_pos right_foot
+constraint: world_att right_foot
+constraint: world_pos left_hand
+constraint: world_att left_hand
+constraint: world_pos right_hand
+constraint: world_att right_hand

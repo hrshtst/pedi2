@@ -1,5 +1,6 @@
 #include <zx11/zxwidget.h>
 #include <zx11/zximage_dib.h>
+#include <pedi2/pd_cmd.h>
 #include <pedi2/pd_core.h>
 
 #include "util/dm_scene.h"
@@ -11,53 +12,53 @@ typedef enum{
   DM_MODEL_HYDRA,
 } dmModel;
 
-void init_console_mighty(dmConsole *con, pdCommand *com)
+void init_console_mighty(dmConsole *con, pdCmd *cmd)
 {
-  dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &com->zd );
-  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &com->vud );
-  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &com->qu1 );
-  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &com->qu2 );
-  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &com->vwd );
-  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &com->qw1 );
-  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &com->qw2 );
-  dmConsoleAddEval( con, "Foot dist", 0.02, 0.16, 0.1, 0, &com->dist );
-  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &com->kappa );
-  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &com->rho );
-  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &com->kr );
-  dmConsoleAddEval( con, "L lift height", 0, 0.04, 0.04, 0, &com->lfh );
-  dmConsoleAddEval( con, "R lift height", 0, 0.04, 0.04, 0, &com->rfh );
+  dmConsoleAddEval( con, "COM height", 0.24, 0.28, 0.26, 0, &cmd->zd );
+  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &cmd->vud );
+  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &cmd->qu1 );
+  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &cmd->qu2 );
+  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &cmd->vwd );
+  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &cmd->qw1 );
+  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &cmd->qw2 );
+  dmConsoleAddEval( con, "Foot dist", 0.084, 0.16, 0.1, 0, &cmd->dist );
+  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &cmd->kappa );
+  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &cmd->rho );
+  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &cmd->kr );
+  dmConsoleAddEval( con, "L lift height", 0, 0.04, 0.04, 0, &cmd->lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.04, 0.04, 0, &cmd->rfh );
 }
 
-void init_console_hydra(dmConsole *con, pdCommand *com)
+void init_console_hydra(dmConsole *con, pdCmd *cmd)
 {
-  dmConsoleAddEval( con, "COM height", 0.7, 0.95, 0.9, 0, &com->zd );
-  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &com->vud );
-  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &com->qu1 );
-  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &com->qu2 );
-  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &com->vwd );
-  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &com->qw1 );
-  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &com->qw2 );
-  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.25, 0, &com->dist );
-  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &com->kappa );
-  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &com->rho );
-  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &com->kr );
-  dmConsoleAddEval( con, "L lift height", 0, 0.1, 0.1, 0, &com->lfh );
-  dmConsoleAddEval( con, "R lift height", 0, 0.1, 0.1, 0, &com->rfh );
+  dmConsoleAddEval( con, "COM height", 0.8, 1.0, 0.95, 0, &cmd->zd );
+  dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &cmd->vud );
+  dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &cmd->qu1 );
+  dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &cmd->qu2 );
+  dmConsoleAddEval( con, "VW-ref", -0.15, 0.15, 0, 20, &cmd->vwd );
+  dmConsoleAddEval( con, "W-pole 1", 0.0, 2.0, 1.0, 0, &cmd->qw1 );
+  dmConsoleAddEval( con, "W-pole 2", 0.0, 2.0, 1.5, 0, &cmd->qw2 );
+  dmConsoleAddEval( con, "Foot dist", 0.05, 0.5, 0.25, 0, &cmd->dist );
+  dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &cmd->kappa );
+  dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &cmd->rho );
+  dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &cmd->kr );
+  dmConsoleAddEval( con, "L lift height", 0, 0.2, 0.1, 0, &cmd->lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.2, 0.1, 0, &cmd->rfh );
 }
 
-void init_console(dmConsole *con, pdCommand *com, dmModel model)
+void init_console(dmConsole *con, pdCmd *cmd, dmModel model)
 {
+  pdCmdDefaultInit( cmd );
   dmConsoleInit( con );
   if( model == DM_MODEL_MIGHTY )
-    init_console_mighty( con, com );
+    init_console_mighty( con, cmd );
   else if( model == DM_MODEL_HYDRA )
-    init_console_hydra( con, com );
+    init_console_hydra( con, cmd );
   else {
     ZRUNERROR( "invalid model" );
     exit( EXIT_FAILURE );
   }
 }
-
 
 void resize(zxWindow *win, dmConsole *con, dmScene *sx, dmScene *sy)
 {
@@ -72,8 +73,8 @@ void resize(zxWindow *win, dmConsole *con, dmScene *sx, dmScene *sy)
 
   zxwSepBoxLower( win, 6, 6, w-4, 2*h-12 );
   zxwSepBoxLower( win, w+6, 6, w-4, 2*h-12 );
-  dmSceneResize( sx, w, 0, w, h );
-  dmSceneResize( sy, 0, 0, w, h );
+  dmSceneResize( sx, 0, 0, w, h );
+  dmSceneResize( sy, w, 0, w, h );
 
   zxDequeueEvent(); /* flush unprocessed events */
 }
@@ -109,33 +110,42 @@ void dmFlagsetInit(dmFlagset *flag)
   flag->log = false;
 }
 
-#define DT 0.01
+#define ANIM_SKEW 2
 void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmFlagset *flag, dmModel model, FILE *fp)
 {
   zVec3D force = { { 0, 0, 0 } };
+  double theta;
   double s, c;
+  double xd, yd;
   zVec dis;
+  static int anim_skew_cnt;
 
-  dis = zVecAlloc( pdCoreGetJointSize(core) );
-  pdCoreGetJointDis( core, dis );
-  zVec3DCreate( &force, core->adx, core->ady, 0 );
+  dis = zVecAlloc( pdCoreJointSize(core) );
+  zVecCopy( pdCoreJointDis( core ), dis );
+  /* zVec3DCreate( &force, core->adx, core->ady, 0 ); */
   if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate state */
-    pdCoreUpdate( core, DT );
+    pdCoreUpdate( core );
     if( fp )
-      pdCoreFWrite( core, fp );
+      pdCoreDataFWrite( fp, core );
   }
-  zSinCos( core->theta, &s, &c );
+  theta = zVec3DElem( &core->state.base_att, 0 );
+  zSinCos( theta, &s, &c );
+  xd = core->cmd->xd;
+  yd = core->cmd->yd;
   if( model == DM_MODEL_MIGHTY ){
-    dmSceneLookAt( sx, core->xd-4*c, core->yd-4*s, 0.4, core->xd, core->yd, 0.3);
-    dmSceneLookAt( sy, core->xd+4*s, core->yd-4*c, 0.4, core->xd, core->yd, 0.3 );
+    dmSceneLookAt( sx, xd-4*c, yd-4*s, 0.4, xd, yd, 0.3 );
+    dmSceneLookAt( sy, xd+4*s, yd-4*c, 0.4, xd, yd, 0.3 );
   } else if ( model == DM_MODEL_HYDRA ) {
-    dmSceneLookAt( sx, core->xd-10*c, core->yd-10*s, 1, core->xd, core->yd, 0.8 );
-    dmSceneLookAt( sy, core->xd+10*s, core->yd-10*c, 1, core->xd, core->yd, 0.8 );
+    dmSceneLookAt( sx, xd-10*c, yd-10*s, 1, xd, yd, 0.8 );
+    dmSceneLookAt( sy, xd+10*s, yd-10*c, 1, xd, yd, 0.8 );
   }
-  dmSceneDraw( sx, dis, &force );
-  dmSceneDraw( sy, dis, &force );
+  if( ++anim_skew_cnt > ANIM_SKEW ){
+    dmSceneDraw( sx, dis, &force );
+    dmSceneDraw( sy, dis, &force );
+    anim_skew_cnt = 0;
+  }
   zVecFree( dis );
 }
 
@@ -179,15 +189,15 @@ void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene 
       case XK_p: flag.pause = 1 - flag.pause; break;
       case XK_f: flag.frame = flag.pause; break;
       case XK_r: flag.rec = 1 - flag.rec; break;
-      case XK_Up: core->ady = 0.1; break;
-      case XK_Down: core->ady = -0.1; break;
-      case XK_Left: core->adx = -0.1; break;
-      case XK_Right: core->adx = +0.1; break;
+      /* case XK_Up: core->ady = 0.1; break; */
+      /* case XK_Down: core->ady = -0.1; break; */
+      /* case XK_Left: core->adx = -0.1; break; */
+      /* case XK_Right: core->adx = +0.1; break; */
       case XK_q: return;
       }
       break;
     case KeyRelease:
-      core->adx = core->ady = 0;
+      /* core->adx = core->ady = 0; */
       break;
     default: ;
     }
@@ -201,10 +211,11 @@ void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene 
 
 #define WIDTH 960
 #define HEIGHT 640
+#define DT 0.01
 int main(int argc, char *argv[])
 {
   zxWindow mainwin;
-  pdCommand com;
+  pdCmd cmd;
   pdCore core;
   dmConsole con;
   dmScene sx, sy;
@@ -235,14 +246,16 @@ int main(int argc, char *argv[])
 
   dmSceneInit( &sx, &mainwin );
   dmSceneInit( &sy, &mainwin );
-  init_console( &con, &com, model );
+  init_console( &con, &cmd, model );
 
-  pdCoreInit( &core, &com );
+  pdCoreInit( &core, &cmd, DT );
   if( model == DM_MODEL_MIGHTY ){
-    pdCoreLoad( &core, "../model/mighty.zkc" );
+    if( !pdCoreLoad( &core, "../model/mighty.zkc" ) )
+      exit( EXIT_FAILURE );
     dmGLInit( "../model/mighty.zkc" );
   } else if ( model == DM_MODEL_HYDRA ) {
-    pdCoreLoad( &core, "../model/hydra.zkc" );
+    if( !pdCoreLoad( &core, "../model/hydra.zkc" ) )
+      exit( EXIT_FAILURE );
     dmGLInit( "../model/hydra.zkc" );
   } else {
     ZRUNERROR( "invalid model" );
@@ -250,7 +263,7 @@ int main(int argc, char *argv[])
   }
   mainloop( &mainwin, &core, &con, &sx, &sy, model );
   dmGLExit();
-  pdCoreExit( &core );
+  pdCoreDestroy( &core );
 
   dmConsoleExit( &con );
   dmSceneExit( &sx );

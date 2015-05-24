@@ -2276,7 +2276,11 @@ joint: right_ankle_flexion       0.001
 joint: right_ankle_abduction     0.001
 constraint: com
 constraint: world_att body
-constraint: world_pos left_foot f
-constraint: world_att left_foot f
-constraint: world_pos right_foot f
-constraint: world_att right_foot f
+constraint: world_pos left_foot
+constraint: world_att left_foot
+constraint: world_pos right_foot
+constraint: world_att right_foot
+constraint: world_pos left_hand
+constraint: world_att left_hand
+constraint: world_pos right_hand
+constraint: world_att right_hand

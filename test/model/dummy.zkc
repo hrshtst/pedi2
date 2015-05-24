@@ -1,0 +1,18 @@
+[chain]
+name : dummy
+
+[link]
+name: base
+jointtype: float
+mass: 2
+COM: { 0, 0, 0 }
+inertia: {
+ 0.00001, 0, 0
+ 0, 0.00001, 0
+ 0, 0, 0.00001
+}
+frame: {
+ 1, 0, 0, 0
+ 0, 1, 0, 0
+ 0, 0, 1, 0
+}

@@ -137,6 +137,12 @@ __EXPORT bool pdFootIsOnAttempt(pdFoot *f);
 #define pdFootIsOff(f) !pdFootIsOn( f )
 #define pdFootIsOffNext(f) !pdFootIsOnNext( f )
 #define pdFootIsOffAttempt(f) !pdFootIsOnAttempt( f )
+#define pdFootIsBothOn(lf,rf) ( pdFootIsOn( lf ) && pdFootIsOn( rf ) )
+#define pdFootIsEitherOn(lf,rf) ( pdFootIsOn( lf ) || pdFootIsOn( rf ) )
+#define pdFootIsBothOnNext(lf,rf) ( pdFootIsOnNext( lf ) && pdFootIsOnNext( rf ) )
+#define pdFootIsEitherOnNext(lf,rf) ( pdFootIsOnNext( lf ) || pdFootIsOnNext( rf ) )
+#define pdFootIsBothOnAttempt(lf,rf) ( pdFootIsOnAttempt( lf ) && pdFootIsOnAttempt( rf ) )
+#define pdFootIsEitherOnAttempt(lf,rf) ( pdFootIsOnAttempt( lf ) || pdFootIsOnAttempt( rf ) )
 
 #define pdFootRotUWtoXY(f,vuw,vxy) pdCZHrzRotUWtoXY( pdFootCZPtr(f), vuw, vxy )
 #define pdFootRotXYtoUW(f,vxy,vuw) pdCZHrzRotXYtoUW( pdFootCZPtr(f), vxy, vuw )

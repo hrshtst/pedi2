@@ -395,6 +395,67 @@ TEST_F(pdFootTest, IsOnAttempt_IsOffAttempt)
   EXPECT_TRUE( pdFootIsOffAttempt( &lf ) );
 }
 
+TEST_F(pdFootTest, IsBothOn)
+{
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootPosZ( &rf ) = 0.0;
+  pdFootSR( &lf ) = &sr;
+  pdFootSR( &rf ) = &sr;
+  EXPECT_TRUE( pdFootIsBothOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+
+  pdFootPosZ( &lf ) = 0.1;
+  pdFootPosZ( &rf ) = 0.0;
+  pdFootSR( &lf ) = NULL;
+  pdFootSR( &rf ) = &sr;
+  EXPECT_FALSE( pdFootIsBothOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+
+  pdFootPosZ( &lf ) = 0.0;
+  pdFootPosZ( &rf ) = 0.1;
+  pdFootSR( &lf ) = &sr;
+  pdFootSR( &rf ) = NULL;
+  EXPECT_FALSE( pdFootIsBothOn( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOn( &lf, &rf ) );
+}
+
+TEST_F(pdFootTest, IsBothOnNext)
+{
+  pdFootRefPosZ( &lf ) = 0.0;
+  pdFootRefPosZ( &rf ) = 0.0;
+  EXPECT_TRUE( pdFootIsBothOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+
+  pdFootRefPosZ( &lf ) = 0.1;
+  pdFootRefPosZ( &rf ) = 0.0;
+  EXPECT_FALSE( pdFootIsBothOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+
+  pdFootRefPosZ( &lf ) = 0.0;
+  pdFootRefPosZ( &rf ) = 0.1;
+  EXPECT_FALSE( pdFootIsBothOnNext( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnNext( &lf, &rf ) );
+}
+
+TEST_F(pdFootTest, IsBothOnAttempt)
+{
+  pdFootDesPosZ( &lf ) = 0.0;
+  pdFootDesPosZ( &rf ) = 0.0;
+  EXPECT_TRUE( pdFootIsBothOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+
+  pdFootDesPosZ( &lf ) = 0.1;
+  pdFootDesPosZ( &rf ) = 0.0;
+  EXPECT_FALSE( pdFootIsBothOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+
+  pdFootDesPosZ( &lf ) = 0.0;
+  pdFootDesPosZ( &rf ) = 0.1;
+  EXPECT_FALSE( pdFootIsBothOnAttempt( &lf, &rf ) );
+  EXPECT_TRUE( pdFootIsEitherOnAttempt( &lf, &rf ) );
+}
+
+
 TEST_F(pdFootTest, RotUWtoXY_1)
 {
   zVec2D vuw, vxy;

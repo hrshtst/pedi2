@@ -31,7 +31,10 @@ void _pdCorePoseInit(pdCore *core)
   double offset;
 
   offset = zPI_2;
-  foot_dist = core->cmd->dist;
+  if( !zIsTiny( core->cmd->dist ) )
+    foot_dist = core->cmd->dist;
+  else
+    foot_dist = zVec3DDist( &core->state.lf_pos, &core->state.rf_pos );
   com_height = zVec3DElem(&core->state.com_pos,zZ) - zVec3DElem(&core->state.lf_pos,zZ);
   pdCZSetDist( pdCoreCZPtr(core), foot_dist );
   theta = core->cmd->thetad;

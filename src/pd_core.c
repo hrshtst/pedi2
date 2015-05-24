@@ -31,11 +31,19 @@ void _pdCorePoseInit(pdCore *core)
   double offset;
 
   offset = zPI_2;
-  if( !zIsTiny( core->cmd->dist ) )
+  if( core->cmd->dist > 0 )
     foot_dist = core->cmd->dist;
-  else
+  else {
     foot_dist = zVec3DDist( &core->state.lf_pos, &core->state.rf_pos );
-  com_height = zVec3DElem(&core->state.com_pos,zZ) - zVec3DElem(&core->state.lf_pos,zZ);
+    core->cmd->dist = foot_dist;
+  }
+  if( core->cmd->zd > 0 )
+    com_height = core->cmd->zd;
+  else {
+    com_height = zVec3DElem(&core->state.com_pos,zZ) - zVec3DElem(&core->state.lf_pos,zZ);
+    com_height = 0.95 * com_height;
+    core->cmd->zd = com_height;
+  }
   pdCZSetDist( pdCoreCZPtr(core), foot_dist );
   theta = core->cmd->thetad;
   zSinCos( theta, &s, &c );
@@ -46,7 +54,7 @@ void _pdCorePoseInit(pdCore *core)
   core->cmd->yd = y;
 
   zVec3DCopy( &core->state.com_pos, &v );
-  zVec3DSetElem( &v, zZ, com_height*0.95 );
+  zVec3DSetElem( &v, zZ, com_height );
   pdRobotSetRefCOM( pdCoreRobotPtr(core), &v );
 
   zVec3DCopy( &core->state.base_att, &v );
@@ -286,6 +294,7 @@ void pdCoreUpdate(pdCore *core)
   _pdCoreUpdateRef( core );
   _pdCoreUpdateState( core );
   pdCoreUpdateMode( core );
+  pdCoreIncrTime( core );
 }
 
 void pdCoreDataFWrite(FILE *fp, pdCore *core)

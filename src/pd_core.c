@@ -133,11 +133,14 @@ void pdCoreUpdateMode(pdCore *core)
     if( pdCoreDoesIntendToStand( core ) || !core->mode.step ){
       core->mode.stand = true;
       core->mode.step = false;
+      core->mode.walk = false;
     }
   }
   if( pdCoreIsEitherFootOff( core ) ){
     core->mode.stand = false;
     core->mode.step = true;
+    if( pdCoreDoesIntendToWalk( core ) )
+      core->mode.walk = true;
   }
 }
 

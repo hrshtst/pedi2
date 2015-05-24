@@ -71,6 +71,13 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 
 __EXPORT void pdCoreInitMode(pdCore *core);
 
+#define pdCoreIsBothFeetOn(c) pdFootIsBothOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsEitherFootOn(c) pdFootIsEitherOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsBothFeetOnNext(c) pdFootIsBothOnNext( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsEitherFootOnNext(c) pdFootIsEitherOnNext( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsBothFeetOnAttempt(c) pdFootIsBothOnAttempt( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+#define pdCoreIsEitherFootOnAttempt(c) pdFootIsEitherOnAttempt( pdCoreLFPtr(c), pdCoreRFPtr(c) )
+
 /* update method */
 __EXPORT void pdCoreUpdate(pdCore *core);
 

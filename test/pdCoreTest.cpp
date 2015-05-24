@@ -16,6 +16,27 @@ class pdCoreTest : public testing::Test {
       pdCoreDestroy( &core );
   };
 
+  void SupportOnBothFeet() {
+    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
+    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
+    pdFootSR( pdCoreLFPtr(&core) ) = &core.state.sr_lf;
+    pdFootSR( pdCoreRFPtr(&core) ) = &core.state.sr_lf;
+  };
+
+  void SupportOnLeftFoot() {
+    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
+    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.01;
+    pdFootSR( pdCoreLFPtr(&core) ) = &core.state.sr_lf;
+    pdFootSR( pdCoreRFPtr(&core) ) = NULL;
+  };
+
+  void SupportOnRightFoot() {
+    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.01;
+    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
+    pdFootSR( pdCoreLFPtr(&core) ) = NULL;
+    pdFootSR( pdCoreRFPtr(&core) ) = &core.state.sr_lf;
+  };
+
   bool destroy_flag;
   pdCore core;
   pdCmd cmd;

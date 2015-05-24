@@ -31,7 +31,9 @@ int main(void)
   /* main loop */
   for( i=0; i<STEP; i++ ){
     /* modify cmdmand values */
-    cmd.vud = 0.1;
+    cmd.rho = 1.0;
+    if( i > 200 )
+      cmd.vud = 0.1;
     cmd.kappa = 0.0;
 
     /* feedback the current state */

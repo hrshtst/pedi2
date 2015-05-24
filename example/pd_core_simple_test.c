@@ -22,16 +22,18 @@ int main(void)
   dis = zVecAlloc( pdCoreJointSize(&ctrl) );
 
   /* set referential values */
-  cmd.zd = 0.85;           /* COM height */
+  cmd.zd = 0.95;           /* COM height */
   cmd.dist = 0.25;         /* distance of both feet */
-  cmd.lfh = cmd.rfh = 0.2; /* (maximal) foot lifting height */
+  cmd.lfh = cmd.rfh = 0.1; /* (maximal) foot lifting height */
   cmd.vud = 0.0;           /* referential velocity (longitudinal) */
   cmd.kappa = 0.0;         /* referential curvature for rotation */
 
   /* main loop */
   for( i=0; i<STEP; i++ ){
     /* modify cmdmand values */
-    cmd.vud = 0.1;
+    cmd.rho = 1.0;
+    if( i > 200 )
+      cmd.vud = 0.1;
     cmd.kappa = 0.0;
 
     /* feedback the current state */

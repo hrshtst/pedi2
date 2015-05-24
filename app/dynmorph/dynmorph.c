@@ -31,7 +31,7 @@ void init_console_mighty(dmConsole *con, pdCmd *cmd)
 
 void init_console_hydra(dmConsole *con, pdCmd *cmd)
 {
-  dmConsoleAddEval( con, "COM height", 0.7, 0.95, 0.9, 0, &cmd->zd );
+  dmConsoleAddEval( con, "COM height", 0.8, 1.0, 0.95, 0, &cmd->zd );
   dmConsoleAddEval( con, "VU-ref", -0.3, 0.3, 0, 20, &cmd->vud );
   dmConsoleAddEval( con, "U-pole 1", 0.0, 2.0, 1.0, 0, &cmd->qu1 );
   dmConsoleAddEval( con, "U-pole 2", 0.0, 2.0, 0.0, 0, &cmd->qu2 );
@@ -42,8 +42,8 @@ void init_console_hydra(dmConsole *con, pdCmd *cmd)
   dmConsoleAddEval( con, "Kappa", -3.0, 3.0, 0.0, 20, &cmd->kappa );
   dmConsoleAddEval( con, "W-activation", 0, 1, 0, 0, &cmd->rho );
   dmConsoleAddEval( con, "W-initiation", 0.5, 2, 1, 0, &cmd->kr );
-  dmConsoleAddEval( con, "L lift height", 0, 0.1, 0.1, 0, &cmd->lfh );
-  dmConsoleAddEval( con, "R lift height", 0, 0.1, 0.1, 0, &cmd->rfh );
+  dmConsoleAddEval( con, "L lift height", 0, 0.2, 0.1, 0, &cmd->lfh );
+  dmConsoleAddEval( con, "R lift height", 0, 0.2, 0.1, 0, &cmd->rfh );
 }
 
 void init_console(dmConsole *con, pdCmd *cmd, dmModel model)

@@ -157,7 +157,7 @@ int main(void)
     pdCZUpdate( &cz, &com, &vel, &acc, &zmp, theta, &sr );
     pdFootUpdate( &lf, &rf, pdCZDelta(&cz), pdCZVelUW(&cz), &zmp, &lfp, &rfp, &lfa, &rfa, &sr_lf, &sr_rf );
     /* output */
-    pdCZDataWrite( &cz );
+    pdFootDataWrite( &lf, &rf );
     /* auto reference update */
     if( !zIsTiny( pdCZRefVelU(&cz) ) )
       pdCZAutoUpdateRef( &cz, &comd, &thetad );

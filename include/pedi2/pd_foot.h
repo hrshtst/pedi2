@@ -163,7 +163,7 @@ __EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVe
 __EXPORT void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);
 #define pdFootWrite(lf,rf) pdFootFWrite( stdout, lf, rf )
 __EXPORT void pdFootDataFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);
-#define pdFootDataWrite(lf,rf) pdFootFWrite( stdout, lf, rf )
+#define pdFootDataWrite(lf,rf) pdFootDataFWrite( stdout, lf, rf )
 
 __END_DECLS
 

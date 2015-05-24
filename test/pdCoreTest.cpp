@@ -267,6 +267,7 @@ TEST_F(pdCoreTest, UpdateMode_step)
   pdCmdDefaultInit( &cmd );
   SupportOnBothFeet();
   pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.stand );
   EXPECT_FALSE( core.mode.step );
   // attempt to step, but not initiate yet
   cmd.rho = 1;

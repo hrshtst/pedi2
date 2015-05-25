@@ -86,6 +86,17 @@ __EXPORT void pdRobotSolveIK(pdRobot *robot);
 /* methods to get parameters */
 #define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )
 #define pdRobotJointDis(r)  (r)->dis
+#define pdRobotRefVec(r,id)  ( &(r)->_ref_vec[id] )
+#define pdRobotRefCOM(r)     pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_COM )
+#define pdRobotRefBaseAtt(r) pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_BASE_ATT )
+#define pdRobotRefLFPos(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_LF_POS )
+#define pdRobotRefLFAtt(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_LF_ATT )
+#define pdRobotRefRFPos(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_RF_POS )
+#define pdRobotRefRFAtt(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_RF_ATT )
+#define pdRobotRefLHPos(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_LH_POS )
+#define pdRobotRefLHAtt(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_LH_ATT )
+#define pdRobotRefRHPos(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_RH_POS )
+#define pdRobotRefRHAtt(r)   pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_RH_ATT )
 __EXPORT void pdRobotCOMPos(pdRobot *robot, zVec3D *com);
 __EXPORT void pdRobotBaseAtt(pdRobot *robot, zVec3D *att);
 __EXPORT void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);

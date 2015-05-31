@@ -179,7 +179,7 @@ void _pdCoreUpdateCommand(pdCore *core)
   pdCZSetCmdCOMZ( pdCoreCZPtr( core ), core->cmd->zd );
   pdCZSetCmdTheta( pdCoreCZPtr( core ), core->cmd->thetad );
   /* pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud ); */
-  pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd );
+  /* pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd ); */
   pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist );
   pdFootSetMaxHeight( pdCoreLFPtr( core ), core->cmd->lfh );
   pdFootSetTrXK( pdCoreLFPtr( core ), core->cmd->lfkx );
@@ -268,10 +268,13 @@ void _pdCoreUpdateRef(pdCore *core)
   pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
   pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 );
   pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
-  if( pdCoreDoesIntendToWalk( core ) ){
+  pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vud );
+  if( pdCoreDoesIntendToWalk( core ) || pdCoreDoesIntendToSidewalk( core ) ){
     pdCZSetRho( pdCoreCZPtr(core), 1.0 );
-    if( !core->mode.step )
+    if( !core->mode.step ) {
       pdCZSetRefVelU( pdCoreCZPtr( core ), 0.0 );
+      pdCZSetRefVelW( pdCoreCZPtr( core ), 0.0 );
+    }
     if( core->mode.walk )
       pdCZSetQ2U( pdCoreCZPtr( core ), 0.0 );
   }

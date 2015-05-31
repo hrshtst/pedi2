@@ -86,6 +86,8 @@ __EXPORT void pdCoreWriteMode(pdCore *core);
 __EXPORT void pdCoreUpdate(pdCore *core);
 
 /* output method */
+__EXPORT void pdCoreFWrite(FILE *fp, pdCore *core);
+#define pdCoreWrite(c) pdCoreFWrite( stdout, c )
 __EXPORT void pdCoreDataFWrite(FILE *fp, pdCore *core);
 #define pdCoreDataWrite(c) pdCoreDataFWrite( stdout, c )
 

@@ -16,8 +16,10 @@ enum{
 typedef struct{
   zVec3D _p;          /* current foot position */
   zVec3D _pd;         /* desired foot position */
+  zVec3D _pp;         /* foot position when pivoting */
   zVec3D _a;          /* current foot attitude (ZYX Euler angle) */
   zVec3D _ad;         /* desired foot attitude (ZYX Euler angle) */
+  zVec3D _ap;         /* foot attitude when pivoting */
   zVec3DList *_sr;    /* supporting region */
 
   pdFootUW _uw;       /* horizontal motion  */
@@ -51,6 +53,10 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootDesPosX(f)   zVec3DElem( pdFootDesPos(f), zX )
 #define pdFootDesPosY(f)   zVec3DElem( pdFootDesPos(f), zY )
 #define pdFootDesPosZ(f)   zVec3DElem( pdFootDesPos(f), zZ )
+#define pdFootPivotPos(f)  ( &(f)->_pp )
+#define pdFootPivotPosX(f) zVec3DElem( pdFootPivotPos(f), zX )
+#define pdFootPivotPosY(f) zVec3DElem( pdFootPivotPos(f), zY )
+#define pdFootPivotPosZ(f) zVec3DElem( pdFootPivotPos(f), zZ )
 #define pdFootAtt(f)       ( &(f)->_a )
 #define pdFootAttX(f)      zVec3DElem( pdFootAtt(f), zX )
 #define pdFootAttY(f)      zVec3DElem( pdFootAtt(f), zY )
@@ -59,6 +65,10 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootDesAttX(f)   zVec3DElem( pdFootDesAtt(f), zX )
 #define pdFootDesAttY(f)   zVec3DElem( pdFootDesAtt(f), zY )
 #define pdFootDesAttZ(f)   zVec3DElem( pdFootDesAtt(f), zZ )
+#define pdFootPivotAtt(f)  ( &(f)->_ap )
+#define pdFootPivotAttX(f) zVec3DElem( pdFootPivotAtt(f), zX )
+#define pdFootPivotAttY(f) zVec3DElem( pdFootPivotAtt(f), zY )
+#define pdFootPivotAttZ(f) zVec3DElem( pdFootPivotAtt(f), zZ )
 #define pdFootSR(f)        (f)->_sr
 #define pdFootUWPtr(f)     ( &(f)->_uw )
 #define pdFootZPtr(f)      ( &(f)->_z )

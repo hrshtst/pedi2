@@ -38,6 +38,8 @@ void pdFootInit(pdFoot *f, pdCZHrz *cz, byte dir, double dt)
     pdFootDestroy( f );
     return;
   }
+  zVec3DClear( pdFootPivotPos( f ) );
+  zVec3DClear( pdFootPivotAtt( f ) );
 }
 
 void pdFootDestroy(pdFoot *f)
@@ -67,6 +69,8 @@ void pdFootDestroy(pdFoot *f)
   pdFootRefAttX( f ) = 0;
   pdFootRefAttY( f ) = 0;
   pdFootRefAttZ( f ) = 0;
+  zVec3DClear( pdFootPivotPos( f ) );
+  zVec3DClear( pdFootPivotAtt( f ) );
 }
 
 #define PD_FOOT_TOL  (1e-03)

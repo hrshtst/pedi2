@@ -63,6 +63,8 @@ TEST_F(pdCoreTest, Init)
   EXPECT_FALSE( core.mode.step );
   EXPECT_FALSE( core.mode.walk );
   EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
 }
 
 TEST_F(pdCoreTest, Destroy)
@@ -240,11 +242,15 @@ TEST_F(pdCoreTest, InitMode)
   core.mode.step     = true;
   core.mode.walk     = true;
   core.mode.sidewalk = true;
+  core.mode.follow   = true;
+  core.mode.brake    = true;
   pdCoreInitMode( &core );
   EXPECT_TRUE( core.mode.stand );
   EXPECT_FALSE( core.mode.step );
   EXPECT_FALSE( core.mode.walk );
   EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
   destroy_flag = true;
 }
 

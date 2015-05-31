@@ -14,6 +14,8 @@ typedef struct{
   bool step;
   bool walk;
   bool sidewalk;
+  bool follow;
+  bool brake;
 } pdCoreMode;
 
 typedef struct{

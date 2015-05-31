@@ -130,6 +130,8 @@ void pdCoreInitMode(pdCore *core)
   core->mode.step = false;
   core->mode.walk = false;
   core->mode.sidewalk = false;
+  core->mode.follow   = false;
+  core->mode.brake    = false;
 }
 
 void pdCoreUpdateMode(pdCore *core)
@@ -155,11 +157,13 @@ void pdCoreUpdateMode(pdCore *core)
 #define pdCoreBool2Str(b) ( b ? "TRUE" : "FALSE" )
 void pdCoreWriteMode(pdCore *core)
 {
-  printf( "stand:%s, step:%s, walk:%s, sidewalk:%s\n",
+  printf( "stand:%s, step:%s, walk:%s, sidewalk:%s, follow:%s, brake:%s\n",
           pdCoreBool2Str(core->mode.stand),
           pdCoreBool2Str(core->mode.step),
           pdCoreBool2Str(core->mode.walk),
-          pdCoreBool2Str(core->mode.sidewalk) );
+          pdCoreBool2Str(core->mode.sidewalk),
+          pdCoreBool2Str(core->mode.follow),
+          pdCoreBool2Str(core->mode.brake) );
 }
 
 void _pdCoreUpdateCommand(pdCore *core)

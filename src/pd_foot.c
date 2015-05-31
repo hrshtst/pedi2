@@ -162,11 +162,24 @@ void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D delta, zVec2D vel, zVec3
   pdFootSetDesPos( kf, xy[zX], xy[zY], pdFootZRefZ( pdFootZPtr( kf ) ) );
 }
 
+static void _pdFootSmoothDesPos(pdFoot *kf, zVec3D *pd, zVec3D *smoothed_pd);
+void _pdFootSmoothDesPos(pdFoot *kf, zVec3D *pd, zVec3D *smoothed_pd)
+{
+  zVec3DCreate( smoothed_pd,
+                pdFootPivotPosX(kf) + pdFootPhase(kf) * ( zVec3DElem(pd,zX) - pdFootPivotPosX(kf) ),
+                pdFootPivotPosY(kf) + pdFootPhase(kf) * ( zVec3DElem(pd,zY) - pdFootPivotPosY(kf) ),
+                zVec3DElem(pd,zZ) );
+}
+
 void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
 {
+  zVec3D smoothed_pd;
+
   /* update referential position */
   if( pdFootIsOff(kf) || pdFootIsOffNext(kf) || pdFootIsOffAttempt(kf) ){
-    pdFootCalcRefPos( kf, pdFootPos( kf ), pdFootDesPos( kf ), pdFootRefPos( kf ) );
+    /* smooth desired foot position */
+    _pdFootSmoothDesPos( kf, pdFootDesPos( kf ), &smoothed_pd );
+    pdFootCalcRefPos( kf, pdFootPos( kf ), &smoothed_pd, pdFootRefPos( kf ) );
     pdFootCalcRefAtt( kf, pdFootDesPos( kf ), pdFootRefAtt( kf ) );
   } else {
     zVec3DCopy( pdFootPos( kf ), pdFootRefPos( kf ) );

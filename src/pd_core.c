@@ -280,7 +280,7 @@ void _pdCoreUpdateRef(pdCore *core)
       pdCZSetQ2U( pdCoreCZPtr( core ), 0.0 );
   }
 
-  if( !zIsTiny( pdCZRefVelU( pdCoreCZPtr(core) ) ) ){
+  if( core->mode.walk ){
     pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
     core->cmd->xd = pd.e[zX];
     core->cmd->yd = pd.e[zY];

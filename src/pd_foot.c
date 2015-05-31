@@ -164,9 +164,6 @@ void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D delta, zVec2D vel, zVec3
 
 void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
 {
-  /* update current position */
-  pdFootSetPosVec( kf, kfp );
-  pdFootSetAttVec( kf, kfa );
   /* update referential position */
   if( pdFootIsOff(kf) || pdFootIsOffNext(kf) || pdFootIsOffAttempt(kf) ){
     pdFootCalcRefPos( kf, pdFootPos( kf ), pdFootDesPos( kf ), pdFootRefPos( kf ) );
@@ -179,10 +176,24 @@ void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
   }
 }
 
+void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zVec3DList *sr)
+{
+  /* update current state */
+  pdFootSetPosVec( f, pos );
+  pdFootSetAttVec( f, att );
+  /* update supporting region */
+  pdFootSR( f ) = sr;
+  /* update pivoting state */
+  if( pdFootIsOn( f ) ){
+    zVec3DCopy( pdFootPos(f), pdFootPivotPos(f) );
+    zVec3DCopy( pdFootAtt(f), pdFootPivotAtt(f) );
+  }
+}
+
 void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr)
 {
-  pdFootSR( lf ) = lfsr;
-  pdFootSR( rf ) = rfsr;
+  pdFootUpdateState( lf, lfp, lfa, lfsr );
+  pdFootUpdateState( rf, rfp, rfa, rfsr );
   _pdFootDesPosUpdate( lf, rf, delta, vel, zmp, rfsr );
   _pdFootDesPosUpdate( rf, lf, delta, vel, zmp, lfsr );
   _pdFootRefPosUpdate( lf, lfp, lfa, lfsr );

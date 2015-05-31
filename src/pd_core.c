@@ -139,6 +139,7 @@ void pdCoreUpdateMode(pdCore *core)
       core->mode.stand = true;
       core->mode.step = false;
       core->mode.walk = false;
+      core->mode.sidewalk = false;
     }
   }
   if( pdCoreIsEitherFootOff( core ) ){
@@ -146,6 +147,8 @@ void pdCoreUpdateMode(pdCore *core)
     core->mode.step = true;
     if( pdCoreDoesIntendToWalk( core ) )
       core->mode.walk = true;
+    if( pdCoreDoesIntendToSidewalk( core ) )
+      core->mode.sidewalk = true;
   }
 }
 

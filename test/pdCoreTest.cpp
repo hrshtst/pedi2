@@ -191,6 +191,28 @@ TEST_F(pdCoreTest, DoesIntendToStand_Step_Walk)
   destroy_flag = true;
 }
 
+TEST_F(pdCoreTest, DoesIntendToStand_Step_Sidewalk)
+{
+  pdCmdDefaultInit( &cmd );
+
+  EXPECT_TRUE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToSidewalk( &core ) );
+
+  cmd.rho = 1.0;
+  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_FALSE( pdCoreDoesIntendToSidewalk( &core ) );
+
+  cmd.rho = 1.0;
+  cmd.vwd = 0.1;
+  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
+  EXPECT_TRUE( pdCoreDoesIntendToSidewalk( &core ) );
+
+  destroy_flag = true;
+}
+
 TEST_F(pdCoreTest, BothFeetOn)
 {
   SupportOnBothFeet();

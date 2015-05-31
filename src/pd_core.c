@@ -119,6 +119,11 @@ bool pdCoreDoesIntendToWalk(pdCore *core)
   return !zIsTiny( core->cmd->vud );
 }
 
+bool pdCoreDoesIntendToSidewalk(pdCore *core)
+{
+  return !zIsTiny( core->cmd->vwd );
+}
+
 void pdCoreInitMode(pdCore *core)
 {
   core->mode.stand = true;

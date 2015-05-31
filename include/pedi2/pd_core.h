@@ -67,6 +67,7 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 bool pdCoreDoesIntendToStand(pdCore *core);
 bool pdCoreDoesIntendToStep(pdCore *core);
 bool pdCoreDoesIntendToWalk(pdCore *core);
+bool pdCoreDoesIntendToSidewalk(pdCore *core);
 
 #define pdCoreIsBothFeetOn(c) pdFootIsBothOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsEitherFootOn(c) pdFootIsEitherOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )

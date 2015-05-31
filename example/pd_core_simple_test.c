@@ -30,7 +30,7 @@ int main(void)
 
   /* main loop */
   for( i=0; i<STEP; i++ ){
-    /* modify cmdmand values */
+    /* modify command values */
     cmd.rho = 1.0;
     if( i > 200 )
       cmd.vud = 0.1;

@@ -102,7 +102,7 @@ void pdCZHrzUpdateAcc(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D 
   pdCZHrzSetVelVec( hrz, vxy );
   pdCZHrzSetRefPosVec( hrz, xyd );
   pdCZHrzSetRefTheta( hrz, thetad );
-  if( sr )
+  if( sr && ( zListNum( sr ) > 0 ) )
     pdCZHrzXformSRXYtoUW( hrz, sr );
   pdCZHrzXformXYtoUW( hrz, pdCZHrzRefPos(hrz), pdCZHrzRefPosUW(hrz) );
   pdCZHrzCalcDiffToRefPos( hrz, pdCZHrzRefPosUW(hrz), pdCZHrzDelta(hrz) );

@@ -27,6 +27,9 @@ class Data(object):
             msg = 'num of data entries does not match with that of labels'
             raise UserWarning(msg)
         for i, l in enumerate(labellist):
+            if l in data.keys():
+                msg = 'label [%s] already exists' % l
+                raise UserWarning(msg)
             data[l] = rawdata[:, i]
         return data
 

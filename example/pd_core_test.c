@@ -2,6 +2,7 @@
 #include <pedi2/pd_core.h>
 
 /* #define DEBUG_MODE */
+#define OUTPUT_PLOT_DATA
 
 void init_mighty(pdCore *ctrl, pdCmd *cmd)
 {
@@ -42,6 +43,7 @@ int main(int argc, char *argv[])
   pdCmd cmd;
   pdCore ctrl;
   zVec dis;
+  FILE *fp;
   register int i;
 
   /* initialization */
@@ -63,6 +65,9 @@ int main(int argc, char *argv[])
 
   /* allocate displacement vector */
   dis = zVecAlloc( pdCoreJointSize(&ctrl) );
+
+  /* output data for plotting */
+  fp = fopen( "data.log", "w" );
 
   /* main loop */
   for( i=0; i<STEP; i++ ){
@@ -87,9 +92,13 @@ int main(int argc, char *argv[])
 #ifndef DEBUG_MODE
     printf( "%f ", DT );zVecWrite( dis );
 #endif
+#ifdef OUTPUT_PLOT_DATA
+    pdCoreDataFWrite( fp, &ctrl );
+#endif
   }
 
   /* destroy */
+  fclose( fp );
   pdCoreDestroy( &ctrl );
   pdCmdDestroy( &cmd );
   return 0;

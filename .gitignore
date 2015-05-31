@@ -11,3 +11,4 @@
 /app/pedi2-config
 *.pyc
 /tmp
+/config

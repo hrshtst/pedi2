@@ -82,6 +82,12 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootRefAttX(f)   zVec3DElem( pdFootRefAtt(f), zX )
 #define pdFootRefAttY(f)   zVec3DElem( pdFootRefAtt(f), zY )
 #define pdFootRefAttZ(f)   zVec3DElem( pdFootRefAtt(f), zZ )
+#define pdFootZMPPhase(f)  pdFootZZMPPhase( pdFootZPtr(f) )
+#define pdFootPhase(f)     pdFootZFootPhase( pdFootZPtr(f) )
+#define pdFootPhi(f)       pdFootUWPhi( pdFootUWPtr(f) )
+#define pdFootRegZMP(f)    pdFootUWRegZMP( pdFootUWPtr(f) )
+#define pdFootRegZMPU(f)   pdFootUWRegZMPU( pdFootUWPtr(f) )
+#define pdFootRegZMPW(f)   pdFootUWRegZMPW( pdFootUWPtr(f) )
 
 /* methods to set parameters */
 #define pdFootSetTime(f,t)        ( (f)->_sol._t = (t) )

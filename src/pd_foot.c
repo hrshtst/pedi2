@@ -213,13 +213,13 @@ void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)
   fprintf( fp, "lf desa:%g, dese:%g, dest:%g\n", zVec3DElem(&lf->_ad,zX), zVec3DElem(&lf->_ad,zY), zVec3DElem(&lf->_ad,zZ) );
   fprintf( fp, "lf refa:%g, refe:%g, reft:%g\n", zVec3DElem(&lf->refa,zX), zVec3DElem(&lf->refa,zY), zVec3DElem(&lf->refa,zZ) );
   fprintf( fp, "lf sign:%g, kappa:%g, dist:%g, phi:%g\n",
-           pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)), pdFootUWDist(pdFootUWPtr(lf)), pdFootUWPhi(pdFootUWPtr(lf)) );
-  fprintf( fp, "lf reguz:%g, regwz:%g\n", pdFootUWRegZMPU(pdFootUWPtr(lf)), pdFootUWRegZMPW(pdFootUWPtr(lf)) );
+           pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)), pdFootUWDist(pdFootUWPtr(lf)), pdFootPhi(lf) );
+  fprintf( fp, "lf reguz:%g, regwz:%g\n", pdFootRegZMPU(lf), pdFootRegZMPW(lf) );
   fprintf( fp, "lf refud:%g, refwd:%g\n", pdFootUWRefPosU(pdFootUWPtr(lf)), pdFootUWRefPosW(pdFootUWPtr(lf)) );
   fprintf( fp, "lf sign:%g, h:%g, rho:%g, dist:%g\n",
            pdFootZSign(pdFootZPtr(lf)), pdFootZMaxHeight(pdFootZPtr(lf)), pdFootZRho(pdFootZPtr(lf)), pdFootZDist(pdFootZPtr(lf)) );
-  fprintf( fp, "lf pz:" );zComplexFWrite( fp, pdFootZZMPPhase(pdFootZPtr(lf)) );
-  fprintf( fp, ", phase:%g, zd:%g\n", pdFootZFootPhase(pdFootZPtr(lf)), pdFootZRefZ(pdFootZPtr(lf)) );
+  fprintf( fp, "lf pz:" );zComplexFWrite( fp, pdFootZMPPhase(lf) );
+  fprintf( fp, ", phase:%g, zd:%g\n", pdFootPhase(lf), pdFootZRefZ(pdFootZPtr(lf)) );
   fprintf( fp, "--\n" );
   fprintf( fp, "rf    x:%g,    y:%g,    z:%g\n", zVec3DElem(&rf->_p,zX), zVec3DElem(&rf->_p,zY), zVec3DElem(&rf->_p,zZ) );
   fprintf( fp, "rf   xd:%g,   yd:%g,   zd:%g\n", zVec3DElem(&rf->_pd,zX), zVec3DElem(&rf->_pd,zY), zVec3DElem(&rf->_pd,zZ) );
@@ -228,13 +228,13 @@ void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)
   fprintf( fp, "rf desa:%g, dese:%g, dest:%g\n", zVec3DElem(&rf->_ad,zX), zVec3DElem(&rf->_ad,zY), zVec3DElem(&rf->_ad,zZ) );
   fprintf( fp, "rf refa:%g, refe:%g, reft:%g\n", zVec3DElem(&rf->refa,zX), zVec3DElem(&rf->refa,zY), zVec3DElem(&rf->refa,zZ) );
   fprintf( fp, "rf sign:%g, kappa:%g, dist:%g, phi:%g\n",
-           pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)), pdFootUWDist(pdFootUWPtr(rf)), pdFootUWPhi(pdFootUWPtr(rf)) );
-  fprintf( fp, "rf reguz:%g, regwz:%g\n", pdFootUWRegZMPU(pdFootUWPtr(rf)), pdFootUWRegZMPW(pdFootUWPtr(rf)) );
+           pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)), pdFootUWDist(pdFootUWPtr(rf)), pdFootPhi(rf) );
+  fprintf( fp, "rf reguz:%g, regwz:%g\n", pdFootRegZMPU(rf), pdFootRegZMPW(rf) );
   fprintf( fp, "rf refud:%g, refwd:%g\n", pdFootUWRefPosU(pdFootUWPtr(rf)), pdFootUWRefPosW(pdFootUWPtr(rf)) );
   fprintf( fp, "rf sign:%g, h:%g, rho:%g, dist:%g\n",
            pdFootZSign(pdFootZPtr(rf)), pdFootZMaxHeight(pdFootZPtr(rf)), pdFootZRho(pdFootZPtr(rf)), pdFootZDist(pdFootZPtr(rf)) );
-  fprintf( fp, "rf pz:" );zComplexFWrite( fp, pdFootZZMPPhase(pdFootZPtr(rf)) );
-  fprintf( fp, ", phase:%g, zd:%g\n", pdFootZFootPhase(pdFootZPtr(rf)), pdFootZRefZ(pdFootZPtr(rf)) );
+  fprintf( fp, "rf pz:" );zComplexFWrite( fp, pdFootZMPPhase(rf) );
+  fprintf( fp, ", phase:%g, zd:%g\n", pdFootPhase(rf), pdFootZRefZ(pdFootZPtr(rf)) );
 }
 
 void pdFootDataFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)
@@ -247,22 +247,22 @@ void pdFootDataFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)
 /*11-13*/  zVec3DElem(&lf->_a,zX), zVec3DElem(&lf->_a,zY), zVec3DElem(&lf->_a,zZ),
 /*14-16*/  zVec3DElem(&lf->_ad,zX), zVec3DElem(&lf->_ad,zY), zVec3DElem(&lf->_ad,zZ),
 /*17-19*/  zVec3DElem(&lf->refa,zX), zVec3DElem(&lf->refa,zY), zVec3DElem(&lf->refa,zZ),
-/*20-23*/  pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)), pdFootUWDist(pdFootUWPtr(lf)), pdFootUWPhi(pdFootUWPtr(lf)),
-/*24-25*/  pdFootUWRegZMPU(pdFootUWPtr(lf)), pdFootUWRegZMPW(pdFootUWPtr(lf)),
+/*20-23*/  pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)), pdFootUWDist(pdFootUWPtr(lf)), pdFootPhi(lf),
+/*24-25*/  pdFootRegZMPU(lf), pdFootRegZMPW(lf),
 /*26-27*/  pdFootUWRefPosU(pdFootUWPtr(lf)), pdFootUWRefPosW(pdFootUWPtr(lf)),
 /*28-31*/  pdFootZSign(pdFootZPtr(lf)), pdFootZMaxHeight(pdFootZPtr(lf)), pdFootZRho(pdFootZPtr(lf)), pdFootZDist(pdFootZPtr(lf)),
-/*32-33*/  pdFootZZMPPhase(pdFootZPtr(lf))->re, pdFootZZMPPhase(pdFootZPtr(lf))->im,
-/*34-35*/  pdFootZFootPhase(pdFootZPtr(lf)), pdFootZRefZ(pdFootZPtr(lf)),
+/*32-33*/  pdFootZMPPhase(lf)->re, pdFootZMPPhase(lf)->im,
+/*34-35*/  pdFootPhase(lf), pdFootZRefZ(pdFootZPtr(lf)),
 /*36-38*/  zVec3DElem(&rf->_p,zX), zVec3DElem(&rf->_p,zY), zVec3DElem(&rf->_p,zZ),
 /*39-41*/  zVec3DElem(&rf->_pd,zX), zVec3DElem(&rf->_pd,zY), zVec3DElem(&rf->_pd,zZ),
 /*42-44*/  zVec3DElem(&rf->refp,zX), zVec3DElem(&rf->refp,zY), zVec3DElem(&rf->refp,zZ),
 /*45-47*/  zVec3DElem(&rf->_a,zX), zVec3DElem(&rf->_a,zY), zVec3DElem(&rf->_a,zZ),
 /*48-50*/  zVec3DElem(&rf->_ad,zX), zVec3DElem(&rf->_ad,zY), zVec3DElem(&rf->_ad,zZ),
 /*51-53*/  zVec3DElem(&rf->refa,zX), zVec3DElem(&rf->refa,zY), zVec3DElem(&rf->refa,zZ),
-/*54-57*/  pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)), pdFootUWDist(pdFootUWPtr(rf)), pdFootUWPhi(pdFootUWPtr(rf)),
-/*58-59*/  pdFootUWRegZMPU(pdFootUWPtr(rf)), pdFootUWRegZMPW(pdFootUWPtr(rf)),
+/*54-57*/  pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)), pdFootUWDist(pdFootUWPtr(rf)), pdFootPhi(rf),
+/*58-59*/  pdFootRegZMPU(rf), pdFootRegZMPW(rf),
 /*60-61*/  pdFootUWRefPosU(pdFootUWPtr(rf)), pdFootUWRefPosW(pdFootUWPtr(rf)),
 /*62-65*/  pdFootZSign(pdFootZPtr(rf)), pdFootZMaxHeight(pdFootZPtr(rf)), pdFootZRho(pdFootZPtr(rf)), pdFootZDist(pdFootZPtr(rf)),
-/*66-67*/  pdFootZZMPPhase(pdFootZPtr(rf))->re, pdFootZZMPPhase(pdFootZPtr(rf))->im,
-/*68-69*/  pdFootZFootPhase(pdFootZPtr(rf)), pdFootZRefZ(pdFootZPtr(rf)) );
+/*66-67*/  pdFootZMPPhase(rf)->re, pdFootZMPPhase(rf)->im,
+/*68-69*/  pdFootPhase(rf), pdFootZRefZ(pdFootZPtr(rf)) );
 }

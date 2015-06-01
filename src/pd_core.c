@@ -143,14 +143,25 @@ void pdCoreUpdateMode(pdCore *core)
       core->mode.walk = false;
       core->mode.sidewalk = false;
     }
+    core->mode.follow = false;
+    core->mode.brake  = false;
   }
   if( pdCoreIsEitherFootOff( core ) ){
     core->mode.stand = false;
     core->mode.step = true;
     if( pdCoreDoesIntendToWalk( core ) )
       core->mode.walk = true;
-    if( pdCoreDoesIntendToSidewalk( core ) )
+    if( pdCoreDoesIntendToSidewalk( core ) ) {
       core->mode.sidewalk = true;
+      core->mode.follow = false;
+      core->mode.brake  = false;
+      if( ( pdFootIsOff( &core->lf ) && ( core->cmd->vwd > 0 ) ) ||
+          ( pdFootIsOff( &core->rf ) && ( core->cmd->vwd < 0 ) ) )
+        core->mode.follow = true;
+      if( ( pdFootIsOff( &core->rf ) && ( core->cmd->vwd > 0 ) ) ||
+          ( pdFootIsOff( &core->lf ) && ( core->cmd->vwd < 0 ) ) )
+        core->mode.brake = true;
+    }
   }
 }
 

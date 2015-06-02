@@ -323,6 +323,14 @@ void _pdCoreUpdateRef(pdCore *core)
       pdCZSetQ2U( pdCoreCZPtr( core ), 0.0 );
   }
 
+  if( core->mode.sidewalk && core->mode.follow ) {
+    pdCZSetDist( pdCoreCZPtr( core ), _pdCoreCalcDesFootWidthFollow( core ) );
+    core->cmd->yd = 0.5 * ( zVec3DElem( &core->state.lf_pos, zY ) + zVec3DElem( &core->state.rf_pos, zY ) );
+  }
+  if( core->mode.sidewalk && core->mode.brake ) {
+    pdCZSetDist( pdCoreCZPtr( core ), _pdCoreCalcDesFootWidthBrake( core ) );
+  }
+
   if( core->mode.walk ){
     pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
     core->cmd->xd = pd.e[zX];

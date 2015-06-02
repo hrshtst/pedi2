@@ -311,8 +311,8 @@ void _pdCoreUpdateRef(pdCore *core)
   pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
   pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 );
   pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
-  pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vud );
-  pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist );
+  pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd );
+  pdCZSetDist( pdCoreCZPtr( core ), pdStateFootDist( &core->state ) );
   if( pdCoreDoesIntendToWalk( core ) || pdCoreDoesIntendToSidewalk( core ) ){
     pdCZSetRho( pdCoreCZPtr(core), 1.0 );
     if( !core->mode.step ) {

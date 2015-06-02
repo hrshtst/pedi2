@@ -66,6 +66,7 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZVrtPtr(c)  ( &(c)->_vrt )
 #define pdCZQ1Z(c)     pdCZVrtQ1( pdCZVrtPtr(c) )
 #define pdCZQ2Z(c)     pdCZVrtQ2( pdCZVrtPtr(c) )
+#define pdCZZeta(c)    pdCZVrtZeta( pdCZVrtPtr(c) )
 #define pdCZHrzPtr(c)  ( &(c)->_hrz )
 #define pdCZRefVelU(c) pdCZHrzRefVelU( pdCZHrzPtr(c) )
 #define pdCZQ1U(c)     pdCZHrzQ1U( pdCZHrzPtr(c) )

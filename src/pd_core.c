@@ -119,12 +119,19 @@ bool pdCoreDoesIntendToWalk(pdCore *core)
   return !zIsTiny( core->cmd->vud );
 }
 
+bool pdCoreDoesIntendToSidewalk(pdCore *core)
+{
+  return !zIsTiny( core->cmd->vwd );
+}
+
 void pdCoreInitMode(pdCore *core)
 {
   core->mode.stand = true;
   core->mode.step = false;
   core->mode.walk = false;
   core->mode.sidewalk = false;
+  core->mode.follow   = false;
+  core->mode.brake    = false;
 }
 
 void pdCoreUpdateMode(pdCore *core)
@@ -134,24 +141,38 @@ void pdCoreUpdateMode(pdCore *core)
       core->mode.stand = true;
       core->mode.step = false;
       core->mode.walk = false;
+      core->mode.sidewalk = false;
     }
+    core->mode.follow = false;
+    core->mode.brake  = false;
   }
   if( pdCoreIsEitherFootOff( core ) ){
     core->mode.stand = false;
     core->mode.step = true;
     if( pdCoreDoesIntendToWalk( core ) )
       core->mode.walk = true;
+    if( pdCoreDoesIntendToSidewalk( core ) ) {
+      core->mode.sidewalk = true;
+      core->mode.follow = false;
+      core->mode.brake  = false;
+      if( pdFootIsOff( pdCoreBFPtr(core) ) )
+        core->mode.follow = true;
+      else if( pdFootIsOff( pdCoreFFPtr(core) ) )
+        core->mode.brake = true;
+    }
   }
 }
 
 #define pdCoreBool2Str(b) ( b ? "TRUE" : "FALSE" )
 void pdCoreWriteMode(pdCore *core)
 {
-  printf( "stand:%s, step:%s, walk:%s, sidewalk:%s\n",
+  printf( "stand:%s, step:%s, walk:%s, sidewalk:%s, follow:%s, brake:%s\n",
           pdCoreBool2Str(core->mode.stand),
           pdCoreBool2Str(core->mode.step),
           pdCoreBool2Str(core->mode.walk),
-          pdCoreBool2Str(core->mode.sidewalk) );
+          pdCoreBool2Str(core->mode.sidewalk),
+          pdCoreBool2Str(core->mode.follow),
+          pdCoreBool2Str(core->mode.brake) );
 }
 
 void _pdCoreUpdateCommand(pdCore *core)
@@ -171,8 +192,8 @@ void _pdCoreUpdateCommand(pdCore *core)
   pdCZSetCmdCOMZ( pdCoreCZPtr( core ), core->cmd->zd );
   pdCZSetCmdTheta( pdCoreCZPtr( core ), core->cmd->thetad );
   /* pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud ); */
-  pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd );
-  pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist );
+  /* pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd ); */
+  /* pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist ); */
   pdFootSetMaxHeight( pdCoreLFPtr( core ), core->cmd->lfh );
   pdFootSetTrXK( pdCoreLFPtr( core ), core->cmd->lfkx );
   pdFootSetTrXC( pdCoreLFPtr( core ), core->cmd->lfcx );
@@ -253,26 +274,86 @@ void _pdCoreUpdateRobot(pdCore *core)
   pdRobotSolveIK( pdCoreRobotPtr( core ) );
 }
 
+static double _pdCoreCalcDesFootDistFollow(pdCore *core);
+static double _pdCoreCalcDesFootDistFollowToBrake(pdCore *core);
+static double _pdCoreCalcDesFootDistBrake(pdCore *core);
+static double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core);
+double _pdCoreCalcDesFootDistFollow(pdCore *core)
+{
+  double q1, q2, zeta, phase;
+
+  q1 = pdCZQ1W( pdCoreCZPtr(core) );
+  q2 = pdCZQ2W( pdCoreCZPtr(core) );
+  zeta = pdCZZeta( pdCoreCZPtr(core) );
+  if( pdCoreIsEitherFootOff(core) )
+    phase = pdFootPhase( pdCoreKFPtr( core ) );
+  else
+    phase = 0;
+  return core->cmd->dist + zPIx2 * phase * fabs(pdCZRefVelW(pdCoreCZPtr(core))) / ( zeta * sqrt( q1 * q2 ) );
+}
+
+double _pdCoreCalcDesFootDistFollowToBrake(pdCore *core)
+{
+  return core->cmd->dist;
+}
+
+double _pdCoreCalcDesFootDistBrake(pdCore *core)
+{
+  double phase, foot_dist;
+
+  if( pdCoreIsEitherFootOff(core) )
+    phase = pdFootPhase( pdCoreKFPtr( core ) );
+  else
+    phase = 0;
+  foot_dist = pdStateFootDist(&core->state);
+  return foot_dist + phase * ( core->cmd->dist - foot_dist );
+}
+
+double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core)
+{
+  return core->cmd->dist;
+}
+
 void _pdCoreUpdateRef(pdCore *core)
 {
   zVec3D pd;
+  double ref_dist;
 
   pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
   pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 );
   pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
-  if( pdCoreDoesIntendToWalk( core ) ){
+  pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd );
+  pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist );
+  if( pdCoreDoesIntendToWalk( core ) || pdCoreDoesIntendToSidewalk( core ) ){
     pdCZSetRho( pdCoreCZPtr(core), 1.0 );
-    if( !core->mode.step )
+    if( !core->mode.step ) {
       pdCZSetRefVelU( pdCoreCZPtr( core ), 0.0 );
+      pdCZSetRefVelW( pdCoreCZPtr( core ), 0.0 );
+    }
     if( core->mode.walk )
       pdCZSetQ2U( pdCoreCZPtr( core ), 0.0 );
   }
 
-  if( !zIsTiny( pdCZRefVelU( pdCoreCZPtr(core) ) ) ){
-    pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
+  if( core->mode.sidewalk ) {
+    if( core->mode.follow )
+      ref_dist = _pdCoreCalcDesFootDistFollow( core );
+    else if( core->mode.brake )
+      ref_dist = _pdCoreCalcDesFootDistBrake( core );
+    else if( pdCZVelW( pdCoreCZPtr(core) ) * core->cmd->vwd > 0 )
+      ref_dist = _pdCoreCalcDesFootDistFollowToBrake( core );
+    else
+      ref_dist = _pdCoreCalcDesFootDistBrakeToFollow( core );
+    pdCZSetDist( pdCoreCZPtr( core ), ref_dist );
+    pdFootCalcCOMRefPos( pdCoreLFPtr(core), pdCoreRFPtr(core), &core->state.lf_pos, &core->state.rf_pos, &pd );
     core->cmd->xd = pd.e[zX];
     core->cmd->yd = pd.e[zY];
   }
+  if( !zIsTiny( core->cmd->kappa ) ){
+    pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
+    core->cmd->xd = pd.e[zX];
+    core->cmd->yd = pd.e[zY];
+  } else
+    core->cmd->xd = zVec3DElem( &core->state.com_pos, zX );
 }
 
 void _pdCoreUpdateState(pdCore *core)

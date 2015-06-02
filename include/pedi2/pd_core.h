@@ -14,6 +14,8 @@ typedef struct{
   bool step;
   bool walk;
   bool sidewalk;
+  bool follow;
+  bool brake;
 } pdCoreMode;
 
 typedef struct{
@@ -43,6 +45,10 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 #define pdCoreJointSize(c) pdRobotJointSize( pdCoreRobotPtr( c ) )
 #define pdCoreJointDis(c)  pdRobotJointDis( pdCoreRobotPtr( c ) )
 
+#define pdCoreKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
+#define pdCoreFFPtr(c)     pdFootFFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
+#define pdCoreBFPtr(c)     pdFootBFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
+
 /* methods to set parameters */
 #define pdCoreSetTime(c,t) do{ \
   (c)->_t = (t); \
@@ -67,6 +73,7 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 bool pdCoreDoesIntendToStand(pdCore *core);
 bool pdCoreDoesIntendToStep(pdCore *core);
 bool pdCoreDoesIntendToWalk(pdCore *core);
+bool pdCoreDoesIntendToSidewalk(pdCore *core);
 
 #define pdCoreIsBothFeetOn(c) pdFootIsBothOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )
 #define pdCoreIsEitherFootOn(c) pdFootIsEitherOn( pdCoreLFPtr(c), pdCoreRFPtr(c) )

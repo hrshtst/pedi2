@@ -46,6 +46,12 @@ void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, 
   zVec2DCreate( refpos, ud, wd );
 }
 
+void pdFootUWCalcCOMRefPos(zVec2D lf_pos, zVec2D rf_pos, zVec2D ref_pos)
+{
+  ref_pos[pdU] = 0.5 * ( lf_pos[pdU] + rf_pos[pdU] );
+  ref_pos[pdW] = 0.5 * ( lf_pos[pdW] + rf_pos[pdW] );
+}
+
 void pdFootUWUpdate(pdFootUW *kf, zVec2D delta, zVec2D vel)
 {
   pdFootUWCalcRegZMP( kf, delta, vel, pdFootUWRegZMP( kf ) );

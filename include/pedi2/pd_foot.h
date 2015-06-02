@@ -16,8 +16,10 @@ enum{
 typedef struct{
   zVec3D _p;          /* current foot position */
   zVec3D _pd;         /* desired foot position */
+  zVec3D _pp;         /* foot position when pivoting */
   zVec3D _a;          /* current foot attitude (ZYX Euler angle) */
   zVec3D _ad;         /* desired foot attitude (ZYX Euler angle) */
+  zVec3D _ap;         /* foot attitude when pivoting */
   zVec3DList *_sr;    /* supporting region */
 
   pdFootUW _uw;       /* horizontal motion  */
@@ -51,6 +53,10 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootDesPosX(f)   zVec3DElem( pdFootDesPos(f), zX )
 #define pdFootDesPosY(f)   zVec3DElem( pdFootDesPos(f), zY )
 #define pdFootDesPosZ(f)   zVec3DElem( pdFootDesPos(f), zZ )
+#define pdFootPivotPos(f)  ( &(f)->_pp )
+#define pdFootPivotPosX(f) zVec3DElem( pdFootPivotPos(f), zX )
+#define pdFootPivotPosY(f) zVec3DElem( pdFootPivotPos(f), zY )
+#define pdFootPivotPosZ(f) zVec3DElem( pdFootPivotPos(f), zZ )
 #define pdFootAtt(f)       ( &(f)->_a )
 #define pdFootAttX(f)      zVec3DElem( pdFootAtt(f), zX )
 #define pdFootAttY(f)      zVec3DElem( pdFootAtt(f), zY )
@@ -59,6 +65,10 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootDesAttX(f)   zVec3DElem( pdFootDesAtt(f), zX )
 #define pdFootDesAttY(f)   zVec3DElem( pdFootDesAtt(f), zY )
 #define pdFootDesAttZ(f)   zVec3DElem( pdFootDesAtt(f), zZ )
+#define pdFootPivotAtt(f)  ( &(f)->_ap )
+#define pdFootPivotAttX(f) zVec3DElem( pdFootPivotAtt(f), zX )
+#define pdFootPivotAttY(f) zVec3DElem( pdFootPivotAtt(f), zY )
+#define pdFootPivotAttZ(f) zVec3DElem( pdFootPivotAtt(f), zZ )
 #define pdFootSR(f)        (f)->_sr
 #define pdFootUWPtr(f)     ( &(f)->_uw )
 #define pdFootZPtr(f)      ( &(f)->_z )
@@ -72,6 +82,12 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootRefAttX(f)   zVec3DElem( pdFootRefAtt(f), zX )
 #define pdFootRefAttY(f)   zVec3DElem( pdFootRefAtt(f), zY )
 #define pdFootRefAttZ(f)   zVec3DElem( pdFootRefAtt(f), zZ )
+#define pdFootZMPPhase(f)  pdFootZZMPPhase( pdFootZPtr(f) )
+#define pdFootPhase(f)     pdFootZFootPhase( pdFootZPtr(f) )
+#define pdFootPhi(f)       pdFootUWPhi( pdFootUWPtr(f) )
+#define pdFootRegZMP(f)    pdFootUWRegZMP( pdFootUWPtr(f) )
+#define pdFootRegZMPU(f)   pdFootUWRegZMPU( pdFootUWPtr(f) )
+#define pdFootRegZMPW(f)   pdFootUWRegZMPW( pdFootUWPtr(f) )
 
 /* methods to set parameters */
 #define pdFootSetTime(f,t)        ( (f)->_sol._t = (t) )
@@ -148,6 +164,10 @@ __EXPORT bool pdFootIsOnAttempt(pdFoot *f);
 #define pdFootIsEitherOnAttempt(lf,rf) ( pdFootIsOnAttempt( lf ) || pdFootIsOnAttempt( rf ) )
 #define pdFootIsEitherOffAttempt(lf,rf) ( pdFootIsOffAttempt( lf ) || pdFootIsOffAttempt( rf ) )
 
+__EXPORT pdFoot *pdFootKFPtr(pdFoot *lf, pdFoot *rf);
+__EXPORT pdFoot *pdFootFFPtr(pdFoot *lf, pdFoot *rf, double vwd);
+__EXPORT pdFoot *pdFootBFPtr(pdFoot *lf, pdFoot *rf, double vwd);
+
 #define pdFootRotUWtoXY(f,vuw,vxy) pdCZHrzRotUWtoXY( pdFootCZPtr(f), vuw, vxy )
 #define pdFootRotXYtoUW(f,vxy,vuw) pdCZHrzRotXYtoUW( pdFootCZPtr(f), vxy, vuw )
 #define pdFootXformUWtoXY(f,uw,xy) pdCZHrzXformUWtoXY( pdFootCZPtr(f), uw, xy )
@@ -155,8 +175,10 @@ __EXPORT bool pdFootIsOnAttempt(pdFoot *f);
 __EXPORT void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr);
 __EXPORT void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp);
 __EXPORT void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa);
+__EXPORT void pdFootCalcCOMRefPos(pdFoot *lf, pdFoot *rf, zVec3D *lf_pos, zVec3D *rf_pos, zVec3D *ref_pos);
 
 /* update */
+__EXPORT void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zVec3DList *sr);
 __EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr);
 
 /* output */

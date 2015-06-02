@@ -29,6 +29,9 @@ typedef struct{
 __EXPORT void pdStateInit(pdState *state);
 __EXPORT void pdStateDestroy(pdState *state);
 
+/* methods to get parameters */
+__EXPORT double pdStateFootDist(pdState *state);
+
 __END_DECLS
 
 #endif /* __PD_STATE_H__ */

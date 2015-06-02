@@ -60,6 +60,36 @@ def plotZ(data):
     fig.legend()
 
 
+def plotFootX(data):
+    fig = FigureCreator()
+    fig.plot(data.t, data.lfpx,   label='lf pos')
+    fig.plot(data.t, data.rfpx,   label='rf pos')
+    fig.plot(data.t, data.lfpdx,  label='desired lf pos')
+    fig.plot(data.t, data.rfpdx,  label='desired rf pos')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='position [m]')
+    fig.legend()
+
+
+def plotFootY(data):
+    fig = FigureCreator()
+    fig.plot(data.t, data.lfpy, label='lf pos')
+    fig.plot(data.t, data.rfpy, label='rf pos')
+    fig.plot(data.t, data.lfpdy, label='desired lf pos')
+    fig.plot(data.t, data.rfpdy, label='desired rf pos')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='position [m]')
+    fig.legend()
+
+
+def plotFootZ(data):
+    fig = FigureCreator()
+    fig.plot(data.t, data.lfpz, label='lf pos')
+    fig.plot(data.t, data.rfpz, label='rf pos')
+    fig.plot(data.t, data.lfpdz, label='desired lf pos')
+    fig.plot(data.t, data.rfpdz, label='desired rf pos')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='position [m]')
+    fig.legend()
+
+
 def usage(prog):
     print "%s [-hx] datafile" % prog
 
@@ -87,6 +117,9 @@ def main():
     data = Data(datafile, LABEL_LIST)
     plotXY(data)
     plotZ(data)
+    plotFootX(data)
+    plotFootY(data)
+    plotFootZ(data)
 
     if showflag:
         plt.show()

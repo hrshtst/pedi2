@@ -38,6 +38,7 @@ __EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 #define pdFootUWCalcRegZMPW(f,d,v)  pdCZHrzUWCalcRegZMPW( pdFootUWCZPtr(f), d, v )
 __EXPORT double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp);
 __EXPORT void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, zVec2D refpos);
+__EXPORT void pdFootUWCalcCOMRefPos(zVec2D lf_pos, zVec2D rf_pos, zVec2D ref_pos);
 
 /* update method */
 __EXPORT void pdFootUWUpdate(pdFootUW *kf, zVec2D delta, zVec2D vel);

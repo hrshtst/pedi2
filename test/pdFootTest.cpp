@@ -716,3 +716,44 @@ TEST_F(pdFootTest, pdFootCalcRefAtt)
   EXPECT_NEAR( 0,     zVec3DElem( &refa, zY ), 1e-12 );
   EXPECT_NEAR( 0,     zVec3DElem( &refa, zZ ), 1e-12 );
 }
+
+TEST_F(pdFootTest, UpdateState)
+{
+  zVec3D p, a;
+  zVec3DCreate( &p, 0.1, 0.2, 0.0 );
+  zVec3DCreate( &a, 0.3, 0.4, 0.5 );
+
+  // on the ground
+  pdFootUpdateState( &lf, &p, &a, &sr );
+  EXPECT_EQ( 0.1, pdFootPosX(&lf) );
+  EXPECT_EQ( 0.2, pdFootPosY(&lf) );
+  EXPECT_EQ( 0.0, pdFootPosZ(&lf) );
+  EXPECT_EQ( 0.3, pdFootAttX(&lf) );
+  EXPECT_EQ( 0.4, pdFootAttY(&lf) );
+  EXPECT_EQ( 0.5, pdFootAttZ(&lf) );
+  EXPECT_EQ( &sr, pdFootSR(&lf) );
+  EXPECT_EQ( 0.1, pdFootPivotPosX(&lf) );
+  EXPECT_EQ( 0.2, pdFootPivotPosY(&lf) );
+  EXPECT_EQ( 0.0, pdFootPivotPosZ(&lf) );
+  EXPECT_EQ( 0.3, pdFootPivotAttX(&lf) );
+  EXPECT_EQ( 0.4, pdFootPivotAttY(&lf) );
+  EXPECT_EQ( 0.5, pdFootPivotAttZ(&lf) );
+
+  // off the ground
+  zVec3DCreate( &p, 0.1, 0.2, 0.01 );
+  zVec3DCreate( &a, 0.6, 0.0, 0.0 );
+  pdFootUpdateState( &lf, &p, &a, NULL );
+  EXPECT_EQ( 0.1, pdFootPosX(&lf) );
+  EXPECT_EQ( 0.2, pdFootPosY(&lf) );
+  EXPECT_EQ( 0.01, pdFootPosZ(&lf) );
+  EXPECT_EQ( 0.6, pdFootAttX(&lf) );
+  EXPECT_EQ( 0.0, pdFootAttY(&lf) );
+  EXPECT_EQ( 0.0, pdFootAttZ(&lf) );
+  EXPECT_EQ( NULL, pdFootSR(&lf) );
+  EXPECT_EQ( 0.1, pdFootPivotPosX(&lf) );
+  EXPECT_EQ( 0.2, pdFootPivotPosY(&lf) );
+  EXPECT_EQ( 0.0, pdFootPivotPosZ(&lf) );
+  EXPECT_EQ( 0.3, pdFootPivotAttX(&lf) );
+  EXPECT_EQ( 0.4, pdFootPivotAttY(&lf) );
+  EXPECT_EQ( 0.5, pdFootPivotAttZ(&lf) );
+}

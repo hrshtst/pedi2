@@ -45,6 +45,8 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 #define pdCoreJointSize(c) pdRobotJointSize( pdCoreRobotPtr( c ) )
 #define pdCoreJointDis(c)  pdRobotJointDis( pdCoreRobotPtr( c ) )
 
+#define pdCoreKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
+
 /* methods to set parameters */
 #define pdCoreSetTime(c,t) do{ \
   (c)->_t = (t); \

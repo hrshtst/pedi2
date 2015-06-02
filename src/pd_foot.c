@@ -89,6 +89,13 @@ bool pdFootIsOnAttempt(pdFoot *f)
   return pdFootDesPosZ( f ) < PD_FOOT_TOL;
 }
 
+pdFoot *pdFootKFPtr(pdFoot *lf, pdFoot *rf)
+{
+  if( pdFootIsOff( lf ) ) return lf;
+  else if( pdFootIsOff( rf ) ) return rf;
+  else return NULL;
+}
+
 void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
 {
   zVec3D *p, *pp;

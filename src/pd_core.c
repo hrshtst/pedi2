@@ -276,6 +276,34 @@ void _pdCoreUpdateRobot(pdCore *core)
   pdRobotSolveIK( pdCoreRobotPtr( core ) );
 }
 
+static double _pdCoreCalcDesFootWidthFollow(pdCore *core);
+static double _pdCoreCalcDesFootWidthBrake(pdCore *core);
+double _pdCoreCalcDesFootWidthFollow(pdCore *core)
+{
+  double q1, q2, zeta, phase;
+
+  q1 = pdCZQ1W( pdCoreCZPtr(core) );
+  q2 = pdCZQ2W( pdCoreCZPtr(core) );
+  zeta = pdCZZeta( pdCoreCZPtr(core) );
+  if( pdCoreIsEitherFootOff(core) )
+    phase = pdFootPhase( pdCoreKFPtr( core ) );
+  else
+    phase = 0;
+  return core->cmd->dist + zPIx2 * phase * fabs(pdCZRefVelW(pdCoreCZPtr(core))) / ( zeta * sqrt( q1 * q2 ) );
+}
+
+double _pdCoreCalcDesFootWidthBrake(pdCore *core)
+{
+  double phase, foot_dist;
+
+  if( pdCoreIsEitherFootOff(core) )
+    phase = pdFootPhase( pdCoreKFPtr( core ) );
+  else
+    phase = 0;
+  foot_dist = pdStateFootDist(&core->state);
+  return foot_dist + phase * ( core->cmd->dist - foot_dist );
+}
+
 void _pdCoreUpdateRef(pdCore *core)
 {
   zVec3D pd;

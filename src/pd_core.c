@@ -155,11 +155,9 @@ void pdCoreUpdateMode(pdCore *core)
       core->mode.sidewalk = true;
       core->mode.follow = false;
       core->mode.brake  = false;
-      if( ( pdFootIsOff( &core->lf ) && ( core->cmd->vwd > 0 ) ) ||
-          ( pdFootIsOff( &core->rf ) && ( core->cmd->vwd < 0 ) ) )
+      if( pdFootIsOff( pdCoreBFPtr(core) ) )
         core->mode.follow = true;
-      if( ( pdFootIsOff( &core->rf ) && ( core->cmd->vwd > 0 ) ) ||
-          ( pdFootIsOff( &core->lf ) && ( core->cmd->vwd < 0 ) ) )
+      else if( pdFootIsOff( pdCoreFFPtr(core) ) )
         core->mode.brake = true;
     }
   }

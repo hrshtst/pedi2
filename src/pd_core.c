@@ -274,9 +274,11 @@ void _pdCoreUpdateRobot(pdCore *core)
   pdRobotSolveIK( pdCoreRobotPtr( core ) );
 }
 
-static double _pdCoreCalcDesFootWidthFollow(pdCore *core);
-static double _pdCoreCalcDesFootWidthBrake(pdCore *core);
-double _pdCoreCalcDesFootWidthFollow(pdCore *core)
+static double _pdCoreCalcDesFootDistFollow(pdCore *core);
+static double _pdCoreCalcDesFootDistFollowToBrake(pdCore *core);
+static double _pdCoreCalcDesFootDistBrake(pdCore *core);
+static double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core);
+double _pdCoreCalcDesFootDistFollow(pdCore *core)
 {
   double q1, q2, zeta, phase;
 
@@ -290,7 +292,12 @@ double _pdCoreCalcDesFootWidthFollow(pdCore *core)
   return core->cmd->dist + zPIx2 * phase * fabs(pdCZRefVelW(pdCoreCZPtr(core))) / ( zeta * sqrt( q1 * q2 ) );
 }
 
-double _pdCoreCalcDesFootWidthBrake(pdCore *core)
+double _pdCoreCalcDesFootDistFollowToBrake(pdCore *core)
+{
+  return core->cmd->dist;
+}
+
+double _pdCoreCalcDesFootDistBrake(pdCore *core)
 {
   double phase, foot_dist;
 
@@ -302,15 +309,21 @@ double _pdCoreCalcDesFootWidthBrake(pdCore *core)
   return foot_dist + phase * ( core->cmd->dist - foot_dist );
 }
 
+double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core)
+{
+  return core->cmd->dist;
+}
+
 void _pdCoreUpdateRef(pdCore *core)
 {
   zVec3D pd;
+  double ref_dist;
 
   pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
   pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 );
   pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
   pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd );
-  pdCZSetDist( pdCoreCZPtr( core ), pdStateFootDist( &core->state ) );
+  pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist );
   if( pdCoreDoesIntendToWalk( core ) || pdCoreDoesIntendToSidewalk( core ) ){
     pdCZSetRho( pdCoreCZPtr(core), 1.0 );
     if( !core->mode.step ) {
@@ -321,12 +334,21 @@ void _pdCoreUpdateRef(pdCore *core)
       pdCZSetQ2U( pdCoreCZPtr( core ), 0.0 );
   }
 
-  if( core->mode.sidewalk && core->mode.follow ) {
-    pdCZSetDist( pdCoreCZPtr( core ), _pdCoreCalcDesFootWidthFollow( core ) );
-    core->cmd->yd = 0.5 * ( zVec3DElem( &core->state.lf_pos, zY ) + zVec3DElem( &core->state.rf_pos, zY ) );
-  }
-  if( core->mode.sidewalk && core->mode.brake ) {
-    pdCZSetDist( pdCoreCZPtr( core ), _pdCoreCalcDesFootWidthBrake( core ) );
+  if( core->mode.sidewalk ) {
+    if( core->mode.follow ) {
+      ref_dist = _pdCoreCalcDesFootDistFollow( core );
+      /* core->cmd->yd = 0.5 * ( zVec3DElem( &core->state.lf_pos, zY ) + zVec3DElem( &core->state.rf_pos, zY ) ); */
+      pdFootCalcCOMRefPos( pdCoreLFPtr(core), pdCoreRFPtr(core), &core->state.lf_pos, &core->state.rf_pos, &pd );
+      core->cmd->xd = pd.e[zX];
+      core->cmd->yd = pd.e[zY];
+    } else if( core->mode.brake ) {
+      ref_dist = _pdCoreCalcDesFootDistBrake( core );
+    } else if( pdCZVelW( pdCoreCZPtr(core) ) * core->cmd->vwd > 0 ){
+      ref_dist = _pdCoreCalcDesFootDistFollowToBrake( core );
+    } else {
+      ref_dist = _pdCoreCalcDesFootDistBrakeToFollow( core );
+    }
+    pdCZSetDist( pdCoreCZPtr( core ), ref_dist );
   }
 
   if( core->mode.walk ){

@@ -165,6 +165,8 @@ __EXPORT bool pdFootIsOnAttempt(pdFoot *f);
 #define pdFootIsEitherOffAttempt(lf,rf) ( pdFootIsOffAttempt( lf ) || pdFootIsOffAttempt( rf ) )
 
 __EXPORT pdFoot *pdFootKFPtr(pdFoot *lf, pdFoot *rf);
+__EXPORT pdFoot *pdFootFFPtr(pdFoot *lf, pdFoot *rf, double vwd);
+__EXPORT pdFoot *pdFootBFPtr(pdFoot *lf, pdFoot *rf, double vwd);
 
 #define pdFootRotUWtoXY(f,vuw,vxy) pdCZHrzRotUWtoXY( pdFootCZPtr(f), vuw, vxy )
 #define pdFootRotXYtoUW(f,vxy,vuw) pdCZHrzRotXYtoUW( pdFootCZPtr(f), vxy, vuw )

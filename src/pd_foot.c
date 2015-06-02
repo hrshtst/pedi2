@@ -96,6 +96,20 @@ pdFoot *pdFootKFPtr(pdFoot *lf, pdFoot *rf)
   else return NULL;
 }
 
+pdFoot *pdFootFFPtr(pdFoot *lf, pdFoot *rf, double vwd)
+{
+  if( zIsTiny( vwd ) ) return NULL;
+  else if( vwd > 0 ) return rf;
+  else return lf;
+}
+
+pdFoot *pdFootBFPtr(pdFoot *lf, pdFoot *rf, double vwd)
+{
+  if( zIsTiny( vwd ) ) return NULL;
+  else if( vwd > 0 ) return lf;
+  else return rf;
+}
+
 void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
 {
   zVec3D *p, *pp;

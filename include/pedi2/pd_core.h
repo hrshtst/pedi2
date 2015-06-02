@@ -46,6 +46,8 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 #define pdCoreJointDis(c)  pdRobotJointDis( pdCoreRobotPtr( c ) )
 
 #define pdCoreKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
+#define pdCoreFFPtr(c)     pdFootFFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
+#define pdCoreBFPtr(c)     pdFootBFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
 
 /* methods to set parameters */
 #define pdCoreSetTime(c,t) do{ \

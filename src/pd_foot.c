@@ -196,6 +196,24 @@ void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
   }
 }
 
+void pdFootCalcCOMRefPos(pdFoot *lf, pdFoot *rf, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd)
+{
+  zVec2D lfxy, lfuw;
+  zVec2D rfxy, rfuw;
+  zVec2D comdxy, comduw;
+
+  /* world frame -> moving frame */
+  zVec2DCreate( lfxy, zVec3DElem(lfpos,zX), zVec3DElem(lfpos,zY) );
+  pdFootXformXYtoUW( lf, lfxy, lfuw );
+  zVec2DCreate( rfxy, zVec3DElem(rfpos,zX), zVec3DElem(rfpos,zY) );
+  pdFootXformXYtoUW( rf, rfxy, rfuw );
+  /* calculate desired COM position */
+  pdFootUWCalcCOMRefPos( lfuw, rfuw, comduw );
+  /* moving frame -> world frame */
+  pdFootXformUWtoXY( lf, comduw, comdxy );
+  zVec3DCreate( comd, comdxy[zX], comdxy[zY], zVec3DElem( comd, zZ ) );
+}
+
 void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zVec3DList *sr)
 {
   /* update current state */

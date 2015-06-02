@@ -30,3 +30,8 @@ void pdStateDestroy(pdState *state)
 {
   pdStateInit( state );
 }
+
+double pdStateFootDist(pdState *state)
+{
+  return zVec3DDist( &state->lf_pos, &state->rf_pos );
+}

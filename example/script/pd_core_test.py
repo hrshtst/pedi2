@@ -51,6 +51,24 @@ def plotXY(data):
     fig.legend()
 
 
+def plotX(data):
+    fig = FigureCreator()
+    fig.plot(data.t, data.x, label='COM position')
+    fig.plot(data.t, data.xz, label='ZMP position')
+    fig.plot(data.t, data.xd, label='Ref COM position')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='x position [m]')
+    fig.legend()
+
+
+def plotY(data):
+    fig = FigureCreator()
+    fig.plot(data.t, data.y, label='COM position')
+    fig.plot(data.t, data.yz, label='ZMP position')
+    fig.plot(data.t, data.yd, label='Ref COM position')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='y position [m]')
+    fig.legend()
+
+
 def plotZ(data):
     fig = FigureCreator()
     fig.plot(data.t, data.z, label='COM')
@@ -66,7 +84,7 @@ def plotFootX(data):
     fig.plot(data.t, data.rfpx,   label='rf pos')
     fig.plot(data.t, data.lfpdx,  label='desired lf pos')
     fig.plot(data.t, data.rfpdx,  label='desired rf pos')
-    fig.setTitleLabels(xlabel='time [s]', ylabel='position [m]')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='position x [m]')
     fig.legend()
 
 
@@ -76,7 +94,7 @@ def plotFootY(data):
     fig.plot(data.t, data.rfpy, label='rf pos')
     fig.plot(data.t, data.lfpdy, label='desired lf pos')
     fig.plot(data.t, data.rfpdy, label='desired rf pos')
-    fig.setTitleLabels(xlabel='time [s]', ylabel='position [m]')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='position y [m]')
     fig.legend()
 
 
@@ -86,8 +104,20 @@ def plotFootZ(data):
     fig.plot(data.t, data.rfpz, label='rf pos')
     fig.plot(data.t, data.lfpdz, label='desired lf pos')
     fig.plot(data.t, data.rfpdz, label='desired rf pos')
-    fig.setTitleLabels(xlabel='time [s]', ylabel='position [m]')
+    fig.setTitleLabels(xlabel='time [s]', ylabel='position z [m]')
     fig.legend()
+
+
+def plotFootXZ(data):
+    fig = FigureCreator()
+    fig.plot(data.lfpx, data.lfpz, label='lf pos')
+    fig.plot(data.rfpx, data.rfpz, label='rf pos')
+    fig.plot(data.lfpdx, data.lfpdz, label='desired lf pos')
+    fig.plot(data.rfpdx, data.rfpdz, label='desired rf pos')
+    fig.setTitleLabels(xlabel='position x [m]', ylabel='position z [m]')
+    fig.setLimits(xlim=[0.1, 0.3])
+    fig.legend()
+    fig.save('foot-xz.svg')
 
 
 def usage(prog):
@@ -116,10 +146,13 @@ def main():
     # plot
     data = Data(datafile, LABEL_LIST)
     plotXY(data)
-    plotZ(data)
-    plotFootX(data)
-    plotFootY(data)
-    plotFootZ(data)
+    plotX(data)
+    plotY(data)
+    # plotZ(data)
+    # plotFootX(data)
+    # plotFootY(data)
+    # plotFootZ(data)
+    # plotFootXZ(data)
 
     if showflag:
         plt.show()

@@ -12,3 +12,4 @@
 *.pyc
 /tmp
 /config
+/app/joystick/joystick_ctrl

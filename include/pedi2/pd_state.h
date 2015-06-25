@@ -32,6 +32,10 @@ __EXPORT void pdStateDestroy(pdState *state);
 /* methods to get parameters */
 __EXPORT double pdStateFootDist(pdState *state);
 
+/* output method  */
+__EXPORT void pdStateSRDataFWrite(FILE *fp, pdState *state);
+#define pdStateSRDataWrite(s) pdStateSRDataFWrite( stdout, s )
+
 __END_DECLS
 
 #endif /* __PD_STATE_H__ */

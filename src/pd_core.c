@@ -140,9 +140,11 @@ void pdCoreUpdateMode(pdCore *core)
     if( pdCoreDoesIntendToStand( core ) || !core->mode.step ){
       core->mode.stand = true;
       core->mode.step = false;
-      core->mode.walk = false;
-      core->mode.sidewalk = false;
     }
+    if( !pdCoreDoesIntendToWalk( core ) )
+      core->mode.walk = false;
+    if( !pdCoreDoesIntendToSidewalk( core ) )
+      core->mode.sidewalk = false;
     core->mode.follow = false;
     core->mode.brake  = false;
   }

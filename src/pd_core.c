@@ -140,9 +140,11 @@ void pdCoreUpdateMode(pdCore *core)
     if( pdCoreDoesIntendToStand( core ) || !core->mode.step ){
       core->mode.stand = true;
       core->mode.step = false;
-      core->mode.walk = false;
-      core->mode.sidewalk = false;
     }
+    if( !pdCoreDoesIntendToWalk( core ) )
+      core->mode.walk = false;
+    if( !pdCoreDoesIntendToSidewalk( core ) )
+      core->mode.sidewalk = false;
     core->mode.follow = false;
     core->mode.brake  = false;
   }
@@ -348,12 +350,11 @@ void _pdCoreUpdateRef(pdCore *core)
     core->cmd->xd = pd.e[zX];
     core->cmd->yd = pd.e[zY];
   }
-  if( !zIsTiny( core->cmd->kappa ) ){
+  if( core->mode.walk && !core->mode.sidewalk ){
     pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
     core->cmd->xd = pd.e[zX];
     core->cmd->yd = pd.e[zY];
-  } else
-    core->cmd->xd = zVec3DElem( &core->state.com_pos, zX );
+  }
 }
 
 void _pdCoreUpdateState(pdCore *core)

@@ -26,7 +26,13 @@ static pdCore core;
 static zVec dis;
 
 static pthread_t thread;
-static bool is_running;
+static bool is_running = false;
+
+#define DATALOGFILE "data.log"
+#define SRLOGFILE   "sr.log"
+static FILE *data_fp = NULL;
+static FILE *sr_fp = NULL;
+static bool is_logging = false;
 
 #define DEVFILE "/dev/input/js0"
 static aviator_t av;
@@ -176,6 +182,17 @@ int joystickCtrlKeyPress(void)
 {
   zxModkeyOn( zxKeySymbol() );
   switch( zxKeySymbol() ){
+  case XK_l: case XK_L:
+    if( ( is_logging = 1 - is_logging ) ){
+      data_fp = fopen( DATALOGFILE, "w" );
+      sr_fp = fopen( SRLOGFILE, "w" );
+      eprintf( "start logging.\n" );
+    } else {
+      fclose( data_fp );
+      fclose( sr_fp );
+      eprintf( "quit logging.\n" );
+    }
+    break;
   case XK_q: case XK_Q:
     is_running = false;
     eprintf( "quit.\n" );
@@ -205,6 +222,12 @@ void joystickCtrlUpdate(void)
   liwSleep( DT, 0 );
 }
 
+void joystickCtrlLog(void)
+{
+  pdCoreDataFWrite( data_fp, &core );
+  pdStateSRDataFWrite( sr_fp, &core.state );
+}
+
 void joystickCtrlPlay(void)
 {
   joystickCtrlUpdate();
@@ -214,6 +237,8 @@ void joystickCtrlPlay(void)
     if( joystickCtrlEvent() < 0 ) return;
     joystickCtrlUpdate();
     joystickCtrlRedisplay();
+    if( is_logging )
+      joystickCtrlLog();
   }
 }
 

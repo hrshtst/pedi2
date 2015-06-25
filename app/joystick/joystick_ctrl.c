@@ -96,7 +96,7 @@ void joystickCtrlInit(void)
   pthread_create( &thread, NULL, joystickCtrlCommand, (void *)NULL );
 }
 
-#define DT 0.01
+#define DT 0.005
 void joystickCtrlLoad(void)
 {
   pdCmdDefaultInit( &cmd );

@@ -56,7 +56,7 @@ void* joystickCtrlCommand(void *args)
   while( is_running ){
     aviator_action( &av, NULL );
     cmd.vud   = -0.3  * av.pitch / JOYSTICK_CTRL_VAL_LIM;
-    cmd.vwd   = -0.15 * av.roll  / JOYSTICK_CTRL_VAL_LIM;
+    cmd.vwd   = -0.1 * av.roll  / JOYSTICK_CTRL_VAL_LIM;
     cmd.kappa = -3.0  * av.yaw   / JOYSTICK_CTRL_VAL_LIM;
   }
   return NULL;
@@ -101,7 +101,7 @@ void joystickCtrlLoad(void)
 {
   pdCmdDefaultInit( &cmd );
   cmd.zd = 0.26;
-  cmd.dist = 0.084;
+  cmd.dist = 0.1;
   cmd.lfh = 0.02;
   cmd.rfh = 0.02;
   pdCoreInit( &core, &cmd, DT );

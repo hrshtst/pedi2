@@ -11,6 +11,7 @@
 
 #define JOYSTICK_CTRL_MODEL "../model/mighty.zkc"
 
+#define JOYSTICK_CTRL_BUFSIZ 512
 static rkChain robot;
 static rkglChain gl_robot;
 
@@ -178,10 +179,34 @@ void joystickCtrlRedisplay(void)
   }
 }
 
+void joystickCtrlCapture(void)
+{
+  zxImage img;
+  static char imgfile[JOYSTICK_CTRL_BUFSIZ];
+  static int cnt = 0;
+
+  sprintf( imgfile, "capture%05d.png", cnt++ );
+  zxImageAllocDefault( &img, zxWindowWidth(&win), zxWindowHeight(&win) );
+  printf("width:%d, height:%d\n", img.width, img.height );
+  zxImageFromPixmap( &img, zxCanvas(&win), img.width, img.height );
+  zxImageWritePNGFile( &img, imgfile );
+  zxImageDestroy( &img );
+}
+
+void joystickCtrlLog(void)
+{
+  pdCoreDataFWrite( data_fp, &core );
+  pdStateSRDataFWrite( sr_fp, &core.state );
+}
+
 int joystickCtrlKeyPress(void)
 {
   zxModkeyOn( zxKeySymbol() );
   switch( zxKeySymbol() ){
+  case XK_c: case XK_C:
+    eprintf( "capture\n" );
+    joystickCtrlCapture();
+    break;
   case XK_l: case XK_L:
     if( ( is_logging = 1 - is_logging ) ){
       data_fp = fopen( DATALOGFILE, "w" );
@@ -219,13 +244,7 @@ void joystickCtrlUpdate(void)
   pdCoreUpdate( &core );
   zVecCopy( pdCoreJointDis( &core ), dis );
   rkChainFK( &robot, dis );
-  liwSleep( DT, 0 );
-}
-
-void joystickCtrlLog(void)
-{
-  pdCoreDataFWrite( data_fp, &core );
-  pdStateSRDataFWrite( sr_fp, &core.state );
+  liwSleep( (long)DT, 0 );
 }
 
 void joystickCtrlPlay(void)

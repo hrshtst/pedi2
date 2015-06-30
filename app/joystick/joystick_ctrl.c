@@ -72,11 +72,14 @@ void joystickCtrlInit(void)
 
   width = WIDTH;
   height = HEIGHT;
-  zxWindowCreate( &win, 0, 0, width+8, height+8 );
+  zxWindowCreate( &win, 0, 0, width+8, height+32 );
   zxWindowSetTitle( &win, JOYSTICK_CTRL_TITLE );
   zxWindowOpen( &win );
   zxWindowSetBG( &win, (char *)"lightgray" );
+  zxWindowSetFG( &win, (char *)"black" );
+  zxDoubleBufferEnable( &win );
   zxWindowClear( &win );
+  zxSetFont( &win, "-misc-fixed-medium-r-normal-*-24-*-*-*-*-*-*-*" );
 
   glwin = rkglWindowCreateGLX( &win, 4, 4, width, height, NULL );
   rkglKeyEnableGLX( glwin );
@@ -239,6 +242,22 @@ int joystickCtrlEvent(void)
   return 0;
 }
 
+void joystickCtrlDrawStatusbar(void)
+{
+  static char statusbar[JOYSTICK_CTRL_BUFSIZ];
+  zxRegion reg;
+
+  sprintf( statusbar,
+           "vud:%0.3f vwd:%0.3f kappa:%0.3f",
+           cmd.vud, cmd.vwd, cmd.kappa );
+  zxTextArea( statusbar, 0, 0, &reg );
+  zxWindowClear( &win );
+  zxClear( &win );
+  zxDrawString( &win, zxWindowWidth(&win)-reg.width-8, zxWindowHeight(&win)-8, statusbar );
+  zxDoubleBufferPartAppear( &win, 4, zxWindowHeight(&win)-28, zxWindowWidth(&win)-8, 24 );
+  zxFlush();
+}
+
 void joystickCtrlUpdate(void)
 {
   pdCoreUpdate( &core );
@@ -255,6 +274,7 @@ void joystickCtrlPlay(void)
   while( 1 ){
     if( joystickCtrlEvent() < 0 ) return;
     joystickCtrlUpdate();
+    joystickCtrlDrawStatusbar();
     joystickCtrlRedisplay();
     if( is_logging )
       joystickCtrlLog();
@@ -271,6 +291,7 @@ void joystickCtrlExit(void)
   glDeleteLists( gl_gauge, 1 );
   rkglWindowDestroyGLX( glwin );
   rkglCloseGLX();
+  zxDoubleBufferDisable( &win );
   zxWindowDestroy( &win );
   pthread_join( thread, NULL );
 }

@@ -27,7 +27,6 @@ static pdCore core;
 static zVec dis;
 
 static pthread_t thread;
-static bool is_running = false;
 
 #define DATALOGFILE "data.log"
 #define SRLOGFILE   "sr.log"
@@ -58,7 +57,7 @@ void* joystickCtrlCommand(void *args)
 
   pthread_setcanceltype( PTHREAD_CANCEL_ASYNCHRONOUS, &last_type );
   pthread_setcancelstate( PTHREAD_CANCEL_ENABLE, &last_state );
-  while( is_running ){
+  while( 1 ){
     aviator_action( &av, NULL );
     pthread_setcanceltype( PTHREAD_CANCEL_DEFERRED, &last_tmp );
     cmd.vud   = -0.3  * av.pitch / JOYSTICK_CTRL_VAL_LIM;
@@ -102,7 +101,6 @@ void joystickCtrlInit(void)
   gl_gauge = rkglGauge( zX, 6.0, zY, 6.0, 1.0, 0.2, white );
 
   joystickCtrlAviatorInit();
-  is_running = true;
   pthread_create( &thread, NULL, joystickCtrlCommand, (void *)NULL );
 }
 
@@ -228,7 +226,6 @@ int joystickCtrlKeyPress(void)
     }
     break;
   case XK_q: case XK_Q:
-    is_running = false;
     eprintf( "quit.\n" );
     return -1;
   }

@@ -52,7 +52,7 @@ class SRDataElem(object):
         return (isinstance(other, self.__class__)
                 and self._n_vert == other._n_vert
                 # and np.allclose(self._vert, other._vert, atol=1e-03))
-                and np.allclose(self._vert, other._vert, atol=1e-01))
+                and np.allclose(self._vert, other._vert, atol=1e-02))
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -196,7 +196,7 @@ def main():
     srlog = None
 
     # parse arguments
-    for arg in sys.argv:
+    for arg in sys.argv[1:]:
         if arg.startswith('-'):
             if arg == '-h':
                 usage(sys.argv[0])

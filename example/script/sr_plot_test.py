@@ -174,12 +174,12 @@ def plot_sr(fig, sr_data):
 
 
 def plot_traj(fig, data):
-    fig.plot(data.x, data.y, 'r-', label='actual COM pos.')
-    fig.plot(data.xz, data.yz, 'g-', label='actual ZMP pos.')
+    fig.plot(data.x, data.y, 'r-', label='actual COM position')
+    fig.plot(data.xz, data.yz, 'g-', label='actual ZMP position')
     # fig.plot(data.xd, data.yd, label='referential COM pos.')
     # fig.setTitleLabels(xlabel='x [m]', ylabel='y [m]')
     fig.makeAspectEqual()
-    fig.legend()
+    fig.legend(frameaplha=0.0)
     fig.save('simulation_result.svg')
     fig.save('simulation_result.png')
 

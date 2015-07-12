@@ -44,8 +44,9 @@ class FigureCreator(object):
     def makeAspectEqual(self):
         self.ax.set_aspect('equal', 'datalim')
 
-    def legend(self, loc='best'):
-        self.ax.legend(loc=loc)
+    def legend(self, loc='best', frameaplha=1.0):
+        leg = self.ax.legend(loc=loc, fancybox=True)
+        leg.get_frame().set_alpha(frameaplha)
 
     def save(self, filename):
         self.fig.savefig(filename,

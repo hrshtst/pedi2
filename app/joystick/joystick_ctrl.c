@@ -7,7 +7,7 @@
 #include <aviator.h>
 #include <pthread.h>
 
-#define JOYSTICK_CTRL_TITLE "Joystick Control"
+#define JOYSTICK_CTRL_TITLE "Joystick Operation"
 
 #define JOYSTICK_CTRL_MODEL "../model/mighty.zkc"
 

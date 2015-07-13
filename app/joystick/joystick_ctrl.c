@@ -40,9 +40,11 @@ zOption opt[] = {
 static rkChain robot;
 static rkglChain gl_robot;
 
+static rkChain chain_env;
+static rkglChain ge;
+static int env = 0;
 static rkglCamera cam;
 static rkglLight light;
-static int gl_gauge;
 
 static zxWindow win;
 static Window glwin;
@@ -102,6 +104,53 @@ void joystickCtrlUsage(void)
   exit( 0 );
 }
 
+void joystickCtrlLoad(char modelfile[])
+{
+  pdCmdDefaultInit( &cmd );
+  if( opt[OPT_QU1].flag ) cmd.qu1 = atof(opt[OPT_QU1].arg);
+  if( opt[OPT_QU2].flag ) cmd.qu2 = atof(opt[OPT_QU2].arg);
+  if( opt[OPT_QW1].flag ) cmd.qw1 = atof(opt[OPT_QW1].arg);
+  if( opt[OPT_QW2].flag ) cmd.qw2 = atof(opt[OPT_QW2].arg);
+  if( opt[OPT_ZD].flag ) cmd.zd = atof(opt[OPT_ZD].arg);
+  if( opt[OPT_DIST].flag ) cmd.dist = atof(opt[OPT_DIST].arg);
+  if( opt[OPT_HMAX].flag ) {
+    cmd.lfh = atof(opt[OPT_HMAX].arg);
+    cmd.rfh = atof(opt[OPT_HMAX].arg);
+  }
+  pdCoreInit( &core, &cmd, atof( opt[OPT_DT].arg ) );
+  if( !pdCoreLoad( &core, modelfile ) )
+    exit( 1 );
+
+  if( !rkChainReadFile( &robot, modelfile ) ||
+      !rkglChainLoad( &gl_robot, &robot, NULL ) ){
+    ZOPENERROR( modelfile );
+    exit( 1 );
+  }
+
+  dis = zVecAlloc( pdCoreJointSize( &core ) );
+}
+
+int joystickCtrlLoadEnv(void)
+{
+  char *sfx;
+  int entry;
+
+  sfx = zGetSuffix( opt[OPT_ENVFILE].arg );
+  if( !( strcmp( sfx, RK_CHAIN_SUFFIX ) == 0 ?
+         rkChainReadFile( &chain_env, opt[OPT_ENVFILE].arg ) :
+         rkChainMShape3DReadFile( &chain_env, opt[OPT_ENVFILE].arg  ) ) ){
+    ZOPENERROR( opt[OPT_ENVFILE].arg );
+    joystickCtrlUsage();
+    exit( 1 );
+  }
+  if( !rkglChainLoad( &ge, &chain_env, NULL ) ) exit( 1 );
+
+  entry = rkglBeginList();
+  rkglChainDraw( &ge );
+  glEndList();
+  return entry;
+}
+
 void joystickCtrlInit(void)
 {
   short width, height;
@@ -130,36 +179,13 @@ void joystickCtrlInit(void)
   rkglLightCreate( &light, 0, 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0, 0, 0, 0 );
   rkglLightSetPos( &light, 10, 0, 4 );
 
-  gl_gauge = rkglGauge( zX, 6.0, zY, 6.0, 1.0, 0.2, white );
+  if( opt[OPT_ENVFILE].flag )
+    env = joystickCtrlLoadEnv();
+  else
+    env = rkglGauge( zX, 6.0, zY, 6.0, 1.0, 0.2, white );
 
   joystickCtrlAviatorInit();
   pthread_create( &thread, NULL, joystickCtrlCommand, (void *)NULL );
-}
-
-void joystickCtrlLoad(char modelfile[])
-{
-  pdCmdDefaultInit( &cmd );
-  if( opt[OPT_QU1].flag ) cmd.qu1 = atof(opt[OPT_QU1].arg);
-  if( opt[OPT_QU2].flag ) cmd.qu2 = atof(opt[OPT_QU2].arg);
-  if( opt[OPT_QW1].flag ) cmd.qw1 = atof(opt[OPT_QW1].arg);
-  if( opt[OPT_QW2].flag ) cmd.qw2 = atof(opt[OPT_QW2].arg);
-  if( opt[OPT_ZD].flag ) cmd.zd = atof(opt[OPT_ZD].arg);
-  if( opt[OPT_DIST].flag ) cmd.dist = atof(opt[OPT_DIST].arg);
-  if( opt[OPT_HMAX].flag ) {
-    cmd.lfh = atof(opt[OPT_HMAX].arg);
-    cmd.rfh = atof(opt[OPT_HMAX].arg);
-  }
-  pdCoreInit( &core, &cmd, atof( opt[OPT_DT].arg ) );
-  if( !pdCoreLoad( &core, modelfile ) )
-    exit( 1 );
-
-  if( !rkChainReadFile( &robot, modelfile ) ||
-      !rkglChainLoad( &gl_robot, &robot, NULL ) ){
-    ZOPENERROR( modelfile );
-    exit( 1 );
-  }
-
-  dis = zVecAlloc( pdCoreJointSize( &core ) );
 }
 
 bool joystickCtrlCommandArgs(int argc, char *argv[])
@@ -204,15 +230,11 @@ void joystickCtrlReshape(void)
   rkglFrustum( &cam, -wx, wx, -wy, wy, 1, 20 );
 }
 
-void joystickCtrlGauge(void)
-{
-  glDisable( GL_LIGHTING );
-  glCallList( gl_gauge );
-  glEnable( GL_LIGHTING );
-}
-
 void joystickCtrlDraw(void)
 {
+  if( env ){
+    glCallList( env );
+  }
   rkglChainDraw( &gl_robot );
 }
 
@@ -222,7 +244,6 @@ void joystickCtrlDisplay(void)
   rkglClear();
   rkglCALoad( &cam );
   rkglLightPut( &light );
-  joystickCtrlGauge();
   joystickCtrlDraw();
   rkglSwapBuffersGLX( glwin );
   rkglFlushGLX();
@@ -345,7 +366,7 @@ void joystickCtrlExit(void)
   rkglChainUnload( &gl_robot );
   rkChainDestroy( &robot );
   pdCoreDestroy( &core );
-  glDeleteLists( gl_gauge, 1 );
+  glDeleteLists( env, 1 );
   rkglWindowDestroyGLX( glwin );
   rkglCloseGLX();
   zxDoubleBufferDisable( &win );

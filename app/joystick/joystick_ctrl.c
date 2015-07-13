@@ -15,7 +15,7 @@ enum{
   OPT_WIDTH, OPT_HEIGHT,
   OPT_DT,
   OPT_QU1, OPT_QU2, OPT_QW1, OPT_QW2,
-  OPT_COM_HEIGHT, OPT_FOOT_DITS, OPT_FOOT_HEIGHT,
+  OPT_ZD, OPT_DIST, OPT_HMAX,
   OPT_HELP,
   OPT_INVALID
 };
@@ -139,10 +139,16 @@ void joystickCtrlInit(void)
 void joystickCtrlLoad(char modelfile[])
 {
   pdCmdDefaultInit( &cmd );
-  cmd.zd = 0.26;
-  cmd.dist = 0.1;
-  cmd.lfh = 0.02;
-  cmd.rfh = 0.02;
+  if( opt[OPT_QU1].flag ) cmd.qu1 = atof(opt[OPT_QU1].arg);
+  if( opt[OPT_QU2].flag ) cmd.qu2 = atof(opt[OPT_QU2].arg);
+  if( opt[OPT_QW1].flag ) cmd.qw1 = atof(opt[OPT_QW1].arg);
+  if( opt[OPT_QW2].flag ) cmd.qw2 = atof(opt[OPT_QW2].arg);
+  if( opt[OPT_ZD].flag ) cmd.zd = atof(opt[OPT_ZD].arg);
+  if( opt[OPT_DIST].flag ) cmd.dist = atof(opt[OPT_DIST].arg);
+  if( opt[OPT_HMAX].flag ) {
+    cmd.lfh = atof(opt[OPT_HMAX].arg);
+    cmd.rfh = atof(opt[OPT_HMAX].arg);
+  }
   pdCoreInit( &core, &cmd, atof( opt[OPT_DT].arg ) );
   if( !pdCoreLoad( &core, modelfile ) )
     exit( 1 );

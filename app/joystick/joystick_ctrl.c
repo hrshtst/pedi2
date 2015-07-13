@@ -9,7 +9,32 @@
 
 #define JOYSTICK_CTRL_TITLE "Joystick Operation"
 
-#define JOYSTICK_CTRL_MODEL "../model/mighty.zkc"
+enum{
+  OPT_TITLE=0,
+  OPT_ENVFILE,
+  OPT_WIDTH, OPT_HEIGHT,
+  OPT_DT,
+  OPT_QU1, OPT_QU2, OPT_QW1, OPT_QW2,
+  OPT_COM_HEIGHT, OPT_FOOT_DITS, OPT_FOOT_HEIGHT,
+  OPT_HELP,
+  OPT_INVALID
+};
+zOption opt[] = {
+  { "title", NULL, "<title name>", "title of sequence", (char *)"anim", false },
+  { "env", NULL, "<.z3d/.zkc file>", "environment model file", NULL, false },
+  { "width", NULL, "<width>", "set window width", (char *)"500", false },
+  { "height", NULL, "<height>", "set window height", (char *)"500", false },
+  { "dt", NULL, "<dt value>", "time step", (char *)"0.01", false },
+  { "qu1", NULL, "<qu1 value>", "control parameter qu1", (char *)"0", false },
+  { "qu2", NULL, "<qu2 value>", "control parameter qu2", (char *)"0", false },
+  { "qw1", NULL, "<qw1 value>", "control parameter qw1", (char *)"0", false },
+  { "qw2", NULL, "<qw2 value>", "control parameter qw2", (char *)"0", false },
+  { "zd",   NULL, "<value>", "referential position of COM height", (char *)"0", false },
+  { "dist", NULL, "<value>", "distance of the feet", (char *)"0", false },
+  { "hmax", NULL, "<value>", "maximal height of the foot", (char *)"0", false },
+  { "help", NULL, NULL, "show this message", NULL, false },
+  { NULL, NULL, NULL, NULL, NULL, false },
+};
 
 #define JOYSTICK_CTRL_BUFSIZ 512
 static rkChain robot;
@@ -68,15 +93,22 @@ void* joystickCtrlCommand(void *args)
   return NULL;
 }
 
-#define WIDTH 500
-#define HEIGHT 500
+void joystickCtrlUsage(void)
+{
+  eprintf( "Usage: joystick_ctrl <.zkc file> [options]\n" );
+  eprintf( "<.zkc file>\tkinematic chain model file\n" );
+  eprintf( "[options]\n" );
+  zOptionHelp( opt );
+  exit( 0 );
+}
+
 void joystickCtrlInit(void)
 {
   short width, height;
   GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
 
-  width = WIDTH;
-  height = HEIGHT;
+  width = atoi( opt[OPT_WIDTH].arg );
+  height = atoi( opt[OPT_HEIGHT].arg );
   zxWindowCreate( &win, 0, 0, width+8, height+32 );
   zxWindowSetTitle( &win, JOYSTICK_CTRL_TITLE );
   zxWindowOpen( &win );
@@ -104,25 +136,41 @@ void joystickCtrlInit(void)
   pthread_create( &thread, NULL, joystickCtrlCommand, (void *)NULL );
 }
 
-#define DT 0.005
-void joystickCtrlLoad(void)
+void joystickCtrlLoad(char modelfile[])
 {
   pdCmdDefaultInit( &cmd );
   cmd.zd = 0.26;
   cmd.dist = 0.1;
   cmd.lfh = 0.02;
   cmd.rfh = 0.02;
-  pdCoreInit( &core, &cmd, DT );
-  if( !pdCoreLoad( &core, JOYSTICK_CTRL_MODEL ) )
-    exit( EXIT_FAILURE );
+  pdCoreInit( &core, &cmd, atof( opt[OPT_DT].arg ) );
+  if( !pdCoreLoad( &core, modelfile ) )
+    exit( 1 );
 
-  if( !rkChainReadFile( &robot, (char *)JOYSTICK_CTRL_MODEL ) ||
+  if( !rkChainReadFile( &robot, modelfile ) ||
       !rkglChainLoad( &gl_robot, &robot, NULL ) ){
-    ZOPENERROR( JOYSTICK_CTRL_MODEL );
-    exit( EXIT_FAILURE );
+    ZOPENERROR( modelfile );
+    exit( 1 );
   }
 
   dis = zVecAlloc( pdCoreJointSize( &core ) );
+}
+
+bool joystickCtrlCommandArgs(int argc, char *argv[])
+{
+  zStrList arglist;
+
+  if( argc <= 1 ) joystickCtrlUsage();
+  zOptionRead( opt, argv, &arglist );
+  if( opt[OPT_HELP].flag ) joystickCtrlUsage();
+  if( zListIsEmpty( &arglist ) ){
+    ZRUNERROR( "kinematic chain model not specified" );
+    return false;
+  }
+  joystickCtrlInit();
+  joystickCtrlLoad( zListHead( &arglist )->data );
+  zStrListDestroy( &arglist, false );
+  return true;
 }
 
 void joystickCtrlSetCamera(void)
@@ -266,7 +314,7 @@ void joystickCtrlUpdate(void)
   pdCoreUpdate( &core );
   zVecCopy( pdCoreJointDis( &core ), dis );
   rkChainFK( &robot, dis );
-  liwSleep( (long)DT, 0 );
+  liwSleep( (long)atof( opt[OPT_DT].arg ), 0 );
 }
 
 void joystickCtrlPlay(void)
@@ -302,8 +350,7 @@ void joystickCtrlExit(void)
 int main(int argc, char *argv[])
 {
   rkglInitGLX();
-  joystickCtrlInit();
-  joystickCtrlLoad();
+  if( !joystickCtrlCommandArgs( argc, argv+1 ) ) return 1;
   joystickCtrlPlay();
   joystickCtrlExit();
   return 0;

@@ -107,6 +107,7 @@ void joystickCtrlUsage(void)
 void joystickCtrlLoad(char modelfile[])
 {
   pdCmdDefaultInit( &cmd );
+  cmd.lfh = cmd.rfh = 0.02;     /* for mighty */
   if( opt[OPT_QU1].flag ) cmd.qu1 = atof(opt[OPT_QU1].arg);
   if( opt[OPT_QU2].flag ) cmd.qu2 = atof(opt[OPT_QU2].arg);
   if( opt[OPT_QW1].flag ) cmd.qw1 = atof(opt[OPT_QW1].arg);

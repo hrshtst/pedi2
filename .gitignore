@@ -1,6 +1,6 @@
 *.o
 *.so
-*.log
+/*.log
 /test/gtest/*
 /G*
 /test/gtest_main.a

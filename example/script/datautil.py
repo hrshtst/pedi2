@@ -23,6 +23,7 @@ class Data(object):
     @staticmethod
     def make_data(rawdata, labellist):
         data = {}
+        rawdata = np.atleast_2d(rawdata)
         if len(labellist) != rawdata.shape[1]:
             msg = 'num of data entries does not match with that of labels'
             raise UserWarning(msg)

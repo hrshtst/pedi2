@@ -60,6 +60,7 @@ static pthread_t thread;
 static FILE *data_fp = NULL;
 static FILE *sr_fp = NULL;
 static bool is_logging = false;
+static bool is_recording = false;
 
 #define DEVFILE "/dev/input/js0"
 static aviator_t av;
@@ -270,7 +271,6 @@ void joystickCtrlCapture(void)
 
   sprintf( imgfile, "capture%05d.png", cnt++ );
   zxImageAllocDefault( &img, zxWindowWidth(&win), zxWindowHeight(&win) );
-  printf("width:%d, height:%d\n", img.width, img.height );
   zxImageFromPixmap( &img, zxCanvas(&win), img.width, img.height );
   zxImageWritePNGFile( &img, imgfile );
   zxImageDestroy( &img );
@@ -299,6 +299,13 @@ int joystickCtrlKeyPress(void)
       fclose( data_fp );
       fclose( sr_fp );
       eprintf( "quit logging.\n" );
+    }
+    break;
+  case XK_r: case XK_R:
+    if( (is_recording = 1 - is_recording ) ){
+      eprintf( "start recording.\n" );
+    } else {
+      eprintf( "quit recording.\n" );
     }
     break;
   case XK_q: case XK_Q:
@@ -357,6 +364,8 @@ void joystickCtrlPlay(void)
     joystickCtrlRedisplay();
     if( is_logging )
       joystickCtrlLog();
+    if( is_recording )
+      joystickCtrlCapture();
   }
 }
 

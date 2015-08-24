@@ -168,7 +168,7 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
   sole = zListHead( rkLinkShapeList(foot) )->data;
   n_vert_lf = zShape3DVertNum( sole );
   if( !( robot->_sr_lf_vert = zAlloc( zVec3D, n_vert_lf ) ) ){
-    ZRUNERROR( "cannot allocate vertices of left foot suuport region" );
+    ZRUNERROR( "cannot allocate vertices of left foot support region" );
     goto ERROR;
   }
   /* right foot */
@@ -176,12 +176,12 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
   sole = zListHead( rkLinkShapeList(foot) )->data;
   n_vert_rf = zShape3DVertNum( sole );
   if( !( robot->_sr_rf_vert = zAlloc( zVec3D, n_vert_rf ) ) ){
-    ZRUNERROR( "cannot allocate vertices of right foot suuport region" );
+    ZRUNERROR( "cannot allocate vertices of right foot support region" );
     goto ERROR;
   }
   /* both feet */
   if( !( robot->_sr_vert = zAlloc( zVec3D, n_vert_lf + n_vert_rf ) ) ){
-    ZRUNERROR( "cannot allocate vertices of suuport region" );
+    ZRUNERROR( "cannot allocate vertices of support region" );
     goto ERROR;
   }
 

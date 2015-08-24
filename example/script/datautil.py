@@ -42,3 +42,6 @@ class Data(object):
 
     def getDataLabelNum(self):
         return self._rawdata.shape[1]
+
+    def makeTimeSeq(self, dt):
+        return np.arange(self.getDataNum()) * dt

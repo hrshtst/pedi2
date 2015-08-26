@@ -277,7 +277,7 @@ void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh)
   zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotRHID( robot ) ), rh );
 }
 
-#define PD_ROBOT_TOL (1.0e-3)
+#define PD_ROBOT_TOL (1.0e-4)
 void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr)
 {
   int i, nl, nr, n;

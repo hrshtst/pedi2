@@ -12,6 +12,9 @@ class FigureCreator(object):
         self.vline = self.ax.axvline
         self.hline = self.ax.axhline
 
+    def resize(self, figsize=(8, 6)):
+        self.fig.set_size_inches(figsize[0], figsize[1], forward=True)
+
     def setTitle(self, title):
         self.ax.set_title(title)
 

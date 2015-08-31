@@ -167,7 +167,6 @@ void joystickCtrlInit(void)
   zxWindowOpen( &win );
   zxWindowSetBG( &win, (char *)"lightgray" );
   zxWindowSetFG( &win, (char *)"black" );
-  zxDoubleBufferEnable( &win );
   zxWindowClear( &win );
   zxSetFont( &win, "-misc-fixed-medium-r-normal-*-24-*-*-*-*-*-*-*" );
 
@@ -278,9 +277,7 @@ void joystickCtrlDrawStatusbar(void)
            cmd.vud, cmd.vwd, cmd.kappa );
   zxTextArea( statusbar, 0, 0, &reg );
   zxWindowClear( &win );
-  zxClear( &win );
   zxDrawString( &win, zxWindowWidth(&win)-reg.width-8, zxWindowHeight(&win)-8, statusbar );
-  zxDoubleBufferPartAppear( &win, 4, zxWindowHeight(&win)-28, zxWindowWidth(&win)-8, 24 );
   zxFlush();
 }
 
@@ -384,7 +381,6 @@ void joystickCtrlExit(void)
   glDeleteLists( env, 1 );
   rkglWindowDestroyGLX( glwin );
   rkglCloseGLX();
-  zxDoubleBufferDisable( &win );
   zxWindowDestroy( &win );
   pthread_cancel( thread );
 }

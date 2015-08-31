@@ -108,7 +108,9 @@ void joystickCtrlUsage(void)
 void joystickCtrlLoad(char modelfile[])
 {
   pdCmdDefaultInit( &cmd );
-  cmd.lfh = cmd.rfh = 0.02;     /* for mighty */
+  /* cmd.lfh = cmd.rfh = 0.02;     /\* for mighty *\/ */
+  cmd.lfh = cmd.rfh = 0.1;     /* for hydra */
+  cmd.qw2 = 0.5;
   if( opt[OPT_QU1].flag ) cmd.qu1 = atof(opt[OPT_QU1].arg);
   if( opt[OPT_QU2].flag ) cmd.qu2 = atof(opt[OPT_QU2].arg);
   if( opt[OPT_QW1].flag ) cmd.qw1 = atof(opt[OPT_QW1].arg);
@@ -217,7 +219,8 @@ void joystickCtrlSetCamera(void)
   zSinCos( theta, &s, &c );
   xd = core.cmd->xd;
   yd = core.cmd->yd;
-  rkglCALookAt( &cam, xd-5*c, yd-5*s, 0.6, xd, yd, 0.3, 0, 0, 1 );
+  /* rkglCALookAt( &cam, xd-5*c, yd-5*s, 0.6, xd, yd, 0.3, 0, 0, 1 ); */
+  rkglCALookAt( &cam, xd-10*c, yd-10*s, 1.2, xd, yd, 0.8, 0, 0, 1 );
 }
 
 void joystickCtrlReshape(void)
@@ -235,7 +238,9 @@ void joystickCtrlReshape(void)
 void joystickCtrlDraw(void)
 {
   if( env ){
+    glDisable( GL_LIGHTING );
     glCallList( env );
+    glEnable( GL_LIGHTING );
   }
   rkglChainDraw( &gl_robot );
 }
@@ -261,6 +266,22 @@ void joystickCtrlRedisplay(void)
     joystickCtrlSetCamera();
     joystickCtrlDisplay();
   }
+}
+
+void joystickCtrlDrawStatusbar(void)
+{
+  static char statusbar[JOYSTICK_CTRL_BUFSIZ];
+  zxRegion reg;
+
+  sprintf( statusbar,
+           "vud:%0.3f vwd:%0.3f kappa:%0.3f",
+           cmd.vud, cmd.vwd, cmd.kappa );
+  zxTextArea( statusbar, 0, 0, &reg );
+  zxWindowClear( &win );
+  zxClear( &win );
+  zxDrawString( &win, zxWindowWidth(&win)-reg.width-8, zxWindowHeight(&win)-8, statusbar );
+  zxDoubleBufferPartAppear( &win, 4, zxWindowHeight(&win)-28, zxWindowWidth(&win)-8, 24 );
+  zxFlush();
 }
 
 void joystickCtrlCapture(void)
@@ -326,22 +347,6 @@ int joystickCtrlEvent(void)
   default: ;
   }
   return 0;
-}
-
-void joystickCtrlDrawStatusbar(void)
-{
-  static char statusbar[JOYSTICK_CTRL_BUFSIZ];
-  zxRegion reg;
-
-  sprintf( statusbar,
-           "vud:%0.3f vwd:%0.3f kappa:%0.3f",
-           cmd.vud, cmd.vwd, cmd.kappa );
-  zxTextArea( statusbar, 0, 0, &reg );
-  zxWindowClear( &win );
-  zxClear( &win );
-  zxDrawString( &win, zxWindowWidth(&win)-reg.width-8, zxWindowHeight(&win)-8, statusbar );
-  zxDoubleBufferPartAppear( &win, 4, zxWindowHeight(&win)-28, zxWindowWidth(&win)-8, 24 );
-  zxFlush();
 }
 
 void joystickCtrlUpdate(void)

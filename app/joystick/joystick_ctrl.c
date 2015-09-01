@@ -386,6 +386,7 @@ void joystickCtrlExit(void)
   rkglCloseGLX();
   zxWindowDestroy( &win );
   pthread_cancel( thread );
+  pthread_join( thread, NULL );
 }
 
 int main(int argc, char *argv[])

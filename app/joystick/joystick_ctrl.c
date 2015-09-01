@@ -108,9 +108,6 @@ void joystickCtrlUsage(void)
 void joystickCtrlLoad(char modelfile[])
 {
   pdCmdDefaultInit( &cmd );
-  /* cmd.lfh = cmd.rfh = 0.02;     /\* for mighty *\/ */
-  cmd.lfh = cmd.rfh = 0.1;     /* for hydra */
-  cmd.qw2 = 0.5;
   if( opt[OPT_QU1].flag ) cmd.qu1 = atof(opt[OPT_QU1].arg);
   if( opt[OPT_QU2].flag ) cmd.qu2 = atof(opt[OPT_QU2].arg);
   if( opt[OPT_QW1].flag ) cmd.qw1 = atof(opt[OPT_QW1].arg);
@@ -132,6 +129,10 @@ void joystickCtrlLoad(char modelfile[])
   }
 
   dis = zVecAlloc( pdCoreJointSize( &core ) );
+
+  if( !opt[OPT_HMAX].flag ) {
+    cmd.lfh = cmd.rfh = 0.1 * cmd.zd;
+  }
 }
 
 int joystickCtrlLoadEnv(void)
@@ -212,14 +213,14 @@ void joystickCtrlSetCamera(void)
 {
   double theta;
   double s, c;
-  double xd, yd;
+  double xd, yd, zd;
 
   theta = zVec3DElem( &core.state.base_att, 0 );
   zSinCos( theta, &s, &c );
   xd = core.cmd->xd;
   yd = core.cmd->yd;
-  /* rkglCALookAt( &cam, xd-5*c, yd-5*s, 0.6, xd, yd, 0.3, 0, 0, 1 ); */
-  rkglCALookAt( &cam, xd-10*c, yd-10*s, 1.2, xd, yd, 0.8, 0, 0, 1 );
+  zd = core.cmd->zd;
+  rkglCALookAt( &cam, xd-12*zd*c, yd-12*zd*s, 2*zd, xd, yd, zd, 0, 0, 1 );
 }
 
 void joystickCtrlReshape(void)
@@ -236,7 +237,9 @@ void joystickCtrlReshape(void)
 
 void joystickCtrlDraw(void)
 {
-  if( env ){
+  if( opt[OPT_ENVFILE].flag ){
+    glCallList( env );
+  } else {
     glDisable( GL_LIGHTING );
     glCallList( env );
     glEnable( GL_LIGHTING );
@@ -297,7 +300,7 @@ void joystickCtrlCapture(void)
 void joystickCtrlLog(void)
 {
   pdCoreDataFWrite( data_fp, &core );
-  pdStateSRDataFWrite( sr_fp, &core.state );
+  /* pdStateSRDataFWrite( sr_fp, &core.state ); */
 }
 
 int joystickCtrlKeyPress(void)

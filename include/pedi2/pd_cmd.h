@@ -28,6 +28,11 @@ __EXPORT void pdCmdInit(pdCmd *cmd);
 __EXPORT void pdCmdDefaultInit(pdCmd *cmd);
 __EXPORT void pdCmdDestroy(pdCmd *cmd);
 
+__EXPORT void pdCmdDataFWrite(FILE *fp, pdCmd *cmd);
+#define pdCmdDataWrite(c) pdCmdDataFWrite( stdout, c )
+__EXPORT bool pdCmdDataFRead(FILE *fp, pdCmd *cmd);
+#define pdCmdDataRead(c) pdCmdDataFRead( stdin, c )
+
 __END_DECLS
 
 #endif /* __PD_CMD_H__ */

@@ -16,6 +16,7 @@ enum{
   OPT_DT,
   OPT_QU1, OPT_QU2, OPT_QW1, OPT_QW2,
   OPT_ZD, OPT_DIST, OPT_HMAX,
+  OPT_REPLAY,
   OPT_HELP,
   OPT_INVALID
 };
@@ -32,6 +33,7 @@ zOption opt[] = {
   { "zd",   NULL, "<value>", "referential position of COM height", (char *)"0", false },
   { "dist", NULL, "<value>", "distance of the feet", (char *)"0", false },
   { "hmax", NULL, "<value>", "maximal height of the foot", (char *)"0", false },
+  { "R", NULL, "<cmd.log>", "replay with command log and recording", (char *)"cmd.log", false },
   { "help", NULL, NULL, "show this message", NULL, false },
   { NULL, NULL, NULL, NULL, NULL, false },
 };
@@ -57,10 +59,13 @@ static pthread_t thread;
 
 #define DATALOGFILE "data.log"
 #define SRLOGFILE   "sr.log"
+#define CMDLOGFILE  "cmd.log"
 static FILE *data_fp = NULL;
 static FILE *sr_fp = NULL;
+static FILE *cmd_fp = NULL;
 static bool is_logging = false;
 static bool is_recording = false;
+static bool is_cmdlogging = false;
 
 #define DEVFILE "/dev/input/js0"
 static aviator_t av;
@@ -303,6 +308,16 @@ void joystickCtrlLog(void)
   /* pdStateSRDataFWrite( sr_fp, &core.state ); */
 }
 
+void joystickCtrlCommandLog(void)
+{
+  pdCmdDataFWrite( cmd_fp, &cmd );
+}
+
+bool joystickCtrlReplayIsTerminated(void)
+{
+  return !pdCmdDataFRead( cmd_fp, &cmd );
+}
+
 int joystickCtrlKeyPress(void)
 {
   zxModkeyOn( zxKeySymbol() );
@@ -320,6 +335,15 @@ int joystickCtrlKeyPress(void)
       fclose( data_fp );
       fclose( sr_fp );
       eprintf( "quit logging.\n" );
+    }
+    break;
+  case XK_k: case XK_K:
+    if( ( is_cmdlogging = 1 - is_cmdlogging ) ){
+      cmd_fp = fopen( CMDLOGFILE, "w" );
+      eprintf( "start command logging.\n" );
+    } else {
+      fclose( cmd_fp );
+      eprintf( "quit command logging.\n" );
     }
     break;
   case XK_r: case XK_R:
@@ -362,15 +386,30 @@ void joystickCtrlPlay(void)
   joystickCtrlUpdate();
   joystickCtrlReshape();
   joystickCtrlDisplay();
-  while( 1 ){
-    if( joystickCtrlEvent() < 0 ) return;
-    joystickCtrlUpdate();
-    joystickCtrlDrawStatusbar();
-    joystickCtrlRedisplay();
-    if( is_logging )
-      joystickCtrlLog();
-    if( is_recording )
+  if( opt[OPT_REPLAY].flag ){
+    pthread_cancel( thread );
+    pthread_join( thread, NULL );
+    cmd_fp = fopen( opt[OPT_REPLAY].arg, "r" );
+    while( !joystickCtrlReplayIsTerminated() ){
+      joystickCtrlUpdate();
+      joystickCtrlDrawStatusbar();
+      joystickCtrlRedisplay();
       joystickCtrlCapture();
+    }
+    fclose( cmd_fp );
+  } else {
+    while( 1 ){
+      if( joystickCtrlEvent() < 0 ) return;
+      joystickCtrlUpdate();
+      joystickCtrlDrawStatusbar();
+      joystickCtrlRedisplay();
+      if( is_logging )
+        joystickCtrlLog();
+      if( is_recording )
+        joystickCtrlCapture();
+      if( is_cmdlogging )
+        joystickCtrlCommandLog();
+    }
   }
 }
 

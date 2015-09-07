@@ -1,9 +1,9 @@
 # dependency
 # CURE-1.0.0-beta5
-# ZM-1.0.0-beta5
-# ZEO-1.0.0-beta6
-# Roki-1.0.0-beta6
+# ZM-1.0.0
+# ZEO-1.0.1
+# Roki-1.0.0
 
 PREFIX=$(HOME)/usr
 PROJNAME=pedi2
-VERSION = 0.3.2
+VERSION = 0.3.3

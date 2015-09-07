@@ -35,3 +35,23 @@ double pdStateFootDist(pdState *state)
 {
   return zVec3DDist( &state->lf_pos, &state->rf_pos );
 }
+
+static void _pdStateSRDataFWrite(FILE *fp, zVec3DList *sr);
+void _pdStateSRDataFWrite(FILE *fp, zVec3DList *sr)
+{
+  zVec3DListCell *cp;
+
+  if( !sr ){ fprintf( fp, " 0" ); return; }
+  fprintf( fp, " %d", zListNum( sr ) );
+  zListForEach( sr, cp ){
+    zVec3DDataFWrite( fp, cp->data );
+  }
+}
+
+void pdStateSRDataFWrite(FILE *fp, pdState *state)
+{
+  _pdStateSRDataFWrite( fp, &state->sr );
+  _pdStateSRDataFWrite( fp, &state->sr_lf );
+  _pdStateSRDataFWrite( fp, &state->sr_rf );
+  fprintf( fp, "\n" );
+}

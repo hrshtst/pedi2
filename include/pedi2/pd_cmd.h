@@ -5,24 +5,33 @@
 
 __BEGIN_DECLS
 
-typedef struct{
-  double qu1, qu2;
-  double qw1, qw2;
-  double qz1, qz2;
-  double kappa, rho, kr;
-  double xd, yd, zd;
-  double thetad;
-  double vud, vwd, dist;
-  double lfkx, lfky, lfkz;
-  double lfcx, lfcy, lfcz;
-  double rfkx, rfky, rfkz;
-  double rfcx, rfcy, rfcz;
-  double lfh, rfh;
+#define PD_CMD_ENTRY_NUM 30
+typedef union{
+  struct{
+    double qu1, qu2;
+    double qw1, qw2;
+    double qz1, qz2;
+    double kappa, rho, kr;
+    double xd, yd, zd;
+    double thetad;
+    double vud, vwd, dist;
+    double lfkx, lfky, lfkz;
+    double lfcx, lfcy, lfcz;
+    double rfkx, rfky, rfkz;
+    double rfcx, rfcy, rfcz;
+    double lfh, rfh;
+  };
+  double entry[PD_CMD_ENTRY_NUM];
 } pdCmd;
 
 __EXPORT void pdCmdInit(pdCmd *cmd);
 __EXPORT void pdCmdDefaultInit(pdCmd *cmd);
 __EXPORT void pdCmdDestroy(pdCmd *cmd);
+
+__EXPORT void pdCmdDataFWrite(FILE *fp, pdCmd *cmd);
+#define pdCmdDataWrite(c) pdCmdDataFWrite( stdout, c )
+__EXPORT bool pdCmdDataFRead(FILE *fp, pdCmd *cmd);
+#define pdCmdDataRead(c) pdCmdDataFRead( stdin, c )
 
 __END_DECLS
 

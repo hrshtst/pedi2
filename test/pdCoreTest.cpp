@@ -481,3 +481,132 @@ TEST_F(pdCoreTest, UpdateMode_sidewalk)
 
   destroy_flag = true;
 }
+
+TEST_F(pdCoreTest, UpdateMode_diagonal)
+{
+  pdCoreInitMode( &core );
+
+  pdCmdDefaultInit( &cmd );
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.stand );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_FALSE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // attempt to walk, but not initiate yet
+  cmd.vud = 0.1;
+  cmd.vwd = 0.0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.stand );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_FALSE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // initiate walking
+  cmd.vud = 0.1;
+  cmd.vwd = 0.0;
+  SupportOnRightFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // still walking
+  cmd.vud = 0.1;
+  cmd.vwd = 0.0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // attempt to walk diagonally
+  cmd.vud = 0.1;
+  cmd.vwd = 0.1;
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_TRUE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_TRUE( core.mode.brake );
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  // still walking
+  cmd.vud = 0.1;
+  cmd.vwd = 0.1;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_TRUE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // still walking
+  cmd.vud = 0.1;
+  cmd.vwd = 0.1;
+  SupportOnRightFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_TRUE( core.mode.sidewalk );
+  EXPECT_TRUE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // attempt to walk longitudinally again
+  cmd.vud = 0.1;
+  cmd.vwd = 0.0;
+  SupportOnRightFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_TRUE( core.mode.sidewalk );
+  EXPECT_TRUE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // still walking
+  cmd.vud = 0.1;
+  cmd.vwd = 0.0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // attempt to stop
+  cmd.vud = 0.0;
+  cmd.vwd = 0.0;
+  SupportOnLeftFoot();
+  pdCoreUpdateMode( &core );
+  EXPECT_FALSE( core.mode.stand );
+  EXPECT_TRUE( core.mode.step );
+  EXPECT_TRUE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+  // stop stepping
+  cmd.vud = 0.0;
+  cmd.vwd = 0.0;
+  SupportOnBothFeet();
+  pdCoreUpdateMode( &core );
+  EXPECT_TRUE( core.mode.stand );
+  EXPECT_FALSE( core.mode.step );
+  EXPECT_FALSE( core.mode.walk );
+  EXPECT_FALSE( core.mode.sidewalk );
+  EXPECT_FALSE( core.mode.follow );
+  EXPECT_FALSE( core.mode.brake );
+
+  destroy_flag = true;
+}

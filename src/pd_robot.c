@@ -166,22 +166,26 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
   /* left foot */
   foot = rkChainLink( pdRobotChainPtr(robot), pdRobotLFID(robot) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
+  if( zShape3DType( sole ) != ZSHAPE_PH )
+    sole = zShape3DToPH( sole );
   n_vert_lf = zShape3DVertNum( sole );
   if( !( robot->_sr_lf_vert = zAlloc( zVec3D, n_vert_lf ) ) ){
-    ZRUNERROR( "cannot allocate vertices of left foot suuport region" );
+    ZRUNERROR( "cannot allocate vertices of left foot support region" );
     goto ERROR;
   }
   /* right foot */
   foot = rkChainLink( pdRobotChainPtr(robot), pdRobotRFID(robot) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
+  if( zShape3DType( sole ) != ZSHAPE_PH )
+    sole = zShape3DToPH( sole );
   n_vert_rf = zShape3DVertNum( sole );
   if( !( robot->_sr_rf_vert = zAlloc( zVec3D, n_vert_rf ) ) ){
-    ZRUNERROR( "cannot allocate vertices of right foot suuport region" );
+    ZRUNERROR( "cannot allocate vertices of right foot support region" );
     goto ERROR;
   }
   /* both feet */
   if( !( robot->_sr_vert = zAlloc( zVec3D, n_vert_lf + n_vert_rf ) ) ){
-    ZRUNERROR( "cannot allocate vertices of suuport region" );
+    ZRUNERROR( "cannot allocate vertices of support region" );
     goto ERROR;
   }
 
@@ -273,7 +277,7 @@ void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh)
   zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( robot ), pdRobotRHID( robot ) ), rh );
 }
 
-#define PD_ROBOT_TOL (1.0e-3)
+#define PD_ROBOT_TOL (1.0e-4)
 void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr)
 {
   int i, nl, nr, n;
@@ -285,6 +289,8 @@ void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, 
   /* left foot */
   foot = rkChainLink( pdRobotChainPtr( robot ), pdRobotLFID( robot ) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
+  if( zShape3DType( sole ) != ZSHAPE_PH )
+    sole = zShape3DToPH( sole );
   for( i=0; i<(int)zShape3DVertNum(sole); i++ ){
     zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
     if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){
@@ -295,6 +301,8 @@ void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, 
   /* right foot */
   foot = rkChainLink( pdRobotChainPtr( robot ), pdRobotRFID( robot ) );
   sole = zListHead( rkLinkShapeList(foot) )->data;
+  if( zShape3DType( sole ) != ZSHAPE_PH )
+    sole = zShape3DToPH( sole );
   for( i=0; i<(int)zShape3DVertNum(sole); i++ ){
     zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
     if( zVec3DElem(&v,zZ) < PD_ROBOT_TOL ){

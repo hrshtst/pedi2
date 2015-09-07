@@ -12,6 +12,9 @@ class FigureCreator(object):
         self.vline = self.ax.axvline
         self.hline = self.ax.axhline
 
+    def resize(self, figsize=(8, 6)):
+        self.fig.set_size_inches(figsize[0], figsize[1], forward=True)
+
     def setTitle(self, title):
         self.ax.set_title(title)
 
@@ -44,8 +47,9 @@ class FigureCreator(object):
     def makeAspectEqual(self):
         self.ax.set_aspect('equal', 'datalim')
 
-    def legend(self, loc='best'):
-        self.ax.legend(loc=loc)
+    def legend(self, loc='best', frameaplha=1.0):
+        leg = self.ax.legend(loc=loc, fancybox=True)
+        leg.get_frame().set_alpha(frameaplha)
 
     def save(self, filename):
         self.fig.savefig(filename,

@@ -42,3 +42,37 @@ void pdCmdDestroy(pdCmd *cmd)
 {
   pdCmdInit( cmd );
 }
+
+void pdCmdDataFWrite(FILE *fp, pdCmd *cmd)
+{
+  register int i;
+
+  for( i=0; i<PD_CMD_ENTRY_NUM; i++ )
+    fprintf( fp, "%g ", cmd->entry[i] );
+  fprintf( fp, "\n" );
+}
+
+void _pdCmdDataFReadLine(pdCmd *cmd, const char *line, const char *delim)
+{
+  char tmp[BUFSIZ];
+  char *token;
+  register int i;
+
+  strcpy(tmp, line);
+  token = strtok(tmp, delim);
+  for( i=0; token && i<PD_CMD_ENTRY_NUM; i++){
+    cmd->entry[i] = atof( token );
+    token = strtok( NULL, delim );
+  }
+}
+
+bool pdCmdDataFRead(FILE *fp, pdCmd *cmd)
+{
+  char line[BUFSIZ];
+
+  if( fgets( line, sizeof(line), fp ) ){
+    _pdCmdDataFReadLine( cmd, line, " " );
+    return true;
+  } else
+    return false;
+}

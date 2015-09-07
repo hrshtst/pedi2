@@ -1,6 +1,6 @@
 *.o
 *.so
-*.log
+/*.log
 /test/gtest/*
 /G*
 /test/gtest_main.a
@@ -12,3 +12,4 @@
 *.pyc
 /tmp
 /config
+/app/joystick/joystick_ctrl

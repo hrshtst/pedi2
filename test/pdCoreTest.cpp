@@ -26,13 +26,6 @@ class pdCoreTest : public testing::Test {
     ri.SetRandVec3D( core.ref_rf_att );
   };
 
-  void LoadMighty() {
-    char model[] = "model/mighty.zkc";
-
-    pdCmdDefaultInit( &cmd );
-    pdCoreLoad( &core, model );
-  };
-
   void SupportOnBothFeet() {
     pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
     pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
@@ -148,7 +141,6 @@ TEST_F(pdCoreTest, IncrTime)
 
 TEST_F(pdCoreTest, IncrTime_Update)
 {
-  LoadMighty();
   EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
   EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
   EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
@@ -174,6 +166,49 @@ TEST_F(pdCoreTest, RefVec)
   EXPECT_EQ( &core.ref_lf_att, pdCoreRefLFAtt( &core ) );
   EXPECT_EQ( &core.ref_rf_pos, pdCoreRefRFPos( &core ) );
   EXPECT_EQ( &core.ref_rf_att, pdCoreRefRFAtt( &core ) );
+}
+
+TEST_F(pdCoreTest, DefaultPoseInit_ThrowException)
+{
+  zEchoOff();
+  pdStateInit( &core.state );
+  EXPECT_FALSE( pdCoreDefaultPoseInit( &core ) );
+  zEchoOn();
+}
+
+TEST_F(pdCoreTest, DefaultPoseInit)
+{
+  pdStateInit( &core.state );
+  zVec3DCreate( &core.state.lf_pos, 0,  0.1, -0.1 );
+  zVec3DCreate( &core.state.rf_pos, 0, -0.1, -0.1 );
+  zVec3DCreate( &core.state.com_pos, 0.01, 0, 0.1 );
+  pdCmdDefaultInit( core.cmd );
+  EXPECT_TRUE( pdCoreDefaultPoseInit( &core ) );
+
+  EXPECT_DOUBLE_EQ( 0.2, core.cmd->dist );
+  EXPECT_DOUBLE_EQ( 0.95*0.2, core.cmd->zd );
+  EXPECT_DOUBLE_EQ( -zPI_2, core.cmd->thetad );
+  EXPECT_DOUBLE_EQ( 0.01, core.cmd->xd );
+  EXPECT_DOUBLE_EQ( 0, core.cmd->yd );
+
+  EXPECT_DOUBLE_EQ( 0.01, pdCoreRefCOMPosX( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefCOMPosY( &core ) );
+  EXPECT_DOUBLE_EQ( 0.95*0.2, pdCoreRefCOMPosZ( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefBaseAttX( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefBaseAttY( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefBaseAttZ( &core ) );
+  EXPECT_DOUBLE_EQ( 0.01, pdCoreRefLFPosX( &core ) );
+  EXPECT_DOUBLE_EQ( 0.1, pdCoreRefLFPosY( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFPosZ( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFAttX( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFAttY( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFAttZ( &core ) );
+  EXPECT_DOUBLE_EQ( 0.01, pdCoreRefRFPosX( &core ) );
+  EXPECT_DOUBLE_EQ( -0.1, pdCoreRefRFPosY( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFPosZ( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFAttX( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFAttY( &core ) );
+  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFAttZ( &core ) );
 }
 
 #if 0

@@ -1,5 +1,7 @@
 #include <pedi2/pd_core.h>
 
+static bool _pdCoreIsStateValid(pdCore *core);
+static void _pdCorePoseInit(pdCore *core);
 static void _pdCoreUpdateCommand(pdCore *core);
 static void _pdCoreUpdateCZ(pdCore *core);
 static void _pdCoreUpdateFoot(pdCore *core);
@@ -25,6 +27,24 @@ void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
   zVec3DClear( pdCoreRefLFAtt( core ) );
   zVec3DClear( pdCoreRefRFPos( core ) );
   zVec3DClear( pdCoreRefRFAtt( core ) );
+}
+
+bool _pdCoreIsStateValid(pdCore *core)
+{
+  /* NOTE: This validation checking is insufficient */
+  if( zIsTiny( zVec3DElem( &core->state.lf_pos, zZ ) -
+               zVec3DElem( &core->state.com_pos, zZ ) ) ||
+      zIsTiny( zVec3DElem( &core->state.rf_pos, zZ ) -
+               zVec3DElem( &core->state.com_pos, zZ ) ) ){
+    ZRUNERROR( "could not determine the height of COM" );
+    return false;
+  }
+  if( zVec3DEqual( &core->state.lf_pos, ZVEC3DZERO ) &&
+      zVec3DEqual( &core->state.rf_pos, ZVEC3DZERO ) ){
+    ZRUNERROR( "could not determine the distance of feet" );
+    return false;
+  }
+  return true;
 }
 
 void _pdCorePoseInit(pdCore *core)
@@ -59,38 +79,34 @@ void _pdCorePoseInit(pdCore *core)
 
   zVec3DCopy( &core->state.com_pos, &v );
   zVec3DSetElem( &v, zZ, com_height );
-  /* pdRobotSetRefCOM( pdCoreRobotPtr(core), &v ); */
+  zVec3DCopy( &v, pdCoreRefCOMPos( core ) );
 
   zVec3DCopy( &core->state.base_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
-  /* pdRobotSetRefBaseAtt( pdCoreRobotPtr(core), &v ); */
+  zVec3DCopy( &v, pdCoreRefBaseAtt( core ) );
 
   zVec3DCreate( &v, x-d*c, y-d*s, 0 );
-  /* pdRobotSetRefLFPos( pdCoreRobotPtr(core), &v ); */
+  zVec3DCopy( &v, pdCoreRefLFPos( core ) );
 
   zVec3DCopy( &core->state.lf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
-  /* pdRobotSetRefLFAtt( pdCoreRobotPtr(core), &v ); */
+  zVec3DCopy( &v, pdCoreRefLFAtt( core ) );
 
   zVec3DCreate( &v, x+d*c, y+d*s, 0 );
-  /* pdRobotSetRefRFPos( pdCoreRobotPtr(core), &v ); */
+  zVec3DCopy( &v, pdCoreRefRFPos( core ) );
 
   zVec3DCopy( &core->state.rf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
-  /* pdRobotSetRefRFAtt( pdCoreRobotPtr(core), &v ); */
-
-  /* pdRobotSolveIK( pdCoreRobotPtr( core ) ); */
+  zVec3DCopy( &v, pdCoreRefRFAtt( core ) );
 }
 
-bool pdCoreLoad(pdCore *core, char *filename)
+bool pdCoreDefaultPoseInit(pdCore *core)
 {
-  /* if( !pdRobotLoad( pdCoreRobotPtr( core ), filename ) ) */
-  /*   return false; */
-  _pdCoreUpdateState( core );
+  if( !_pdCoreIsStateValid( core ) )
+    return false;
   _pdCorePoseInit( core );
-  _pdCoreUpdateState( core );
-  pdFootSetTrOldVec( pdCoreLFPtr(core), &core->state.lf_pos );
-  pdFootSetTrOldVec( pdCoreRFPtr(core), &core->state.rf_pos );
+  pdFootSetTrOldVec( pdCoreLFPtr(core), pdCoreRefLFPos( core ) );
+  pdFootSetTrOldVec( pdCoreRFPtr(core), pdCoreRefRFPos( core ) );
   return true;
 }
 

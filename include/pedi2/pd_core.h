@@ -35,7 +35,7 @@ typedef struct{
 } pdCore;
 
 __EXPORT void pdCoreInit(pdCore *core, pdCmd *cmd, double dt);
-__EXPORT bool pdCoreLoad(pdCore *core, char *filename);
+__EXPORT bool pdCoreDefaultPoseInit(pdCore *core);
 __EXPORT void pdCoreDestroy(pdCore *core);
 
 /* methods to get parameters */

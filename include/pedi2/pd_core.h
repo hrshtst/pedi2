@@ -118,6 +118,7 @@ __EXPORT void pdCoreWriteMode(pdCore *core);
 
 /* update method */
 __EXPORT void pdCoreUpdate(pdCore *core);
+__EXPORT void pdCoreUpdateState(pdCore *core);
 
 /* output method */
 __EXPORT void pdCoreFWrite(FILE *fp, pdCore *core);

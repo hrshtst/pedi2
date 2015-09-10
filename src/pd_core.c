@@ -6,7 +6,6 @@ static void _pdCoreUpdateCommand(pdCore *core);
 static void _pdCoreUpdateCZ(pdCore *core);
 static void _pdCoreUpdateFoot(pdCore *core);
 static void _pdCoreUpdateCmd(pdCore *core);
-static void _pdCoreUpdateState(pdCore *core);
 
 void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
 {
@@ -359,19 +358,6 @@ void _pdCoreUpdateCmd(pdCore *core)
   }
 }
 
-void _pdCoreUpdateState(pdCore *core)
-{
-  /* pdRobotCOMPos( pdCoreRobotPtr(core), &core->state.com_pos ); */
-  zVec3DCopy( pdCZRefVel( pdCoreCZPtr(core) ), &core->state.com_vel );
-  zVec3DCopy( pdCZRefAcc( pdCoreCZPtr(core) ), &core->state.com_acc );
-  /* pdRobotBaseAtt( pdCoreRobotPtr(core), &core->state.base_att ); */
-  /* pdRobotFootPos( pdCoreRobotPtr(core), &core->state.lf_pos, &core->state.rf_pos ); */
-  /* pdRobotFootAtt( pdCoreRobotPtr(core), &core->state.lf_att, &core->state.rf_att ); */
-  zVec3DCopy( pdCZRefZMP( pdCoreCZPtr(core) ), &core->state.zmp );
-  core->state.fz = pdCZVrtRF( &core->cz._vrt );
-  /* pdRobotSupportRegion( pdCoreRobotPtr(core), &core->state.sr_lf, &core->state.sr_rf, &core->state.sr ); */
-}
-
 void pdCoreUpdate(pdCore *core)
 {
   _pdCoreUpdateCommand( core );
@@ -379,9 +365,22 @@ void pdCoreUpdate(pdCore *core)
   _pdCoreUpdateFoot( core );
   _pdCoreUpdateRef( core );
   _pdCoreUpdateCmd( core );
-  _pdCoreUpdateState( core );
   pdCoreUpdateMode( core );
   pdCoreIncrTime( core );
+}
+
+void pdCoreUpdateState(pdCore *core)
+{
+  zVec3DCopy( pdCoreRefCOMPos(core), &core->state.com_pos );
+  zVec3DCopy( pdCZRefVel( pdCoreCZPtr(core) ), &core->state.com_vel );
+  zVec3DCopy( pdCZRefAcc( pdCoreCZPtr(core) ), &core->state.com_acc );
+  zVec3DCopy( pdCoreRefBaseAtt(core), &core->state.base_att );
+  zVec3DCopy( pdCoreRefLFPos(core), &core->state.lf_pos );
+  zVec3DCopy( pdCoreRefLFAtt(core), &core->state.lf_att );
+  zVec3DCopy( pdCoreRefRFPos(core), &core->state.rf_pos );
+  zVec3DCopy( pdCoreRefRFAtt(core), &core->state.rf_att );
+  zVec3DCopy( pdCZRefZMP( pdCoreCZPtr(core) ), &core->state.zmp );
+  core->state.fz = pdCZVrtRF( &core->cz._vrt );
 }
 
 void pdCoreFWrite(FILE *fp, pdCore *core)

@@ -24,6 +24,10 @@ class pdCoreTest : public testing::Test {
     ri.SetRandVec3D( core.ref_lf_att );
     ri.SetRandVec3D( core.ref_rf_pos );
     ri.SetRandVec3D( core.ref_rf_att );
+    ri.SetRandVec3D( pdCoreCZPtr(&core)->refvel );
+    ri.SetRandVec3D( pdCoreCZPtr(&core)->refacc );
+    ri.SetRandVec3D( pdCoreCZPtr(&core)->refzmp );
+    ri.SetRandScalar( pdCZVrtRF( &core.cz._vrt ) );
   };
 
   void SupportOnBothFeet() {
@@ -686,4 +690,40 @@ TEST_F(pdCoreTest, UpdateMode_diagonal)
   EXPECT_FALSE( core.mode.brake );
 
   destroy_flag = true;
+}
+
+TEST_F(pdCoreTest, UpdateState)
+{
+  SetRandomValues();
+  pdCoreUpdateState( &core );
+  pdState *s = &core.state;
+  EXPECT_EQ( pdCoreRefCOMPosX(&core), zVec3DElem(&s->com_pos,zX) );
+  EXPECT_EQ( pdCoreRefCOMPosY(&core), zVec3DElem(&s->com_pos,zY) );
+  EXPECT_EQ( pdCoreRefCOMPosZ(&core), zVec3DElem(&s->com_pos,zZ) );
+  EXPECT_EQ( pdCoreRefBaseAttX(&core), zVec3DElem(&s->base_att,zX) );
+  EXPECT_EQ( pdCoreRefBaseAttY(&core), zVec3DElem(&s->base_att,zY) );
+  EXPECT_EQ( pdCoreRefBaseAttZ(&core), zVec3DElem(&s->base_att,zZ) );
+  EXPECT_EQ( pdCoreRefLFPosX(&core), zVec3DElem(&s->lf_pos,zX) );
+  EXPECT_EQ( pdCoreRefLFPosY(&core), zVec3DElem(&s->lf_pos,zY) );
+  EXPECT_EQ( pdCoreRefLFPosZ(&core), zVec3DElem(&s->lf_pos,zZ) );
+  EXPECT_EQ( pdCoreRefLFAttX(&core), zVec3DElem(&s->lf_att,zX) );
+  EXPECT_EQ( pdCoreRefLFAttY(&core), zVec3DElem(&s->lf_att,zY) );
+  EXPECT_EQ( pdCoreRefLFAttZ(&core), zVec3DElem(&s->lf_att,zZ) );
+  EXPECT_EQ( pdCoreRefRFPosX(&core), zVec3DElem(&s->rf_pos,zX) );
+  EXPECT_EQ( pdCoreRefRFPosY(&core), zVec3DElem(&s->rf_pos,zY) );
+  EXPECT_EQ( pdCoreRefRFPosZ(&core), zVec3DElem(&s->rf_pos,zZ) );
+  EXPECT_EQ( pdCoreRefRFAttX(&core), zVec3DElem(&s->rf_att,zX) );
+  EXPECT_EQ( pdCoreRefRFAttY(&core), zVec3DElem(&s->rf_att,zY) );
+  EXPECT_EQ( pdCoreRefRFAttZ(&core), zVec3DElem(&s->rf_att,zZ) );
+  pdCZ *cz = pdCoreCZPtr(&core);
+  EXPECT_EQ( pdCZRefVelX(cz), zVec3DElem(&s->com_vel,zX) );
+  EXPECT_EQ( pdCZRefVelY(cz), zVec3DElem(&s->com_vel,zY) );
+  EXPECT_EQ( pdCZRefVelZ(cz), zVec3DElem(&s->com_vel,zZ) );
+  EXPECT_EQ( pdCZRefAccX(cz), zVec3DElem(&s->com_acc,zX) );
+  EXPECT_EQ( pdCZRefAccY(cz), zVec3DElem(&s->com_acc,zY) );
+  EXPECT_EQ( pdCZRefAccZ(cz), zVec3DElem(&s->com_acc,zZ) );
+  EXPECT_EQ( pdCZRefZMPX(cz), zVec3DElem(&s->zmp,zX) );
+  EXPECT_EQ( pdCZRefZMPY(cz), zVec3DElem(&s->zmp,zY) );
+  EXPECT_EQ( pdCZRefZMPZ(cz), zVec3DElem(&s->zmp,zZ) );
+  EXPECT_EQ( pdCZVrtRF(&cz->_vrt), s->fz );
 }

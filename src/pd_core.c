@@ -5,8 +5,7 @@ static void _pdCorePoseInit(pdCore *core);
 static void _pdCoreUpdateCommand(pdCore *core);
 static void _pdCoreUpdateCZ(pdCore *core);
 static void _pdCoreUpdateFoot(pdCore *core);
-static void _pdCoreUpdateHand(pdCore *core);
-static void _pdCoreUpdateRef(pdCore *core);
+static void _pdCoreUpdateCmd(pdCore *core);
 static void _pdCoreUpdateState(pdCore *core);
 
 void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
@@ -260,11 +259,6 @@ void _pdCoreUpdateFoot(pdCore *core)
                 &core->state.sr_rf );
 }
 
-void _pdCoreUpdateHand(pdCore *core)
-{
-  /* dummy */
-}
-
 /* void _pdCoreUpdateRobot(pdCore *core) */
 /* { */
 /*   zVec3D v; */
@@ -287,11 +281,6 @@ void _pdCoreUpdateHand(pdCore *core)
 
 /*   zVec3DCopy( pdFootRefAtt( pdCoreLFPtr(core) ), &v ); */
 /*   pdRobotSetRefRFAtt( pdCoreRobotPtr(core), pdFootRefAtt( pdCoreRFPtr(core) ) ); */
-
-/*   /\* pdRobotSetRefLHPos( pdCoreRobotPtr(core), pdHandRefPos( pdCoreLFPtr(core) ) ); *\/ */
-/*   /\* pdRobotSetRefLHAtt( pdCoreRobotPtr(core), pdHandRefAtt( pdCoreLFPtr(core) ) ); *\/ */
-/*   /\* pdRobotSetRefRHPos( pdCoreRobotPtr(core), pdHandRefPos( pdCoreRFPtr(core) ) ); *\/ */
-/*   /\* pdRobotSetRefRHAtt( pdCoreRobotPtr(core), pdHandRefAtt( pdCoreRFPtr(core) ) ); *\/ */
 
 /*   pdRobotSolveIK( pdCoreRobotPtr( core ) ); */
 /* } */
@@ -336,7 +325,7 @@ double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core)
   return core->cmd->dist;
 }
 
-void _pdCoreUpdateRef(pdCore *core)
+void _pdCoreUpdateCmd(pdCore *core)
 {
   zVec3D pd;
   double ref_dist;
@@ -385,8 +374,6 @@ void _pdCoreUpdateState(pdCore *core)
   /* pdRobotBaseAtt( pdCoreRobotPtr(core), &core->state.base_att ); */
   /* pdRobotFootPos( pdCoreRobotPtr(core), &core->state.lf_pos, &core->state.rf_pos ); */
   /* pdRobotFootAtt( pdCoreRobotPtr(core), &core->state.lf_att, &core->state.rf_att ); */
-  /* pdRobotHandPos( pdCoreRobotPtr(core), &core->state.lh_pos, &core->state.rh_pos ); */
-  /* pdRobotHandAtt( pdCoreRobotPtr(core), &core->state.lh_att, &core->state.rh_att ); */
   zVec3DCopy( pdCZRefZMP( pdCoreCZPtr(core) ), &core->state.zmp );
   core->state.fz = pdCZVrtRF( &core->cz._vrt );
   /* pdRobotSupportRegion( pdCoreRobotPtr(core), &core->state.sr_lf, &core->state.sr_rf, &core->state.sr ); */
@@ -397,9 +384,8 @@ void pdCoreUpdate(pdCore *core)
   _pdCoreUpdateCommand( core );
   _pdCoreUpdateCZ( core );
   _pdCoreUpdateFoot( core );
-  _pdCoreUpdateHand( core );
   /* _pdCoreUpdateRobot( core ); */
-  _pdCoreUpdateRef( core );
+  _pdCoreUpdateCmd( core );
   _pdCoreUpdateState( core );
   pdCoreUpdateMode( core );
   pdCoreIncrTime( core );

@@ -1,51 +1,51 @@
 #include <pedi2/pd_core.h>
 
-static bool _pdCoreIsStateValid(pdCore *core);
-static void _pdCorePoseInit(pdCore *core);
-static void _pdCoreUpdateCommand(pdCore *core);
-static void _pdCoreUpdateCZ(pdCore *core);
-static void _pdCoreUpdateFoot(pdCore *core);
-static void _pdCoreModifyCommand(pdCore *core);
+static bool _pdBipedIsStateValid(pdBiped *biped);
+static void _pdBipedPoseInit(pdBiped *biped);
+static void _pdBipedUpdateCommand(pdBiped *biped);
+static void _pdBipedUpdateCZ(pdBiped *biped);
+static void _pdBipedUpdateFoot(pdBiped *biped);
+static void _pdBipedModifyCommand(pdBiped *biped);
 
-void pdCoreInit(pdCore *core, pdCmd *cmd, pdState *state, double dt)
+void pdBipedInit(pdBiped *biped, pdCmd *cmd, pdState *state, double dt)
 {
-  pdCoreResetTime( core );
-  pdCoreSetTimeStep( core, dt );
-  pdCZInit( pdCoreCZPtr( core ), pdCoreTimeStep( core ) );
-  pdFootInit( pdCoreLFPtr( core ), pdCZHrzPtr( pdCoreCZPtr( core ) ),
-              PD_FOOT_LEFT,  pdCoreTimeStep( core ) );
-  pdFootInit( pdCoreRFPtr( core ), pdCZHrzPtr( pdCoreCZPtr( core ) ),
-              PD_FOOT_RIGHT, pdCoreTimeStep( core ) );
-  core->cmd = cmd;
-  core->state = state;
-  pdCoreInitMode( core );
-  zVec3DClear( pdCoreRefCOMPos( core ) );
-  zVec3DClear( pdCoreRefBaseAtt( core ) );
-  zVec3DClear( pdCoreRefLFPos( core ) );
-  zVec3DClear( pdCoreRefLFAtt( core ) );
-  zVec3DClear( pdCoreRefRFPos( core ) );
-  zVec3DClear( pdCoreRefRFAtt( core ) );
+  pdBipedResetTime( biped );
+  pdBipedSetTimeStep( biped, dt );
+  pdCZInit( pdBipedCZPtr( biped ), pdBipedTimeStep( biped ) );
+  pdFootInit( pdBipedLFPtr( biped ), pdCZHrzPtr( pdBipedCZPtr( biped ) ),
+              PD_FOOT_LEFT,  pdBipedTimeStep( biped ) );
+  pdFootInit( pdBipedRFPtr( biped ), pdCZHrzPtr( pdBipedCZPtr( biped ) ),
+              PD_FOOT_RIGHT, pdBipedTimeStep( biped ) );
+  biped->cmd = cmd;
+  biped->state = state;
+  pdBipedInitMode( biped );
+  zVec3DClear( pdBipedRefCOMPos( biped ) );
+  zVec3DClear( pdBipedRefBaseAtt( biped ) );
+  zVec3DClear( pdBipedRefLFPos( biped ) );
+  zVec3DClear( pdBipedRefLFAtt( biped ) );
+  zVec3DClear( pdBipedRefRFPos( biped ) );
+  zVec3DClear( pdBipedRefRFAtt( biped ) );
 }
 
-bool _pdCoreIsStateValid(pdCore *core)
+bool _pdBipedIsStateValid(pdBiped *biped)
 {
   /* NOTE: This validation checking is insufficient */
-  if( zIsTiny( zVec3DElem( &core->state->lf_pos, zZ ) -
-               zVec3DElem( &core->state->com_pos, zZ ) ) ||
-      zIsTiny( zVec3DElem( &core->state->rf_pos, zZ ) -
-               zVec3DElem( &core->state->com_pos, zZ ) ) ){
+  if( zIsTiny( zVec3DElem( &biped->state->lf_pos, zZ ) -
+               zVec3DElem( &biped->state->com_pos, zZ ) ) ||
+      zIsTiny( zVec3DElem( &biped->state->rf_pos, zZ ) -
+               zVec3DElem( &biped->state->com_pos, zZ ) ) ){
     ZRUNERROR( "could not determine the height of COM" );
     return false;
   }
-  if( zVec3DEqual( &core->state->lf_pos, ZVEC3DZERO ) &&
-      zVec3DEqual( &core->state->rf_pos, ZVEC3DZERO ) ){
+  if( zVec3DEqual( &biped->state->lf_pos, ZVEC3DZERO ) &&
+      zVec3DEqual( &biped->state->rf_pos, ZVEC3DZERO ) ){
     ZRUNERROR( "could not determine the distance of feet" );
     return false;
   }
   return true;
 }
 
-void _pdCorePoseInit(pdCore *core)
+void _pdBipedPoseInit(pdBiped *biped)
 {
   zVec3D v;
   double foot_dist, com_height;
@@ -53,343 +53,343 @@ void _pdCorePoseInit(pdCore *core)
   double offset;
 
   offset = zPI_2;
-  if( core->cmd->dist > 0 )
-    foot_dist = core->cmd->dist;
+  if( biped->cmd->dist > 0 )
+    foot_dist = biped->cmd->dist;
   else {
-    foot_dist = zVec3DDist( &core->state->lf_pos, &core->state->rf_pos );
-    core->cmd->dist = foot_dist;
+    foot_dist = zVec3DDist( &biped->state->lf_pos, &biped->state->rf_pos );
+    biped->cmd->dist = foot_dist;
   }
-  if( core->cmd->zd > 0 )
-    com_height = core->cmd->zd;
+  if( biped->cmd->zd > 0 )
+    com_height = biped->cmd->zd;
   else {
-    com_height = zVec3DElem(&core->state->com_pos,zZ) - zVec3DElem(&core->state->lf_pos,zZ);
+    com_height = zVec3DElem(&biped->state->com_pos,zZ) - zVec3DElem(&biped->state->lf_pos,zZ);
     com_height = 0.95 * com_height;
-    core->cmd->zd = com_height;
+    biped->cmd->zd = com_height;
   }
-  pdCZSetDist( pdCoreCZPtr(core), foot_dist );
-  theta = core->cmd->thetad;
+  pdCZSetDist( pdBipedCZPtr(biped), foot_dist );
+  theta = biped->cmd->thetad;
   zSinCos( theta, &s, &c );
   d = 0.5 * foot_dist;
-  x = zVec3DElem( &core->state->com_pos, zX );
-  y = zVec3DElem( &core->state->com_pos, zY );
-  core->cmd->xd = x;
-  core->cmd->yd = y;
+  x = zVec3DElem( &biped->state->com_pos, zX );
+  y = zVec3DElem( &biped->state->com_pos, zY );
+  biped->cmd->xd = x;
+  biped->cmd->yd = y;
 
-  zVec3DCopy( &core->state->com_pos, &v );
+  zVec3DCopy( &biped->state->com_pos, &v );
   zVec3DSetElem( &v, zZ, com_height );
-  zVec3DCopy( &v, pdCoreRefCOMPos( core ) );
+  zVec3DCopy( &v, pdBipedRefCOMPos( biped ) );
 
-  zVec3DCopy( &core->state->base_att, &v );
+  zVec3DCopy( &biped->state->base_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
-  zVec3DCopy( &v, pdCoreRefBaseAtt( core ) );
+  zVec3DCopy( &v, pdBipedRefBaseAtt( biped ) );
 
   zVec3DCreate( &v, x-d*c, y-d*s, 0 );
-  zVec3DCopy( &v, pdCoreRefLFPos( core ) );
+  zVec3DCopy( &v, pdBipedRefLFPos( biped ) );
 
-  zVec3DCopy( &core->state->lf_att, &v );
+  zVec3DCopy( &biped->state->lf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
-  zVec3DCopy( &v, pdCoreRefLFAtt( core ) );
+  zVec3DCopy( &v, pdBipedRefLFAtt( biped ) );
 
   zVec3DCreate( &v, x+d*c, y+d*s, 0 );
-  zVec3DCopy( &v, pdCoreRefRFPos( core ) );
+  zVec3DCopy( &v, pdBipedRefRFPos( biped ) );
 
-  zVec3DCopy( &core->state->rf_att, &v );
+  zVec3DCopy( &biped->state->rf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
-  zVec3DCopy( &v, pdCoreRefRFAtt( core ) );
+  zVec3DCopy( &v, pdBipedRefRFAtt( biped ) );
 }
 
-bool pdCoreDefaultPoseInit(pdCore *core)
+bool pdBipedDefaultPoseInit(pdBiped *biped)
 {
-  if( !_pdCoreIsStateValid( core ) )
+  if( !_pdBipedIsStateValid( biped ) )
     return false;
-  _pdCorePoseInit( core );
-  pdFootSetTrOldVec( pdCoreLFPtr(core), pdCoreRefLFPos( core ) );
-  pdFootSetTrOldVec( pdCoreRFPtr(core), pdCoreRefRFPos( core ) );
+  _pdBipedPoseInit( biped );
+  pdFootSetTrOldVec( pdBipedLFPtr(biped), pdBipedRefLFPos( biped ) );
+  pdFootSetTrOldVec( pdBipedRFPtr(biped), pdBipedRefRFPos( biped ) );
   return true;
 }
 
-void pdCoreDestroy(pdCore *core)
+void pdBipedDestroy(pdBiped *biped)
 {
-  core->cmd = NULL;
-  pdStateDestroy( pdCoreState( core ) );
-  pdFootDestroy( pdCoreLFPtr( core ) );
-  pdFootDestroy( pdCoreRFPtr( core ) );
-  pdCZDestroy( pdCoreCZPtr( core ) );
-  pdCoreSetTimeStep( core, 0.0 );
-  pdCoreResetTime( core );
+  biped->cmd = NULL;
+  pdStateDestroy( pdBipedState( biped ) );
+  pdFootDestroy( pdBipedLFPtr( biped ) );
+  pdFootDestroy( pdBipedRFPtr( biped ) );
+  pdCZDestroy( pdBipedCZPtr( biped ) );
+  pdBipedSetTimeStep( biped, 0.0 );
+  pdBipedResetTime( biped );
 }
 
-bool pdCoreDoesIntendToStand(pdCore *core)
+bool pdBipedDoesIntendToStand(pdBiped *biped)
 {
-  return zIsTiny( core->cmd->rho ) &&
-         zIsTiny( core->cmd->vud ) &&
-         zIsTiny( core->cmd->vwd );
+  return zIsTiny( biped->cmd->rho ) &&
+         zIsTiny( biped->cmd->vud ) &&
+         zIsTiny( biped->cmd->vwd );
 }
 
-bool pdCoreDoesIntendToStep(pdCore *core)
+bool pdBipedDoesIntendToStep(pdBiped *biped)
 {
-  return !zIsTiny( core->cmd->rho );
+  return !zIsTiny( biped->cmd->rho );
 }
 
-bool pdCoreDoesIntendToWalk(pdCore *core)
+bool pdBipedDoesIntendToWalk(pdBiped *biped)
 {
-  return !zIsTiny( core->cmd->vud );
+  return !zIsTiny( biped->cmd->vud );
 }
 
-bool pdCoreDoesIntendToSidewalk(pdCore *core)
+bool pdBipedDoesIntendToSidewalk(pdBiped *biped)
 {
-  return !zIsTiny( core->cmd->vwd );
+  return !zIsTiny( biped->cmd->vwd );
 }
 
-void pdCoreInitMode(pdCore *core)
+void pdBipedInitMode(pdBiped *biped)
 {
-  core->mode.stand = true;
-  core->mode.step = false;
-  core->mode.walk = false;
-  core->mode.sidewalk = false;
-  core->mode.follow   = false;
-  core->mode.brake    = false;
+  biped->mode.stand = true;
+  biped->mode.step = false;
+  biped->mode.walk = false;
+  biped->mode.sidewalk = false;
+  biped->mode.follow   = false;
+  biped->mode.brake    = false;
 }
 
-void pdCoreUpdateMode(pdCore *core)
+void pdBipedUpdateMode(pdBiped *biped)
 {
-  if( pdCoreIsBothFeetOn( core ) ){
-    if( pdCoreDoesIntendToStand( core ) || !core->mode.step ){
-      core->mode.stand = true;
-      core->mode.step = false;
+  if( pdBipedIsBothFeetOn( biped ) ){
+    if( pdBipedDoesIntendToStand( biped ) || !biped->mode.step ){
+      biped->mode.stand = true;
+      biped->mode.step = false;
     }
-    if( !pdCoreDoesIntendToWalk( core ) )
-      core->mode.walk = false;
-    if( !pdCoreDoesIntendToSidewalk( core ) )
-      core->mode.sidewalk = false;
-    core->mode.follow = false;
-    core->mode.brake  = false;
+    if( !pdBipedDoesIntendToWalk( biped ) )
+      biped->mode.walk = false;
+    if( !pdBipedDoesIntendToSidewalk( biped ) )
+      biped->mode.sidewalk = false;
+    biped->mode.follow = false;
+    biped->mode.brake  = false;
   }
-  if( pdCoreIsEitherFootOff( core ) ){
-    core->mode.stand = false;
-    core->mode.step = true;
-    if( pdCoreDoesIntendToWalk( core ) )
-      core->mode.walk = true;
-    if( pdCoreDoesIntendToSidewalk( core ) ) {
-      core->mode.sidewalk = true;
-      core->mode.follow = false;
-      core->mode.brake  = false;
-      if( pdFootIsOff( pdCoreBFPtr(core) ) )
-        core->mode.follow = true;
-      else if( pdFootIsOff( pdCoreFFPtr(core) ) )
-        core->mode.brake = true;
+  if( pdBipedIsEitherFootOff( biped ) ){
+    biped->mode.stand = false;
+    biped->mode.step = true;
+    if( pdBipedDoesIntendToWalk( biped ) )
+      biped->mode.walk = true;
+    if( pdBipedDoesIntendToSidewalk( biped ) ) {
+      biped->mode.sidewalk = true;
+      biped->mode.follow = false;
+      biped->mode.brake  = false;
+      if( pdFootIsOff( pdBipedBFPtr(biped) ) )
+        biped->mode.follow = true;
+      else if( pdFootIsOff( pdBipedFFPtr(biped) ) )
+        biped->mode.brake = true;
     }
   }
 }
 
-#define pdCoreBool2Str(b) ( b ? "TRUE" : "FALSE" )
-void pdCoreWriteMode(pdCore *core)
+#define pdBipedBool2Str(b) ( b ? "TRUE" : "FALSE" )
+void pdBipedWriteMode(pdBiped *biped)
 {
   printf( "stand:%s, step:%s, walk:%s, sidewalk:%s, follow:%s, brake:%s\n",
-          pdCoreBool2Str(core->mode.stand),
-          pdCoreBool2Str(core->mode.step),
-          pdCoreBool2Str(core->mode.walk),
-          pdCoreBool2Str(core->mode.sidewalk),
-          pdCoreBool2Str(core->mode.follow),
-          pdCoreBool2Str(core->mode.brake) );
+          pdBipedBool2Str(biped->mode.stand),
+          pdBipedBool2Str(biped->mode.step),
+          pdBipedBool2Str(biped->mode.walk),
+          pdBipedBool2Str(biped->mode.sidewalk),
+          pdBipedBool2Str(biped->mode.follow),
+          pdBipedBool2Str(biped->mode.brake) );
 }
 
-void _pdCoreUpdateCommand(pdCore *core)
+void _pdBipedUpdateCommand(pdBiped *biped)
 {
-  pdCZSetQ1U( pdCoreCZPtr( core ), core->cmd->qu1 );
-  /* pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 ); */
-  pdCZSetQ1W( pdCoreCZPtr( core ), core->cmd->qw1 );
-  pdCZSetQ2W( pdCoreCZPtr( core ), core->cmd->qw2 );
-  pdCZSetQ1Z( pdCoreCZPtr( core ), core->cmd->qz1 );
-  pdCZSetQ2Z( pdCoreCZPtr( core ), core->cmd->qz2 );
-  pdCZSetKappa( pdCoreCZPtr( core ), core->cmd->kappa );
-  /* pdCZSetRho( pdCoreCZPtr( core ), core->cmd->rho ); */
-  pdCZSetKr( pdCoreCZPtr( core ), core->cmd->kr );
-  pdCZSetKappa( pdCoreCZPtr( core ), core->cmd->kappa );
-  pdCZSetCmdCOMX( pdCoreCZPtr( core ), core->cmd->xd );
-  pdCZSetCmdCOMY( pdCoreCZPtr( core ), core->cmd->yd );
-  pdCZSetCmdCOMZ( pdCoreCZPtr( core ), core->cmd->zd );
-  pdCZSetCmdTheta( pdCoreCZPtr( core ), core->cmd->thetad );
-  /* pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud ); */
-  /* pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd ); */
-  /* pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist ); */
-  pdFootSetMaxHeight( pdCoreLFPtr( core ), core->cmd->lfh );
-  pdFootSetTrXK( pdCoreLFPtr( core ), core->cmd->lfkx );
-  pdFootSetTrXC( pdCoreLFPtr( core ), core->cmd->lfcx );
-  pdFootSetTrYK( pdCoreLFPtr( core ), core->cmd->lfky );
-  pdFootSetTrYC( pdCoreLFPtr( core ), core->cmd->lfcy );
-  pdFootSetTrZK( pdCoreLFPtr( core ), core->cmd->lfkz );
-  pdFootSetTrZC( pdCoreLFPtr( core ), core->cmd->lfcz );
-  pdFootSetMaxHeight( pdCoreRFPtr( core ), core->cmd->rfh );
-  pdFootSetTrXK( pdCoreRFPtr( core ), core->cmd->rfkx );
-  pdFootSetTrXC( pdCoreRFPtr( core ), core->cmd->rfcx );
-  pdFootSetTrYK( pdCoreRFPtr( core ), core->cmd->rfky );
-  pdFootSetTrYC( pdCoreRFPtr( core ), core->cmd->rfcy );
-  pdFootSetTrZK( pdCoreRFPtr( core ), core->cmd->rfkz );
-  pdFootSetTrZC( pdCoreRFPtr( core ), core->cmd->rfcz );
+  pdCZSetQ1U( pdBipedCZPtr( biped ), biped->cmd->qu1 );
+  /* pdCZSetQ2U( pdBipedCZPtr( biped ), biped->cmd->qu2 ); */
+  pdCZSetQ1W( pdBipedCZPtr( biped ), biped->cmd->qw1 );
+  pdCZSetQ2W( pdBipedCZPtr( biped ), biped->cmd->qw2 );
+  pdCZSetQ1Z( pdBipedCZPtr( biped ), biped->cmd->qz1 );
+  pdCZSetQ2Z( pdBipedCZPtr( biped ), biped->cmd->qz2 );
+  pdCZSetKappa( pdBipedCZPtr( biped ), biped->cmd->kappa );
+  /* pdCZSetRho( pdBipedCZPtr( biped ), biped->cmd->rho ); */
+  pdCZSetKr( pdBipedCZPtr( biped ), biped->cmd->kr );
+  pdCZSetKappa( pdBipedCZPtr( biped ), biped->cmd->kappa );
+  pdCZSetCmdCOMX( pdBipedCZPtr( biped ), biped->cmd->xd );
+  pdCZSetCmdCOMY( pdBipedCZPtr( biped ), biped->cmd->yd );
+  pdCZSetCmdCOMZ( pdBipedCZPtr( biped ), biped->cmd->zd );
+  pdCZSetCmdTheta( pdBipedCZPtr( biped ), biped->cmd->thetad );
+  /* pdCZSetRefVelU( pdBipedCZPtr( biped ), biped->cmd->vud ); */
+  /* pdCZSetRefVelW( pdBipedCZPtr( biped ), biped->cmd->vwd ); */
+  /* pdCZSetDist( pdBipedCZPtr( biped ), biped->cmd->dist ); */
+  pdFootSetMaxHeight( pdBipedLFPtr( biped ), biped->cmd->lfh );
+  pdFootSetTrXK( pdBipedLFPtr( biped ), biped->cmd->lfkx );
+  pdFootSetTrXC( pdBipedLFPtr( biped ), biped->cmd->lfcx );
+  pdFootSetTrYK( pdBipedLFPtr( biped ), biped->cmd->lfky );
+  pdFootSetTrYC( pdBipedLFPtr( biped ), biped->cmd->lfcy );
+  pdFootSetTrZK( pdBipedLFPtr( biped ), biped->cmd->lfkz );
+  pdFootSetTrZC( pdBipedLFPtr( biped ), biped->cmd->lfcz );
+  pdFootSetMaxHeight( pdBipedRFPtr( biped ), biped->cmd->rfh );
+  pdFootSetTrXK( pdBipedRFPtr( biped ), biped->cmd->rfkx );
+  pdFootSetTrXC( pdBipedRFPtr( biped ), biped->cmd->rfcx );
+  pdFootSetTrYK( pdBipedRFPtr( biped ), biped->cmd->rfky );
+  pdFootSetTrYC( pdBipedRFPtr( biped ), biped->cmd->rfcy );
+  pdFootSetTrZK( pdBipedRFPtr( biped ), biped->cmd->rfkz );
+  pdFootSetTrZC( pdBipedRFPtr( biped ), biped->cmd->rfcz );
 }
 
-void _pdCoreUpdateCZ(pdCore *core)
+void _pdBipedUpdateCZ(pdBiped *biped)
 {
   double offset;
 
   offset = zPI_2;
-  pdCZUpdate( pdCoreCZPtr(core),
-              &core->state->com_pos,
-              &core->state->com_vel,
-              &core->state->com_acc,
-              &core->state->zmp,
-              core->state->base_att.e[0] - offset,
-              &core->state->sr );
+  pdCZUpdate( pdBipedCZPtr(biped),
+              &biped->state->com_pos,
+              &biped->state->com_vel,
+              &biped->state->com_acc,
+              &biped->state->zmp,
+              biped->state->base_att.e[0] - offset,
+              &biped->state->sr );
 }
 
-void _pdCoreUpdateFoot(pdCore *core)
+void _pdBipedUpdateFoot(pdBiped *biped)
 {
-  pdFootUpdate( pdCoreLFPtr(core), pdCoreRFPtr(core),
-                pdCZDelta( pdCoreCZPtr(core) ),
-                pdCZVelUW( pdCoreCZPtr(core) ),
-                &core->state->zmp,
-                &core->state->lf_pos,
-                &core->state->rf_pos,
-                &core->state->lf_att,
-                &core->state->rf_att,
-                &core->state->sr_lf,
-                &core->state->sr_rf );
+  pdFootUpdate( pdBipedLFPtr(biped), pdBipedRFPtr(biped),
+                pdCZDelta( pdBipedCZPtr(biped) ),
+                pdCZVelUW( pdBipedCZPtr(biped) ),
+                &biped->state->zmp,
+                &biped->state->lf_pos,
+                &biped->state->rf_pos,
+                &biped->state->lf_att,
+                &biped->state->rf_att,
+                &biped->state->sr_lf,
+                &biped->state->sr_rf );
 }
 
-void _pdCoreUpdateRef(pdCore *core)
+void _pdBipedUpdateRef(pdBiped *biped)
 {
   zVec3D v;
   double offset;
 
   offset = zPI_2;
 
-  zVec3DCopy( pdCZRefCOM( pdCoreCZPtr(core) ), pdCoreRefCOMPos(core) );
+  zVec3DCopy( pdCZRefCOM( pdBipedCZPtr(biped) ), pdBipedRefCOMPos(biped) );
 
-  zVec3DCreate( &v, pdCZCmdTheta( pdCoreCZPtr(core) ), 0, 0 );
+  zVec3DCreate( &v, pdCZCmdTheta( pdBipedCZPtr(biped) ), 0, 0 );
   zVec3DElem( &v, zX ) += offset;
-  zVec3DCopy( &v, pdCoreRefBaseAtt(core) );
+  zVec3DCopy( &v, pdBipedRefBaseAtt(biped) );
 
-  zVec3DCopy( pdFootRefPos( pdCoreLFPtr(core) ), pdCoreRefLFPos(core) );
-  zVec3DCopy( pdFootRefAtt( pdCoreLFPtr(core) ), pdCoreRefLFAtt(core) );
-  zVec3DCopy( pdFootRefPos( pdCoreRFPtr(core) ), pdCoreRefRFPos(core) );
-  zVec3DCopy( pdFootRefAtt( pdCoreRFPtr(core) ), pdCoreRefRFAtt(core) );
+  zVec3DCopy( pdFootRefPos( pdBipedLFPtr(biped) ), pdBipedRefLFPos(biped) );
+  zVec3DCopy( pdFootRefAtt( pdBipedLFPtr(biped) ), pdBipedRefLFAtt(biped) );
+  zVec3DCopy( pdFootRefPos( pdBipedRFPtr(biped) ), pdBipedRefRFPos(biped) );
+  zVec3DCopy( pdFootRefAtt( pdBipedRFPtr(biped) ), pdBipedRefRFAtt(biped) );
 }
 
-static double _pdCoreCalcDesFootDistFollow(pdCore *core);
-static double _pdCoreCalcDesFootDistFollowToBrake(pdCore *core);
-static double _pdCoreCalcDesFootDistBrake(pdCore *core);
-static double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core);
-double _pdCoreCalcDesFootDistFollow(pdCore *core)
+static double _pdBipedCalcDesFootDistFollow(pdBiped *biped);
+static double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped);
+static double _pdBipedCalcDesFootDistBrake(pdBiped *biped);
+static double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped);
+double _pdBipedCalcDesFootDistFollow(pdBiped *biped)
 {
   double q1, q2, zeta, phase;
 
-  q1 = pdCZQ1W( pdCoreCZPtr(core) );
-  q2 = pdCZQ2W( pdCoreCZPtr(core) );
-  zeta = pdCZZeta( pdCoreCZPtr(core) );
-  if( pdCoreIsEitherFootOff(core) )
-    phase = pdFootPhase( pdCoreKFPtr( core ) );
+  q1 = pdCZQ1W( pdBipedCZPtr(biped) );
+  q2 = pdCZQ2W( pdBipedCZPtr(biped) );
+  zeta = pdCZZeta( pdBipedCZPtr(biped) );
+  if( pdBipedIsEitherFootOff(biped) )
+    phase = pdFootPhase( pdBipedKFPtr( biped ) );
   else
     phase = 0;
-  return core->cmd->dist + zPIx2 * phase * fabs(pdCZRefVelW(pdCoreCZPtr(core))) / ( zeta * sqrt( q1 * q2 ) );
+  return biped->cmd->dist + zPIx2 * phase * fabs(pdCZRefVelW(pdBipedCZPtr(biped))) / ( zeta * sqrt( q1 * q2 ) );
 }
 
-double _pdCoreCalcDesFootDistFollowToBrake(pdCore *core)
+double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped)
 {
-  return core->cmd->dist;
+  return biped->cmd->dist;
 }
 
-double _pdCoreCalcDesFootDistBrake(pdCore *core)
+double _pdBipedCalcDesFootDistBrake(pdBiped *biped)
 {
   double phase, foot_dist;
 
-  if( pdCoreIsEitherFootOff(core) )
-    phase = pdFootPhase( pdCoreKFPtr( core ) );
+  if( pdBipedIsEitherFootOff(biped) )
+    phase = pdFootPhase( pdBipedKFPtr( biped ) );
   else
     phase = 0;
-  foot_dist = pdStateFootDist( core->state );
-  return foot_dist + phase * ( core->cmd->dist - foot_dist );
+  foot_dist = pdStateFootDist( biped->state );
+  return foot_dist + phase * ( biped->cmd->dist - foot_dist );
 }
 
-double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core)
+double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped)
 {
-  return core->cmd->dist;
+  return biped->cmd->dist;
 }
 
-void _pdCoreModifyCommand(pdCore *core)
+void _pdBipedModifyCommand(pdBiped *biped)
 {
   zVec3D pd;
   double ref_dist;
 
-  pdCZSetRho( pdCoreCZPtr(core), core->cmd->rho );
-  pdCZSetQ2U( pdCoreCZPtr( core ), core->cmd->qu2 );
-  pdCZSetRefVelU( pdCoreCZPtr( core ), core->cmd->vud );
-  pdCZSetRefVelW( pdCoreCZPtr( core ), core->cmd->vwd );
-  pdCZSetDist( pdCoreCZPtr( core ), core->cmd->dist );
-  if( pdCoreDoesIntendToWalk( core ) || pdCoreDoesIntendToSidewalk( core ) ){
-    pdCZSetRho( pdCoreCZPtr(core), 1.0 );
-    if( !core->mode.step ) {
-      pdCZSetRefVelU( pdCoreCZPtr( core ), 0.0 );
-      pdCZSetRefVelW( pdCoreCZPtr( core ), 0.0 );
+  pdCZSetRho( pdBipedCZPtr(biped), biped->cmd->rho );
+  pdCZSetQ2U( pdBipedCZPtr( biped ), biped->cmd->qu2 );
+  pdCZSetRefVelU( pdBipedCZPtr( biped ), biped->cmd->vud );
+  pdCZSetRefVelW( pdBipedCZPtr( biped ), biped->cmd->vwd );
+  pdCZSetDist( pdBipedCZPtr( biped ), biped->cmd->dist );
+  if( pdBipedDoesIntendToWalk( biped ) || pdBipedDoesIntendToSidewalk( biped ) ){
+    pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
+    if( !biped->mode.step ) {
+      pdCZSetRefVelU( pdBipedCZPtr( biped ), 0.0 );
+      pdCZSetRefVelW( pdBipedCZPtr( biped ), 0.0 );
     }
-    if( core->mode.walk )
-      pdCZSetQ2U( pdCoreCZPtr( core ), 0.0 );
+    if( biped->mode.walk )
+      pdCZSetQ2U( pdBipedCZPtr( biped ), 0.0 );
   }
 
-  if( core->mode.sidewalk ) {
-    if( core->mode.follow )
-      ref_dist = _pdCoreCalcDesFootDistFollow( core );
-    else if( core->mode.brake )
-      ref_dist = _pdCoreCalcDesFootDistBrake( core );
-    else if( pdCZVelW( pdCoreCZPtr(core) ) * core->cmd->vwd > 0 )
-      ref_dist = _pdCoreCalcDesFootDistFollowToBrake( core );
+  if( biped->mode.sidewalk ) {
+    if( biped->mode.follow )
+      ref_dist = _pdBipedCalcDesFootDistFollow( biped );
+    else if( biped->mode.brake )
+      ref_dist = _pdBipedCalcDesFootDistBrake( biped );
+    else if( pdCZVelW( pdBipedCZPtr(biped) ) * biped->cmd->vwd > 0 )
+      ref_dist = _pdBipedCalcDesFootDistFollowToBrake( biped );
     else
-      ref_dist = _pdCoreCalcDesFootDistBrakeToFollow( core );
-    pdCZSetDist( pdCoreCZPtr( core ), ref_dist );
-    pdFootCalcCOMRefPos( pdCoreLFPtr(core), pdCoreRFPtr(core), &core->state->lf_pos, &core->state->rf_pos, &pd );
-    core->cmd->xd = pd.e[zX];
-    core->cmd->yd = pd.e[zY];
+      ref_dist = _pdBipedCalcDesFootDistBrakeToFollow( biped );
+    pdCZSetDist( pdBipedCZPtr( biped ), ref_dist );
+    pdFootCalcCOMRefPos( pdBipedLFPtr(biped), pdBipedRFPtr(biped), &biped->state->lf_pos, &biped->state->rf_pos, &pd );
+    biped->cmd->xd = pd.e[zX];
+    biped->cmd->yd = pd.e[zY];
   }
-  if( core->mode.walk && !core->mode.sidewalk ){
-    pdCZAutoUpdateRef( pdCoreCZPtr(core), &pd, &core->cmd->thetad );
-    core->cmd->xd = pd.e[zX];
-    core->cmd->yd = pd.e[zY];
+  if( biped->mode.walk && !biped->mode.sidewalk ){
+    pdCZAutoUpdateRef( pdBipedCZPtr(biped), &pd, &biped->cmd->thetad );
+    biped->cmd->xd = pd.e[zX];
+    biped->cmd->yd = pd.e[zY];
   }
 }
 
-void pdCoreUpdate(pdCore *core)
+void pdBipedUpdate(pdBiped *biped)
 {
-  _pdCoreUpdateCommand( core );
-  _pdCoreUpdateCZ( core );
-  _pdCoreUpdateFoot( core );
-  _pdCoreUpdateRef( core );
-  _pdCoreModifyCommand( core );
-  pdCoreUpdateMode( core );
-  pdCoreIncrTime( core );
+  _pdBipedUpdateCommand( biped );
+  _pdBipedUpdateCZ( biped );
+  _pdBipedUpdateFoot( biped );
+  _pdBipedUpdateRef( biped );
+  _pdBipedModifyCommand( biped );
+  pdBipedUpdateMode( biped );
+  pdBipedIncrTime( biped );
 }
 
-void pdCoreUpdateState(pdCore *core)
+void pdBipedUpdateState(pdBiped *biped)
 {
-  zVec3DCopy( pdCoreRefCOMPos(core), &core->state->com_pos );
-  zVec3DCopy( pdCZRefVel( pdCoreCZPtr(core) ), &core->state->com_vel );
-  zVec3DCopy( pdCZRefAcc( pdCoreCZPtr(core) ), &core->state->com_acc );
-  zVec3DCopy( pdCoreRefBaseAtt(core), &core->state->base_att );
-  zVec3DCopy( pdCoreRefLFPos(core), &core->state->lf_pos );
-  zVec3DCopy( pdCoreRefLFAtt(core), &core->state->lf_att );
-  zVec3DCopy( pdCoreRefRFPos(core), &core->state->rf_pos );
-  zVec3DCopy( pdCoreRefRFAtt(core), &core->state->rf_att );
-  zVec3DCopy( pdCZRefZMP( pdCoreCZPtr(core) ), &core->state->zmp );
-  core->state->fz = pdCZVrtRF( &core->cz._vrt );
+  zVec3DCopy( pdBipedRefCOMPos(biped), &biped->state->com_pos );
+  zVec3DCopy( pdCZRefVel( pdBipedCZPtr(biped) ), &biped->state->com_vel );
+  zVec3DCopy( pdCZRefAcc( pdBipedCZPtr(biped) ), &biped->state->com_acc );
+  zVec3DCopy( pdBipedRefBaseAtt(biped), &biped->state->base_att );
+  zVec3DCopy( pdBipedRefLFPos(biped), &biped->state->lf_pos );
+  zVec3DCopy( pdBipedRefLFAtt(biped), &biped->state->lf_att );
+  zVec3DCopy( pdBipedRefRFPos(biped), &biped->state->rf_pos );
+  zVec3DCopy( pdBipedRefRFAtt(biped), &biped->state->rf_att );
+  zVec3DCopy( pdCZRefZMP( pdBipedCZPtr(biped) ), &biped->state->zmp );
+  biped->state->fz = pdCZVrtRF( &biped->cz._vrt );
 }
 
-void pdCoreFWrite(FILE *fp, pdCore *core)
+void pdBipedFWrite(FILE *fp, pdBiped *biped)
 {
   pdCZ *c;
   pdFoot *lf, *rf;
 
-  c = pdCoreCZPtr( core );
-  lf = pdCoreLFPtr( core );
-  rf = pdCoreRFPtr( core );
+  c = pdBipedCZPtr( biped );
+  lf = pdBipedLFPtr( biped );
+  rf = pdBipedRFPtr( biped );
   /* for debug */
   fprintf( fp, "--\n" );
   fprintf( fp, "t:%g, dt:%g\n", pdCZTime(c), pdCZTimeStep(c) );
@@ -480,16 +480,16 @@ void pdCoreFWrite(FILE *fp, pdCore *core)
            pdFootZFootPhase(pdFootZPtr(rf)), pdFootZRefZ(pdFootZPtr(rf)) );
 }
 
-void pdCoreDataFWrite(FILE *fp, pdCore *core)
+void pdBipedDataFWrite(FILE *fp, pdBiped *biped)
 {
   pdCZ *c;
   pdFoot *lf, *rf;
 
-  c = pdCoreCZPtr( core );
-  lf = pdCoreLFPtr( core );
-  rf = pdCoreRFPtr( core );
+  c = pdBipedCZPtr( biped );
+  lf = pdBipedLFPtr( biped );
+  rf = pdBipedRFPtr( biped );
   fprintf( fp, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
-/* 0- 1*/  pdCoreTime(core), pdCoreTimeStep(core),
+/* 0- 1*/  pdBipedTime(biped), pdBipedTimeStep(biped),
 /* 2- 5*/  pdCZCmdCOMX(c), pdCZCmdCOMY(c), pdCZCmdCOMZ(c), pdCZCmdTheta(c),
 /* 6- 9*/  pdCZCOMX(c), pdCZCOMY(c), pdCZCOMZ(c), pdCZTheta(c),
 /*10-12*/  pdCZVelX(c), pdCZVelY(c), pdCZVelZ(c),

@@ -6,717 +6,717 @@ const double TIME_STEP = 0.01;
 #define GTEST_TOL 1e-12
 #define GTEST_TOL_LOOSE 1e-04
 
-class pdCoreTest : public testing::Test {
+class pdBipedTest : public testing::Test {
  protected:
   virtual void SetUp() {
-    pdCoreInit( &core, &cmd, &state, TIME_STEP );
+    pdBipedInit( &biped, &cmd, &state, TIME_STEP );
     destroy_flag = false;
   };
   virtual void TearDown() {
     if( !destroy_flag )
-      pdCoreDestroy( &core );
+      pdBipedDestroy( &biped );
   };
 
   void SetRandomValues() {
-    ri.SetRandVec3D( core.ref_com_pos );
-    ri.SetRandVec3D( core.ref_base_att );
-    ri.SetRandVec3D( core.ref_lf_pos );
-    ri.SetRandVec3D( core.ref_lf_att );
-    ri.SetRandVec3D( core.ref_rf_pos );
-    ri.SetRandVec3D( core.ref_rf_att );
-    ri.SetRandVec3D( pdCoreCZPtr(&core)->refvel );
-    ri.SetRandVec3D( pdCoreCZPtr(&core)->refacc );
-    ri.SetRandVec3D( pdCoreCZPtr(&core)->refzmp );
-    ri.SetRandScalar( pdCZVrtRF( &core.cz._vrt ) );
+    ri.SetRandVec3D( biped.ref_com_pos );
+    ri.SetRandVec3D( biped.ref_base_att );
+    ri.SetRandVec3D( biped.ref_lf_pos );
+    ri.SetRandVec3D( biped.ref_lf_att );
+    ri.SetRandVec3D( biped.ref_rf_pos );
+    ri.SetRandVec3D( biped.ref_rf_att );
+    ri.SetRandVec3D( pdBipedCZPtr(&biped)->refvel );
+    ri.SetRandVec3D( pdBipedCZPtr(&biped)->refacc );
+    ri.SetRandVec3D( pdBipedCZPtr(&biped)->refzmp );
+    ri.SetRandScalar( pdCZVrtRF( &biped.cz._vrt ) );
   };
 
   void SupportOnBothFeet() {
-    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
-    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
-    pdFootSR( pdCoreLFPtr(&core) ) = &core.state->sr_lf;
-    pdFootSR( pdCoreRFPtr(&core) ) = &core.state->sr_lf;
+    pdFootPosZ( pdBipedLFPtr(&biped) ) = 0.0;
+    pdFootPosZ( pdBipedRFPtr(&biped) ) = 0.0;
+    pdFootSR( pdBipedLFPtr(&biped) ) = &biped.state->sr_lf;
+    pdFootSR( pdBipedRFPtr(&biped) ) = &biped.state->sr_lf;
   };
 
   void SupportOnLeftFoot() {
-    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
-    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.01;
-    pdFootSR( pdCoreLFPtr(&core) ) = &core.state->sr_lf;
-    pdFootSR( pdCoreRFPtr(&core) ) = NULL;
+    pdFootPosZ( pdBipedLFPtr(&biped) ) = 0.0;
+    pdFootPosZ( pdBipedRFPtr(&biped) ) = 0.01;
+    pdFootSR( pdBipedLFPtr(&biped) ) = &biped.state->sr_lf;
+    pdFootSR( pdBipedRFPtr(&biped) ) = NULL;
   };
 
   void SupportOnRightFoot() {
-    pdFootPosZ( pdCoreLFPtr(&core) ) = 0.01;
-    pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
-    pdFootSR( pdCoreLFPtr(&core) ) = NULL;
-    pdFootSR( pdCoreRFPtr(&core) ) = &core.state->sr_lf;
+    pdFootPosZ( pdBipedLFPtr(&biped) ) = 0.01;
+    pdFootPosZ( pdBipedRFPtr(&biped) ) = 0.0;
+    pdFootSR( pdBipedLFPtr(&biped) ) = NULL;
+    pdFootSR( pdBipedRFPtr(&biped) ) = &biped.state->sr_lf;
   };
 
   RandomInitializer ri;
   bool destroy_flag;
-  pdCore core;
+  pdBiped biped;
   pdCmd cmd;
   pdState state;
 };
 
-TEST_F(pdCoreTest, Init)
+TEST_F(pdBipedTest, Init)
 {
   SetRandomValues();
-  pdCoreInit( &core, &cmd, &state, TIME_STEP );
-  EXPECT_EQ( 0, pdCoreTime( &core ) );
-  EXPECT_EQ( TIME_STEP, pdCoreTimeStep( &core ) );
-  EXPECT_EQ( &cmd, pdCoreCmd( &core ) );
-  EXPECT_EQ( &state, pdCoreState( &core ) );
-  EXPECT_EQ( &core.cz, pdCoreCZPtr( &core ) );
-  EXPECT_EQ( &core.lf, pdCoreLFPtr( &core ) );
-  EXPECT_EQ( &core.rf, pdCoreRFPtr( &core ) );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
-  EXPECT_EQ( 0, pdCoreRefCOMPosX( &core ) );
-  EXPECT_EQ( 0, pdCoreRefCOMPosY( &core ) );
-  EXPECT_EQ( 0, pdCoreRefCOMPosZ( &core ) );
-  EXPECT_EQ( 0, pdCoreRefBaseAttX( &core ) );
-  EXPECT_EQ( 0, pdCoreRefBaseAttY( &core ) );
-  EXPECT_EQ( 0, pdCoreRefBaseAttZ( &core ) );
-  EXPECT_EQ( 0, pdCoreRefLFPosX( &core ) );
-  EXPECT_EQ( 0, pdCoreRefLFPosY( &core ) );
-  EXPECT_EQ( 0, pdCoreRefLFPosZ( &core ) );
-  EXPECT_EQ( 0, pdCoreRefLFAttX( &core ) );
-  EXPECT_EQ( 0, pdCoreRefLFAttY( &core ) );
-  EXPECT_EQ( 0, pdCoreRefLFAttZ( &core ) );
-  EXPECT_EQ( 0, pdCoreRefRFPosX( &core ) );
-  EXPECT_EQ( 0, pdCoreRefRFPosY( &core ) );
-  EXPECT_EQ( 0, pdCoreRefRFPosZ( &core ) );
-  EXPECT_EQ( 0, pdCoreRefRFAttX( &core ) );
-  EXPECT_EQ( 0, pdCoreRefRFAttY( &core ) );
-  EXPECT_EQ( 0, pdCoreRefRFAttZ( &core ) );
+  pdBipedInit( &biped, &cmd, &state, TIME_STEP );
+  EXPECT_EQ( 0, pdBipedTime( &biped ) );
+  EXPECT_EQ( TIME_STEP, pdBipedTimeStep( &biped ) );
+  EXPECT_EQ( &cmd, pdBipedCmd( &biped ) );
+  EXPECT_EQ( &state, pdBipedState( &biped ) );
+  EXPECT_EQ( &biped.cz, pdBipedCZPtr( &biped ) );
+  EXPECT_EQ( &biped.lf, pdBipedLFPtr( &biped ) );
+  EXPECT_EQ( &biped.rf, pdBipedRFPtr( &biped ) );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
+  EXPECT_EQ( 0, pdBipedRefCOMPosX( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefCOMPosY( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefCOMPosZ( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefBaseAttX( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefBaseAttY( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefBaseAttZ( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefLFPosX( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefLFPosY( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefLFPosZ( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefLFAttX( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefLFAttY( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefLFAttZ( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefRFPosX( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefRFPosY( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefRFPosZ( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefRFAttX( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefRFAttY( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefRFAttZ( &biped ) );
 }
 
-TEST_F(pdCoreTest, Destroy)
+TEST_F(pdBipedTest, Destroy)
 {
-  pdCoreDestroy( &core );
-  EXPECT_EQ( 0, pdCoreTime( &core ) );
-  EXPECT_EQ( 0, pdCoreTimeStep( &core ) );
-  EXPECT_EQ( NULL, pdCoreCmd( &core ) );
+  pdBipedDestroy( &biped );
+  EXPECT_EQ( 0, pdBipedTime( &biped ) );
+  EXPECT_EQ( 0, pdBipedTimeStep( &biped ) );
+  EXPECT_EQ( NULL, pdBipedCmd( &biped ) );
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, SetTime)
+TEST_F(pdBipedTest, SetTime)
 {
-  pdCoreSetTime( &core, 10 );
-  EXPECT_EQ( 10, pdCoreTime( &core ) );
-  EXPECT_EQ( 10, pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( 10, pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( 10, pdFootTime( pdCoreRFPtr( &core ) ) );
+  pdBipedSetTime( &biped, 10 );
+  EXPECT_EQ( 10, pdBipedTime( &biped ) );
+  EXPECT_EQ( 10, pdCZTime( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( 10, pdFootTime( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( 10, pdFootTime( pdBipedRFPtr( &biped ) ) );
 }
 
-TEST_F(pdCoreTest, ResetTime)
+TEST_F(pdBipedTest, ResetTime)
 {
-  pdCoreSetTime( &core, 5 );
-  EXPECT_EQ( 5, pdCoreTime( &core ) );
-  EXPECT_EQ( 5, pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( 5, pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( 5, pdFootTime( pdCoreRFPtr( &core ) ) );
-  pdCoreResetTime( &core );
-  EXPECT_EQ( 0, pdCoreTime( &core ) );
-  EXPECT_EQ( 0, pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( 0, pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( 0, pdFootTime( pdCoreRFPtr( &core ) ) );
+  pdBipedSetTime( &biped, 5 );
+  EXPECT_EQ( 5, pdBipedTime( &biped ) );
+  EXPECT_EQ( 5, pdCZTime( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( 5, pdFootTime( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( 5, pdFootTime( pdBipedRFPtr( &biped ) ) );
+  pdBipedResetTime( &biped );
+  EXPECT_EQ( 0, pdBipedTime( &biped ) );
+  EXPECT_EQ( 0, pdCZTime( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( 0, pdFootTime( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( 0, pdFootTime( pdBipedRFPtr( &biped ) ) );
 }
 
-TEST_F(pdCoreTest, SetTimeStep)
+TEST_F(pdBipedTest, SetTimeStep)
 {
-  pdCoreSetTimeStep( &core, 0.005 );
-  EXPECT_EQ( 0.005, pdCoreTimeStep( &core ) );
-  EXPECT_EQ( 0.005, pdCZTimeStep( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( 0.005, pdFootTimeStep( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( 0.005, pdFootTimeStep( pdCoreRFPtr( &core ) ) );
+  pdBipedSetTimeStep( &biped, 0.005 );
+  EXPECT_EQ( 0.005, pdBipedTimeStep( &biped ) );
+  EXPECT_EQ( 0.005, pdCZTimeStep( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( 0.005, pdFootTimeStep( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( 0.005, pdFootTimeStep( pdBipedRFPtr( &biped ) ) );
 }
 
-TEST_F(pdCoreTest, IncrTime)
+TEST_F(pdBipedTest, IncrTime)
 {
-  pdCoreIncrTime( &core );
-  EXPECT_EQ( TIME_STEP, pdCoreTime( &core ) );
-  pdCoreIncrTime( &core );
-  EXPECT_EQ( 2*TIME_STEP, pdCoreTime( &core ) );
+  pdBipedIncrTime( &biped );
+  EXPECT_EQ( TIME_STEP, pdBipedTime( &biped ) );
+  pdBipedIncrTime( &biped );
+  EXPECT_EQ( 2*TIME_STEP, pdBipedTime( &biped ) );
 }
 
-TEST_F(pdCoreTest, IncrTime_Update)
+TEST_F(pdBipedTest, IncrTime_Update)
 {
-  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
-  pdCoreUpdate( &core );
-  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
-  pdCoreUpdate( &core );
-  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
-  pdCoreUpdate( &core );
-  EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
-  EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
+  pdBipedUpdate( &biped );
+  EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
+  pdBipedUpdate( &biped );
+  EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
+  pdBipedUpdate( &biped );
+  EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
+  EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
 }
 
-TEST_F(pdCoreTest, RefVec)
+TEST_F(pdBipedTest, RefVec)
 {
-  EXPECT_EQ( &core.ref_com_pos, pdCoreRefCOMPos( &core ) );
-  EXPECT_EQ( &core.ref_base_att, pdCoreRefBaseAtt( &core ) );
-  EXPECT_EQ( &core.ref_lf_pos, pdCoreRefLFPos( &core ) );
-  EXPECT_EQ( &core.ref_lf_att, pdCoreRefLFAtt( &core ) );
-  EXPECT_EQ( &core.ref_rf_pos, pdCoreRefRFPos( &core ) );
-  EXPECT_EQ( &core.ref_rf_att, pdCoreRefRFAtt( &core ) );
+  EXPECT_EQ( &biped.ref_com_pos, pdBipedRefCOMPos( &biped ) );
+  EXPECT_EQ( &biped.ref_base_att, pdBipedRefBaseAtt( &biped ) );
+  EXPECT_EQ( &biped.ref_lf_pos, pdBipedRefLFPos( &biped ) );
+  EXPECT_EQ( &biped.ref_lf_att, pdBipedRefLFAtt( &biped ) );
+  EXPECT_EQ( &biped.ref_rf_pos, pdBipedRefRFPos( &biped ) );
+  EXPECT_EQ( &biped.ref_rf_att, pdBipedRefRFAtt( &biped ) );
 }
 
-TEST_F(pdCoreTest, DefaultPoseInit_ThrowException)
+TEST_F(pdBipedTest, DefaultPoseInit_ThrowException)
 {
   zEchoOff();
-  pdStateInit( core.state );
-  EXPECT_FALSE( pdCoreDefaultPoseInit( &core ) );
+  pdStateInit( biped.state );
+  EXPECT_FALSE( pdBipedDefaultPoseInit( &biped ) );
   zEchoOn();
 }
 
-TEST_F(pdCoreTest, DefaultPoseInit)
+TEST_F(pdBipedTest, DefaultPoseInit)
 {
-  pdStateInit( core.state );
-  zVec3DCreate( &core.state->lf_pos, 0,  0.1, -0.1 );
-  zVec3DCreate( &core.state->rf_pos, 0, -0.1, -0.1 );
-  zVec3DCreate( &core.state->com_pos, 0.01, 0, 0.1 );
-  pdCmdDefaultInit( core.cmd );
-  EXPECT_TRUE( pdCoreDefaultPoseInit( &core ) );
+  pdStateInit( biped.state );
+  zVec3DCreate( &biped.state->lf_pos, 0,  0.1, -0.1 );
+  zVec3DCreate( &biped.state->rf_pos, 0, -0.1, -0.1 );
+  zVec3DCreate( &biped.state->com_pos, 0.01, 0, 0.1 );
+  pdCmdDefaultInit( biped.cmd );
+  EXPECT_TRUE( pdBipedDefaultPoseInit( &biped ) );
 
-  EXPECT_DOUBLE_EQ( 0.2, core.cmd->dist );
-  EXPECT_DOUBLE_EQ( 0.95*0.2, core.cmd->zd );
-  EXPECT_DOUBLE_EQ( -zPI_2, core.cmd->thetad );
-  EXPECT_DOUBLE_EQ( 0.01, core.cmd->xd );
-  EXPECT_DOUBLE_EQ( 0, core.cmd->yd );
+  EXPECT_DOUBLE_EQ( 0.2, biped.cmd->dist );
+  EXPECT_DOUBLE_EQ( 0.95*0.2, biped.cmd->zd );
+  EXPECT_DOUBLE_EQ( -zPI_2, biped.cmd->thetad );
+  EXPECT_DOUBLE_EQ( 0.01, biped.cmd->xd );
+  EXPECT_DOUBLE_EQ( 0, biped.cmd->yd );
 
-  EXPECT_DOUBLE_EQ( 0.01, pdCoreRefCOMPosX( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefCOMPosY( &core ) );
-  EXPECT_DOUBLE_EQ( 0.95*0.2, pdCoreRefCOMPosZ( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefBaseAttX( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefBaseAttY( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefBaseAttZ( &core ) );
-  EXPECT_DOUBLE_EQ( 0.01, pdCoreRefLFPosX( &core ) );
-  EXPECT_DOUBLE_EQ( 0.1, pdCoreRefLFPosY( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFPosZ( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFAttX( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFAttY( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefLFAttZ( &core ) );
-  EXPECT_DOUBLE_EQ( 0.01, pdCoreRefRFPosX( &core ) );
-  EXPECT_DOUBLE_EQ( -0.1, pdCoreRefRFPosY( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFPosZ( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFAttX( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFAttY( &core ) );
-  EXPECT_DOUBLE_EQ( 0, pdCoreRefRFAttZ( &core ) );
+  EXPECT_DOUBLE_EQ( 0.01, pdBipedRefCOMPosX( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefCOMPosY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0.95*0.2, pdBipedRefCOMPosZ( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefBaseAttX( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefBaseAttY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefBaseAttZ( &biped ) );
+  EXPECT_DOUBLE_EQ( 0.01, pdBipedRefLFPosX( &biped ) );
+  EXPECT_DOUBLE_EQ( 0.1, pdBipedRefLFPosY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefLFPosZ( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefLFAttX( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefLFAttY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefLFAttZ( &biped ) );
+  EXPECT_DOUBLE_EQ( 0.01, pdBipedRefRFPosX( &biped ) );
+  EXPECT_DOUBLE_EQ( -0.1, pdBipedRefRFPosY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefRFPosZ( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefRFAttX( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefRFAttY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefRFAttZ( &biped ) );
 }
 
 #if 0
-TEST_F(pdCoreTest, Load)
+TEST_F(pdBipedTest, Load)
 {
   char filename[] = "model/mighty.zkc";
 
-  pdCoreInit( &core, &cmd, TIME_STEP );
-  pdCoreLoad( &core, filename );
-  EXPECT_EQ( 25, (int)rkChainNum(pdRobotChainPtr(pdCoreRobotPtr(&core))));
+  pdBipedInit( &biped, &cmd, TIME_STEP );
+  pdBipedLoad( &biped, filename );
+  EXPECT_EQ( 25, (int)rkChainNum(pdRobotChainPtr(pdBipedRobotPtr(&biped))));
 }
 
-TEST_F(pdCoreTest, JointSize)
+TEST_F(pdBipedTest, JointSize)
 {
   char model[] = "model/mighty.zkc";
 
-  pdCoreLoad( &core, model );
-  EXPECT_EQ( 26, pdCoreJointSize( &core ) );
+  pdBipedLoad( &biped, model );
+  EXPECT_EQ( 26, pdBipedJointSize( &biped ) );
 }
 
-TEST_F(pdCoreTest, JointDis)
+TEST_F(pdBipedTest, JointDis)
 {
   char model[] = "model/mighty.zkc";
 
-  pdCoreLoad( &core, model );
-  EXPECT_EQ( 26, pdCoreJointSize( &core ) );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 0 ),
-               zVecElem( pdCoreJointDis( &core ), 0 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 1 ),
-               zVecElem( pdCoreJointDis( &core ), 1 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 2 ),
-               zVecElem( pdCoreJointDis( &core ), 2 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 10 ),
-               zVecElem( pdCoreJointDis( &core ), 10 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 20 ),
-               zVecElem( pdCoreJointDis( &core ), 20 ), GTEST_TOL );
+  pdBipedLoad( &biped, model );
+  EXPECT_EQ( 26, pdBipedJointSize( &biped ) );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 0 ),
+               zVecElem( pdBipedJointDis( &biped ), 0 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 1 ),
+               zVecElem( pdBipedJointDis( &biped ), 1 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 2 ),
+               zVecElem( pdBipedJointDis( &biped ), 2 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 10 ),
+               zVecElem( pdBipedJointDis( &biped ), 10 ), GTEST_TOL );
+  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 20 ),
+               zVecElem( pdBipedJointDis( &biped ), 20 ), GTEST_TOL );
 }
 #endif
 
-TEST_F(pdCoreTest, DoesIntendToStand_Step_Walk)
+TEST_F(pdBipedTest, DoesIntendToStand_Step_Walk)
 {
   pdCmdDefaultInit( &cmd );
 
-  EXPECT_TRUE( pdCoreDoesIntendToStand( &core ) );
-  EXPECT_FALSE( pdCoreDoesIntendToStep( &core ) );
-  EXPECT_FALSE( pdCoreDoesIntendToWalk( &core ) );
+  EXPECT_TRUE( pdBipedDoesIntendToStand( &biped ) );
+  EXPECT_FALSE( pdBipedDoesIntendToStep( &biped ) );
+  EXPECT_FALSE( pdBipedDoesIntendToWalk( &biped ) );
 
   cmd.rho = 1.0;
-  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
-  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
-  EXPECT_FALSE( pdCoreDoesIntendToWalk( &core ) );
+  EXPECT_FALSE( pdBipedDoesIntendToStand( &biped ) );
+  EXPECT_TRUE( pdBipedDoesIntendToStep( &biped ) );
+  EXPECT_FALSE( pdBipedDoesIntendToWalk( &biped ) );
 
   cmd.rho = 1.0;
   cmd.vud = 0.1;
-  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
-  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
-  EXPECT_TRUE( pdCoreDoesIntendToWalk( &core ) );
+  EXPECT_FALSE( pdBipedDoesIntendToStand( &biped ) );
+  EXPECT_TRUE( pdBipedDoesIntendToStep( &biped ) );
+  EXPECT_TRUE( pdBipedDoesIntendToWalk( &biped ) );
 
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, DoesIntendToStand_Step_Sidewalk)
+TEST_F(pdBipedTest, DoesIntendToStand_Step_Sidewalk)
 {
   pdCmdDefaultInit( &cmd );
 
-  EXPECT_TRUE( pdCoreDoesIntendToStand( &core ) );
-  EXPECT_FALSE( pdCoreDoesIntendToStep( &core ) );
-  EXPECT_FALSE( pdCoreDoesIntendToSidewalk( &core ) );
+  EXPECT_TRUE( pdBipedDoesIntendToStand( &biped ) );
+  EXPECT_FALSE( pdBipedDoesIntendToStep( &biped ) );
+  EXPECT_FALSE( pdBipedDoesIntendToSidewalk( &biped ) );
 
   cmd.rho = 1.0;
-  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
-  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
-  EXPECT_FALSE( pdCoreDoesIntendToSidewalk( &core ) );
+  EXPECT_FALSE( pdBipedDoesIntendToStand( &biped ) );
+  EXPECT_TRUE( pdBipedDoesIntendToStep( &biped ) );
+  EXPECT_FALSE( pdBipedDoesIntendToSidewalk( &biped ) );
 
   cmd.rho = 1.0;
   cmd.vwd = 0.1;
-  EXPECT_FALSE( pdCoreDoesIntendToStand( &core ) );
-  EXPECT_TRUE( pdCoreDoesIntendToStep( &core ) );
-  EXPECT_TRUE( pdCoreDoesIntendToSidewalk( &core ) );
+  EXPECT_FALSE( pdBipedDoesIntendToStand( &biped ) );
+  EXPECT_TRUE( pdBipedDoesIntendToStep( &biped ) );
+  EXPECT_TRUE( pdBipedDoesIntendToSidewalk( &biped ) );
 
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, BothFeetOn)
+TEST_F(pdBipedTest, BothFeetOn)
 {
   SupportOnBothFeet();
-  EXPECT_TRUE( pdCoreIsBothFeetOn( &core ) );
-  EXPECT_TRUE( pdCoreIsEitherFootOn( &core ) );
-  EXPECT_FALSE( pdCoreIsEitherFootOff( &core ) );
+  EXPECT_TRUE( pdBipedIsBothFeetOn( &biped ) );
+  EXPECT_TRUE( pdBipedIsEitherFootOn( &biped ) );
+  EXPECT_FALSE( pdBipedIsEitherFootOff( &biped ) );
 
   SupportOnLeftFoot();
-  EXPECT_FALSE( pdCoreIsBothFeetOn( &core ) );
-  EXPECT_TRUE( pdCoreIsEitherFootOn( &core ) );
-  EXPECT_TRUE( pdCoreIsEitherFootOff( &core ) );
+  EXPECT_FALSE( pdBipedIsBothFeetOn( &biped ) );
+  EXPECT_TRUE( pdBipedIsEitherFootOn( &biped ) );
+  EXPECT_TRUE( pdBipedIsEitherFootOff( &biped ) );
 
   SupportOnRightFoot();
-  EXPECT_FALSE( pdCoreIsBothFeetOn( &core ) );
-  EXPECT_TRUE( pdCoreIsEitherFootOn( &core ) );
-  EXPECT_TRUE( pdCoreIsEitherFootOff( &core ) );
+  EXPECT_FALSE( pdBipedIsBothFeetOn( &biped ) );
+  EXPECT_TRUE( pdBipedIsEitherFootOn( &biped ) );
+  EXPECT_TRUE( pdBipedIsEitherFootOff( &biped ) );
 
   destroy_flag = true;
 }
 
 
-TEST_F(pdCoreTest, InitMode)
+TEST_F(pdBipedTest, InitMode)
 {
-  core.mode.stand    = false;
-  core.mode.step     = true;
-  core.mode.walk     = true;
-  core.mode.sidewalk = true;
-  core.mode.follow   = true;
-  core.mode.brake    = true;
-  pdCoreInitMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  biped.mode.stand    = false;
+  biped.mode.step     = true;
+  biped.mode.walk     = true;
+  biped.mode.sidewalk = true;
+  biped.mode.follow   = true;
+  biped.mode.brake    = true;
+  pdBipedInitMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, UpdateMode_stand)
+TEST_F(pdBipedTest, UpdateMode_stand)
 {
-  pdCoreInitMode( &core );
+  pdBipedInitMode( &biped );
 
   SupportOnBothFeet();
   pdCmdDefaultInit( &cmd );
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
 
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
 
   pdCmdDefaultInit( &cmd );
   cmd.vud = 0.1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
 
   pdCmdDefaultInit( &cmd );
   cmd.vwd = 0.1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
 
   pdCmdDefaultInit( &cmd );
   cmd.rho = 1.0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
 
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, UpdateMode_step)
+TEST_F(pdBipedTest, UpdateMode_step)
 {
-  pdCoreInitMode( &core );
+  pdBipedInitMode( &biped );
 
   pdCmdDefaultInit( &cmd );
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
   // attempt to step, but not initiate yet
   cmd.rho = 1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_TRUE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.stand );
   // initiate stepping
   cmd.rho = 1;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.stand );
   // still stepping
   cmd.rho = 1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.stand );
   // still stepping
   cmd.rho = 1;
   SupportOnRightFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.stand );
   // attempt to stop, but still continue
   cmd.rho = 0;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.stand );
   // stop stepping
   cmd.rho = 0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_TRUE( core.mode.stand );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.stand );
 
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, UpdateMode_walk)
+TEST_F(pdBipedTest, UpdateMode_walk)
 {
-  pdCoreInitMode( &core );
+  pdBipedInitMode( &biped );
 
   pdCmdDefaultInit( &cmd );
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
   // attempt to walk, but not initiate yet
   cmd.vud = 0.1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
   // initiate walking
   cmd.vud = 0.1;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
   // still walking
   cmd.vud = 0.1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
   // still walking
   cmd.vud = 0.1;
   SupportOnRightFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
   // attempt to stop, but still continue
   cmd.vud = 0;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
   // stop stepping
   cmd.vud = 0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
 
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, UpdateMode_sidewalk)
+TEST_F(pdBipedTest, UpdateMode_sidewalk)
 {
-  pdCoreInitMode( &core );
+  pdBipedInitMode( &biped );
 
   pdCmdDefaultInit( &cmd );
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // attempt to walk, but not initiate yet
   cmd.vwd = 0.1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // initiate walking
   cmd.vwd = 0.1;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_TRUE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_TRUE( biped.mode.brake );
   // still walking
   cmd.vwd = 0.1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // still walking
   cmd.vwd = 0.1;
   SupportOnRightFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_TRUE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_TRUE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
+  pdBipedUpdateMode( &biped );
   // attempt to stop, but still continue
   cmd.vwd = 0.1;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_TRUE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_TRUE( biped.mode.brake );
   // attempt to stop, but still continue
   cmd.vwd = 0.0;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_TRUE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_TRUE( biped.mode.brake );
   // stop stepping
   cmd.vwd = 0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
 
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, UpdateMode_diagonal)
+TEST_F(pdBipedTest, UpdateMode_diagonal)
 {
-  pdCoreInitMode( &core );
+  pdBipedInitMode( &biped );
 
   pdCmdDefaultInit( &cmd );
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // attempt to walk, but not initiate yet
   cmd.vud = 0.1;
   cmd.vwd = 0.0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // initiate walking
   cmd.vud = 0.1;
   cmd.vwd = 0.0;
   SupportOnRightFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // still walking
   cmd.vud = 0.1;
   cmd.vwd = 0.0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // attempt to walk diagonally
   cmd.vud = 0.1;
   cmd.vwd = 0.1;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_TRUE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_TRUE( biped.mode.brake );
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
+  pdBipedUpdateMode( &biped );
   // still walking
   cmd.vud = 0.1;
   cmd.vwd = 0.1;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // still walking
   cmd.vud = 0.1;
   cmd.vwd = 0.1;
   SupportOnRightFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_TRUE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_TRUE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // attempt to walk longitudinally again
   cmd.vud = 0.1;
   cmd.vwd = 0.0;
   SupportOnRightFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_TRUE( core.mode.sidewalk );
-  EXPECT_TRUE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_TRUE( biped.mode.sidewalk );
+  EXPECT_TRUE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // still walking
   cmd.vud = 0.1;
   cmd.vwd = 0.0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // attempt to stop
   cmd.vud = 0.0;
   cmd.vwd = 0.0;
   SupportOnLeftFoot();
-  pdCoreUpdateMode( &core );
-  EXPECT_FALSE( core.mode.stand );
-  EXPECT_TRUE( core.mode.step );
-  EXPECT_TRUE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_FALSE( biped.mode.stand );
+  EXPECT_TRUE( biped.mode.step );
+  EXPECT_TRUE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
   // stop stepping
   cmd.vud = 0.0;
   cmd.vwd = 0.0;
   SupportOnBothFeet();
-  pdCoreUpdateMode( &core );
-  EXPECT_TRUE( core.mode.stand );
-  EXPECT_FALSE( core.mode.step );
-  EXPECT_FALSE( core.mode.walk );
-  EXPECT_FALSE( core.mode.sidewalk );
-  EXPECT_FALSE( core.mode.follow );
-  EXPECT_FALSE( core.mode.brake );
+  pdBipedUpdateMode( &biped );
+  EXPECT_TRUE( biped.mode.stand );
+  EXPECT_FALSE( biped.mode.step );
+  EXPECT_FALSE( biped.mode.walk );
+  EXPECT_FALSE( biped.mode.sidewalk );
+  EXPECT_FALSE( biped.mode.follow );
+  EXPECT_FALSE( biped.mode.brake );
 
   destroy_flag = true;
 }
 
-TEST_F(pdCoreTest, UpdateState)
+TEST_F(pdBipedTest, UpdateState)
 {
   SetRandomValues();
-  pdCoreUpdateState( &core );
-  pdState *s = core.state;
-  EXPECT_EQ( pdCoreRefCOMPosX(&core), zVec3DElem(&s->com_pos,zX) );
-  EXPECT_EQ( pdCoreRefCOMPosY(&core), zVec3DElem(&s->com_pos,zY) );
-  EXPECT_EQ( pdCoreRefCOMPosZ(&core), zVec3DElem(&s->com_pos,zZ) );
-  EXPECT_EQ( pdCoreRefBaseAttX(&core), zVec3DElem(&s->base_att,zX) );
-  EXPECT_EQ( pdCoreRefBaseAttY(&core), zVec3DElem(&s->base_att,zY) );
-  EXPECT_EQ( pdCoreRefBaseAttZ(&core), zVec3DElem(&s->base_att,zZ) );
-  EXPECT_EQ( pdCoreRefLFPosX(&core), zVec3DElem(&s->lf_pos,zX) );
-  EXPECT_EQ( pdCoreRefLFPosY(&core), zVec3DElem(&s->lf_pos,zY) );
-  EXPECT_EQ( pdCoreRefLFPosZ(&core), zVec3DElem(&s->lf_pos,zZ) );
-  EXPECT_EQ( pdCoreRefLFAttX(&core), zVec3DElem(&s->lf_att,zX) );
-  EXPECT_EQ( pdCoreRefLFAttY(&core), zVec3DElem(&s->lf_att,zY) );
-  EXPECT_EQ( pdCoreRefLFAttZ(&core), zVec3DElem(&s->lf_att,zZ) );
-  EXPECT_EQ( pdCoreRefRFPosX(&core), zVec3DElem(&s->rf_pos,zX) );
-  EXPECT_EQ( pdCoreRefRFPosY(&core), zVec3DElem(&s->rf_pos,zY) );
-  EXPECT_EQ( pdCoreRefRFPosZ(&core), zVec3DElem(&s->rf_pos,zZ) );
-  EXPECT_EQ( pdCoreRefRFAttX(&core), zVec3DElem(&s->rf_att,zX) );
-  EXPECT_EQ( pdCoreRefRFAttY(&core), zVec3DElem(&s->rf_att,zY) );
-  EXPECT_EQ( pdCoreRefRFAttZ(&core), zVec3DElem(&s->rf_att,zZ) );
-  pdCZ *cz = pdCoreCZPtr(&core);
+  pdBipedUpdateState( &biped );
+  pdState *s = biped.state;
+  EXPECT_EQ( pdBipedRefCOMPosX(&biped), zVec3DElem(&s->com_pos,zX) );
+  EXPECT_EQ( pdBipedRefCOMPosY(&biped), zVec3DElem(&s->com_pos,zY) );
+  EXPECT_EQ( pdBipedRefCOMPosZ(&biped), zVec3DElem(&s->com_pos,zZ) );
+  EXPECT_EQ( pdBipedRefBaseAttX(&biped), zVec3DElem(&s->base_att,zX) );
+  EXPECT_EQ( pdBipedRefBaseAttY(&biped), zVec3DElem(&s->base_att,zY) );
+  EXPECT_EQ( pdBipedRefBaseAttZ(&biped), zVec3DElem(&s->base_att,zZ) );
+  EXPECT_EQ( pdBipedRefLFPosX(&biped), zVec3DElem(&s->lf_pos,zX) );
+  EXPECT_EQ( pdBipedRefLFPosY(&biped), zVec3DElem(&s->lf_pos,zY) );
+  EXPECT_EQ( pdBipedRefLFPosZ(&biped), zVec3DElem(&s->lf_pos,zZ) );
+  EXPECT_EQ( pdBipedRefLFAttX(&biped), zVec3DElem(&s->lf_att,zX) );
+  EXPECT_EQ( pdBipedRefLFAttY(&biped), zVec3DElem(&s->lf_att,zY) );
+  EXPECT_EQ( pdBipedRefLFAttZ(&biped), zVec3DElem(&s->lf_att,zZ) );
+  EXPECT_EQ( pdBipedRefRFPosX(&biped), zVec3DElem(&s->rf_pos,zX) );
+  EXPECT_EQ( pdBipedRefRFPosY(&biped), zVec3DElem(&s->rf_pos,zY) );
+  EXPECT_EQ( pdBipedRefRFPosZ(&biped), zVec3DElem(&s->rf_pos,zZ) );
+  EXPECT_EQ( pdBipedRefRFAttX(&biped), zVec3DElem(&s->rf_att,zX) );
+  EXPECT_EQ( pdBipedRefRFAttY(&biped), zVec3DElem(&s->rf_att,zY) );
+  EXPECT_EQ( pdBipedRefRFAttZ(&biped), zVec3DElem(&s->rf_att,zZ) );
+  pdCZ *cz = pdBipedCZPtr(&biped);
   EXPECT_EQ( pdCZRefVelX(cz), zVec3DElem(&s->com_vel,zX) );
   EXPECT_EQ( pdCZRefVelY(cz), zVec3DElem(&s->com_vel,zY) );
   EXPECT_EQ( pdCZRefVelZ(cz), zVec3DElem(&s->com_vel,zZ) );

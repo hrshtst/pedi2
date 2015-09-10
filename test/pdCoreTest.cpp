@@ -9,7 +9,7 @@ const double TIME_STEP = 0.01;
 class pdCoreTest : public testing::Test {
  protected:
   virtual void SetUp() {
-    pdCoreInit( &core, &cmd, TIME_STEP );
+    pdCoreInit( &core, &cmd, &state, TIME_STEP );
     destroy_flag = false;
   };
   virtual void TearDown() {
@@ -33,14 +33,14 @@ class pdCoreTest : public testing::Test {
   void SupportOnBothFeet() {
     pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
     pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
-    pdFootSR( pdCoreLFPtr(&core) ) = &core.state.sr_lf;
-    pdFootSR( pdCoreRFPtr(&core) ) = &core.state.sr_lf;
+    pdFootSR( pdCoreLFPtr(&core) ) = &core.state->sr_lf;
+    pdFootSR( pdCoreRFPtr(&core) ) = &core.state->sr_lf;
   };
 
   void SupportOnLeftFoot() {
     pdFootPosZ( pdCoreLFPtr(&core) ) = 0.0;
     pdFootPosZ( pdCoreRFPtr(&core) ) = 0.01;
-    pdFootSR( pdCoreLFPtr(&core) ) = &core.state.sr_lf;
+    pdFootSR( pdCoreLFPtr(&core) ) = &core.state->sr_lf;
     pdFootSR( pdCoreRFPtr(&core) ) = NULL;
   };
 
@@ -48,26 +48,27 @@ class pdCoreTest : public testing::Test {
     pdFootPosZ( pdCoreLFPtr(&core) ) = 0.01;
     pdFootPosZ( pdCoreRFPtr(&core) ) = 0.0;
     pdFootSR( pdCoreLFPtr(&core) ) = NULL;
-    pdFootSR( pdCoreRFPtr(&core) ) = &core.state.sr_lf;
+    pdFootSR( pdCoreRFPtr(&core) ) = &core.state->sr_lf;
   };
 
   RandomInitializer ri;
   bool destroy_flag;
   pdCore core;
   pdCmd cmd;
+  pdState state;
 };
 
 TEST_F(pdCoreTest, Init)
 {
   SetRandomValues();
-  pdCoreInit( &core, &cmd, TIME_STEP );
+  pdCoreInit( &core, &cmd, &state, TIME_STEP );
   EXPECT_EQ( 0, pdCoreTime( &core ) );
   EXPECT_EQ( TIME_STEP, pdCoreTimeStep( &core ) );
   EXPECT_EQ( &cmd, pdCoreCmd( &core ) );
+  EXPECT_EQ( &state, pdCoreState( &core ) );
   EXPECT_EQ( &core.cz, pdCoreCZPtr( &core ) );
   EXPECT_EQ( &core.lf, pdCoreLFPtr( &core ) );
   EXPECT_EQ( &core.rf, pdCoreRFPtr( &core ) );
-  EXPECT_EQ( &core.state, pdCoreStatePtr( &core ) );
   EXPECT_TRUE( core.mode.stand );
   EXPECT_FALSE( core.mode.step );
   EXPECT_FALSE( core.mode.walk );
@@ -175,17 +176,17 @@ TEST_F(pdCoreTest, RefVec)
 TEST_F(pdCoreTest, DefaultPoseInit_ThrowException)
 {
   zEchoOff();
-  pdStateInit( &core.state );
+  pdStateInit( core.state );
   EXPECT_FALSE( pdCoreDefaultPoseInit( &core ) );
   zEchoOn();
 }
 
 TEST_F(pdCoreTest, DefaultPoseInit)
 {
-  pdStateInit( &core.state );
-  zVec3DCreate( &core.state.lf_pos, 0,  0.1, -0.1 );
-  zVec3DCreate( &core.state.rf_pos, 0, -0.1, -0.1 );
-  zVec3DCreate( &core.state.com_pos, 0.01, 0, 0.1 );
+  pdStateInit( core.state );
+  zVec3DCreate( &core.state->lf_pos, 0,  0.1, -0.1 );
+  zVec3DCreate( &core.state->rf_pos, 0, -0.1, -0.1 );
+  zVec3DCreate( &core.state->com_pos, 0.01, 0, 0.1 );
   pdCmdDefaultInit( core.cmd );
   EXPECT_TRUE( pdCoreDefaultPoseInit( &core ) );
 
@@ -696,7 +697,7 @@ TEST_F(pdCoreTest, UpdateState)
 {
   SetRandomValues();
   pdCoreUpdateState( &core );
-  pdState *s = &core.state;
+  pdState *s = core.state;
   EXPECT_EQ( pdCoreRefCOMPosX(&core), zVec3DElem(&s->com_pos,zX) );
   EXPECT_EQ( pdCoreRefCOMPosY(&core), zVec3DElem(&s->com_pos,zY) );
   EXPECT_EQ( pdCoreRefCOMPosZ(&core), zVec3DElem(&s->com_pos,zZ) );

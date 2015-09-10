@@ -3,8 +3,8 @@
 
 #include <pedi2/pd_cz.h>
 #include <pedi2/pd_foot.h>
-#include <pedi2/pd_state.h>
 #include <pedi2/pd_cmd.h>
+#include <pedi2/pd_state.h>
 
 __BEGIN_DECLS
 
@@ -22,8 +22,8 @@ typedef struct{
   double _dt;
   pdCZ cz;
   pdFoot lf, rf;
-  pdState state;
   pdCmd *cmd;
+  pdState *state;
   pdCoreMode mode;
 
   zVec3D ref_com_pos;
@@ -34,7 +34,7 @@ typedef struct{
   zVec3D ref_rf_att;
 } pdCore;
 
-__EXPORT void pdCoreInit(pdCore *core, pdCmd *cmd, double dt);
+__EXPORT void pdCoreInit(pdCore *core, pdCmd *cmd, pdState *state, double dt);
 __EXPORT bool pdCoreDefaultPoseInit(pdCore *core);
 __EXPORT void pdCoreDestroy(pdCore *core);
 
@@ -44,8 +44,8 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 #define pdCoreCZPtr(c)     ( &(c)->cz )
 #define pdCoreLFPtr(c)     ( &(c)->lf )
 #define pdCoreRFPtr(c)     ( &(c)->rf )
-#define pdCoreStatePtr(c)  ( &(c)->state )
 #define pdCoreCmd(c)       ( (c)->cmd )
+#define pdCoreState(c)     ( (c)->state )
 
 #define pdCoreKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
 #define pdCoreFFPtr(c)     pdFootFFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )

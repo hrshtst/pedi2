@@ -5,7 +5,7 @@ static void _pdCorePoseInit(pdCore *core);
 static void _pdCoreUpdateCommand(pdCore *core);
 static void _pdCoreUpdateCZ(pdCore *core);
 static void _pdCoreUpdateFoot(pdCore *core);
-static void _pdCoreUpdateCmd(pdCore *core);
+static void _pdCoreModifyCommand(pdCore *core);
 
 void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
 {
@@ -317,7 +317,7 @@ double _pdCoreCalcDesFootDistBrakeToFollow(pdCore *core)
   return core->cmd->dist;
 }
 
-void _pdCoreUpdateCmd(pdCore *core)
+void _pdCoreModifyCommand(pdCore *core)
 {
   zVec3D pd;
   double ref_dist;
@@ -364,7 +364,7 @@ void pdCoreUpdate(pdCore *core)
   _pdCoreUpdateCZ( core );
   _pdCoreUpdateFoot( core );
   _pdCoreUpdateRef( core );
-  _pdCoreUpdateCmd( core );
+  _pdCoreModifyCommand( core );
   pdCoreUpdateMode( core );
   pdCoreIncrTime( core );
 }

@@ -259,31 +259,24 @@ void _pdCoreUpdateFoot(pdCore *core)
                 &core->state.sr_rf );
 }
 
-/* void _pdCoreUpdateRobot(pdCore *core) */
-/* { */
-/*   zVec3D v; */
-/*   double offset; */
+void _pdCoreUpdateRef(pdCore *core)
+{
+  zVec3D v;
+  double offset;
 
-/*   offset = zPI_2; */
+  offset = zPI_2;
 
-/*   pdRobotSetRefCOM( pdCoreRobotPtr(core), pdCZRefCOM( pdCoreCZPtr(core) ) ); */
+  zVec3DCopy( pdCZRefCOM( pdCoreCZPtr(core) ), pdCoreRefCOMPos(core) );
 
-/*   zVec3DCreate( &v, pdCZCmdTheta( pdCoreCZPtr(core) ), 0, 0 ); */
-/*   zVec3DElem( &v, zX ) += offset; */
-/*   pdRobotSetRefBaseAtt( pdCoreRobotPtr(core), &v ); */
+  zVec3DCreate( &v, pdCZCmdTheta( pdCoreCZPtr(core) ), 0, 0 );
+  zVec3DElem( &v, zX ) += offset;
+  zVec3DCopy( &v, pdCoreRefBaseAtt(core) );
 
-/*   pdRobotSetRefLFPos( pdCoreRobotPtr(core), pdFootRefPos( pdCoreLFPtr(core) ) ); */
-
-/*   zVec3DCopy( pdFootRefAtt( pdCoreLFPtr(core) ), &v ); */
-/*   pdRobotSetRefLFAtt( pdCoreRobotPtr(core), pdFootRefAtt( pdCoreLFPtr(core) ) ); */
-
-/*   pdRobotSetRefRFPos( pdCoreRobotPtr(core), pdFootRefPos( pdCoreRFPtr(core) ) ); */
-
-/*   zVec3DCopy( pdFootRefAtt( pdCoreLFPtr(core) ), &v ); */
-/*   pdRobotSetRefRFAtt( pdCoreRobotPtr(core), pdFootRefAtt( pdCoreRFPtr(core) ) ); */
-
-/*   pdRobotSolveIK( pdCoreRobotPtr( core ) ); */
-/* } */
+  zVec3DCopy( pdFootRefPos( pdCoreLFPtr(core) ), pdCoreRefLFPos(core) );
+  zVec3DCopy( pdFootRefAtt( pdCoreLFPtr(core) ), pdCoreRefLFAtt(core) );
+  zVec3DCopy( pdFootRefPos( pdCoreRFPtr(core) ), pdCoreRefRFPos(core) );
+  zVec3DCopy( pdFootRefAtt( pdCoreRFPtr(core) ), pdCoreRefRFAtt(core) );
+}
 
 static double _pdCoreCalcDesFootDistFollow(pdCore *core);
 static double _pdCoreCalcDesFootDistFollowToBrake(pdCore *core);
@@ -384,7 +377,7 @@ void pdCoreUpdate(pdCore *core)
   _pdCoreUpdateCommand( core );
   _pdCoreUpdateCZ( core );
   _pdCoreUpdateFoot( core );
-  /* _pdCoreUpdateRobot( core ); */
+  _pdCoreUpdateRef( core );
   _pdCoreUpdateCmd( core );
   _pdCoreUpdateState( core );
   pdCoreUpdateMode( core );

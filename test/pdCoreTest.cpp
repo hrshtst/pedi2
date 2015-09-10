@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "utility/random_initializer.h"
 #include <pedi2/pd_core.h>
 
 const double TIME_STEP = 0.01;
@@ -14,6 +15,15 @@ class pdCoreTest : public testing::Test {
   virtual void TearDown() {
     if( !destroy_flag )
       pdCoreDestroy( &core );
+  };
+
+  void SetRandomValues() {
+    ri.SetRandVec3D( core.ref_com_pos );
+    ri.SetRandVec3D( core.ref_base_att );
+    ri.SetRandVec3D( core.ref_lf_pos );
+    ri.SetRandVec3D( core.ref_lf_att );
+    ri.SetRandVec3D( core.ref_rf_pos );
+    ri.SetRandVec3D( core.ref_rf_att );
   };
 
   void LoadMighty() {
@@ -44,6 +54,7 @@ class pdCoreTest : public testing::Test {
     pdFootSR( pdCoreRFPtr(&core) ) = &core.state.sr_lf;
   };
 
+  RandomInitializer ri;
   bool destroy_flag;
   pdCore core;
   pdCmd cmd;
@@ -51,6 +62,8 @@ class pdCoreTest : public testing::Test {
 
 TEST_F(pdCoreTest, Init)
 {
+  SetRandomValues();
+  pdCoreInit( &core, &cmd, TIME_STEP );
   EXPECT_EQ( 0, pdCoreTime( &core ) );
   EXPECT_EQ( TIME_STEP, pdCoreTimeStep( &core ) );
   EXPECT_EQ( &cmd, pdCoreCmd( &core ) );
@@ -64,6 +77,24 @@ TEST_F(pdCoreTest, Init)
   EXPECT_FALSE( core.mode.sidewalk );
   EXPECT_FALSE( core.mode.follow );
   EXPECT_FALSE( core.mode.brake );
+  EXPECT_EQ( 0, pdCoreRefCOMPosX( &core ) );
+  EXPECT_EQ( 0, pdCoreRefCOMPosY( &core ) );
+  EXPECT_EQ( 0, pdCoreRefCOMPosZ( &core ) );
+  EXPECT_EQ( 0, pdCoreRefBaseAttX( &core ) );
+  EXPECT_EQ( 0, pdCoreRefBaseAttY( &core ) );
+  EXPECT_EQ( 0, pdCoreRefBaseAttZ( &core ) );
+  EXPECT_EQ( 0, pdCoreRefLFPosX( &core ) );
+  EXPECT_EQ( 0, pdCoreRefLFPosY( &core ) );
+  EXPECT_EQ( 0, pdCoreRefLFPosZ( &core ) );
+  EXPECT_EQ( 0, pdCoreRefLFAttX( &core ) );
+  EXPECT_EQ( 0, pdCoreRefLFAttY( &core ) );
+  EXPECT_EQ( 0, pdCoreRefLFAttZ( &core ) );
+  EXPECT_EQ( 0, pdCoreRefRFPosX( &core ) );
+  EXPECT_EQ( 0, pdCoreRefRFPosY( &core ) );
+  EXPECT_EQ( 0, pdCoreRefRFPosZ( &core ) );
+  EXPECT_EQ( 0, pdCoreRefRFAttX( &core ) );
+  EXPECT_EQ( 0, pdCoreRefRFAttY( &core ) );
+  EXPECT_EQ( 0, pdCoreRefRFAttZ( &core ) );
 }
 
 TEST_F(pdCoreTest, Destroy)
@@ -133,6 +164,16 @@ TEST_F(pdCoreTest, IncrTime_Update)
   EXPECT_EQ( pdCoreTime( &core ), pdCZTime( pdCoreCZPtr( &core ) ) );
   EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreLFPtr( &core ) ) );
   EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
+}
+
+TEST_F(pdCoreTest, RefVec)
+{
+  EXPECT_EQ( &core.ref_com_pos, pdCoreRefCOMPos( &core ) );
+  EXPECT_EQ( &core.ref_base_att, pdCoreRefBaseAtt( &core ) );
+  EXPECT_EQ( &core.ref_lf_pos, pdCoreRefLFPos( &core ) );
+  EXPECT_EQ( &core.ref_lf_att, pdCoreRefLFAtt( &core ) );
+  EXPECT_EQ( &core.ref_rf_pos, pdCoreRefRFPos( &core ) );
+  EXPECT_EQ( &core.ref_rf_att, pdCoreRefRFAtt( &core ) );
 }
 
 #if 0

@@ -19,6 +19,12 @@ void pdCoreInit(pdCore *core, pdCmd *cmd, double dt)
   pdStateInit( pdCoreStatePtr( core ) );
   pdCoreInitMode( core );
   core->cmd = cmd;
+  zVec3DClear( pdCoreRefCOMPos( core ) );
+  zVec3DClear( pdCoreRefBaseAtt( core ) );
+  zVec3DClear( pdCoreRefLFPos( core ) );
+  zVec3DClear( pdCoreRefLFAtt( core ) );
+  zVec3DClear( pdCoreRefRFPos( core ) );
+  zVec3DClear( pdCoreRefRFAtt( core ) );
 }
 
 void _pdCorePoseInit(pdCore *core)

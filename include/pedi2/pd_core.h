@@ -25,6 +25,13 @@ typedef struct{
   pdState state;
   pdCmd *cmd;
   pdCoreMode mode;
+
+  zVec3D ref_com_pos;
+  zVec3D ref_base_att;
+  zVec3D ref_lf_pos;
+  zVec3D ref_lf_att;
+  zVec3D ref_rf_pos;
+  zVec3D ref_rf_att;
 } pdCore;
 
 __EXPORT void pdCoreInit(pdCore *core, pdCmd *cmd, double dt);
@@ -43,6 +50,31 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 #define pdCoreKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
 #define pdCoreFFPtr(c)     pdFootFFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
 #define pdCoreBFPtr(c)     pdFootBFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
+
+#define pdCoreRefCOMPos(c)   ( &(c)->ref_com_pos )
+#define pdCoreRefCOMPosX(c)  zVec3DElem( pdCoreRefCOMPos(c), zX )
+#define pdCoreRefCOMPosY(c)  zVec3DElem( pdCoreRefCOMPos(c), zY )
+#define pdCoreRefCOMPosZ(c)  zVec3DElem( pdCoreRefCOMPos(c), zZ )
+#define pdCoreRefBaseAtt(c)  ( &(c)->ref_base_att )
+#define pdCoreRefBaseAttX(c) zVec3DElem( pdCoreRefBaseAtt(c), zX )
+#define pdCoreRefBaseAttY(c) zVec3DElem( pdCoreRefBaseAtt(c), zY )
+#define pdCoreRefBaseAttZ(c) zVec3DElem( pdCoreRefBaseAtt(c), zZ )
+#define pdCoreRefLFPos(c)    ( &(c)->ref_lf_pos )
+#define pdCoreRefLFPosX(c)   zVec3DElem( pdCoreRefLFPos(c), zX )
+#define pdCoreRefLFPosY(c)   zVec3DElem( pdCoreRefLFPos(c), zY )
+#define pdCoreRefLFPosZ(c)   zVec3DElem( pdCoreRefLFPos(c), zZ )
+#define pdCoreRefLFAtt(c)    ( &(c)->ref_lf_att )
+#define pdCoreRefLFAttX(c)   zVec3DElem( pdCoreRefLFAtt(c), zX )
+#define pdCoreRefLFAttY(c)   zVec3DElem( pdCoreRefLFAtt(c), zY )
+#define pdCoreRefLFAttZ(c)   zVec3DElem( pdCoreRefLFAtt(c), zZ )
+#define pdCoreRefRFPos(c)    ( &(c)->ref_rf_pos )
+#define pdCoreRefRFPosX(c)   zVec3DElem( pdCoreRefRFPos(c), zX )
+#define pdCoreRefRFPosY(c)   zVec3DElem( pdCoreRefRFPos(c), zY )
+#define pdCoreRefRFPosZ(c)   zVec3DElem( pdCoreRefRFPos(c), zZ )
+#define pdCoreRefRFAtt(c)    ( &(c)->ref_rf_att )
+#define pdCoreRefRFAttX(c)   zVec3DElem( pdCoreRefRFAtt(c), zX )
+#define pdCoreRefRFAttY(c)   zVec3DElem( pdCoreRefRFAtt(c), zY )
+#define pdCoreRefRFAttZ(c)   zVec3DElem( pdCoreRefRFAtt(c), zZ )
 
 /* methods to set parameters */
 #define pdCoreSetTime(c,t) do{ \

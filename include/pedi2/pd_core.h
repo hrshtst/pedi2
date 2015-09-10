@@ -3,7 +3,6 @@
 
 #include <pedi2/pd_cz.h>
 #include <pedi2/pd_foot.h>
-#include <pedi2/pd_robot.h>
 #include <pedi2/pd_state.h>
 #include <pedi2/pd_cmd.h>
 
@@ -23,7 +22,6 @@ typedef struct{
   double _dt;
   pdCZ cz;
   pdFoot lf, rf;
-  pdRobot robot;
   pdState state;
   pdCmd *cmd;
   pdCoreMode mode;
@@ -39,11 +37,8 @@ __EXPORT void pdCoreDestroy(pdCore *core);
 #define pdCoreCZPtr(c)     ( &(c)->cz )
 #define pdCoreLFPtr(c)     ( &(c)->lf )
 #define pdCoreRFPtr(c)     ( &(c)->rf )
-#define pdCoreRobotPtr(c)  ( &(c)->robot )
 #define pdCoreStatePtr(c)  ( &(c)->state )
 #define pdCoreCmd(c)       ( (c)->cmd )
-#define pdCoreJointSize(c) pdRobotJointSize( pdCoreRobotPtr( c ) )
-#define pdCoreJointDis(c)  pdRobotJointDis( pdCoreRobotPtr( c ) )
 
 #define pdCoreKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
 #define pdCoreFFPtr(c)     pdFootFFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )

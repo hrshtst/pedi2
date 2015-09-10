@@ -57,7 +57,6 @@ TEST_F(pdCoreTest, Init)
   EXPECT_EQ( &core.cz, pdCoreCZPtr( &core ) );
   EXPECT_EQ( &core.lf, pdCoreLFPtr( &core ) );
   EXPECT_EQ( &core.rf, pdCoreRFPtr( &core ) );
-  EXPECT_EQ( &core.robot, pdCoreRobotPtr( &core ) );
   EXPECT_EQ( &core.state, pdCoreStatePtr( &core ) );
   EXPECT_TRUE( core.mode.stand );
   EXPECT_FALSE( core.mode.step );
@@ -136,6 +135,7 @@ TEST_F(pdCoreTest, IncrTime_Update)
   EXPECT_EQ( pdCoreTime( &core ), pdFootTime( pdCoreRFPtr( &core ) ) );
 }
 
+#if 0
 TEST_F(pdCoreTest, Load)
 {
   char filename[] = "model/mighty.zkc";
@@ -170,6 +170,7 @@ TEST_F(pdCoreTest, JointDis)
   EXPECT_NEAR( zVecElem( pdRobotJointDis( pdCoreRobotPtr( &core ) ), 20 ),
                zVecElem( pdCoreJointDis( &core ), 20 ), GTEST_TOL );
 }
+#endif
 
 TEST_F(pdCoreTest, DoesIntendToStand_Step_Walk)
 {

@@ -20,9 +20,9 @@ CPPFLAGS += -isystem $(GTEST_INC_DIR)
 CXXFLAGS += -g -std=c++11 -Wall -Wextra -pthread
 
 # Edit below when you add a new test
-TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest pdFootUWTest pdFootZTest pdFootTest pdRobotTest pdStateTest pdCmdTest pdCoreTest
+TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest pdFootUWTest pdFootZTest pdFootTest pdRobotTest pdStateTest pdCmdTest pdBipedTest
 # Add depending objects (make sure $(SRCDIR)/makefile)
-OBJ=pd_cz_vrt.o pd_cz_hrz_u.o pd_cz_hrz_w.o pd_cz_hrz_uw.o pd_cz_hrz.o pd_cz.o pd_foot_uw.o pd_foot_z.o pd_foot.o pd_robot.o pd_state.o pd_cmd.o pd_core.o
+OBJ=pd_cz_vrt.o pd_cz_hrz_u.o pd_cz_hrz_w.o pd_cz_hrz_uw.o pd_cz_hrz.o pd_cz.o pd_foot_uw.o pd_foot_z.o pd_foot.o pd_robot.o pd_state.o pd_cmd.o pd_biped.o
 
 TESTOBJ=$(addsuffix .o, $(TESTS))
 LIBOBJ=$(addprefix $(SRCDIR)/, $(OBJ))

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "utility/random_initializer.h"
-#include <pedi2/pd_core.h>
+#include <pedi2/pd_biped.h>
 
 const double TIME_STEP = 0.01;
 #define GTEST_TOL 1e-12

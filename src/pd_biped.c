@@ -1,4 +1,4 @@
-#include <pedi2/pd_core.h>
+#include <pedi2/pd_biped.h>
 
 static bool _pdBipedIsStateValid(pdBiped *biped);
 static void _pdBipedPoseInit(pdBiped *biped);

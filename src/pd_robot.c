@@ -340,6 +340,7 @@ void pdRobotUpdateState(pdRobot *robot, pdState *state)
   pdRobotFootAtt( robot, &state->lf_att, &state->rf_att );
   pdRobotHandPos( robot, &state->lh_pos, &state->rh_pos );
   pdRobotHandAtt( robot, &state->lh_att, &state->rh_att );
+  pdRobotSupportRegion( robot, &state->sr_lf, &state->sr_rf, &state->sr );
 }
 
 void pdRobotFWrite(FILE *fp, pdRobot *r)

@@ -80,6 +80,7 @@ class pdRobotTest : public testing::Test {
   bool destroy_flag;
   pdRobot robot;
   pdState state;
+  pdBiped biped;
   RandomInitializer ri;
 };
 
@@ -467,6 +468,52 @@ TEST_F(pdRobotTest, SetRefRHAtt)
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zZ ) );
   EXPECT_TRUE( pdRobotRHAttFlagIsOn( &robot ) );
+}
+
+TEST_F(pdRobotTest, SetBipedRefVec)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  // set random values to testified vectors
+  for(int i=0; i<PD_ROBOT_REQUIRED_CONST_NUM; i++)
+    ri.SetRandVec3D( pdRobotRefVec( &robot, i ) );
+  // set random values to referential vectors
+  ri.SetRandVec3D( pdBipedRefCOMPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefBaseAtt(&biped) );
+  ri.SetRandVec3D( pdBipedRefLFPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefLFAtt(&biped) );
+  ri.SetRandVec3D( pdBipedRefRFPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefRFAtt(&biped) );
+
+  // call method to testify
+  pdRobotSetBipedRefVec( &robot, &biped );
+
+  zVec3D *alias;
+  alias = pdRobotRefCOM( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefBaseAtt( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefLFPos( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefLFAtt( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFAttX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFAttY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFAttZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefRFPos( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefRFAtt( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFAttX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFAttY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFAttZ(&biped), zVec3DElem(alias,zZ) );
 }
 
 TEST_F(pdRobotTest, SolveIK)

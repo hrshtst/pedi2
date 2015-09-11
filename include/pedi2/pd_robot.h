@@ -2,6 +2,7 @@
 #define __PD_ROBOT_H__
 
 #include <roki/rk_ik.h>
+#include <pedi2/pd_biped.h>
 #include <pedi2/pd_state.h>
 
 __BEGIN_DECLS
@@ -82,6 +83,7 @@ __EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefLHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LH_ATT )
 #define pdRobotSetRefRHPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_POS )
 #define pdRobotSetRefRHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_ATT )
+__EXPORT void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped);
 __EXPORT void pdRobotSolveIK(pdRobot *robot);
 
 /* methods to get parameters */

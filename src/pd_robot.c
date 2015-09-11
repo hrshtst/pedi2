@@ -234,6 +234,16 @@ bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
   }
 }
 
+void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped)
+{
+  pdRobotSetRefCOM( robot, pdBipedRefCOMPos(biped) );
+  pdRobotSetRefBaseAtt( robot, pdBipedRefBaseAtt(biped) );
+  pdRobotSetRefLFPos( robot, pdBipedRefLFPos(biped) );
+  pdRobotSetRefLFAtt( robot, pdBipedRefLFAtt(biped) );
+  pdRobotSetRefRFPos( robot, pdBipedRefRFPos(biped) );
+  pdRobotSetRefRFAtt( robot, pdBipedRefRFAtt(biped) );
+}
+
 void pdRobotSolveIK(pdRobot *robot)
 {
   register int i;

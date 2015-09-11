@@ -17,7 +17,7 @@ int main(void)
   /* initialization */
   pdCmdDefaultInit( &cmd );
   pdStateInit( &state );
-  pdBipedInit( &biped, &cmd, &state, DT );
+  pdBipedInit( &biped, &cmd, DT );
   pdRobotInit( &robot );
 
   /* load kinematics/dynamics model file (robot.zkc) */
@@ -36,7 +36,7 @@ int main(void)
 
   /* initialize robot state */
   pdRobotUpdateState( &robot, &state );
-  pdBipedDefaultPoseInit( &biped );
+  pdBipedDefaultPoseInit( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
   pdRobotSolveIK( &robot );
   pdRobotUpdateState( &robot, &state );
@@ -50,7 +50,7 @@ int main(void)
     cmd.kappa = 0.0;
 
     /* update controller */
-    pdBipedUpdate( &biped );
+    pdBipedUpdate( &biped, &state );
     pdRobotSetBipedRefVec( &robot, &biped );
     pdRobotSolveIK( &robot );
 
@@ -62,7 +62,7 @@ int main(void)
     printf( "%f ", DT );zVecWrite( dis );
 
     /* update state */
-    pdBipedUpdateState( &biped );
+    pdBipedUpdateState( &biped, &state );
     pdRobotUpdateState( &robot, &state );
   }
 

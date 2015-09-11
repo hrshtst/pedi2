@@ -9,7 +9,7 @@ const double TIME_STEP = 0.01;
 class pdBipedTest : public testing::Test {
  protected:
   virtual void SetUp() {
-    pdBipedInit( &biped, &cmd, &state, TIME_STEP );
+    pdBipedInit( &biped, &cmd, TIME_STEP );
     destroy_flag = false;
   };
   virtual void TearDown() {
@@ -33,14 +33,14 @@ class pdBipedTest : public testing::Test {
   void SupportOnBothFeet() {
     pdFootPosZ( pdBipedLFPtr(&biped) ) = 0.0;
     pdFootPosZ( pdBipedRFPtr(&biped) ) = 0.0;
-    pdFootSR( pdBipedLFPtr(&biped) ) = &biped.state->sr_lf;
-    pdFootSR( pdBipedRFPtr(&biped) ) = &biped.state->sr_lf;
+    pdFootSR( pdBipedLFPtr(&biped) ) = &state.sr_lf;
+    pdFootSR( pdBipedRFPtr(&biped) ) = &state.sr_lf;
   };
 
   void SupportOnLeftFoot() {
     pdFootPosZ( pdBipedLFPtr(&biped) ) = 0.0;
     pdFootPosZ( pdBipedRFPtr(&biped) ) = 0.01;
-    pdFootSR( pdBipedLFPtr(&biped) ) = &biped.state->sr_lf;
+    pdFootSR( pdBipedLFPtr(&biped) ) = &state.sr_lf;
     pdFootSR( pdBipedRFPtr(&biped) ) = NULL;
   };
 
@@ -48,7 +48,7 @@ class pdBipedTest : public testing::Test {
     pdFootPosZ( pdBipedLFPtr(&biped) ) = 0.01;
     pdFootPosZ( pdBipedRFPtr(&biped) ) = 0.0;
     pdFootSR( pdBipedLFPtr(&biped) ) = NULL;
-    pdFootSR( pdBipedRFPtr(&biped) ) = &biped.state->sr_lf;
+    pdFootSR( pdBipedRFPtr(&biped) ) = &state.sr_lf;
   };
 
   RandomInitializer ri;
@@ -61,11 +61,10 @@ class pdBipedTest : public testing::Test {
 TEST_F(pdBipedTest, Init)
 {
   SetRandomValues();
-  pdBipedInit( &biped, &cmd, &state, TIME_STEP );
+  pdBipedInit( &biped, &cmd, TIME_STEP );
   EXPECT_EQ( 0, pdBipedTime( &biped ) );
   EXPECT_EQ( TIME_STEP, pdBipedTimeStep( &biped ) );
   EXPECT_EQ( &cmd, pdBipedCmd( &biped ) );
-  EXPECT_EQ( &state, pdBipedState( &biped ) );
   EXPECT_EQ( &biped.cz, pdBipedCZPtr( &biped ) );
   EXPECT_EQ( &biped.lf, pdBipedLFPtr( &biped ) );
   EXPECT_EQ( &biped.rf, pdBipedRFPtr( &biped ) );
@@ -149,15 +148,15 @@ TEST_F(pdBipedTest, IncrTime_Update)
   EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
-  pdBipedUpdate( &biped );
+  pdBipedUpdate( &biped, &state );
   EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
-  pdBipedUpdate( &biped );
+  pdBipedUpdate( &biped, &state );
   EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
-  pdBipedUpdate( &biped );
+  pdBipedUpdate( &biped, &state );
   EXPECT_EQ( pdBipedTime( &biped ), pdCZTime( pdBipedCZPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedLFPtr( &biped ) ) );
   EXPECT_EQ( pdBipedTime( &biped ), pdFootTime( pdBipedRFPtr( &biped ) ) );
@@ -176,19 +175,19 @@ TEST_F(pdBipedTest, RefVec)
 TEST_F(pdBipedTest, DefaultPoseInit_ThrowException)
 {
   zEchoOff();
-  pdStateInit( biped.state );
-  EXPECT_FALSE( pdBipedDefaultPoseInit( &biped ) );
+  pdStateInit( &state );
+  EXPECT_FALSE( pdBipedDefaultPoseInit( &biped, &state ) );
   zEchoOn();
 }
 
 TEST_F(pdBipedTest, DefaultPoseInit)
 {
-  pdStateInit( biped.state );
-  zVec3DCreate( &biped.state->lf_pos, 0,  0.1, -0.1 );
-  zVec3DCreate( &biped.state->rf_pos, 0, -0.1, -0.1 );
-  zVec3DCreate( &biped.state->com_pos, 0.01, 0, 0.1 );
+  pdStateInit( &state );
+  zVec3DCreate( &state.lf_pos, 0,  0.1, -0.1 );
+  zVec3DCreate( &state.rf_pos, 0, -0.1, -0.1 );
+  zVec3DCreate( &state.com_pos, 0.01, 0, 0.1 );
   pdCmdDefaultInit( biped.cmd );
-  EXPECT_TRUE( pdBipedDefaultPoseInit( &biped ) );
+  EXPECT_TRUE( pdBipedDefaultPoseInit( &biped, &state ) );
 
   EXPECT_DOUBLE_EQ( 0.2, biped.cmd->dist );
   EXPECT_DOUBLE_EQ( 0.95*0.2, biped.cmd->zd );
@@ -659,8 +658,8 @@ TEST_F(pdBipedTest, UpdateMode_diagonal)
 TEST_F(pdBipedTest, UpdateState)
 {
   SetRandomValues();
-  pdBipedUpdateState( &biped );
-  pdState *s = biped.state;
+  pdBipedUpdateState( &biped, &state );
+  pdState *s = &state;
   EXPECT_EQ( pdBipedRefCOMPosX(&biped), zVec3DElem(&s->com_pos,zX) );
   EXPECT_EQ( pdBipedRefCOMPosY(&biped), zVec3DElem(&s->com_pos,zY) );
   EXPECT_EQ( pdBipedRefCOMPosZ(&biped), zVec3DElem(&s->com_pos,zZ) );

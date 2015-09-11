@@ -23,7 +23,6 @@ typedef struct{
   pdCZ cz;
   pdFoot lf, rf;
   pdCmd *cmd;
-  pdState *state;
   pdBipedMode mode;
 
   zVec3D ref_com_pos;
@@ -34,8 +33,8 @@ typedef struct{
   zVec3D ref_rf_att;
 } pdBiped;
 
-__EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, pdState *state, double dt);
-__EXPORT bool pdBipedDefaultPoseInit(pdBiped *biped);
+__EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt);
+__EXPORT bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state);
 __EXPORT void pdBipedDestroy(pdBiped *biped);
 
 /* methods to get parameters */
@@ -45,7 +44,6 @@ __EXPORT void pdBipedDestroy(pdBiped *biped);
 #define pdBipedLFPtr(c)     ( &(c)->lf )
 #define pdBipedRFPtr(c)     ( &(c)->rf )
 #define pdBipedCmd(c)       ( (c)->cmd )
-#define pdBipedState(c)     ( (c)->state )
 
 #define pdBipedKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
 #define pdBipedFFPtr(c)     pdFootFFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
@@ -117,8 +115,8 @@ __EXPORT void pdBipedUpdateMode(pdBiped *biped);
 __EXPORT void pdBipedWriteMode(pdBiped *biped);
 
 /* update method */
-__EXPORT void pdBipedUpdate(pdBiped *biped);
-__EXPORT void pdBipedUpdateState(pdBiped *biped);
+__EXPORT void pdBipedUpdate(pdBiped *biped, pdState *state);
+__EXPORT void pdBipedUpdateState(pdBiped *biped, pdState *state);
 
 /* output method */
 __EXPORT void pdBipedFWrite(FILE *fp, pdBiped *biped);

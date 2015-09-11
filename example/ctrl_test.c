@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
   /* initialization */
   pdCmdDefaultInit( &cmd );
   pdStateInit( &state );
-  pdBipedInit( &biped, &cmd, &state, DT );
+  pdBipedInit( &biped, &cmd, DT );
   pdRobotInit( &robot );
 
   /* parse arguments */
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
   /* initialize robot state */
   pdRobotUpdateState( &robot, &state );
-  pdBipedDefaultPoseInit( &biped );
+  pdBipedDefaultPoseInit( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
   pdRobotSolveIK( &robot );
   pdRobotUpdateState( &robot, &state );
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     cmd.kappa = 0.0;
 
     /* update */
-    pdBipedUpdate( &biped );
+    pdBipedUpdate( &biped, &state );
     pdRobotSetBipedRefVec( &robot, &biped );
     pdRobotSolveIK( &robot );
 
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 #endif
 
     /* update state */
-    pdBipedUpdateState( &biped );
+    pdBipedUpdateState( &biped, &state );
     pdRobotUpdateState( &robot, &state );
   }
 

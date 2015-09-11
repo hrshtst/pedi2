@@ -1,13 +1,13 @@
 #include <pedi2/pd_biped.h>
 
-static bool _pdBipedIsStateValid(pdBiped *biped);
-static void _pdBipedPoseInit(pdBiped *biped);
+static bool _pdBipedIsStateValid(pdBiped *biped, pdState *state);
+static void _pdBipedPoseInit(pdBiped *biped, pdState *state);
 static void _pdBipedUpdateCommand(pdBiped *biped);
-static void _pdBipedUpdateCZ(pdBiped *biped);
-static void _pdBipedUpdateFoot(pdBiped *biped);
-static void _pdBipedModifyCommand(pdBiped *biped);
+static void _pdBipedUpdateCZ(pdBiped *biped, pdState *state);
+static void _pdBipedUpdateFoot(pdBiped *biped, pdState *state);
+static void _pdBipedModifyCommand(pdBiped *biped, pdState *state);
 
-void pdBipedInit(pdBiped *biped, pdCmd *cmd, pdState *state, double dt)
+void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt)
 {
   pdBipedResetTime( biped );
   pdBipedSetTimeStep( biped, dt );
@@ -17,7 +17,6 @@ void pdBipedInit(pdBiped *biped, pdCmd *cmd, pdState *state, double dt)
   pdFootInit( pdBipedRFPtr( biped ), pdCZHrzPtr( pdBipedCZPtr( biped ) ),
               PD_FOOT_RIGHT, pdBipedTimeStep( biped ) );
   biped->cmd = cmd;
-  biped->state = state;
   pdBipedInitMode( biped );
   zVec3DClear( pdBipedRefCOMPos( biped ) );
   zVec3DClear( pdBipedRefBaseAtt( biped ) );
@@ -27,25 +26,25 @@ void pdBipedInit(pdBiped *biped, pdCmd *cmd, pdState *state, double dt)
   zVec3DClear( pdBipedRefRFAtt( biped ) );
 }
 
-bool _pdBipedIsStateValid(pdBiped *biped)
+bool _pdBipedIsStateValid(pdBiped *biped, pdState *state)
 {
   /* NOTE: This validation checking is insufficient */
-  if( zIsTiny( zVec3DElem( &biped->state->lf_pos, zZ ) -
-               zVec3DElem( &biped->state->com_pos, zZ ) ) ||
-      zIsTiny( zVec3DElem( &biped->state->rf_pos, zZ ) -
-               zVec3DElem( &biped->state->com_pos, zZ ) ) ){
+  if( zIsTiny( zVec3DElem( &state->lf_pos, zZ ) -
+               zVec3DElem( &state->com_pos, zZ ) ) ||
+      zIsTiny( zVec3DElem( &state->rf_pos, zZ ) -
+               zVec3DElem( &state->com_pos, zZ ) ) ){
     ZRUNERROR( "could not determine the height of COM" );
     return false;
   }
-  if( zVec3DEqual( &biped->state->lf_pos, ZVEC3DZERO ) &&
-      zVec3DEqual( &biped->state->rf_pos, ZVEC3DZERO ) ){
+  if( zVec3DEqual( &state->lf_pos, ZVEC3DZERO ) &&
+      zVec3DEqual( &state->rf_pos, ZVEC3DZERO ) ){
     ZRUNERROR( "could not determine the distance of feet" );
     return false;
   }
   return true;
 }
 
-void _pdBipedPoseInit(pdBiped *biped)
+void _pdBipedPoseInit(pdBiped *biped, pdState *state)
 {
   zVec3D v;
   double foot_dist, com_height;
@@ -56,13 +55,13 @@ void _pdBipedPoseInit(pdBiped *biped)
   if( biped->cmd->dist > 0 )
     foot_dist = biped->cmd->dist;
   else {
-    foot_dist = zVec3DDist( &biped->state->lf_pos, &biped->state->rf_pos );
+    foot_dist = zVec3DDist( &state->lf_pos, &state->rf_pos );
     biped->cmd->dist = foot_dist;
   }
   if( biped->cmd->zd > 0 )
     com_height = biped->cmd->zd;
   else {
-    com_height = zVec3DElem(&biped->state->com_pos,zZ) - zVec3DElem(&biped->state->lf_pos,zZ);
+    com_height = zVec3DElem(&state->com_pos,zZ) - zVec3DElem(&state->lf_pos,zZ);
     com_height = 0.95 * com_height;
     biped->cmd->zd = com_height;
   }
@@ -70,39 +69,39 @@ void _pdBipedPoseInit(pdBiped *biped)
   theta = biped->cmd->thetad;
   zSinCos( theta, &s, &c );
   d = 0.5 * foot_dist;
-  x = zVec3DElem( &biped->state->com_pos, zX );
-  y = zVec3DElem( &biped->state->com_pos, zY );
+  x = zVec3DElem( &state->com_pos, zX );
+  y = zVec3DElem( &state->com_pos, zY );
   biped->cmd->xd = x;
   biped->cmd->yd = y;
 
-  zVec3DCopy( &biped->state->com_pos, &v );
+  zVec3DCopy( &state->com_pos, &v );
   zVec3DSetElem( &v, zZ, com_height );
   zVec3DCopy( &v, pdBipedRefCOMPos( biped ) );
 
-  zVec3DCopy( &biped->state->base_att, &v );
+  zVec3DCopy( &state->base_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
   zVec3DCopy( &v, pdBipedRefBaseAtt( biped ) );
 
   zVec3DCreate( &v, x-d*c, y-d*s, 0 );
   zVec3DCopy( &v, pdBipedRefLFPos( biped ) );
 
-  zVec3DCopy( &biped->state->lf_att, &v );
+  zVec3DCopy( &state->lf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
   zVec3DCopy( &v, pdBipedRefLFAtt( biped ) );
 
   zVec3DCreate( &v, x+d*c, y+d*s, 0 );
   zVec3DCopy( &v, pdBipedRefRFPos( biped ) );
 
-  zVec3DCopy( &biped->state->rf_att, &v );
+  zVec3DCopy( &state->rf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
   zVec3DCopy( &v, pdBipedRefRFAtt( biped ) );
 }
 
-bool pdBipedDefaultPoseInit(pdBiped *biped)
+bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state)
 {
-  if( !_pdBipedIsStateValid( biped ) )
+  if( !_pdBipedIsStateValid( biped, state ) )
     return false;
-  _pdBipedPoseInit( biped );
+  _pdBipedPoseInit( biped, state );
   pdFootSetTrOldVec( pdBipedLFPtr(biped), pdBipedRefLFPos( biped ) );
   pdFootSetTrOldVec( pdBipedRFPtr(biped), pdBipedRefRFPos( biped ) );
   return true;
@@ -111,7 +110,6 @@ bool pdBipedDefaultPoseInit(pdBiped *biped)
 void pdBipedDestroy(pdBiped *biped)
 {
   biped->cmd = NULL;
-  pdStateDestroy( pdBipedState( biped ) );
   pdFootDestroy( pdBipedLFPtr( biped ) );
   pdFootDestroy( pdBipedRFPtr( biped ) );
   pdCZDestroy( pdBipedCZPtr( biped ) );
@@ -229,35 +227,35 @@ void _pdBipedUpdateCommand(pdBiped *biped)
   pdFootSetTrZC( pdBipedRFPtr( biped ), biped->cmd->rfcz );
 }
 
-void _pdBipedUpdateCZ(pdBiped *biped)
+void _pdBipedUpdateCZ(pdBiped *biped, pdState *state)
 {
   double offset;
 
   offset = zPI_2;
   pdCZUpdate( pdBipedCZPtr(biped),
-              &biped->state->com_pos,
-              &biped->state->com_vel,
-              &biped->state->com_acc,
-              &biped->state->zmp,
-              biped->state->base_att.e[0] - offset,
-              &biped->state->sr );
+              &state->com_pos,
+              &state->com_vel,
+              &state->com_acc,
+              &state->zmp,
+              state->base_att.e[0] - offset,
+              &state->sr );
 }
 
-void _pdBipedUpdateFoot(pdBiped *biped)
+void _pdBipedUpdateFoot(pdBiped *biped, pdState *state)
 {
   pdFootUpdate( pdBipedLFPtr(biped), pdBipedRFPtr(biped),
                 pdCZDelta( pdBipedCZPtr(biped) ),
                 pdCZVelUW( pdBipedCZPtr(biped) ),
-                &biped->state->zmp,
-                &biped->state->lf_pos,
-                &biped->state->rf_pos,
-                &biped->state->lf_att,
-                &biped->state->rf_att,
-                &biped->state->sr_lf,
-                &biped->state->sr_rf );
+                &state->zmp,
+                &state->lf_pos,
+                &state->rf_pos,
+                &state->lf_att,
+                &state->rf_att,
+                &state->sr_lf,
+                &state->sr_rf );
 }
 
-void _pdBipedUpdateRef(pdBiped *biped)
+void _pdBipedUpdateRef(pdBiped *biped, pdState *state)
 {
   zVec3D v;
   double offset;
@@ -276,11 +274,11 @@ void _pdBipedUpdateRef(pdBiped *biped)
   zVec3DCopy( pdFootRefAtt( pdBipedRFPtr(biped) ), pdBipedRefRFAtt(biped) );
 }
 
-static double _pdBipedCalcDesFootDistFollow(pdBiped *biped);
-static double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped);
-static double _pdBipedCalcDesFootDistBrake(pdBiped *biped);
-static double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped);
-double _pdBipedCalcDesFootDistFollow(pdBiped *biped)
+static double _pdBipedCalcDesFootDistFollow(pdBiped *biped, pdState *state);
+static double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped, pdState *state);
+static double _pdBipedCalcDesFootDistBrake(pdBiped *biped, pdState *state);
+static double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped, pdState *state);
+double _pdBipedCalcDesFootDistFollow(pdBiped *biped, pdState *state)
 {
   double q1, q2, zeta, phase;
 
@@ -294,12 +292,12 @@ double _pdBipedCalcDesFootDistFollow(pdBiped *biped)
   return biped->cmd->dist + zPIx2 * phase * fabs(pdCZRefVelW(pdBipedCZPtr(biped))) / ( zeta * sqrt( q1 * q2 ) );
 }
 
-double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped)
+double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped, pdState *state)
 {
   return biped->cmd->dist;
 }
 
-double _pdBipedCalcDesFootDistBrake(pdBiped *biped)
+double _pdBipedCalcDesFootDistBrake(pdBiped *biped, pdState *state)
 {
   double phase, foot_dist;
 
@@ -307,16 +305,16 @@ double _pdBipedCalcDesFootDistBrake(pdBiped *biped)
     phase = pdFootPhase( pdBipedKFPtr( biped ) );
   else
     phase = 0;
-  foot_dist = pdStateFootDist( biped->state );
+  foot_dist = pdStateFootDist( state );
   return foot_dist + phase * ( biped->cmd->dist - foot_dist );
 }
 
-double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped)
+double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped, pdState *state)
 {
   return biped->cmd->dist;
 }
 
-void _pdBipedModifyCommand(pdBiped *biped)
+void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
 {
   zVec3D pd;
   double ref_dist;
@@ -338,15 +336,15 @@ void _pdBipedModifyCommand(pdBiped *biped)
 
   if( biped->mode.sidewalk ) {
     if( biped->mode.follow )
-      ref_dist = _pdBipedCalcDesFootDistFollow( biped );
+      ref_dist = _pdBipedCalcDesFootDistFollow( biped, state );
     else if( biped->mode.brake )
-      ref_dist = _pdBipedCalcDesFootDistBrake( biped );
+      ref_dist = _pdBipedCalcDesFootDistBrake( biped, state );
     else if( pdCZVelW( pdBipedCZPtr(biped) ) * biped->cmd->vwd > 0 )
-      ref_dist = _pdBipedCalcDesFootDistFollowToBrake( biped );
+      ref_dist = _pdBipedCalcDesFootDistFollowToBrake( biped, state );
     else
-      ref_dist = _pdBipedCalcDesFootDistBrakeToFollow( biped );
+      ref_dist = _pdBipedCalcDesFootDistBrakeToFollow( biped, state );
     pdCZSetDist( pdBipedCZPtr( biped ), ref_dist );
-    pdFootCalcCOMRefPos( pdBipedLFPtr(biped), pdBipedRFPtr(biped), &biped->state->lf_pos, &biped->state->rf_pos, &pd );
+    pdFootCalcCOMRefPos( pdBipedLFPtr(biped), pdBipedRFPtr(biped), &state->lf_pos, &state->rf_pos, &pd );
     biped->cmd->xd = pd.e[zX];
     biped->cmd->yd = pd.e[zY];
   }
@@ -357,29 +355,29 @@ void _pdBipedModifyCommand(pdBiped *biped)
   }
 }
 
-void pdBipedUpdate(pdBiped *biped)
+void pdBipedUpdate(pdBiped *biped, pdState *state)
 {
   _pdBipedUpdateCommand( biped );
-  _pdBipedUpdateCZ( biped );
-  _pdBipedUpdateFoot( biped );
-  _pdBipedUpdateRef( biped );
-  _pdBipedModifyCommand( biped );
+  _pdBipedUpdateCZ( biped, state );
+  _pdBipedUpdateFoot( biped, state );
+  _pdBipedUpdateRef( biped, state );
+  _pdBipedModifyCommand( biped, state );
   pdBipedUpdateMode( biped );
   pdBipedIncrTime( biped );
 }
 
-void pdBipedUpdateState(pdBiped *biped)
+void pdBipedUpdateState(pdBiped *biped, pdState *state)
 {
-  zVec3DCopy( pdBipedRefCOMPos(biped), &biped->state->com_pos );
-  zVec3DCopy( pdCZRefVel( pdBipedCZPtr(biped) ), &biped->state->com_vel );
-  zVec3DCopy( pdCZRefAcc( pdBipedCZPtr(biped) ), &biped->state->com_acc );
-  zVec3DCopy( pdBipedRefBaseAtt(biped), &biped->state->base_att );
-  zVec3DCopy( pdBipedRefLFPos(biped), &biped->state->lf_pos );
-  zVec3DCopy( pdBipedRefLFAtt(biped), &biped->state->lf_att );
-  zVec3DCopy( pdBipedRefRFPos(biped), &biped->state->rf_pos );
-  zVec3DCopy( pdBipedRefRFAtt(biped), &biped->state->rf_att );
-  zVec3DCopy( pdCZRefZMP( pdBipedCZPtr(biped) ), &biped->state->zmp );
-  biped->state->fz = pdCZVrtRF( &biped->cz._vrt );
+  zVec3DCopy( pdBipedRefCOMPos(biped), &state->com_pos );
+  zVec3DCopy( pdCZRefVel( pdBipedCZPtr(biped) ), &state->com_vel );
+  zVec3DCopy( pdCZRefAcc( pdBipedCZPtr(biped) ), &state->com_acc );
+  zVec3DCopy( pdBipedRefBaseAtt(biped), &state->base_att );
+  zVec3DCopy( pdBipedRefLFPos(biped), &state->lf_pos );
+  zVec3DCopy( pdBipedRefLFAtt(biped), &state->lf_att );
+  zVec3DCopy( pdBipedRefRFPos(biped), &state->rf_pos );
+  zVec3DCopy( pdBipedRefRFAtt(biped), &state->rf_att );
+  zVec3DCopy( pdCZRefZMP( pdBipedCZPtr(biped) ), &state->zmp );
+  state->fz = pdCZVrtRF( &biped->cz._vrt );
 }
 
 void pdBipedFWrite(FILE *fp, pdBiped *biped)

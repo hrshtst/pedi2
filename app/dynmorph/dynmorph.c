@@ -127,11 +127,11 @@ void frame_one(zxWindow *win, pdRobot *robot, pdBiped *biped, pdState *state, dm
   if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
     /* udpate controller */
-    pdBipedUpdate( biped );
+    pdBipedUpdate( biped, state );
     pdRobotSetBipedRefVec( robot, biped );
     pdRobotSolveIK( robot );
     /* update state */
-    pdBipedUpdateState( biped );
+    pdBipedUpdateState( biped, state );
     pdRobotUpdateState( robot, state );
     if( fp )
       pdBipedDataFWrite( fp, biped );
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
   init_console( &con, &cmd, model );
 
   pdStateInit( &state );
-  pdBipedInit( &biped, &cmd, &state, DT );
+  pdBipedInit( &biped, &cmd, DT );
   pdRobotInit( &robot );
   if( model == DM_MODEL_MIGHTY ){
     if( !pdRobotLoad( &robot, "../model/mighty.zkc" ) )
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
     exit( EXIT_FAILURE );
   }
   pdRobotUpdateState( &robot, &state );
-  pdBipedDefaultPoseInit( &biped );
+  pdBipedDefaultPoseInit( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
   pdRobotSolveIK( &robot );
   pdRobotUpdateState( &robot, &state );

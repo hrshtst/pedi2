@@ -128,7 +128,7 @@ void joystickCtrlLoad(char modelfile[])
     cmd.rfh = atof(opt[OPT_HMAX].arg);
   }
   pdStateInit( &state );
-  pdBipedInit( &biped, &cmd, &state, atof( opt[OPT_DT].arg ) );
+  pdBipedInit( &biped, &cmd, atof( opt[OPT_DT].arg ) );
   pdRobotInit( &robot );
   if( !pdRobotLoad( &robot, modelfile ) )
     exit( 1 );
@@ -142,7 +142,7 @@ void joystickCtrlLoad(char modelfile[])
   dis = zVecAlloc( pdRobotJointSize( &robot ) );
 
   pdRobotUpdateState( &robot, &state );
-  pdBipedDefaultPoseInit( &biped );
+  pdBipedDefaultPoseInit( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
   pdRobotSolveIK( &robot );
   pdRobotUpdateState( &robot, &state );
@@ -387,12 +387,12 @@ int joystickCtrlEvent(void)
 
 void joystickCtrlUpdate(void)
 {
-  pdBipedUpdate( &biped );
+  pdBipedUpdate( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
   pdRobotSolveIK( &robot );
   zVecCopy( pdRobotJointDis( &robot ), dis );
   rkChainFK( &chain, dis );
-  pdBipedUpdateState( &biped );
+  pdBipedUpdateState( &biped, &state );
   pdRobotUpdateState( &robot, &state );
   liwSleep( (long)atof( opt[OPT_DT].arg ), 0 );
 }

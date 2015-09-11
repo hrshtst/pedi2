@@ -1,8 +1,9 @@
 #include <zx11/zxwidget.h>
 #include <zx11/zximage_dib.h>
 #include <pedi2/pd_cmd.h>
-#include <pedi2/pd_core.h>
-
+#include <pedi2/pd_state.h>
+#include <pedi2/pd_biped.h>
+#include <pedi2/pd_robot.h>
 #include "util/dm_scene.h"
 #include "util/dm_console.h"
 
@@ -111,7 +112,7 @@ void dmFlagsetInit(dmFlagset *flag)
 }
 
 #define ANIM_SKEW 2
-void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmFlagset *flag, dmModel model, FILE *fp)
+void frame_one(zxWindow *win, pdRobot *robot, pdBiped *biped, pdState *state, dmConsole *con, dmScene *sx, dmScene *sy, dmFlagset *flag, dmModel model, FILE *fp)
 {
   zVec3D force = { { 0, 0, 0 } };
   double theta;
@@ -120,20 +121,25 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
   zVec dis;
   static int anim_skew_cnt;
 
-  dis = zVecAlloc( pdCoreJointSize(core) );
-  zVecCopy( pdCoreJointDis( core ), dis );
+  dis = zVecAlloc( pdRobotJointSize(robot) );
+  zVecCopy( pdRobotJointDis( robot ), dis );
   /* zVec3DCreate( &force, core->adx, core->ady, 0 ); */
   if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
-    /* udpate state */
-    pdCoreUpdate( core );
+    /* udpate controller */
+    pdBipedUpdate( biped );
+    pdRobotSetBipedRefVec( robot, biped );
+    pdRobotSolveIK( robot );
+    /* update state */
+    pdBipedUpdateState( biped );
+    pdRobotUpdateState( robot, state );
     if( fp )
-      pdCoreDataFWrite( fp, core );
+      pdBipedDataFWrite( fp, biped );
   }
-  theta = zVec3DElem( &core->state.base_att, 0 );
+  theta = zVec3DElem( &state->base_att, 0 );
   zSinCos( theta, &s, &c );
-  xd = core->cmd->xd;
-  yd = core->cmd->yd;
+  xd = biped->cmd->xd;
+  yd = biped->cmd->yd;
   if( model == DM_MODEL_MIGHTY ){
     dmSceneLookAt( sx, xd-4*c, yd-4*s, 0.4, xd, yd, 0.3 );
     dmSceneLookAt( sy, xd+4*s, yd-4*c, 0.4, xd, yd, 0.3 );
@@ -150,7 +156,7 @@ void frame_one(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene
 }
 
 #define ANIM_SKIP 1000
-void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene *sy, dmModel model)
+void mainloop(zxWindow *win, pdRobot *robot, pdBiped *biped, pdState *state, dmConsole *con, dmScene *sx, dmScene *sy, dmModel model)
 {
   FILE *fp = NULL;
   dmFlagset flag;
@@ -202,7 +208,7 @@ void mainloop(zxWindow *win, pdCore *core, dmConsole *con, dmScene *sx, dmScene 
     default: ;
     }
     if( ++count > ANIM_SKIP ){
-      frame_one( win, core, con, sx, sy, &flag, model, fp );
+      frame_one( win, robot, biped, state, con, sx, sy, &flag, model, fp );
       count = 0;
       if( flag.rec ) capture( win );
     }
@@ -216,7 +222,9 @@ int main(int argc, char *argv[])
 {
   zxWindow mainwin;
   pdCmd cmd;
-  pdCore core;
+  pdState state;
+  pdBiped biped;
+  pdRobot robot;
   dmConsole con;
   dmScene sx, sy;
   dmModel model;
@@ -248,22 +256,34 @@ int main(int argc, char *argv[])
   dmSceneInit( &sy, &mainwin );
   init_console( &con, &cmd, model );
 
-  pdCoreInit( &core, &cmd, DT );
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, &state, DT );
+  pdRobotInit( &robot );
   if( model == DM_MODEL_MIGHTY ){
-    if( !pdCoreLoad( &core, "../model/mighty.zkc" ) )
+    if( !pdRobotLoad( &robot, "../model/mighty.zkc" ) )
       exit( EXIT_FAILURE );
     dmGLInit( "../model/mighty.zkc" );
   } else if ( model == DM_MODEL_HYDRA ) {
-    if( !pdCoreLoad( &core, "../model/hydra.zkc" ) )
+    if( !pdRobotLoad( &robot, "../model/hydra.zkc" ) )
       exit( EXIT_FAILURE );
     dmGLInit( "../model/hydra.zkc" );
   } else {
     ZRUNERROR( "invalid model" );
     exit( EXIT_FAILURE );
   }
-  mainloop( &mainwin, &core, &con, &sx, &sy, model );
+  pdRobotUpdateState( &robot, &state );
+  pdBipedDefaultPoseInit( &biped );
+  pdRobotSetBipedRefVec( &robot, &biped );
+  pdRobotSolveIK( &robot );
+  pdRobotUpdateState( &robot, &state );
+
+  mainloop( &mainwin, &robot, &biped, &state, &con, &sx, &sy, model );
+
   dmGLExit();
-  pdCoreDestroy( &core );
+  pdRobotDestroy( &robot );
+  pdBipedDestroy( &biped );
+  pdStateDestroy( &state );
+  pdCmdDestroy( &cmd );
 
   dmConsoleExit( &con );
   dmSceneExit( &sx );

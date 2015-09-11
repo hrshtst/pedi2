@@ -316,8 +316,7 @@ TEST_F(pdRobotTest, SetRefVec_Error)
   zEchoOff();
   pdRobotLoad( &robot, model );
   zVec3DCreate( &v, 0, 0, 0.26 );
-  pdRobotSetRefVec( &robot, &v, 10 );
-  SUCCEED();
+  EXPECT_FALSE( pdRobotSetRefVec( &robot, &v, 10 ) );
   zEchoOn();
 }
 

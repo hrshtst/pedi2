@@ -222,13 +222,16 @@ void pdRobotUnsetAllFlags(pdRobot *robot)
     robot->_ref_set_flag[i] = false;
 }
 
-void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
+bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
 {
   if( id < pdRobotCellNum( robot ) ){
     zVec3DCopy( ref, &robot->_ref_vec[id] );
     robot->_ref_set_flag[id] = true;
-  } else
+    return true;
+  } else {
     ZRUNERROR( "IK Cell id %d is invalid.", id );
+    return false;
+  }
 }
 
 void pdRobotSolveIK(pdRobot *robot)

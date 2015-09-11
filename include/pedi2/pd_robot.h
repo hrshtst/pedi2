@@ -71,7 +71,7 @@ void pdRobotDestroy(pdRobot *robot);
 
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);
-__EXPORT void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
+__EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefCOM(r,v)     pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotSetRefBaseAtt(r,v) pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_BASE_ATT )
 #define pdRobotSetRefLFPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LF_POS )

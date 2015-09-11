@@ -216,43 +216,6 @@ TEST_F(pdBipedTest, DefaultPoseInit)
   EXPECT_DOUBLE_EQ( 0, pdBipedRefRFAttZ( &biped ) );
 }
 
-#if 0
-TEST_F(pdBipedTest, Load)
-{
-  char filename[] = "model/mighty.zkc";
-
-  pdBipedInit( &biped, &cmd, TIME_STEP );
-  pdBipedLoad( &biped, filename );
-  EXPECT_EQ( 25, (int)rkChainNum(pdRobotChainPtr(pdBipedRobotPtr(&biped))));
-}
-
-TEST_F(pdBipedTest, JointSize)
-{
-  char model[] = "model/mighty.zkc";
-
-  pdBipedLoad( &biped, model );
-  EXPECT_EQ( 26, pdBipedJointSize( &biped ) );
-}
-
-TEST_F(pdBipedTest, JointDis)
-{
-  char model[] = "model/mighty.zkc";
-
-  pdBipedLoad( &biped, model );
-  EXPECT_EQ( 26, pdBipedJointSize( &biped ) );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 0 ),
-               zVecElem( pdBipedJointDis( &biped ), 0 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 1 ),
-               zVecElem( pdBipedJointDis( &biped ), 1 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 2 ),
-               zVecElem( pdBipedJointDis( &biped ), 2 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 10 ),
-               zVecElem( pdBipedJointDis( &biped ), 10 ), GTEST_TOL );
-  EXPECT_NEAR( zVecElem( pdRobotJointDis( pdBipedRobotPtr( &biped ) ), 20 ),
-               zVecElem( pdBipedJointDis( &biped ), 20 ), GTEST_TOL );
-}
-#endif
-
 TEST_F(pdBipedTest, DoesIntendToStand_Step_Walk)
 {
   pdCmdDefaultInit( &cmd );

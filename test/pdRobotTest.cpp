@@ -261,27 +261,35 @@ TEST_F(pdRobotTest, Load_InitRefVec)
 
 TEST_F(pdRobotTest, Load_FileError)
 {
+  zEchoOff();
   rkIKCreate( pdRobotIKPtr( &robot ), pdRobotChainPtr( &robot ) );
   EXPECT_FALSE( pdRobotLoad( &robot, "hoge.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, Load_NotEnoughConstraintsError)
 {
+  zEchoOff();
   EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty2.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, Load_LinkIDMismatchError)
 {
+  zEchoOff();
   EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty3.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, Load_NotImplementedError)
 {
+  zEchoOff();
   EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty4.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, SetRefVec_Error)
@@ -289,10 +297,12 @@ TEST_F(pdRobotTest, SetRefVec_Error)
   char model[] = "model/mighty.zkc";
   zVec3D v;
 
+  zEchoOff();
   pdRobotLoad( &robot, model );
   zVec3DCreate( &v, 0, 0, 0.26 );
   pdRobotSetRefVec( &robot, &v, 10 );
   SUCCEED();
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, SetRefCOM)

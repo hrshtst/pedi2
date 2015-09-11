@@ -7,8 +7,10 @@ class RandomInitializer {
   RandomInitializer(double seed);
   ~RandomInitializer();
 
+  double rand() { return mt_(); };
   double SetRandScalar(double &s);
   zVec3D &SetRandVec3D(zVec3D &v);
+  zVec3D *SetRandVec3D(zVec3D *v);
 
  private:
   std::random_device rd_;

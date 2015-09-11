@@ -28,6 +28,13 @@ class pdRobotTest : public testing::Test {
     pdRobotCellNum( &robot ) = 100;
   };
 
+  void SetRandomValues() {
+    pdRobotChainPtr( &robot )->mass = ri.rand();
+    rkChainReadFile( &robot._chain, (char *)"model/dummy.zkc" );
+    rkIKCreate( &robot._ik, &robot._chain );
+    pdRobotCellNum( &robot ) = (int)ri.rand();
+  };
+
   void LoadAndSolveIK() {
     char model[] = "model/mighty.zkc";
     zVec3D com_pos, lf_pos, rf_pos, lh_pos, rh_pos;
@@ -78,7 +85,8 @@ class pdRobotTest : public testing::Test {
 
 TEST_F(pdRobotTest, Init)
 {
-  SetVacuousPrm();
+  // SetVacuousPrm();
+  SetRandomValues();
   pdRobotInit( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
@@ -100,7 +108,8 @@ TEST_F(pdRobotTest, Init)
 
 TEST_F(pdRobotTest, Destroy)
 {
-  SetVacuousPrm();
+  // SetVacuousPrm();
+  SetRandomValues();
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );

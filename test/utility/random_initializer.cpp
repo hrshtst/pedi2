@@ -13,14 +13,22 @@ RandomInitializer::~RandomInitializer()
 
 double RandomInitializer::SetRandScalar(double &s)
 {
-  s = mt_();
+  s = rand();
   return s;
 }
 
 zVec3D &RandomInitializer::SetRandVec3D(zVec3D &v)
 {
   for(int i=0; i<3; i++){
-    v.e[i] = mt_();
+    v.e[i] = rand();
+  }
+  return v;
+}
+
+zVec3D *RandomInitializer::SetRandVec3D(zVec3D *v)
+{
+  for(int i=0; i<3; i++){
+    v->e[i] = rand();
   }
   return v;
 }

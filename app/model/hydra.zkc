@@ -14026,40 +14026,80 @@ face 107 135 108
 face 108 135 134
 
 [shape]
-name: right_sole
-type: polyhedron
+name : left_sole
+type : polyhedron
 bb: AABB
 optic: red
-vert 0: 0.11000000035762787, 0.06000000983476639, 0.0
-vert 1: 0.10000000244379044, 0.07000000029802322, 0.0
-vert 2: 0.11000000035762787, -0.06000000238418579, 0.0
-vert 3: 0.10000000244379044, -0.06999990344047546, 0.0
-vert 4: -0.07999998235702514, -0.06999990344047546, 0.0
-vert 5: -0.08999997282028198, -0.06000000238418579, 0.0
-vert 6: -0.08999997282028198, 0.06000000983476639, 0.0
-vert 7: -0.07999998235702514, 0.07000000029802322, 0.0
-face 2 3 0
-face 0 3 4
-face 0 4 1
-face 1 4 7
+vert 0: 0.11 0.07 0.001
+vert 1: -0.09 0.07 0.001
+vert 2: -0.09 -0.07 0.001
+vert 3: 0.11 -0.07 0.001
+vert 4: 0.11 0.07 0
+vert 5: -0.09 0.07 0
+vert 6: -0.09 -0.07 0
+vert 7: 0.11 -0.07 0
+face 0 1 2
+face 0 2 3
+face 0 4 5
+face 0 5 1
+face 1 5 6
+face 1 6 2
+face 2 6 7
+face 2 7 3
+face 3 7 4
+face 3 4 0
+face 7 6 5
+face 7 5 4
 
 [shape]
-name: left_sole
-type: polyhedron
+name : right_sole
+type : polyhedron
 bb: AABB
 optic: red
-vert 0: 0.11000000035762787, 0.06000000238418579, 0.0
-vert 1: 0.10000000244379044, 0.06999990344047546, 0.0
-vert 2: 0.11000000035762787, -0.06000000983476639, 0.0
-vert 3: 0.10000000244379044, -0.070000059902668, 0.0
-vert 4: -0.07999998235702514, -0.070000059902668, 0.0
-vert 5: -0.08999997282028198, -0.06000000983476639, 0.0
-vert 6: -0.08999997282028198, 0.06000000238418579, 0.0
-vert 7: -0.07999998235702514, 0.06999990344047546, 0.0
-face 2 3 0
-face 0 3 4
-face 0 4 1
-face 1 4 7
+vert 0: 0.11 0.07 0.001
+vert 1: -0.09 0.07 0.001
+vert 2: -0.09 -0.07 0.001
+vert 3: 0.11 -0.07 0.001
+vert 4: 0.11 0.07 0
+vert 5: -0.09 0.07 0
+vert 6: -0.09 -0.07 0
+vert 7: 0.11 -0.07 0
+face 0 1 2
+face 0 2 3
+face 0 4 5
+face 0 5 1
+face 1 5 6
+face 1 6 2
+face 2 6 7
+face 2 7 3
+face 3 7 4
+face 3 4 0
+face 7 6 5
+face 7 5 4
+
+[shape]
+name : right_palm
+type : sphere
+optic: red
+bb: AABB
+center: ( 0.0, 0.0, 0.0 )
+radius: 0.02
+
+[shape]
+name : left_palm
+type : sphere
+optic: red
+bb: AABB
+center: ( 0.0, 0.0, 0.0 )
+radius: 0.02
+
+[shape]
+name : head_shape
+type : sphere
+optic: red
+bb: AABB
+center: ( 0.0, 0.0, 0.0 )
+radius: 0.02
 
 
 % 0: waist_base
@@ -14096,6 +14136,11 @@ face 1 4 7
 %31: lwrist_p
 %32: right_foot
 %33: left_foot
+%34: right_hand
+%35: left_hand
+%36: head
+%37: camera
+%38: ranger
 
 [link]
 name: waist_base
@@ -14730,7 +14775,7 @@ name: right_foot
 jointtype: fix
 frame: {
  1.0, 0.0, 0.0, 0.0
- 0.0, 0.0, -1.0, 0.09699998188018799
+ 0.0, 0.0, -1.0, 0.09799998188018799
  0.0, 1.0, 0.0, 0.0
 }
 parent: rankle_p
@@ -14741,11 +14786,64 @@ name: left_foot
 jointtype: fix
 frame: {
  1.0, 0.0, 0.0, 0.0
- 0.0, 0.0, -1.0, 0.09699998188018799
+ 0.0, 0.0, -1.0, 0.09799998188018799
  0.0, 1.0, 0.0, 0.0
 }
 parent: lankle_p
 shape: left_sole
+
+[link]
+name: right_hand
+jointtype: fix
+frame: {
+ 1.0, 0.0, 0.0, 0.0
+ 0.0, 0.0, -1.0, 0.18
+ 0.0, 1.0, 0.0, 0.0
+}
+parent: rwrist_p
+shape: right_palm
+
+[link]
+name: left_hand
+jointtype: fix
+frame: {
+ 1.0, 0.0, 0.0, 0.0
+ 0.0, 0.0, -1.0, 0.18
+ 0.0, 1.0, 0.0, 0.0
+}
+parent: lwrist_p
+shape: left_palm
+
+[link]
+name: head
+jointtype: fix
+frame: {
+ 0.0, 0.0, 1.0, 0.2
+ 1.0, 0.0, 0.0, 0.08
+ 0.0, 1.0, 0.0, 0.0
+}
+parent: neck_p
+shape: head_shape
+
+[link]
+name: camera
+jointtype: fix
+frame: {
+ 0.0, 0.0, -1.0, 0.0
+ -1.0, 0.0, 0.0, 0.0
+ 0.0, 1.0, 0.0, 0.0
+}
+parent: head
+
+[link]
+name: ranger
+jointtype: fix
+frame: {
+ 1.0, 0.0, 0.0, 0.0
+ 0.0, 1.0, 0.0, 0.0
+ 0.0, 0.0, 1.0, 0.0
+}
+parent: head
 
 [init]
 frame : {
@@ -14755,22 +14853,22 @@ frame : {
 }
 
 [ik]
-joint: waist_base   0.001
+joint: waist_base   0.0001
 joint: waist_p      0 0
-joint: waist_r	    0 0
+joint: waist_r      0 0
 joint: neck_p       0 0
-joint: lhip_y	    0.001
-joint: lhip_p	    0.001
-joint: lhip_r	    0.001
-joint: lknee_p	    0.001
-joint: lankle_r	    0.001
-joint: lankle_p	    0.001
-joint: rhip_y	    0.001
-joint: rhip_p	    0.001
-joint: rhip_r	    0.001
-joint: rknee_p	    0.001
-joint: rankle_r	    0.001
-joint: rankle_p	    0.001
+joint: lhip_y       0.01
+joint: lhip_p	    0.01
+joint: lhip_r	    0.01
+joint: lknee_p	    0.01
+joint: lankle_r	    0.01
+joint: lankle_p	    0.01
+joint: rhip_y	    0.01
+joint: rhip_p	    0.01
+joint: rhip_r	    0.01
+joint: rknee_p	    0.01
+joint: rankle_r	    0.01
+joint: rankle_p	    0.01
 joint: lscaplae_y   0 0
 joint: lshoulder_p  0 0
 joint: lshoulder_r  0 15
@@ -14793,7 +14891,7 @@ constraint: world_pos left_foot
 constraint: world_att left_foot
 constraint: world_pos right_foot
 constraint: world_att right_foot
-constraint: world_pos lwrist_p
-constraint: world_att lwrist_p
-constraint: world_pos rwrist_p
-constraint: world_att rwrist_p
+constraint: world_pos left_hand
+constraint: world_att left_hand
+constraint: world_pos right_hand
+constraint: world_att right_hand

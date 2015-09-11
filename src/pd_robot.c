@@ -319,6 +319,16 @@ void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, 
   if( n  > 0 ) zCH2D( sr, robot->_sr_vert, n );
 }
 
+void pdRobotUpdateState(pdRobot *robot, pdState *state)
+{
+  pdRobotCOMPos( robot, &state->com_pos );
+  pdRobotBaseAtt( robot, &state->base_att );
+  pdRobotFootPos( robot, &state->lf_pos, &state->rf_pos );
+  pdRobotFootAtt( robot, &state->lf_att, &state->rf_att );
+  pdRobotHandPos( robot, &state->lh_pos, &state->rh_pos );
+  pdRobotHandAtt( robot, &state->lh_att, &state->rh_att );
+}
+
 void pdRobotFWrite(FILE *fp, pdRobot *r)
 {
   register int i;

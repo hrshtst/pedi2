@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "utility/random_initializer.h"
 #include <pedi2/pd_robot.h>
 
 const int MIGHTY_BODY_ID = 0;
@@ -54,10 +55,25 @@ class pdRobotTest : public testing::Test {
     // pdRobotSetRefLHAtt( &robot, &lh_att );
     // pdRobotSetRefRHAtt( &robot, &rh_att );
     pdRobotSolveIK( &robot );
-  }
+  };
+
+  void SetRandomState() {
+    ri.SetRandVec3D( state.com_pos );
+    ri.SetRandVec3D( state.base_att );
+    ri.SetRandVec3D( state.lf_pos );
+    ri.SetRandVec3D( state.lf_att );
+    ri.SetRandVec3D( state.rf_pos );
+    ri.SetRandVec3D( state.rf_att );
+    ri.SetRandVec3D( state.lh_pos );
+    ri.SetRandVec3D( state.lh_att );
+    ri.SetRandVec3D( state.rh_pos );
+    ri.SetRandVec3D( state.rh_att );
+  };
 
   bool destroy_flag;
   pdRobot robot;
+  pdState state;
+  RandomInitializer ri;
 };
 
 TEST_F(pdRobotTest, Init)
@@ -806,4 +822,43 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, UpdateState)
+{
+  LoadAndSolveIK();
+  pdStateInit( &state );
+
+  SetRandomState();
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_NEAR( 0.0,   state.com_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,   state.com_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.26,  state.com_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  state.base_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  state.base_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  state.base_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.042,  state.lf_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.042, state.rf_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lh_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.13,   state.lh_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.25,   state.lh_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rh_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.13,  state.rh_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.25,   state.rh_pos.e[2], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.lh_att.e[0], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.lh_att.e[1], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.lh_att.e[2], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.rh_att.e[0], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.rh_att.e[1], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.rh_att.e[2], GTEST_TOL_LOOSE );
 }

@@ -2,6 +2,7 @@
 #define __PD_ROBOT_H__
 
 #include <roki/rk_ik.h>
+#include <pedi2/pd_state.h>
 
 __BEGIN_DECLS
 
@@ -104,6 +105,7 @@ __EXPORT void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf);
 __EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr);
+__EXPORT void pdRobotUpdateState(pdRobot *robot, pdState *state);
 
 /* output method */
 __EXPORT void pdRobotFWrite(FILE *fp, pdRobot *robot);

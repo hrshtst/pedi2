@@ -3,7 +3,9 @@
 #include <zx11/zximage_png.h>
 #include <liw/liw_time.h>
 #include <pedi2/pd_cmd.h>
-#include <pedi2/pd_core.h>
+#include <pedi2/pd_state.h>
+#include <pedi2/pd_biped.h>
+#include <pedi2/pd_robot.h>
 #include <aviator.h>
 #include <pthread.h>
 
@@ -39,8 +41,8 @@ zOption opt[] = {
 };
 
 #define JOYSTICK_CTRL_BUFSIZ 512
-static rkChain robot;
-static rkglChain gl_robot;
+static rkChain chain;
+static rkglChain gl_chain;
 
 static rkChain chain_env;
 static rkglChain ge;
@@ -52,7 +54,9 @@ static zxWindow win;
 static Window glwin;
 
 static pdCmd cmd;
-static pdCore core;
+static pdState state;
+static pdBiped biped;
+static pdRobot robot;
 static zVec dis;
 
 static pthread_t thread;
@@ -123,17 +127,25 @@ void joystickCtrlLoad(char modelfile[])
     cmd.lfh = atof(opt[OPT_HMAX].arg);
     cmd.rfh = atof(opt[OPT_HMAX].arg);
   }
-  pdCoreInit( &core, &cmd, atof( opt[OPT_DT].arg ) );
-  if( !pdCoreLoad( &core, modelfile ) )
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, &state, atof( opt[OPT_DT].arg ) );
+  pdRobotInit( &robot );
+  if( !pdRobotLoad( &robot, modelfile ) )
     exit( 1 );
 
-  if( !rkChainReadFile( &robot, modelfile ) ||
-      !rkglChainLoad( &gl_robot, &robot, NULL ) ){
+  if( !rkChainReadFile( &chain, modelfile ) ||
+      !rkglChainLoad( &gl_chain, &chain, NULL ) ){
     ZOPENERROR( modelfile );
     exit( 1 );
   }
 
-  dis = zVecAlloc( pdCoreJointSize( &core ) );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+
+  pdRobotUpdateState( &robot, &state );
+  pdBipedDefaultPoseInit( &biped );
+  pdRobotSetBipedRefVec( &robot, &biped );
+  pdRobotSolveIK( &robot );
+  pdRobotUpdateState( &robot, &state );
 
   if( !opt[OPT_HMAX].flag ) {
     cmd.lfh = cmd.rfh = 0.1 * cmd.zd;
@@ -220,11 +232,11 @@ void joystickCtrlSetCamera(void)
   double s, c;
   double xd, yd, zd;
 
-  theta = zVec3DElem( &core.state.base_att, 0 );
+  theta = zVec3DElem( &state.base_att, 0 );
   zSinCos( theta, &s, &c );
-  xd = core.cmd->xd;
-  yd = core.cmd->yd;
-  zd = core.cmd->zd;
+  xd = cmd.xd;
+  yd = cmd.yd;
+  zd = cmd.zd;
   rkglCALookAt( &cam, xd-12*zd*c, yd-12*zd*s, 2*zd, xd, yd, zd, 0, 0, 1 );
 }
 
@@ -249,7 +261,7 @@ void joystickCtrlDraw(void)
     glCallList( env );
     glEnable( GL_LIGHTING );
   }
-  rkglChainDraw( &gl_robot );
+  rkglChainDraw( &gl_chain );
 }
 
 void joystickCtrlDisplay(void)
@@ -304,8 +316,8 @@ void joystickCtrlCapture(void)
 
 void joystickCtrlLog(void)
 {
-  pdCoreDataFWrite( data_fp, &core );
-  /* pdStateSRDataFWrite( sr_fp, &core.state ); */
+  pdBipedDataFWrite( data_fp, &biped );
+  pdStateSRDataFWrite( sr_fp, &state );
 }
 
 void joystickCtrlCommandLog(void)
@@ -375,9 +387,13 @@ int joystickCtrlEvent(void)
 
 void joystickCtrlUpdate(void)
 {
-  pdCoreUpdate( &core );
-  zVecCopy( pdCoreJointDis( &core ), dis );
-  rkChainFK( &robot, dis );
+  pdBipedUpdate( &biped );
+  pdRobotSetBipedRefVec( &robot, &biped );
+  pdRobotSolveIK( &robot );
+  zVecCopy( pdRobotJointDis( &robot ), dis );
+  rkChainFK( &chain, dis );
+  pdBipedUpdateState( &biped );
+  pdRobotUpdateState( &robot, &state );
   liwSleep( (long)atof( opt[OPT_DT].arg ), 0 );
 }
 
@@ -417,9 +433,12 @@ void joystickCtrlExit(void)
 {
   aviator_close( &av );
   zVecFree( dis );
-  rkglChainUnload( &gl_robot );
-  rkChainDestroy( &robot );
-  pdCoreDestroy( &core );
+  rkglChainUnload( &gl_chain );
+  rkChainDestroy( &chain );
+  pdRobotDestroy( &robot );
+  pdBipedDestroy( &biped );
+  pdStateDestroy( &state );
+  pdCmdDestroy( &cmd );
   glDeleteLists( env, 1 );
   rkglWindowDestroyGLX( glwin );
   rkglCloseGLX();

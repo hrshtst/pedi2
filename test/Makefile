@@ -17,15 +17,16 @@ GTEST_INC_DIR = $(GTESTDIR)/include
 
 CXX=g++
 CPPFLAGS += -isystem $(GTEST_INC_DIR)
-CXXFLAGS += -g -Wall -Wextra -pthread
+CXXFLAGS += -g -std=c++11 -Wall -Wextra -pthread
 
 # Edit below when you add a new test
-TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest pdFootUWTest pdFootZTest pdFootTest pdRobotTest pdStateTest pdCmdTest pdCoreTest
+TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest pdFootUWTest pdFootZTest pdFootTest pdRobotTest pdStateTest pdCmdTest pdBipedTest
 # Add depending objects (make sure $(SRCDIR)/makefile)
-OBJ=pd_cz_vrt.o pd_cz_hrz_u.o pd_cz_hrz_w.o pd_cz_hrz_uw.o pd_cz_hrz.o pd_cz.o pd_foot_uw.o pd_foot_z.o pd_foot.o pd_robot.o pd_state.o pd_cmd.o pd_core.o
+OBJ=pd_cz_vrt.o pd_cz_hrz_u.o pd_cz_hrz_w.o pd_cz_hrz_uw.o pd_cz_hrz.o pd_cz.o pd_foot_uw.o pd_foot_z.o pd_foot.o pd_robot.o pd_state.o pd_cmd.o pd_biped.o
 
 TESTOBJ=$(addsuffix .o, $(TESTS))
 LIBOBJ=$(addprefix $(SRCDIR)/, $(OBJ))
+UTILOBJ=random_initializer.o
 
 GTEST_HEADERS =\
 	$(GTEST_INC_DIR)/gtest/*.h\
@@ -46,7 +47,7 @@ debug:
 .PHONY: clean cleantest cleangtest
 clean : cleantest cleangtest
 cleantest :
-	rm -f $(TESTS) $(TESTOBJ)
+	rm -f $(TESTS) $(TESTOBJ) $(UTILOBJ)
 cleangtest :
 	rm -f gtest.a gtest_main.a gtest.o gtest_main.o gtest-all.o
 
@@ -76,9 +77,10 @@ OTHERLIBOBJ = $(filter-out $(SRCDIR)/pd_foot_uw.o, $(LIBOBJ))
 pdFootUWTest: pdFootUWTest.o $(OTHERLIBOBJ) gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBRARY) $^ -o $@ -lpthread $(LINK)
 
-%Test: %Test.o $(LIBOBJ) gtest_main.a
+%Test: %Test.o $(LIBOBJ) $(UTILOBJ) gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBRARY) $^ -o $@ -lpthread $(LINK)
 
 .PRECIOUS: %.o
+VPATH = utility
 %.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(INCLUDE) $(CXXFLAGS) -c $<

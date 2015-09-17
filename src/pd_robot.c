@@ -222,13 +222,26 @@ void pdRobotUnsetAllFlags(pdRobot *robot)
     robot->_ref_set_flag[i] = false;
 }
 
-void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
+bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
 {
   if( id < pdRobotCellNum( robot ) ){
     zVec3DCopy( ref, &robot->_ref_vec[id] );
     robot->_ref_set_flag[id] = true;
-  } else
+    return true;
+  } else {
     ZRUNERROR( "IK Cell id %d is invalid.", id );
+    return false;
+  }
+}
+
+void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped)
+{
+  pdRobotSetRefCOM( robot, pdBipedRefCOMPos(biped) );
+  pdRobotSetRefBaseAtt( robot, pdBipedRefBaseAtt(biped) );
+  pdRobotSetRefLFPos( robot, pdBipedRefLFPos(biped) );
+  pdRobotSetRefLFAtt( robot, pdBipedRefLFAtt(biped) );
+  pdRobotSetRefRFPos( robot, pdBipedRefRFPos(biped) );
+  pdRobotSetRefRFAtt( robot, pdBipedRefRFAtt(biped) );
 }
 
 void pdRobotSolveIK(pdRobot *robot)
@@ -317,6 +330,17 @@ void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, 
   if( nl > 0 ) zCH2D( sr_lf, robot->_sr_lf_vert, nl );
   if( nr > 0 ) zCH2D( sr_rf, robot->_sr_rf_vert, nr );
   if( n  > 0 ) zCH2D( sr, robot->_sr_vert, n );
+}
+
+void pdRobotUpdateState(pdRobot *robot, pdState *state)
+{
+  pdRobotCOMPos( robot, &state->com_pos );
+  pdRobotBaseAtt( robot, &state->base_att );
+  pdRobotFootPos( robot, &state->lf_pos, &state->rf_pos );
+  pdRobotFootAtt( robot, &state->lf_att, &state->rf_att );
+  pdRobotHandPos( robot, &state->lh_pos, &state->rh_pos );
+  pdRobotHandAtt( robot, &state->lh_att, &state->rh_att );
+  pdRobotSupportRegion( robot, &state->sr_lf, &state->sr_rf, &state->sr );
 }
 
 void pdRobotFWrite(FILE *fp, pdRobot *r)

@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "utility/random_initializer.h"
 #include <pedi2/pd_robot.h>
 
 const int MIGHTY_BODY_ID = 0;
@@ -25,6 +26,13 @@ class pdRobotTest : public testing::Test {
     rkChainReadFile( &robot._chain, (char *)"model/dummy.zkc" );
     rkIKCreate( &robot._ik, &robot._chain );
     pdRobotCellNum( &robot ) = 100;
+  };
+
+  void SetRandomValues() {
+    pdRobotChainPtr( &robot )->mass = ri.rand();
+    rkChainReadFile( &robot._chain, (char *)"model/dummy.zkc" );
+    rkIKCreate( &robot._ik, &robot._chain );
+    pdRobotCellNum( &robot ) = (int)ri.rand();
   };
 
   void LoadAndSolveIK() {
@@ -54,15 +62,32 @@ class pdRobotTest : public testing::Test {
     // pdRobotSetRefLHAtt( &robot, &lh_att );
     // pdRobotSetRefRHAtt( &robot, &rh_att );
     pdRobotSolveIK( &robot );
-  }
+  };
+
+  void SetRandomState() {
+    ri.SetRandVec3D( state.com_pos );
+    ri.SetRandVec3D( state.base_att );
+    ri.SetRandVec3D( state.lf_pos );
+    ri.SetRandVec3D( state.lf_att );
+    ri.SetRandVec3D( state.rf_pos );
+    ri.SetRandVec3D( state.rf_att );
+    ri.SetRandVec3D( state.lh_pos );
+    ri.SetRandVec3D( state.lh_att );
+    ri.SetRandVec3D( state.rh_pos );
+    ri.SetRandVec3D( state.rh_att );
+  };
 
   bool destroy_flag;
   pdRobot robot;
+  pdState state;
+  pdBiped biped;
+  RandomInitializer ri;
 };
 
 TEST_F(pdRobotTest, Init)
 {
-  SetVacuousPrm();
+  // SetVacuousPrm();
+  SetRandomValues();
   pdRobotInit( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
@@ -84,7 +109,8 @@ TEST_F(pdRobotTest, Init)
 
 TEST_F(pdRobotTest, Destroy)
 {
-  SetVacuousPrm();
+  // SetVacuousPrm();
+  SetRandomValues();
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
@@ -261,27 +287,35 @@ TEST_F(pdRobotTest, Load_InitRefVec)
 
 TEST_F(pdRobotTest, Load_FileError)
 {
+  zEchoOff();
   rkIKCreate( pdRobotIKPtr( &robot ), pdRobotChainPtr( &robot ) );
   EXPECT_FALSE( pdRobotLoad( &robot, "hoge.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, Load_NotEnoughConstraintsError)
 {
+  zEchoOff();
   EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty2.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, Load_LinkIDMismatchError)
 {
+  zEchoOff();
   EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty3.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, Load_NotImplementedError)
 {
+  zEchoOff();
   EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty4.zkc" ) );
   destroy_flag = true;
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, SetRefVec_Error)
@@ -289,10 +323,11 @@ TEST_F(pdRobotTest, SetRefVec_Error)
   char model[] = "model/mighty.zkc";
   zVec3D v;
 
+  zEchoOff();
   pdRobotLoad( &robot, model );
   zVec3DCreate( &v, 0, 0, 0.26 );
-  pdRobotSetRefVec( &robot, &v, 10 );
-  SUCCEED();
+  EXPECT_FALSE( pdRobotSetRefVec( &robot, &v, 10 ) );
+  zEchoOn();
 }
 
 TEST_F(pdRobotTest, SetRefCOM)
@@ -433,6 +468,52 @@ TEST_F(pdRobotTest, SetRefRHAtt)
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zY ) );
   EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zZ ) );
   EXPECT_TRUE( pdRobotRHAttFlagIsOn( &robot ) );
+}
+
+TEST_F(pdRobotTest, SetBipedRefVec)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  // set random values to testified vectors
+  for(int i=0; i<PD_ROBOT_REQUIRED_CONST_NUM; i++)
+    ri.SetRandVec3D( pdRobotRefVec( &robot, i ) );
+  // set random values to referential vectors
+  ri.SetRandVec3D( pdBipedRefCOMPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefBaseAtt(&biped) );
+  ri.SetRandVec3D( pdBipedRefLFPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefLFAtt(&biped) );
+  ri.SetRandVec3D( pdBipedRefRFPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefRFAtt(&biped) );
+
+  // call method to testify
+  pdRobotSetBipedRefVec( &robot, &biped );
+
+  zVec3D *alias;
+  alias = pdRobotRefCOM( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefBaseAtt( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefLFPos( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefLFAtt( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFAttX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFAttY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFAttZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefRFPos( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosZ(&biped), zVec3DElem(alias,zZ) );
+  alias = pdRobotRefRFAtt( &robot );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFAttX(&biped), zVec3DElem(alias,zX) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFAttY(&biped), zVec3DElem(alias,zY) );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFAttZ(&biped), zVec3DElem(alias,zZ) );
 }
 
 TEST_F(pdRobotTest, SolveIK)
@@ -796,4 +877,43 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, UpdateState)
+{
+  LoadAndSolveIK();
+  pdStateInit( &state );
+
+  SetRandomState();
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_NEAR( 0.0,   state.com_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,   state.com_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.26,  state.com_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  state.base_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  state.base_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,  state.base_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.042,  state.lf_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.042, state.rf_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lf_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rf_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.lh_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.13,   state.lh_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.25,   state.lh_pos.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    state.rh_pos.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.13,  state.rh_pos.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.25,   state.rh_pos.e[2], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.lh_att.e[0], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.lh_att.e[1], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.lh_att.e[2], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.rh_att.e[0], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.rh_att.e[1], GTEST_TOL_LOOSE );
+  // EXPECT_NEAR( 0.0,    state.rh_att.e[2], GTEST_TOL_LOOSE );
 }

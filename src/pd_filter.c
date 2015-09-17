@@ -13,6 +13,7 @@ void *pdFilterVFTable[] = {
   pdFilterSetInput_Imp,
   pdFilterAlloc_Imp,
   pdFilterUpdate_Imp,
+  pdFilterFree_Imp,
 };
 
 void pdFilterInit(pdFilter *filter, double dt)
@@ -71,6 +72,11 @@ pdFilter *pdFilterAlloc_Imp(pdFilter *filter)
 }
 
 void pdFilterUpdate_Imp(pdFilter *filter)
+{
+  ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
+}
+
+void pdFilterFree_Imp(pdFilter *filter)
 {
   ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
 }

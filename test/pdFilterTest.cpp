@@ -96,6 +96,14 @@ TEST_F(pdFilterTest, Update_Imp)
   EXPECT_EQ( pdFilterUpdate_Imp, func );
 }
 
+TEST_F(pdFilterTest, Free_Imp)
+{
+  pdFilterFreeType *func;
+
+  func = (pdFilterFreeType*)filter.vftable[pdFilterFreeTag];
+  EXPECT_EQ( pdFilterFree_Imp, func );
+}
+
 TEST_F(pdFilterTest, Init)
 {
   SetRandomValues();

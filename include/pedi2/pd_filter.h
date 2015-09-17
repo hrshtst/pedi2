@@ -1,7 +1,7 @@
 #ifndef __PD_FILTER_H__
 #define __PD_FILTER_H__
 
-#include <cure/cure_defs.h>
+#include <dzco/dz_sys.h>
 
 __BEGIN_DECLS
 
@@ -61,5 +61,7 @@ __EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
 #define pdFilterUpdate(self) ((pdFilterUpdateType*)((pdFilter*)self)->vftable[pdFilterUpdateTag])( (pdFilter*)self )
 
 __END_DECLS
+
+#include <pedi2/pd_filter_bw.h>
 
 #endif /* __PD_FILTER_H__ */

@@ -132,7 +132,39 @@ TEST_F(pdFilterTest, SetInput)
   EXPECT_EQ( 2, pdFilterInput( &filter ) );
 }
 
+const double BWF_CF = 50;
+const int BWF_DIM = 2;
 
+class pdFilterBWTest : public testing::Test {
+protected:
+  virtual void SetUp() {
+    pdFilterBWInit( &bwf, TIME_STEP, BWF_CF, BWF_DIM );
+  };
+  virtual void TearDown() {
+    pdFilterBWDestroy( &bwf );
+  }
+
+  void SetRandomValues() {
+    pdFilter *base = (pdFilter*)&bwf;
+    base->_t = ri.rand();
+    base->_dt = ri.rand();
+    base->_input = ri.rand();
+    base->_output = ri.rand();
+  }
+
+  RandomInitializer ri;
+  pdFilterBW bwf;
+};
+
+TEST_F(pdFilterBWTest, Init)
+{
+  SetRandomValues();
+  pdFilterBWInit( &bwf, 0.02, 50, 2 );
+  EXPECT_EQ( 0, pdFilterTime( &bwf ) );
+  EXPECT_EQ( 0.02, pdFilterTimeStep( &bwf ) );
+  EXPECT_EQ( 0, pdFilterInput( &bwf ) );
+  EXPECT_EQ( 0, pdFilterOutput( &bwf ) );
+}
 
 // TEST_F(pdFilterTest, )
 // {}

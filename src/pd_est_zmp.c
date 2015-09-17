@@ -2,6 +2,7 @@
 
 void pdEstZMPInit(pdEstZMP *e_zmp)
 {
+  e_zmp->_t = 0;
   e_zmp->_dt = 0;
 }
 

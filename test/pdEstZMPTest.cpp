@@ -46,8 +46,8 @@ TEST_F(pdEstZMPTest, SetTime)
 TEST_F(pdEstZMPTest, SetTimeStep)
 {
   SetRandomValues();
-  pdEstZMPSetTimeStep( &e_zmp, 0.5 );
-  EXPECT_EQ( 0.5, pdEstZMPTimeStep(&e_zmp) );
+  pdEstZMPSetTimeStep( &e_zmp, 0.001 );
+  EXPECT_EQ( 0.001, pdEstZMPTimeStep(&e_zmp) );
 }
 
 TEST_F(pdEstZMPTest, ConfReadFile)

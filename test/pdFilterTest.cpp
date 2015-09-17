@@ -11,14 +11,18 @@ protected:
   };
   virtual void TearDown() {
     pdFilterDestroy( &filter );
-  }
+  };
 
   void SetRandomValues() {
     filter._t = ri.rand();
     filter._dt = ri.rand();
     filter._input = ri.rand();
     filter._output = ri.rand();
-  }
+  };
+
+  void* GetVFPtr(pdFilterVFTableTag tag) {
+    return (&filter)->vftable[tag];
+  };
 
   RandomInitializer ri;
   pdFilter filter;
@@ -28,7 +32,7 @@ TEST_F(pdFilterTest, Time_Imp)
 {
   pdFilterTimeType *func;
 
-  func = (pdFilterTimeType*)filter.vftable[pdFilterTimeTag];
+  func = (pdFilterTimeType*)GetVFPtr(pdFilterTimeTag);
   EXPECT_EQ( pdFilterTime_Imp, func );
 }
 
@@ -36,7 +40,7 @@ TEST_F(pdFilterTest, TimeStep_Imp)
 {
   pdFilterTimeStepType *func;
 
-  func = (pdFilterTimeStepType*)filter.vftable[pdFilterTimeStepTag];
+  func = (pdFilterTimeStepType*)GetVFPtr(pdFilterTimeStepTag);
   EXPECT_EQ( pdFilterTimeStep_Imp, func );
 }
 
@@ -44,7 +48,7 @@ TEST_F(pdFilterTest, Input_Imp)
 {
   pdFilterInputType *func;
 
-  func = (pdFilterInputType*)filter.vftable[pdFilterInputTag];
+  func = (pdFilterInputType*)GetVFPtr(pdFilterInputTag);
   EXPECT_EQ( pdFilterInput_Imp, func );
 }
 
@@ -52,7 +56,7 @@ TEST_F(pdFilterTest, Output_Imp)
 {
   pdFilterOutputType *func;
 
-  func = (pdFilterOutputType*)filter.vftable[pdFilterOutputTag];
+  func = (pdFilterOutputType*)GetVFPtr(pdFilterOutputTag);
   EXPECT_EQ( pdFilterOutput_Imp, func );
 }
 
@@ -60,7 +64,7 @@ TEST_F(pdFilterTest, SetTime_Imp)
 {
   pdFilterSetTimeType *func;
 
-  func = (pdFilterSetTimeType*)filter.vftable[pdFilterSetTimeTag];
+  func = (pdFilterSetTimeType*)GetVFPtr(pdFilterSetTimeTag);
   EXPECT_EQ( pdFilterSetTime_Imp, func );
 }
 
@@ -68,7 +72,7 @@ TEST_F(pdFilterTest, SetTimeStep_Imp)
 {
   pdFilterSetTimeStepType *func;
 
-  func = (pdFilterSetTimeStepType*)filter.vftable[pdFilterSetTimeStepTag];
+  func = (pdFilterSetTimeStepType*)GetVFPtr(pdFilterSetTimeStepTag);
   EXPECT_EQ( pdFilterSetTimeStep_Imp, func );
 }
 
@@ -76,7 +80,7 @@ TEST_F(pdFilterTest, SetInput_Imp)
 {
   pdFilterSetInputType *func;
 
-  func = (pdFilterSetInputType*)filter.vftable[pdFilterSetInputTag];
+  func = (pdFilterSetInputType*)GetVFPtr(pdFilterSetInputTag);
   EXPECT_EQ( pdFilterSetInput_Imp, func );
 }
 
@@ -84,7 +88,7 @@ TEST_F(pdFilterTest, Alloc_Imp)
 {
   pdFilterAllocType *func;
 
-  func = (pdFilterAllocType*)filter.vftable[pdFilterAllocTag];
+  func = (pdFilterAllocType*)GetVFPtr(pdFilterAllocTag);
   EXPECT_EQ( pdFilterAlloc_Imp, func );
 }
 
@@ -92,7 +96,7 @@ TEST_F(pdFilterTest, Update_Imp)
 {
   pdFilterUpdateType *func;
 
-  func = (pdFilterUpdateType*)filter.vftable[pdFilterUpdateTag];
+  func = (pdFilterUpdateType*)GetVFPtr(pdFilterUpdateTag);
   EXPECT_EQ( pdFilterUpdate_Imp, func );
 }
 
@@ -100,7 +104,7 @@ TEST_F(pdFilterTest, Free_Imp)
 {
   pdFilterFreeType *func;
 
-  func = (pdFilterFreeType*)filter.vftable[pdFilterFreeTag];
+  func = (pdFilterFreeType*)GetVFPtr(pdFilterFreeTag);
   EXPECT_EQ( pdFilterFree_Imp, func );
 }
 
@@ -158,7 +162,7 @@ protected:
   };
   virtual void TearDown() {
     pdFilterBWDestroy( &bwf );
-  }
+  };
 
   void SetRandomValues() {
     pdFilter *base = (pdFilter*)&bwf;
@@ -166,7 +170,11 @@ protected:
     base->_dt = ri.rand();
     base->_input = ri.rand();
     base->_output = ri.rand();
-  }
+  };
+
+  void* GetVFPtr(pdFilterVFTableTag tag) {
+    return ((pdFilter*)&bwf)->vftable[tag];
+  };
 
   RandomInitializer ri;
   pdFilterBW bwf;
@@ -181,6 +189,31 @@ TEST_F(pdFilterBWTest, Init)
   EXPECT_EQ( 0, pdFilterInput( &bwf ) );
   EXPECT_EQ( 0, pdFilterOutput( &bwf ) );
 }
+
+TEST_F(pdFilterBWTest, Alloc_Imp)
+{
+  pdFilterAllocType *func;
+
+  func = (pdFilterAllocType*)GetVFPtr(pdFilterAllocTag);
+  EXPECT_EQ( (pdFilterAllocType*)pdFilterBWAlloc_Imp, func );
+}
+
+TEST_F(pdFilterBWTest, Update_Imp)
+{
+  pdFilterUpdateType *func;
+
+  func = (pdFilterUpdateType*)GetVFPtr(pdFilterUpdateTag);
+  EXPECT_EQ( (pdFilterUpdateType*)pdFilterBWUpdate_Imp, func );
+}
+
+TEST_F(pdFilterBWTest, Free_Imp)
+{
+  pdFilterFreeType *func;
+
+  func = (pdFilterFreeType*)GetVFPtr(pdFilterFreeTag);
+  EXPECT_EQ( (pdFilterFreeType*)pdFilterBWFree_Imp, func );
+}
+
 
 // TEST_F(pdFilterTest, )
 // {}

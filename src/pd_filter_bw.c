@@ -9,7 +9,9 @@ void *pdFilterBWVFTable[] = {
   pdFilterSetTime_Imp,
   pdFilterSetTimeStep_Imp,
   pdFilterSetInput_Imp,
+  pdFilterBWAlloc_Imp,
   pdFilterBWUpdate_Imp,
+  pdFilterBWFree_Imp,
 };
 
 void pdFilterBWInit(pdFilterBW *bwf, double dt, double cf, int dim)
@@ -26,7 +28,21 @@ void pdFilterBWDestroy(pdFilterBW *bwf)
   pdFilterDestroy( &bwf->base );
 }
 
+pdFilter *pdFilterBWAlloc_Imp(pdFilterBW *bwf)
+{
+  if( !( bwf = zAlloc( pdFilterBW, 1 ) ) ){
+    ZALLOCERROR();
+    return NULL;
+  }
+  return (pdFilter*)bwf;
+}
+
 void pdFilterBWUpdate_Imp(pdFilterBW *bwf)
 {
   bwf->base._output = zVecElem(dzSysUpdate(&bwf->_sys,pdFilterTimeStep(bwf)),0);
+}
+
+void pdFilterBWFree_Imp(pdFilterBW *bwf)
+{
+  zFree( bwf );
 }

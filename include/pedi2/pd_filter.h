@@ -6,13 +6,28 @@
 __BEGIN_DECLS
 
 typedef struct{
-  double _t;
-  double _dt;
+  double _t;         /* time */
+  double _dt;        /* time step */
+
+  void **vftable;    /* virtual function table */
 } pdFilter;
 
+typedef enum{
+  pdFilterUpdateTag=1,
+} pdFilterVFTableTag;
+
+typedef void pdFilterUpdateType(pdFilter*,double);
+
+extern void *pdFilterVFTable[];
 /* c'tor and d'tor */
 __EXPORT void pdFilterInit(pdFilter *filter, double dt);
 __EXPORT void pdFilterDestroy(pdFilter *filter);
+
+/* implementations of virtual functions */
+__EXPORT void pdFilterUpdate_Imp(pdFilter *filter, double dt);
+
+/* virtual functions */
+#define pdFilterUpdate(self,dt) ((pdFilterUpdateType*)((pdFilter*)self)->vftable[pdFilterUpdateTag])( (pdFilter*)self, dt )
 
 /* methods */
 #define pdFilterTime(f)     (f)->_t

@@ -53,6 +53,14 @@ TEST_F(pdFilterTest, SetTimeStep)
   EXPECT_EQ( 0.001, pdFilterTimeStep( &filter ) );
 }
 
+TEST_F(pdFilterTest, Update_Imp)
+{
+  pdFilterUpdateType *func;
+
+  func = (pdFilterUpdateType*)filter.vftable[pdFilterUpdateTag];
+  EXPECT_EQ( pdFilterUpdate_Imp, func );
+}
+
 // TEST_F(pdFilterTest, )
 // {}
 

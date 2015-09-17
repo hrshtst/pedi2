@@ -80,6 +80,14 @@ TEST_F(pdFilterTest, SetInput_Imp)
   EXPECT_EQ( pdFilterSetInput_Imp, func );
 }
 
+TEST_F(pdFilterTest, Alloc_Imp)
+{
+  pdFilterAllocType *func;
+
+  func = (pdFilterAllocType*)filter.vftable[pdFilterAllocTag];
+  EXPECT_EQ( pdFilterAlloc_Imp, func );
+}
+
 TEST_F(pdFilterTest, Update_Imp)
 {
   pdFilterUpdateType *func;

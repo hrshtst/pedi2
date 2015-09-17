@@ -1,5 +1,7 @@
 #include <pedi2/pd_filter.h>
 
+#define PD_FILTER_ERR_NOT_IMPL "Not implemented virtual function "
+
 void *pdFilterVFTable[] = {
   "class pdFilter",
   pdFilterTime_Imp,
@@ -9,6 +11,7 @@ void *pdFilterVFTable[] = {
   pdFilterSetTime_Imp,
   pdFilterSetTimeStep_Imp,
   pdFilterSetInput_Imp,
+  pdFilterAlloc_Imp,
   pdFilterUpdate_Imp,
 };
 
@@ -61,8 +64,14 @@ void pdFilterSetInput_Imp(pdFilter *filter, double input)
   filter->_input = input;
 }
 
+pdFilter *pdFilterAlloc_Imp(pdFilter *filter)
+{
+  ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
+  return NULL;
+}
+
 void pdFilterUpdate_Imp(pdFilter *filter)
 {
-  ZRUNERROR( "Not implemented virtual function " );
+  ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
 }
 

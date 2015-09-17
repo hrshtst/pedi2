@@ -23,6 +23,7 @@ typedef enum{
   pdFilterSetTimeTag,
   pdFilterSetTimeStepTag,
   pdFilterSetInputTag,
+  pdFilterAllocTag,
   pdFilterUpdateTag,
 } pdFilterVFTableTag;
 
@@ -33,6 +34,7 @@ typedef double pdFilterOutputType(pdFilter*);
 typedef void pdFilterSetTimeType(pdFilter*,double);
 typedef void pdFilterSetTimeStepType(pdFilter*,double);
 typedef void pdFilterSetInputType(pdFilter*,double);
+typedef pdFilter *pdFilterAllocType(pdFilter*);
 typedef void pdFilterUpdateType(pdFilter*);
 
 extern void *pdFilterVFTable[];
@@ -48,6 +50,7 @@ __EXPORT double pdFilterOutput_Imp(pdFilter *filter);
 __EXPORT void pdFilterSetTime_Imp(pdFilter *filter, double t);
 __EXPORT void pdFilterSetTimeStep_Imp(pdFilter *filter, double dt);
 __EXPORT void pdFilterSetInput_Imp(pdFilter *filter, double input);
+__EXPORT pdFilter *pdFilterAlloc_Imp(pdFilter *filter);
 __EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
 
 /* methods */
@@ -58,6 +61,7 @@ __EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
 #define pdFilterSetTime(self,t) ((pdFilterSetTimeType*)((pdFilter*)self)->vftable[pdFilterSetTimeTag])( (pdFilter*)self, t )
 #define pdFilterSetTimeStep(self,dt) ((pdFilterSetTimeStepType*)((pdFilter*)self)->vftable[pdFilterSetTimeStepTag])( (pdFilter*)self, dt )
 #define pdFilterSetInput(self,input) ((pdFilterSetInputType*)((pdFilter*)self)->vftable[pdFilterSetInputTag])( (pdFilter*)self, input )
+#define pdFilterAlloc(self) ((pdFilterAllocType*)((pdFilter*)self)->vftable[pdFilterAllocTag])( (pdFilter*)self )
 #define pdFilterUpdate(self) ((pdFilterUpdateType*)((pdFilter*)self)->vftable[pdFilterUpdateTag])( (pdFilter*)self )
 
 __END_DECLS

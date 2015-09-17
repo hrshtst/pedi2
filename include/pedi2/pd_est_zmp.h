@@ -11,7 +11,7 @@ typedef struct{
 } pdEstZMP;
 
 /* c'tor and d'tor */
-__EXPORT void pdEstZMPInit(pdEstZMP *e_zmp);
+__EXPORT void pdEstZMPInit(pdEstZMP *e_zmp, double dt);
 __EXPORT void pdEstZMPDestroy(pdEstZMP *e_zmp);
 
 /* methods to get parameters */

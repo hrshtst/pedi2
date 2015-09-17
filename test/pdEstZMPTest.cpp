@@ -2,10 +2,12 @@
 #include "utility/random_initializer.h"
 #include <pedi2/pd_est_zmp.h>
 
+const double TIME_STEP = 0.01;
+
 class pdEstZMPTest : public testing::Test {
  protected:
   virtual void SetUp() {
-    pdEstZMPInit( &e_zmp );
+    pdEstZMPInit( &e_zmp, TIME_STEP );
   };
   virtual void TearDown() {};
 
@@ -21,9 +23,9 @@ class pdEstZMPTest : public testing::Test {
 TEST_F(pdEstZMPTest, Init)
 {
   SetRandomValues();
-  pdEstZMPInit( &e_zmp );
+  pdEstZMPInit( &e_zmp, 0.02 );
   EXPECT_EQ( 0, pdEstZMPTime(&e_zmp) );
-  EXPECT_EQ( 0, pdEstZMPTimeStep(&e_zmp) );
+  EXPECT_EQ( 0.02, pdEstZMPTimeStep(&e_zmp) );
 }
 
 TEST_F(pdEstZMPTest, Destroy)

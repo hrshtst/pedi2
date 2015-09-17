@@ -6,8 +6,22 @@
 __BEGIN_DECLS
 
 typedef struct{
+  char name[BUFSIZ];
+  int dim;
+  double freq;
+} filter_t;
+
+typedef struct{
+  char name[BUFSIZ];
+  char type[BUFSIZ];
+} sensor_t;
+
+typedef struct{
   double _t;     /* time */
   double _dt;    /* time step */
+
+  filter_t filter[2];
+  sensor_t sensor[2];
 } pdEstZMP;
 
 /* c'tor and d'tor */
@@ -21,6 +35,9 @@ __EXPORT void pdEstZMPDestroy(pdEstZMP *e_zmp);
 /* methods to set parameters */
 #define pdEstZMPSetTime(e,t)      ( (e)->_t = (t) )
 #define pdEstZMPSetTimeStep(e,dt) ( (e)->_dt = (dt) )
+
+__EXPORT bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e_zmp);
+__EXPORT bool pdEstZMPConfReadFile(pdEstZMP *e_zmp, const char *filename);
 
 __END_DECLS
 

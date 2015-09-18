@@ -136,6 +136,73 @@ TEST_F(pdFilterTest, SetInput)
   EXPECT_EQ( 2, pdFilterInput( &filter ) );
 }
 
+class pdFilterNoneTest : public testing::Test {
+protected:
+  virtual void SetUp() {
+    pdFilterNoneInit( &flt, TIME_STEP );
+  };
+  virtual void TearDown() {
+    pdFilterNoneDestroy( &flt );
+  };
+
+  void SetRandomValues() {
+    pdFilter *base = (pdFilter*)&flt;
+    base->_t = ri.rand();
+    base->_dt = ri.rand();
+    base->_input = ri.rand();
+    base->_output = ri.rand();
+  };
+
+  void* GetVFPtr(pdFilterVFTableTag tag) {
+    return ((pdFilter*)&flt)->vftable[tag];
+  };
+
+  RandomInitializer ri;
+  pdFilterNone flt;
+};
+
+TEST_F(pdFilterNoneTest, Init)
+{
+  SetRandomValues();
+  pdFilterNoneInit( &flt, 0.02 );
+  EXPECT_EQ( 0, pdFilterTime( &flt ) );
+  EXPECT_EQ( 0.02, pdFilterTimeStep( &flt ) );
+  EXPECT_EQ( 0, pdFilterInput( &flt ) );
+  EXPECT_EQ( 0, pdFilterOutput( &flt ) );
+}
+
+TEST_F(pdFilterNoneTest, Update_Imp)
+{
+  pdFilterUpdateType *func;
+
+  func = (pdFilterUpdateType*)GetVFPtr(pdFilterUpdateTag);
+  EXPECT_EQ( (pdFilterUpdateType*)pdFilterNoneUpdate_Imp, func );
+}
+
+TEST_F(pdFilterNoneTest, Alloc)
+{
+  pdFilterNone *new_flt;
+
+  new_flt = pdFilterNoneAlloc();
+  EXPECT_TRUE( new_flt );
+  zFree( new_flt );
+  EXPECT_FALSE( new_flt );
+}
+
+TEST_F(pdFilterNoneTest, Update)
+{
+  pdFilterSetInput( &flt, 1 );
+  pdFilterUpdate( &flt );
+  EXPECT_EQ( 1, pdFilterOutput( &flt ) );
+  pdFilterSetInput( &flt, 2 );
+  pdFilterUpdate( &flt );
+  EXPECT_EQ( 2, pdFilterOutput( &flt ) );
+  double val = ri.rand();
+  pdFilterSetInput( &flt, val );
+  pdFilterUpdate( &flt );
+  EXPECT_EQ( val, pdFilterOutput( &flt ) );
+}
+
 const double BWF_CF = 50;
 const int BWF_DIM = 2;
 

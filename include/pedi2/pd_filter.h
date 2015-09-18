@@ -62,6 +62,7 @@ __EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
 
 __END_DECLS
 
+#include <pedi2/pd_filter_none.h>
 #include <pedi2/pd_filter_bw.h>
 
 #endif /* __PD_FILTER_H__ */

@@ -32,5 +32,6 @@ pdFilterNone *pdFilterNoneAlloc()
 
 void pdFilterNoneUpdate_Imp(pdFilterNone *f)
 {
+  pdFilterIncrTime( f );
   pdFilterOutput( f ) = pdFilterInput( f );
 }

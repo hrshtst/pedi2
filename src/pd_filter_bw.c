@@ -35,6 +35,7 @@ pdFilterBW *pdFilterBWAlloc()
 
 void pdFilterBWUpdate_Imp(pdFilterBW *bwf)
 {
+  pdFilterIncrTime( bwf );
   pdFilterOutput(bwf) =\
       zVecElem(dzSysUpdate(&bwf->_sys,pdFilterTimeStep(bwf)),0);
 }

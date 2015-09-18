@@ -232,6 +232,17 @@ TEST_F(pdFilterNoneTest, Update)
   EXPECT_EQ( val, pdFilterOutput( &filter ) );
 }
 
+TEST_F(pdFilterNoneTest, Update_IncrTime)
+{
+  EXPECT_EQ( 0, pdFilterTime( &filter ) );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( TIME_STEP, pdFilterTime( &filter ) );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( 2*TIME_STEP, pdFilterTime( &filter ) );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( 3*TIME_STEP, pdFilterTime( &filter ) );
+}
+
 const double BWF_CF = 50;
 const int BWF_DIM = 2;
 
@@ -328,6 +339,17 @@ TEST_F(pdFilterBWTest, Alloc)
   EXPECT_TRUE( new_filter );
   zFree( new_filter );
   EXPECT_FALSE( new_filter );
+}
+
+TEST_F(pdFilterBWTest, Update_IncrTime)
+{
+  EXPECT_EQ( 0, pdFilterTime( &filter ) );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( TIME_STEP, pdFilterTime( &filter ) );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( 2*TIME_STEP, pdFilterTime( &filter ) );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( 3*TIME_STEP, pdFilterTime( &filter ) );
 }
 
 // TEST_F(pdFilterTest, )

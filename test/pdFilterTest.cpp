@@ -107,14 +107,14 @@ TEST_F(pdFilterTest, SetInput)
 class pdFilterNoneTest : public testing::Test {
 protected:
   virtual void SetUp() {
-    pdFilterNoneInit( &flt, TIME_STEP );
+    pdFilterNoneInit( &filter, TIME_STEP );
   };
   virtual void TearDown() {
-    pdFilterNoneDestroy( &flt );
+    pdFilterNoneDestroy( &filter );
   };
 
   void SetRandomValues() {
-    pdFilter *base = (pdFilter*)&flt;
+    pdFilter *base = (pdFilter*)&filter;
     base->_t = ri.rand();
     base->_dt = ri.rand();
     base->_input = ri.rand();
@@ -122,35 +122,45 @@ protected:
   };
 
   void* GetVFPtr(pdFilterVFTableTag tag) {
-    return ((pdFilter*)&flt)->vftable[tag];
+    return ((pdFilter*)&filter)->vftable[tag];
   };
 
   RandomInitializer ri;
-  pdFilterNone flt;
+  pdFilterNone filter;
 };
 
 TEST_F(pdFilterNoneTest, Init)
 {
   SetRandomValues();
-  pdFilterNoneInit( &flt, 0.02 );
-  EXPECT_EQ( 0, pdFilterTime( &flt ) );
-  EXPECT_EQ( 0.02, pdFilterTimeStep( &flt ) );
-  EXPECT_EQ( 0, pdFilterInput( &flt ) );
-  EXPECT_EQ( 0, pdFilterOutput( &flt ) );
+  pdFilterNoneInit( &filter, 0.02 );
+  EXPECT_EQ( 0, pdFilterTime( &filter ) );
+  EXPECT_EQ( 0.02, pdFilterTimeStep( &filter ) );
+  EXPECT_EQ( 0, pdFilterInput( &filter ) );
+  EXPECT_EQ( 0, pdFilterOutput( &filter ) );
 }
 
 TEST_F(pdFilterNoneTest, SetTime)
 {
   SetRandomValues();
-  pdFilterSetTime( &flt, 1.0 );
-  EXPECT_EQ( 1.0, pdFilterTime( &flt ) );
+  pdFilterSetTime( &filter, 0.5 );
+  EXPECT_EQ( 0.5, pdFilterTime( &filter ) );
 }
+
 
 TEST_F(pdFilterNoneTest, SetTimeStep)
 {
   SetRandomValues();
-  pdFilterSetTimeStep( &flt, 0.001 );
-  EXPECT_EQ( 0.001, pdFilterTimeStep( &flt ) );
+  pdFilterSetTimeStep( &filter, 0.001 );
+  EXPECT_EQ( 0.001, pdFilterTimeStep( &filter ) );
+}
+
+TEST_F(pdFilterNoneTest, SetInput)
+{
+  SetRandomValues();
+  pdFilterSetInput( &filter, 1 );
+  EXPECT_EQ( 1, pdFilterInput( &filter ) );
+  pdFilterSetInput( &filter, 2 );
+  EXPECT_EQ( 2, pdFilterInput( &filter ) );
 }
 
 TEST_F(pdFilterNoneTest, Update_Imp)
@@ -163,26 +173,26 @@ TEST_F(pdFilterNoneTest, Update_Imp)
 
 TEST_F(pdFilterNoneTest, Alloc)
 {
-  pdFilterNone *new_flt;
+  pdFilterNone *new_filter;
 
-  new_flt = pdFilterNoneAlloc();
-  EXPECT_TRUE( new_flt );
-  zFree( new_flt );
-  EXPECT_FALSE( new_flt );
+  new_filter = pdFilterNoneAlloc();
+  EXPECT_TRUE( new_filter );
+  zFree( new_filter );
+  EXPECT_FALSE( new_filter );
 }
 
 TEST_F(pdFilterNoneTest, Update)
 {
-  pdFilterSetInput( &flt, 1 );
-  pdFilterUpdate( &flt );
-  EXPECT_EQ( 1, pdFilterOutput( &flt ) );
-  pdFilterSetInput( &flt, 2 );
-  pdFilterUpdate( &flt );
-  EXPECT_EQ( 2, pdFilterOutput( &flt ) );
+  pdFilterSetInput( &filter, 1 );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( 1, pdFilterOutput( &filter ) );
+  pdFilterSetInput( &filter, 2 );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( 2, pdFilterOutput( &filter ) );
   double val = ri.rand();
-  pdFilterSetInput( &flt, val );
-  pdFilterUpdate( &flt );
-  EXPECT_EQ( val, pdFilterOutput( &flt ) );
+  pdFilterSetInput( &filter, val );
+  pdFilterUpdate( &filter );
+  EXPECT_EQ( val, pdFilterOutput( &filter ) );
 }
 
 const double BWF_CF = 50;
@@ -191,14 +201,14 @@ const int BWF_DIM = 2;
 class pdFilterBWTest : public testing::Test {
 protected:
   virtual void SetUp() {
-    pdFilterBWInit( &bwf, TIME_STEP, BWF_CF, BWF_DIM );
+    pdFilterBWInit( &filter, TIME_STEP, BWF_CF, BWF_DIM );
   };
   virtual void TearDown() {
-    pdFilterBWDestroy( &bwf );
+    pdFilterBWDestroy( &filter );
   };
 
   void SetRandomValues() {
-    pdFilter *base = (pdFilter*)&bwf;
+    pdFilter *base = (pdFilter*)&filter;
     base->_t = ri.rand();
     base->_dt = ri.rand();
     base->_input = ri.rand();
@@ -206,35 +216,45 @@ protected:
   };
 
   void* GetVFPtr(pdFilterVFTableTag tag) {
-    return ((pdFilter*)&bwf)->vftable[tag];
+    return ((pdFilter*)&filter)->vftable[tag];
   };
 
   RandomInitializer ri;
-  pdFilterBW bwf;
+  pdFilterBW filter;
 };
 
 TEST_F(pdFilterBWTest, Init)
 {
   SetRandomValues();
-  pdFilterBWInit( &bwf, 0.02, 50, 2 );
-  EXPECT_EQ( 0, pdFilterTime( &bwf ) );
-  EXPECT_EQ( 0.02, pdFilterTimeStep( &bwf ) );
-  EXPECT_EQ( 0, pdFilterInput( &bwf ) );
-  EXPECT_EQ( 0, pdFilterOutput( &bwf ) );
+  pdFilterBWInit( &filter, 0.02, 50, 2 );
+  EXPECT_EQ( 0, pdFilterTime( &filter ) );
+  EXPECT_EQ( 0.02, pdFilterTimeStep( &filter ) );
+  EXPECT_EQ( 0, pdFilterInput( &filter ) );
+  EXPECT_EQ( 0, pdFilterOutput( &filter ) );
 }
 
 TEST_F(pdFilterBWTest, SetTime)
 {
   SetRandomValues();
-  pdFilterSetTime( &bwf, 1.0 );
-  EXPECT_EQ( 1.0, pdFilterTime( &bwf ) );
+  pdFilterSetTime( &filter, 0.5 );
+  EXPECT_EQ( 0.5, pdFilterTime( &filter ) );
 }
+
 
 TEST_F(pdFilterBWTest, SetTimeStep)
 {
   SetRandomValues();
-  pdFilterSetTimeStep( &bwf, 0.001 );
-  EXPECT_EQ( 0.001, pdFilterTimeStep( &bwf ) );
+  pdFilterSetTimeStep( &filter, 0.001 );
+  EXPECT_EQ( 0.001, pdFilterTimeStep( &filter ) );
+}
+
+TEST_F(pdFilterBWTest, SetInput)
+{
+  SetRandomValues();
+  pdFilterSetInput( &filter, 1 );
+  EXPECT_EQ( 1, pdFilterInput( &filter ) );
+  pdFilterSetInput( &filter, 2 );
+  EXPECT_EQ( 2, pdFilterInput( &filter ) );
 }
 
 TEST_F(pdFilterBWTest, Update_Imp)
@@ -247,12 +267,12 @@ TEST_F(pdFilterBWTest, Update_Imp)
 
 TEST_F(pdFilterBWTest, Alloc)
 {
-  pdFilterBW *new_bwf;
+  pdFilterBW *new_filter;
 
-  new_bwf = pdFilterBWAlloc();
-  EXPECT_TRUE( new_bwf );
-  zFree( new_bwf );
-  EXPECT_FALSE( new_bwf );
+  new_filter = pdFilterBWAlloc();
+  EXPECT_TRUE( new_filter );
+  zFree( new_filter );
+  EXPECT_FALSE( new_filter );
 }
 
 // TEST_F(pdFilterTest, )

@@ -2,10 +2,6 @@
 
 void *pdFilterNoneVFTable[] = {
   "class pdFilterNone",
-  pdFilterTime_Imp,
-  pdFilterTimeStep_Imp,
-  pdFilterInput_Imp,
-  pdFilterOutput_Imp,
   pdFilterSetTime_Imp,
   pdFilterSetTimeStep_Imp,
   pdFilterSetInput_Imp,

@@ -4,10 +4,6 @@
 
 void *pdFilterVFTable[] = {
   "class pdFilter",
-  pdFilterTime_Imp,
-  pdFilterTimeStep_Imp,
-  pdFilterInput_Imp,
-  pdFilterOutput_Imp,
   pdFilterSetTime_Imp,
   pdFilterSetTimeStep_Imp,
   pdFilterSetInput_Imp,
@@ -26,26 +22,6 @@ void pdFilterInit(pdFilter *filter, double dt)
 void pdFilterDestroy(pdFilter *filter)
 {
   pdFilterInit( filter, 0 );
-}
-
-double pdFilterTime_Imp(pdFilter *filter)
-{
-  return filter->_t;
-}
-
-double pdFilterTimeStep_Imp(pdFilter *filter)
-{
-  return filter->_dt;
-}
-
-double pdFilterInput_Imp(pdFilter *filter)
-{
-  return filter->_input;
-}
-
-double pdFilterOutput_Imp(pdFilter *filter)
-{
-  return filter->_output;
 }
 
 void pdFilterSetTime_Imp(pdFilter *filter, double t)

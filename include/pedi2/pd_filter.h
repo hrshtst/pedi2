@@ -16,20 +16,12 @@ typedef struct{
 } pdFilter;
 
 typedef enum{
-  pdFilterTimeTag=1,
-  pdFilterTimeStepTag,
-  pdFilterInputTag,
-  pdFilterOutputTag,
-  pdFilterSetTimeTag,
+  pdFilterSetTimeTag=1,
   pdFilterSetTimeStepTag,
   pdFilterSetInputTag,
   pdFilterUpdateTag,
 } pdFilterVFTableTag;
 
-typedef double pdFilterTimeType(pdFilter*);
-typedef double pdFilterTimeStepType(pdFilter*);
-typedef double pdFilterInputType(pdFilter*);
-typedef double pdFilterOutputType(pdFilter*);
 typedef void pdFilterSetTimeType(pdFilter*,double);
 typedef void pdFilterSetTimeStepType(pdFilter*,double);
 typedef void pdFilterSetInputType(pdFilter*,double);
@@ -41,20 +33,16 @@ __EXPORT void pdFilterInit(pdFilter *filter, double dt);
 __EXPORT void pdFilterDestroy(pdFilter *filter);
 
 /* implementations of virtual functions */
-__EXPORT double pdFilterTime_Imp(pdFilter *filter);
-__EXPORT double pdFilterTimeStep_Imp(pdFilter *filter);
-__EXPORT double pdFilterInput_Imp(pdFilter *filter);
-__EXPORT double pdFilterOutput_Imp(pdFilter *filter);
 __EXPORT void pdFilterSetTime_Imp(pdFilter *filter, double t);
 __EXPORT void pdFilterSetTimeStep_Imp(pdFilter *filter, double dt);
 __EXPORT void pdFilterSetInput_Imp(pdFilter *filter, double input);
 __EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
 
 /* methods */
-#define pdFilterTime(self) ((pdFilterTimeType*)((pdFilter*)self)->vftable[pdFilterTimeTag])( (pdFilter*)self )
-#define pdFilterTimeStep(self) ((pdFilterTimeStepType*)((pdFilter*)self)->vftable[pdFilterTimeStepTag])( (pdFilter*)self )
-#define pdFilterInput(self) ((pdFilterInputType*)((pdFilter*)self)->vftable[pdFilterInputTag])( (pdFilter*)self )
-#define pdFilterOutput(self) ((pdFilterOutputType*)((pdFilter*)self)->vftable[pdFilterOutputTag])( (pdFilter*)self )
+#define pdFilterTime(self)     ( ((pdFilter*)self)->_t )
+#define pdFilterTimeStep(self) ( ((pdFilter*)self)->_dt )
+#define pdFilterInput(self)    ( ((pdFilter*)self)->_input )
+#define pdFilterOutput(self)   ( ((pdFilter*)self)->_output )
 #define pdFilterSetTime(self,t) ((pdFilterSetTimeType*)((pdFilter*)self)->vftable[pdFilterSetTimeTag])( (pdFilter*)self, t )
 #define pdFilterSetTimeStep(self,dt) ((pdFilterSetTimeStepType*)((pdFilter*)self)->vftable[pdFilterSetTimeStepTag])( (pdFilter*)self, dt )
 #define pdFilterSetInput(self,input) ((pdFilterSetInputType*)((pdFilter*)self)->vftable[pdFilterSetInputTag])( (pdFilter*)self, input )

@@ -28,38 +28,6 @@ protected:
   pdFilter filter;
 };
 
-TEST_F(pdFilterTest, Time_Imp)
-{
-  pdFilterTimeType *func;
-
-  func = (pdFilterTimeType*)GetVFPtr(pdFilterTimeTag);
-  EXPECT_EQ( pdFilterTime_Imp, func );
-}
-
-TEST_F(pdFilterTest, TimeStep_Imp)
-{
-  pdFilterTimeStepType *func;
-
-  func = (pdFilterTimeStepType*)GetVFPtr(pdFilterTimeStepTag);
-  EXPECT_EQ( pdFilterTimeStep_Imp, func );
-}
-
-TEST_F(pdFilterTest, Input_Imp)
-{
-  pdFilterInputType *func;
-
-  func = (pdFilterInputType*)GetVFPtr(pdFilterInputTag);
-  EXPECT_EQ( pdFilterInput_Imp, func );
-}
-
-TEST_F(pdFilterTest, Output_Imp)
-{
-  pdFilterOutputType *func;
-
-  func = (pdFilterOutputType*)GetVFPtr(pdFilterOutputTag);
-  EXPECT_EQ( pdFilterOutput_Imp, func );
-}
-
 TEST_F(pdFilterTest, SetTime_Imp)
 {
   pdFilterSetTimeType *func;
@@ -171,6 +139,20 @@ TEST_F(pdFilterNoneTest, Init)
   EXPECT_EQ( 0, pdFilterOutput( &flt ) );
 }
 
+TEST_F(pdFilterNoneTest, SetTime)
+{
+  SetRandomValues();
+  pdFilterSetTime( &flt, 1.0 );
+  EXPECT_EQ( 1.0, pdFilterTime( &flt ) );
+}
+
+TEST_F(pdFilterNoneTest, SetTimeStep)
+{
+  SetRandomValues();
+  pdFilterSetTimeStep( &flt, 0.001 );
+  EXPECT_EQ( 0.001, pdFilterTimeStep( &flt ) );
+}
+
 TEST_F(pdFilterNoneTest, Update_Imp)
 {
   pdFilterUpdateType *func;
@@ -239,6 +221,20 @@ TEST_F(pdFilterBWTest, Init)
   EXPECT_EQ( 0.02, pdFilterTimeStep( &bwf ) );
   EXPECT_EQ( 0, pdFilterInput( &bwf ) );
   EXPECT_EQ( 0, pdFilterOutput( &bwf ) );
+}
+
+TEST_F(pdFilterBWTest, SetTime)
+{
+  SetRandomValues();
+  pdFilterSetTime( &bwf, 1.0 );
+  EXPECT_EQ( 1.0, pdFilterTime( &bwf ) );
+}
+
+TEST_F(pdFilterBWTest, SetTimeStep)
+{
+  SetRandomValues();
+  pdFilterSetTimeStep( &bwf, 0.001 );
+  EXPECT_EQ( 0.001, pdFilterTimeStep( &bwf ) );
 }
 
 TEST_F(pdFilterBWTest, Update_Imp)

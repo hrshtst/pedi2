@@ -11,9 +11,7 @@ void *pdFilterVFTable[] = {
   pdFilterSetTime_Imp,
   pdFilterSetTimeStep_Imp,
   pdFilterSetInput_Imp,
-  pdFilterAlloc_Imp,
   pdFilterUpdate_Imp,
-  pdFilterFree_Imp,
 };
 
 void pdFilterInit(pdFilter *filter, double dt)
@@ -65,19 +63,7 @@ void pdFilterSetInput_Imp(pdFilter *filter, double input)
   filter->_input = input;
 }
 
-pdFilter *pdFilterAlloc_Imp(pdFilter *filter)
-{
-  ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
-  return NULL;
-}
-
 void pdFilterUpdate_Imp(pdFilter *filter)
 {
   ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
 }
-
-void pdFilterFree_Imp(pdFilter *filter)
-{
-  ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
-}
-

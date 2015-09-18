@@ -84,28 +84,12 @@ TEST_F(pdFilterTest, SetInput_Imp)
   EXPECT_EQ( pdFilterSetInput_Imp, func );
 }
 
-TEST_F(pdFilterTest, Alloc_Imp)
-{
-  pdFilterAllocType *func;
-
-  func = (pdFilterAllocType*)GetVFPtr(pdFilterAllocTag);
-  EXPECT_EQ( pdFilterAlloc_Imp, func );
-}
-
 TEST_F(pdFilterTest, Update_Imp)
 {
   pdFilterUpdateType *func;
 
   func = (pdFilterUpdateType*)GetVFPtr(pdFilterUpdateTag);
   EXPECT_EQ( pdFilterUpdate_Imp, func );
-}
-
-TEST_F(pdFilterTest, Free_Imp)
-{
-  pdFilterFreeType *func;
-
-  func = (pdFilterFreeType*)GetVFPtr(pdFilterFreeTag);
-  EXPECT_EQ( pdFilterFree_Imp, func );
 }
 
 TEST_F(pdFilterTest, Init)
@@ -190,14 +174,6 @@ TEST_F(pdFilterBWTest, Init)
   EXPECT_EQ( 0, pdFilterOutput( &bwf ) );
 }
 
-TEST_F(pdFilterBWTest, Alloc_Imp)
-{
-  pdFilterAllocType *func;
-
-  func = (pdFilterAllocType*)GetVFPtr(pdFilterAllocTag);
-  EXPECT_EQ( (pdFilterAllocType*)pdFilterBWAlloc_Imp, func );
-}
-
 TEST_F(pdFilterBWTest, Update_Imp)
 {
   pdFilterUpdateType *func;
@@ -206,14 +182,15 @@ TEST_F(pdFilterBWTest, Update_Imp)
   EXPECT_EQ( (pdFilterUpdateType*)pdFilterBWUpdate_Imp, func );
 }
 
-TEST_F(pdFilterBWTest, Free_Imp)
+TEST_F(pdFilterBWTest, Alloc)
 {
-  pdFilterFreeType *func;
+  pdFilterBW *new_bwf;
 
-  func = (pdFilterFreeType*)GetVFPtr(pdFilterFreeTag);
-  EXPECT_EQ( (pdFilterFreeType*)pdFilterBWFree_Imp, func );
+  new_bwf = pdFilterBWAlloc();
+  EXPECT_TRUE( new_bwf );
+  zFree( new_bwf );
+  EXPECT_FALSE( new_bwf );
 }
-
 
 // TEST_F(pdFilterTest, )
 // {}

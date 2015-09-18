@@ -23,9 +23,7 @@ typedef enum{
   pdFilterSetTimeTag,
   pdFilterSetTimeStepTag,
   pdFilterSetInputTag,
-  pdFilterAllocTag,
   pdFilterUpdateTag,
-  pdFilterFreeTag,
 } pdFilterVFTableTag;
 
 typedef double pdFilterTimeType(pdFilter*);
@@ -35,9 +33,7 @@ typedef double pdFilterOutputType(pdFilter*);
 typedef void pdFilterSetTimeType(pdFilter*,double);
 typedef void pdFilterSetTimeStepType(pdFilter*,double);
 typedef void pdFilterSetInputType(pdFilter*,double);
-typedef pdFilter *pdFilterAllocType(pdFilter*);
 typedef void pdFilterUpdateType(pdFilter*);
-typedef void pdFilterFreeType(pdFilter*);
 
 extern void *pdFilterVFTable[];
 /* c'tor and d'tor */
@@ -52,9 +48,7 @@ __EXPORT double pdFilterOutput_Imp(pdFilter *filter);
 __EXPORT void pdFilterSetTime_Imp(pdFilter *filter, double t);
 __EXPORT void pdFilterSetTimeStep_Imp(pdFilter *filter, double dt);
 __EXPORT void pdFilterSetInput_Imp(pdFilter *filter, double input);
-__EXPORT pdFilter *pdFilterAlloc_Imp(pdFilter *filter);
 __EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
-__EXPORT void pdFilterFree_Imp(pdFilter *filter);
 
 /* methods */
 #define pdFilterTime(self) ((pdFilterTimeType*)((pdFilter*)self)->vftable[pdFilterTimeTag])( (pdFilter*)self )
@@ -64,9 +58,7 @@ __EXPORT void pdFilterFree_Imp(pdFilter *filter);
 #define pdFilterSetTime(self,t) ((pdFilterSetTimeType*)((pdFilter*)self)->vftable[pdFilterSetTimeTag])( (pdFilter*)self, t )
 #define pdFilterSetTimeStep(self,dt) ((pdFilterSetTimeStepType*)((pdFilter*)self)->vftable[pdFilterSetTimeStepTag])( (pdFilter*)self, dt )
 #define pdFilterSetInput(self,input) ((pdFilterSetInputType*)((pdFilter*)self)->vftable[pdFilterSetInputTag])( (pdFilter*)self, input )
-#define pdFilterAlloc(self) ((pdFilterAllocType*)((pdFilter*)self)->vftable[pdFilterAllocTag])( (pdFilter*)self )
 #define pdFilterUpdate(self) ((pdFilterUpdateType*)((pdFilter*)self)->vftable[pdFilterUpdateTag])( (pdFilter*)self )
-#define pdFilterFree(self) ((pdFilterFreeType*)((pdFilter*)self)->vftable[pdFilterFreeTag])( (pdFilter*)self )
 
 __END_DECLS
 

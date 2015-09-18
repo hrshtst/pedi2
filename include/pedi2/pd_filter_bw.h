@@ -14,10 +14,10 @@ extern void* pdFilterBWVFTable[];
 __EXPORT void pdFilterBWInit(pdFilterBW *bwf, double dt, double cf, int dim);
 __EXPORT void pdFilterBWDestroy(pdFilterBW *bwf);
 
+__EXPORT pdFilterBW *pdFilterBWAlloc();
+
 /* implementations of virtual functions */
-__EXPORT pdFilter *pdFilterBWAlloc_Imp(pdFilterBW *bwf);
 __EXPORT void pdFilterBWUpdate_Imp(pdFilterBW *bwf);
-__EXPORT void pdFilterBWFree_Imp(pdFilterBW *bwf);
 
 __END_DECLS
 

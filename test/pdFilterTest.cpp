@@ -103,6 +103,17 @@ TEST_F(pdFilterTest, ResetTime)
   EXPECT_EQ( 0, pdFilterTime( &filter ) );
 }
 
+TEST_F(pdFilterTest, IncrTime)
+{
+  pdFilterSetTimeStep( &filter, 0.001 );
+  pdFilterResetTime( &filter );
+  EXPECT_EQ( 0, pdFilterTime( &filter ) );
+  pdFilterIncrTime( &filter );
+  EXPECT_EQ( 0.001, pdFilterTime( &filter ) );
+  pdFilterIncrTime( &filter );
+  EXPECT_EQ( 0.002, pdFilterTime( &filter ) );
+}
+
 TEST_F(pdFilterTest, SetInput)
 {
   SetRandomValues();
@@ -160,6 +171,17 @@ TEST_F(pdFilterNoneTest, ResetTime)
   EXPECT_NE( 0, pdFilterTime( &filter ) );
   pdFilterResetTime( &filter );
   EXPECT_EQ( 0, pdFilterTime( &filter ) );
+}
+
+TEST_F(pdFilterNoneTest, IncrTime)
+{
+  pdFilterSetTimeStep( &filter, 0.001 );
+  pdFilterResetTime( &filter );
+  EXPECT_EQ( 0, pdFilterTime( &filter ) );
+  pdFilterIncrTime( &filter );
+  EXPECT_EQ( 0.001, pdFilterTime( &filter ) );
+  pdFilterIncrTime( &filter );
+  EXPECT_EQ( 0.002, pdFilterTime( &filter ) );
 }
 
 TEST_F(pdFilterNoneTest, SetTimeStep)
@@ -261,6 +283,17 @@ TEST_F(pdFilterBWTest, ResetTime)
   EXPECT_NE( 0, pdFilterTime( &filter ) );
   pdFilterResetTime( &filter );
   EXPECT_EQ( 0, pdFilterTime( &filter ) );
+}
+
+TEST_F(pdFilterBWTest, IncrTime)
+{
+  pdFilterSetTimeStep( &filter, 0.001 );
+  pdFilterResetTime( &filter );
+  EXPECT_EQ( 0, pdFilterTime( &filter ) );
+  pdFilterIncrTime( &filter );
+  EXPECT_EQ( 0.001, pdFilterTime( &filter ) );
+  pdFilterIncrTime( &filter );
+  EXPECT_EQ( 0.002, pdFilterTime( &filter ) );
 }
 
 TEST_F(pdFilterBWTest, SetTimeStep)

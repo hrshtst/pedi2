@@ -44,8 +44,9 @@ __EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
 #define pdFilterInput(self)    ( ((pdFilter*)self)->_input )
 #define pdFilterOutput(self)   ( ((pdFilter*)self)->_output )
 #define pdFilterSetTime(self,t) ((pdFilterSetTimeType*)((pdFilter*)self)->vftable[pdFilterSetTimeTag])( (pdFilter*)self, t )
-#define pdFilterSetTimeStep(self,dt) ((pdFilterSetTimeStepType*)((pdFilter*)self)->vftable[pdFilterSetTimeStepTag])( (pdFilter*)self, dt )
 #define pdFilterResetTime(self) pdFilterSetTime( self, 0 )
+#define pdFilterSetTimeStep(self,dt) ((pdFilterSetTimeStepType*)((pdFilter*)self)->vftable[pdFilterSetTimeStepTag])( (pdFilter*)self, dt )
+#define pdFilterIncrTime(self) ( pdFilterTime(self) += pdFilterTimeStep(self) )
 #define pdFilterSetInput(self,input) ((pdFilterSetInputType*)((pdFilter*)self)->vftable[pdFilterSetInputTag])( (pdFilter*)self, input )
 #define pdFilterUpdate(self) ((pdFilterUpdateType*)((pdFilter*)self)->vftable[pdFilterUpdateTag])( (pdFilter*)self )
 

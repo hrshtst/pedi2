@@ -1,21 +1,13 @@
 #ifndef __PD_FILTER_NONE_H__
 #define __PD_FILTER_NONE_H__
 
+/* NONE: never include this header file in user programs. */
+
 __BEGIN_DECLS
 
-typedef struct{
-  pdFilter base;
-} pdFilterNone;
+__EXPORT bool pdFilterCreateNone(pdFilter *filter);
 
-extern void* pdFilterNoneVFTable[];
-/* c'tor and d'tor */
-__EXPORT void pdFilterNoneInit(pdFilterNone *f, double dt);
-__EXPORT void pdFilterNoneDestroy(pdFilterNone *f);
-
-__EXPORT pdFilterNone *pdFilterNoneAlloc();
-
-/* implementations of virtual functions */
-__EXPORT void pdFilterNoneUpdate_Imp(pdFilterNone *f);
+extern pdFilterMethod pd_filter_none_met;
 
 __END_DECLS
 

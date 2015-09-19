@@ -1,41 +1,57 @@
 #include <pedi2/pd_filter.h>
 
-void *pdFilterBWVFTable[] = {
-  "class pdFilterBW",
-  pdFilterSetTime_Imp,
-  pdFilterSetTimeStep_Imp,
-  pdFilterSetInput_Imp,
-  pdFilterBWUpdate_Imp,
+typedef struct{
+  dzSys bwf;
+  double cf;
+  int dim;
+} _pdFilterBW;
+
+static void _pdFilterDestroyBW(_pdFilterBW *bw);
+static double _pdFilterUpdateBW(_pdFilterBW *bw, double dt);
+
+void _pdFilterDestroyBW(_pdFilterBW *bw)
+{
+  dzSysDestroy( &bw->bwf );
+}
+
+double _pdFilterUpdateBW(_pdFilterBW *bw, double dt)
+{
+  return zVecElem( dzSysUpdate( &bw->bwf, dt ), 0 );
+}
+
+void pdFilterDestroyBW(pdFilter *filter)
+{
+  _pdFilterDestroyBW( filter->_prm );
+  pdFilterDestroyDefault( filter );
+}
+
+double pdFilterUpdateBW(pdFilter *filter, double dt)
+{
+  pdFilterOutput( filter ) = _pdFilterUpdateBW( filter->_prm, dt );
+  return pdFilterOutput( filter );
+}
+
+pdFilterMethod pd_filter_bw_met = {
+  type: "bw",
+  destroy: pdFilterDestroyBW,
+  update: pdFilterUpdateBW,
 };
 
-void pdFilterBWInit(pdFilterBW *bwf, double dt, double cf, int dim)
+bool pdFilterCreateBW(pdFilter *filter, double cf, int dim)
 {
-  pdFilterInit( &bwf->base, dt );
-  bwf->base.vftable = pdFilterBWVFTable;
-  dzSysCreateBW( &bwf->_sys, cf, dim );
-  dzSysInputPtr( &bwf->_sys, 0 ) = &bwf->base._input;
-}
+  _pdFilterBW *bw;
 
-void pdFilterBWDestroy(pdFilterBW *bwf)
-{
-  dzSysDestroy( &bwf->_sys );
-  pdFilterDestroy( &bwf->base );
-}
-
-pdFilterBW *pdFilterBWAlloc()
-{
-  pdFilterBW *bwf;
-
-  if( !( bwf = zAlloc( pdFilterBW, 1 ) ) ){
+  if( !( bw = zAlloc( _pdFilterBW, 1 ) ) ){
     ZALLOCERROR();
-    return NULL;
+    return false;
   }
-  return bwf;
-}
-
-void pdFilterBWUpdate_Imp(pdFilterBW *bwf)
-{
-  pdFilterIncrTime( bwf );
-  pdFilterOutput(bwf) =\
-      zVecElem(dzSysUpdate(&bwf->_sys,pdFilterTimeStep(bwf)),0);
+  if( !dzSysCreateBW( &bw->bwf, cf, dim ) ){
+    zFree( bw );
+    return false;
+  }
+  pdFilterInit( filter );
+  dzSysInputPtr( &bw->bwf, 0 ) = &filter->input;
+  filter->_prm = bw;
+  filter->_met = &pd_filter_bw_met;
+  return true;
 }

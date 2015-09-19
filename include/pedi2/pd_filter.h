@@ -5,50 +5,37 @@
 
 __BEGIN_DECLS
 
+struct _pdFilter;
+
 typedef struct{
-  double _t;         /* time */
-  double _dt;        /* time step */
+  const char *type;
+  void (*destroy)(struct _pdFilter*);
+  double (*update)(struct _pdFilter*, double dt);
+} pdFilterMethod;
 
-  double _input;     /* input value */
-  double _output;    /* output value */
-
-  void **vftable;    /* virtual function table */
+typedef struct _pdFilter{
+  Z_NAMED_CLASS;
+  double input;
+  double output;
+  void *_prm;
+  pdFilterMethod *_met;
 } pdFilter;
 
-typedef enum{
-  pdFilterSetTimeTag=1,
-  pdFilterSetTimeStepTag,
-  pdFilterSetInputTag,
-  pdFilterUpdateTag,
-} pdFilterVFTableTag;
+#define pdFilterInput(f)  ( (f)->input )
+#define pdFilterOutput(f) ( (f)->output )
 
-typedef void pdFilterSetTimeType(pdFilter*,double);
-typedef void pdFilterSetTimeStepType(pdFilter*,double);
-typedef void pdFilterSetInputType(pdFilter*,double);
-typedef void pdFilterUpdateType(pdFilter*);
+#define pdFilterInit(f) do{\
+  zNameSet( f, NULL );\
+  pdFilterInput(f) = 0.0;\
+  pdFilterOutput(f) = 0.0;\
+  (f)->_prm = NULL;\
+  (f)->_met = NULL;\
+} while(0)
 
-extern void *pdFilterVFTable[];
-/* c'tor and d'tor */
-__EXPORT void pdFilterInit(pdFilter *filter, double dt);
-__EXPORT void pdFilterDestroy(pdFilter *filter);
+#define pdFilterDestroy(f)  (f)->_met->destroy( f )
+#define pdFilterUpdate(f,h) (f)->_met->update( f, h )
 
-/* implementations of virtual functions */
-__EXPORT void pdFilterSetTime_Imp(pdFilter *filter, double t);
-__EXPORT void pdFilterSetTimeStep_Imp(pdFilter *filter, double dt);
-__EXPORT void pdFilterSetInput_Imp(pdFilter *filter, double input);
-__EXPORT void pdFilterUpdate_Imp(pdFilter *filter);
-
-/* methods */
-#define pdFilterTime(self)     ( ((pdFilter*)self)->_t )
-#define pdFilterTimeStep(self) ( ((pdFilter*)self)->_dt )
-#define pdFilterInput(self)    ( ((pdFilter*)self)->_input )
-#define pdFilterOutput(self)   ( ((pdFilter*)self)->_output )
-#define pdFilterSetTime(self,t) ((pdFilterSetTimeType*)((pdFilter*)self)->vftable[pdFilterSetTimeTag])( (pdFilter*)self, t )
-#define pdFilterResetTime(self) pdFilterSetTime( self, 0 )
-#define pdFilterSetTimeStep(self,dt) ((pdFilterSetTimeStepType*)((pdFilter*)self)->vftable[pdFilterSetTimeStepTag])( (pdFilter*)self, dt )
-#define pdFilterIncrTime(self) ( pdFilterTime(self) += pdFilterTimeStep(self) )
-#define pdFilterSetInput(self,input) ((pdFilterSetInputType*)((pdFilter*)self)->vftable[pdFilterSetInputTag])( (pdFilter*)self, input )
-#define pdFilterUpdate(self) ((pdFilterUpdateType*)((pdFilter*)self)->vftable[pdFilterUpdateTag])( (pdFilter*)self )
+__EXPORT void pdFilterDestroyDefault(pdFilter *filter);
 
 __END_DECLS
 

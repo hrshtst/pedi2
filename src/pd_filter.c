@@ -1,45 +1,70 @@
 #include <pedi2/pd_filter.h>
 
-#define PD_FILTER_ERR_NOT_IMPL "Not implemented virtual function "
+void pdFilterDestroyDefault(pdFilter *filter)
+{
+  zNameDestroy( filter );
+  zFree( filter->_prm );
+  pdFilterInit( filter );
+}
 
-void *pdFilterVFTable[] = {
-  "class pdFilter",
-  pdFilterSetTime_Imp,
-  pdFilterSetTimeStep_Imp,
-  pdFilterSetInput_Imp,
-  pdFilterUpdate_Imp,
+
+#if 0
+static char *__pdfiltertypename[] = {
+  "none", "bw",
+  NULL,
 };
 
-void pdFilterInit(pdFilter *filter, double dt)
+char *pdFilterTypeExpr(byte type)
 {
-  filter->_t = 0;
-  filter->_dt = dt;
-  filter->_input = 0;
-  filter->_output = 0;
-  filter->vftable = pdFilterVFTable;
+  return __pdfiltertypename[zLimit(type,PD_FILTER_NONE,PD_FILTER_BW)];
 }
 
-void pdFilterDestroy(pdFilter *filter)
+byte pdFilterTypeFromStr(char *str)
 {
-  pdFilterInit( filter, 0 );
+  char **fp;
+  byte type;
+
+  for( type=PD_FILTER_NONE, fp=__pdfiltertypename; *fp; fp++, type++ )
+    if( !strcmp( str, *fp ) ) return type;
+  return PD_FILTER_NONE;
 }
 
-void pdFilterSetTime_Imp(pdFilter *filter, double t)
+/* temporary */
+pdFilter *pdFilterStateCopy(pdFilter *s, pdFilter *d){ return d; }
+
+static pdFilter *( *pd_filter_create[])(pdFilter*) = {
+  pdFilterCreateNone,
+  pdFilterCreateBW,
+};
+
+pdFilter *pdFilterCreate(pdFilter *f, byte type)
 {
-  filter->_t = t;
+  if( type < PD_FILTER_NONE || type > PD_FILTER_BW ){
+    ZRUNERROR( "invalid filter type specified - %d", type );
+    return NULL;
+  }
+  pdFilterInit( f );
+  if( !pd_filter_create[( f->type = type )]( f ) ){
+    ZRUNERROR( "cannot create filter instance" );
+    pdFilterDestroy( f );
+    return NULL;
+  }
+  return f;
 }
 
-void pdFilterSetTimeStep_Imp(pdFilter *filter, double dt)
+void pdFilterDestroy(pdFilter *f)
 {
-  filter->_dt = dt;
+  zNameDestroy( f );
+  zFree( f->prp );
+  pdFilterInit( f );
 }
 
-void pdFilterSetInput_Imp(pdFilter *filter, double input)
+pdFilter *pdFilterClone(pdFilter *src, pdFilter *dst)
 {
-  filter->_input = input;
+  if( dst->type > PD_FILTER_NONE ) return NULL;
+  if( !pdFilterCreate( dst, pdFilterType(src) ) ) return NULL;
+  zNameSet( dst, zName(src) );
+  pdFilterStateCopy( src, dst );
+  return dst;
 }
-
-void pdFilterUpdate_Imp(pdFilter *filter)
-{
-  ZRUNERROR( PD_FILTER_ERR_NOT_IMPL );
-}
+#endif

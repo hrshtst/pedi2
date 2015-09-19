@@ -1,23 +1,13 @@
 #ifndef __PD_FILTER_BW_H__
 #define __PD_FILTER_BW_H__
 
+/* NONE: never include this header file in user programs. */
+
 __BEGIN_DECLS
 
-typedef struct{
-  pdFilter base;
+__EXPORT bool pdFilterCreateBW(pdFilter *filter, double cf, int dim);
 
-  dzSys _sys;
-} pdFilterBW;
-
-extern void* pdFilterBWVFTable[];
-/* c'tor and d'tor */
-__EXPORT void pdFilterBWInit(pdFilterBW *bwf, double dt, double cf, int dim);
-__EXPORT void pdFilterBWDestroy(pdFilterBW *bwf);
-
-__EXPORT pdFilterBW *pdFilterBWAlloc();
-
-/* implementations of virtual functions */
-__EXPORT void pdFilterBWUpdate_Imp(pdFilterBW *bwf);
+extern pdFilterMethod pd_filter_bw_met;
 
 __END_DECLS
 

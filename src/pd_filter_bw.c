@@ -38,6 +38,18 @@ void pdFilterRefreshBW(pdFilter *filter)
   pdFilterRefreshBW( filter );
 }
 
+pdFilter *pdFilterCloneBW(pdFilter *src, pdFilter *dst)
+{
+  _pdFilterBW *bw;
+
+  bw = src->_prm;
+  pdFilterCreateBW( dst, bw->cf, bw->dim );
+  zNameSet( dst, zNamePtr(src) );
+  pdFilterInput( dst ) = pdFilterInput( src );
+  pdFilterOutput( dst ) = pdFilterOutput( src );
+  return dst;
+}
+
 double pdFilterUpdateBW(pdFilter *filter, double dt)
 {
   pdFilterOutput( filter ) = _pdFilterUpdateBW( filter->_prm, dt );
@@ -61,18 +73,6 @@ bool _pdFilterFReadBW(FILE *fp, void *prm, char *buf, bool *success)
   } else
     return false;
   return true;
-}
-
-pdFilter *pdFilterCloneBW(pdFilter *src, pdFilter *dst)
-{
-  _pdFilterBW *bw;
-
-  bw = src->_prm;
-  pdFilterCreateBW( dst, bw->cf, bw->dim );
-  zNameSet( dst, zNamePtr(src) );
-  pdFilterInput( dst ) = pdFilterInput( src );
-  pdFilterOutput( dst ) = pdFilterOutput( src );
-  return dst;
 }
 
 pdFilter *pdFilterFReadBW(FILE *fp, pdFilter *filter)

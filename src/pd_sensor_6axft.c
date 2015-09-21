@@ -20,8 +20,14 @@ pdSensorMethod pd_sensor_6axisft_met = {
   fread: pdSensorFRead6AxisFT,
 };
 
+#define PD_SENSOR_6AXIS_SIZE 6
 bool pdSensorCreate6AxisFT(pdSensor *sensor)
 {
   pdSensorInit( sensor );
+  pdSensorSize( sensor ) = PD_SENSOR_6AXIS_SIZE;
+  pdSensorInput( sensor ) = zVecAlloc( pdSensorSize(sensor) );
+  pdSensorOutput( sensor ) = zVecAlloc( pdSensorSize(sensor) );
+  pdFilterArrayAlloc( pdSensorFilterArray(sensor), pdSensorSize(sensor) );
   sensor->_met = &pd_sensor_6axisft_met;
+  return true;
 }

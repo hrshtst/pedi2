@@ -49,3 +49,25 @@ TEST_F(pdSensorTest, DestroyDefault)
   EXPECT_EQ( NULL, sensor._met );
 }
 
+
+class pdSensor6AxisFTTest : public testing::Test {
+protected:
+  virtual void SetUp() {};
+  virtual void TearDown() {};
+
+  pdSensor sensor;
+  RandomInitializer ri;
+};
+
+TEST_F(pdSensor6AxisFTTest, Create)
+{
+  EXPECT_TRUE( pdSensorCreate6AxisFT( &sensor ) );
+  EXPECT_EQ( NULL, zNamePtr( &sensor ) );
+  EXPECT_EQ( 0, pdSensorSize( &sensor ) );
+  EXPECT_EQ( NULL, pdSensorInput( &sensor ) );
+  EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
+  EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
+  EXPECT_EQ( &pd_sensor_6axisft_met, sensor._met );
+  pdSensorDestroy( &sensor );
+}

@@ -54,4 +54,6 @@ __EXPORT pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor);
 
 __END_DECLS
 
+#include <pedi2/pd_sensor_6axft.h> /* six-axis force/torque sensor */
+
 #endif /* __PD_SENSOR_H__ */

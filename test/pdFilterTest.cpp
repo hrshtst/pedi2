@@ -94,6 +94,24 @@ TEST_F(pdFilterNoneTest, Update)
   pdFilterDestroy( &filter );
 }
 
+TEST_F(pdFilterNoneTest, Clone)
+{
+  pdFilter src, dst;
+
+  pdFilterCreateNone( &src );
+  zNameSet( &src, (char*)"none01" );
+  pdFilterInput( &src ) = ri.rand();
+  pdFilterOutput( &src ) = ri.rand();
+  pdFilterClone( &src, &dst );
+  EXPECT_STREQ( "none01", zNamePtr(&dst) );
+  EXPECT_EQ( pdFilterInput( &src ), pdFilterInput( &dst ) );
+  EXPECT_EQ( pdFilterOutput( &src ), pdFilterOutput( &dst ) );
+  EXPECT_EQ( NULL, filter._prm );
+  EXPECT_EQ( &pd_filter_none_met, dst._met );
+  pdFilterDestroy( &src );
+  pdFilterDestroy( &dst );
+}
+
 TEST_F(pdFilterNoneTest, FRead)
 {
   char filename[] = "model/filter_none.conf";
@@ -110,6 +128,12 @@ TEST_F(pdFilterNoneTest, FRead)
   fclose( fp );
 }
 
+
+typedef struct{
+  dzSys bwf;
+  double cf;
+  int dim;
+} _pdFilterBW;
 
 const double BWF_CF = 50;
 const int BWF_DIM = 2;
@@ -128,6 +152,8 @@ TEST_F(pdFilterBWTest, Create)
   EXPECT_EQ( NULL, zNamePtr( &filter ) );
   EXPECT_EQ( 0.0, pdFilterInput( &filter ) );
   EXPECT_EQ( 0.0, pdFilterOutput( &filter ) );
+  EXPECT_EQ( BWF_CF, ((_pdFilterBW*)filter._prm)->cf );
+  EXPECT_EQ( BWF_DIM, ((_pdFilterBW*)filter._prm)->dim );
   EXPECT_TRUE( filter._prm );
   EXPECT_EQ( &pd_filter_bw_met, filter._met );
   pdFilterDestroy( &filter );
@@ -148,6 +174,26 @@ TEST_F(pdFilterBWTest, Destroy)
   EXPECT_EQ( 0.0, pdFilterOutput( &filter ) );
   EXPECT_EQ( NULL, filter._prm );
   EXPECT_EQ( NULL, filter._met );
+}
+
+TEST_F(pdFilterBWTest, Clone)
+{
+  pdFilter src, dst;
+
+  pdFilterCreateBW( &src, 0.8, 3 );
+  zNameSet( &src, (char*)"bw01" );
+  pdFilterInput( &src ) = ri.rand();
+  pdFilterOutput( &src ) = ri.rand();
+  pdFilterClone( &src, &dst );
+  EXPECT_STREQ( "bw01", zNamePtr(&dst) );
+  EXPECT_EQ( pdFilterInput( &src ), pdFilterInput( &dst ) );
+  EXPECT_EQ( pdFilterOutput( &src ), pdFilterOutput( &dst ) );
+  EXPECT_EQ( 0.8, ((_pdFilterBW*)dst._prm)->cf );
+  EXPECT_EQ( 3, ((_pdFilterBW*)dst._prm)->dim );
+  EXPECT_TRUE( dst._prm );
+  EXPECT_EQ( &pd_filter_bw_met, dst._met );
+  pdFilterDestroy( &src );
+  pdFilterDestroy( &dst );
 }
 
 TEST_F(pdFilterBWTest, FRead)

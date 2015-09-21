@@ -12,6 +12,7 @@ typedef struct{
   void (*destroy)(struct _pdFilter*);
   void (*refresh)(struct _pdFilter*);
   double (*update)(struct _pdFilter*, double dt);
+  struct _pdFilter *(*clone)(struct _pdFilter*, struct _pdFilter*);
   struct _pdFilter *(*fread)(FILE *fp, struct _pdFilter*);
 } pdFilterMethod;
 
@@ -37,6 +38,7 @@ typedef struct _pdFilter{
 #define pdFilterDestroy(f)  (f)->_met->destroy( f )
 #define pdFilterRefresh(f)  (f)->_met->refresh( f )
 #define pdFilterUpdate(f,h) (f)->_met->update( f, h )
+#define pdFilterClone(s,d)  (s)->_met->clone( s, d )
 
 __EXPORT void pdFilterDestroyDefault(pdFilter *filter);
 __EXPORT void pdFilterRefreshDefault(pdFilter *filter);

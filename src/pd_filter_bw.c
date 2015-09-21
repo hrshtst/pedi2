@@ -9,6 +9,7 @@ typedef struct{
 static void _pdFilterDestroyBW(_pdFilterBW *bw);
 static void _pdFilterRefreshBW(_pdFilterBW *bw);
 static double _pdFilterUpdateBW(_pdFilterBW *bw, double dt);
+static _pdFilterBW *_pdFilterCloneBW(_pdFilterBW *src, _pdFilterBW *dst);
 
 void _pdFilterDestroyBW(_pdFilterBW *bw)
 {
@@ -62,6 +63,18 @@ bool _pdFilterFReadBW(FILE *fp, void *prm, char *buf, bool *success)
   return true;
 }
 
+pdFilter *pdFilterCloneBW(pdFilter *src, pdFilter *dst)
+{
+  _pdFilterBW *bw;
+
+  bw = src->_prm;
+  pdFilterCreateBW( dst, bw->cf, bw->dim );
+  zNameSet( dst, zNamePtr(src) );
+  pdFilterInput( dst ) = pdFilterInput( src );
+  pdFilterOutput( dst ) = pdFilterOutput( src );
+  return dst;
+}
+
 pdFilter *pdFilterFReadBW(FILE *fp, pdFilter *filter)
 {
   _pdFilterBWParam prm = { 1.0, 1 };
@@ -75,6 +88,7 @@ pdFilterMethod pd_filter_bw_met = {
   destroy: pdFilterDestroyBW,
   refresh: pdFilterRefreshBW,
   update: pdFilterUpdateBW,
+  clone: pdFilterCloneBW,
   fread: pdFilterFReadBW,
 };
 

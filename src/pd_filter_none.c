@@ -16,6 +16,15 @@ double pdFilterUpdateNone(pdFilter *filter, double dt)
   return pdFilterOutput( filter );
 }
 
+pdFilter *pdFilterCloneNone(pdFilter *src, pdFilter *dst)
+{
+  pdFilterCreateNone( dst );
+  zNameSet( dst, zNamePtr(src) );
+  pdFilterInput( dst ) = pdFilterInput( src );
+  pdFilterOutput( dst ) = pdFilterOutput( src );
+  return dst;
+}
+
 static bool _pdFilterFReadNone(FILE *fp, void *prm, char *bur, bool *success);
 
 bool _pdFilterFReadNone(FILE *fp, void *prm, char *buf, bool *success)
@@ -34,6 +43,7 @@ pdFilterMethod pd_filter_none_met = {
   destroy: pdFilterDestroyNone,
   refresh: pdFilterRefreshNone,
   update: pdFilterUpdateNone,
+  clone: pdFilterCloneNone,
   fread: pdFilterFReadNone,
 };
 

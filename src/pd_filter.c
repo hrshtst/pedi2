@@ -72,6 +72,16 @@ pdFilter *pdFilterFRead(FILE *fp, pdFilter *filter)
 
 static bool _pdFilterFAlloc(FILE *fp, pdFilterArray *arr);
 
+bool pdFilterArrayAlloc(pdFilterArray *arr, int n)
+{
+  zArrayAlloc( arr, pdFilter, n );
+  if( !zArrayBuf(arr) ){
+    ZALLOCERROR();
+    return false;
+  }
+  return true;
+}
+
 void pdFilterArrayDestroy(pdFilterArray *arr)
 {
   register uint i;
@@ -86,12 +96,7 @@ bool _pdFilterFAlloc(FILE *fp, pdFilterArray *arr)
   int n;
 
   n = zFCountTag( fp, PD_FILTER_TAG );
-  zArrayAlloc( arr, pdFilter, n );
-  if( !zArrayBuf(arr) ){
-    ZALLOCERROR();
-    return false;
-  }
-  return true;
+  return pdFilterArrayAlloc( arr, n );
 }
 
 pdFilter *pdFilterArrayNameFind(pdFilterArray *arr, const char *name)

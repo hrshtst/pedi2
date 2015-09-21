@@ -46,6 +46,7 @@ __EXPORT pdFilter *pdFilterFRead(FILE *fp, pdFilter *filter);
 
 zArrayClass( pdFilterArray, pdFilter );
 
+__EXPORT bool pdFilterArrayAlloc(pdFilterArray *arr, int n);
 __EXPORT void pdFilterArrayDestroy(pdFilterArray *arr);
 
 __EXPORT pdFilter *pdFilterArrayNameFind(pdFilterArray *arr, const char *name);

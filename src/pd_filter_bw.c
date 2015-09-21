@@ -7,11 +7,17 @@ typedef struct{
 } _pdFilterBW;
 
 static void _pdFilterDestroyBW(_pdFilterBW *bw);
+static void _pdFilterRefreshBW(_pdFilterBW *bw);
 static double _pdFilterUpdateBW(_pdFilterBW *bw, double dt);
 
 void _pdFilterDestroyBW(_pdFilterBW *bw)
 {
   dzSysDestroy( &bw->bwf );
+}
+
+void _pdFilterRefreshBW(_pdFilterBW *bw)
+{
+  dzSysRefresh( &bw->bwf );
 }
 
 double _pdFilterUpdateBW(_pdFilterBW *bw, double dt)
@@ -25,6 +31,12 @@ void pdFilterDestroyBW(pdFilter *filter)
   pdFilterDestroyDefault( filter );
 }
 
+void pdFilterRefreshBW(pdFilter *filter)
+{
+  _pdFilterRefreshBW( filter->_prm );
+  pdFilterRefreshBW( filter );
+}
+
 double pdFilterUpdateBW(pdFilter *filter, double dt)
 {
   pdFilterOutput( filter ) = _pdFilterUpdateBW( filter->_prm, dt );
@@ -34,6 +46,7 @@ double pdFilterUpdateBW(pdFilter *filter, double dt)
 pdFilterMethod pd_filter_bw_met = {
   type: "bw",
   destroy: pdFilterDestroyBW,
+  refresh: pdFilterRefreshBW,
   update: pdFilterUpdateBW,
 };
 

@@ -10,6 +10,7 @@ struct _pdFilter;
 typedef struct{
   const char *type;
   void (*destroy)(struct _pdFilter*);
+  void (*refresh)(struct _pdFilter*);
   double (*update)(struct _pdFilter*, double dt);
 } pdFilterMethod;
 
@@ -33,9 +34,11 @@ typedef struct _pdFilter{
 } while(0)
 
 #define pdFilterDestroy(f)  (f)->_met->destroy( f )
+#define pdFilterRefresh(f)  (f)->_met->refresh( f )
 #define pdFilterUpdate(f,h) (f)->_met->update( f, h )
 
 __EXPORT void pdFilterDestroyDefault(pdFilter *filter);
+__EXPORT void pdFilterRefreshDefault(pdFilter *filter);
 
 __END_DECLS
 

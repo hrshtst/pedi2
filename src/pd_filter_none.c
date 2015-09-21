@@ -5,6 +5,11 @@ void pdFilterDestroyNone(pdFilter *filter)
   pdFilterDestroyDefault( filter );
 }
 
+void pdFilterRefreshNone(pdFilter *filter)
+{
+  pdFilterRefreshDefault( filter );
+}
+
 double pdFilterUpdateNone(pdFilter *filter, double dt)
 {
   pdFilterOutput( filter ) = pdFilterInput( filter );
@@ -14,6 +19,7 @@ double pdFilterUpdateNone(pdFilter *filter, double dt)
 pdFilterMethod pd_filter_none_met = {
   type: "none",
   destroy: pdFilterDestroyNone,
+  refresh: pdFilterRefreshNone,
   update: pdFilterUpdateNone,
 };
 

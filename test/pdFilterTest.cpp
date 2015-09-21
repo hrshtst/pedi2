@@ -58,6 +58,7 @@ TEST_F(pdFilterNoneTest, Create)
   EXPECT_EQ( 0.0, pdFilterOutput( &filter ) );
   EXPECT_EQ( NULL, filter._prm );
   EXPECT_EQ( &pd_filter_none_met, filter._met );
+  pdFilterDestroy( &filter );
 }
 
 TEST_F(pdFilterNoneTest, Destroy)
@@ -90,6 +91,7 @@ TEST_F(pdFilterNoneTest, Update)
   pdFilterInput( &filter ) = input;
   output = pdFilterUpdate( &filter, TIME_STEP );
   EXPECT_EQ( input, output );
+  pdFilterDestroy( &filter );
 }
 
 TEST_F(pdFilterNoneTest, FRead)
@@ -104,6 +106,7 @@ TEST_F(pdFilterNoneTest, FRead)
   EXPECT_EQ( 0.0, pdFilterOutput( &filter ) );
   EXPECT_EQ( NULL, filter._prm );
   EXPECT_EQ( &pd_filter_none_met, filter._met );
+  pdFilterDestroy( &filter );
   fclose( fp );
 }
 
@@ -127,6 +130,7 @@ TEST_F(pdFilterBWTest, Create)
   EXPECT_EQ( 0.0, pdFilterOutput( &filter ) );
   EXPECT_TRUE( filter._prm );
   EXPECT_EQ( &pd_filter_bw_met, filter._met );
+  pdFilterDestroy( &filter );
 }
 
 TEST_F(pdFilterBWTest, Destroy)
@@ -158,6 +162,7 @@ TEST_F(pdFilterBWTest, FRead)
   EXPECT_EQ( 0.0, pdFilterOutput( &filter ) );
   EXPECT_TRUE( filter._prm );
   EXPECT_EQ( &pd_filter_bw_met, filter._met );
+  pdFilterDestroy( &filter );
   fclose( fp );
 }
 
@@ -180,6 +185,7 @@ TEST_F(pdFilterArrayTest, NameFind)
   zNameSet( zArrayElem(&arr,1), (char*)"bw01" );
   EXPECT_EQ( zArrayElem(&arr,0), pdFilterArrayNameFind( &arr, "none01" ) );
   EXPECT_EQ( zArrayElem(&arr,1), pdFilterArrayNameFind( &arr, "bw01" ) );
+  pdFilterArrayDestroy( &arr );
 }
 
 TEST_F(pdFilterArrayTest, FRead)
@@ -192,5 +198,6 @@ TEST_F(pdFilterArrayTest, FRead)
   EXPECT_STREQ( "bw01", zNamePtr( zArrayElem(&arr,0) ) );
   EXPECT_STREQ( "bw02", zNamePtr( zArrayElem(&arr,1) ) );
   EXPECT_STREQ( "none01", zNamePtr( zArrayElem(&arr,2) ) );
+  pdFilterArrayDestroy( &arr );
   fclose( fp );
 }

@@ -7,6 +7,12 @@ void pdSensorDestroy6AxisFT(pdSensor *sensor)
 
 zVec pdSensorProcess6AxisFT(pdSensor *sensor, double dt)
 {
+  register int i;
+
+  pdFilterArrayUpdate( pdSensorFilterArray(sensor), dt );
+  for( i=0; i<pdSensorSize(sensor); i++ )
+    pdSensorOutputVal( sensor, i ) = pdFilterOutput( zArrayElem(pdSensorFilterArray(sensor),i) );
+  return pdSensorOutput( sensor );
 }
 
 pdSensor *pdSensorFRead6AxisFT(FILE *fp, pdSensor *sensor)

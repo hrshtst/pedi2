@@ -20,6 +20,8 @@ TEST_F(pdSensorTest, Init)
   EXPECT_EQ( 0, pdSensorSize( &sensor ) );
   EXPECT_EQ( NULL, pdSensorInput( &sensor ) );
   EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
+  EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( NULL, sensor._prm );
   EXPECT_EQ( NULL, sensor._met );
 }
@@ -31,11 +33,18 @@ TEST_F(pdSensorTest, DestroyDefault)
   pdSensorSize( &sensor ) = 3;
   pdSensorInput( &sensor ) = zVecAlloc( 3 );
   pdSensorOutput( &sensor ) = zVecAlloc( 3 );
+  zArrayAlloc( &sensor.arr, pdFilter, 2 );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
+  pdFilterCreateBW( zArrayElem(&sensor.arr,1), 0.5, 2 );
+  zNameSet( zArrayElem(&sensor.arr,0), (char*)"none01" );
+  zNameSet( zArrayElem(&sensor.arr,1), (char*)"bw01" );
   pdSensorDestroyDefault( &sensor );
   EXPECT_EQ( NULL, zNamePtr( &sensor ) );
   EXPECT_EQ( 0, pdSensorSize( &sensor ) );
   EXPECT_EQ( NULL, pdSensorInput( &sensor ) );
   EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
+  EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( NULL, sensor._prm );
   EXPECT_EQ( NULL, sensor._met );
 }

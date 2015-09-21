@@ -10,7 +10,7 @@ struct _pdSensor;
 typedef struct{
   const char *type;
   void (*destroy)(struct _pdSensor*);
-  void (*process)(struct _pdSensor*, double dt);
+  zVec (*process)(struct _pdSensor*, double dt);
   struct _pdSensor *(*fread)(FILE *fp, struct _pdSensor*);
 } pdSensorMethod;
 
@@ -19,25 +19,32 @@ typedef struct _pdSensor{
   int size;
   zVec input;
   zVec output;
+  pdFilterArray arr;
   void *_prm;
   pdSensorMethod *_met;
 } pdSensor;
 
-#define pdSensorSize(s)   ( (s)->size )
-#define pdSensorInput(s)  ( (s)->input )
-#define pdSensorOutput(s) ( (s)->output )
+#define pdSensorSize(s)        ( (s)->size )
+#define pdSensorInput(s)       ( (s)->input )
+#define pdSensorOutput(s)      ( (s)->output )
+#define pdSensorFilterArray(s) ( &(s)->arr )
+
+#define pdSensorInputVal(s,i)   zVecElem( pdSensorInput(s), i )
+#define pdSensorOutputVal(s,i)  zVecElem( pdSensorOutput(s), i )
+#define pdSensorFilterElem(s,i) zArrayElem( pdSensorFilterArray(s), i )
 
 #define pdSensorInit(s) do{\
   zNameSet( s, NULL );\
   pdSensorSize(s) = 0;\
   pdSensorInput(s) = NULL;\
   pdSensorOutput(s) = NULL;\
+  zArrayInit( pdSensorFilterArray(s) );\
   (s)->_prm = NULL;\
   (s)->_met = NULL;\
 } while(0)
 
-#define pdSensorDestroy(s)  (s)->_met->destroy( s )
-#define pdSensorUpdate(s,h) (s)->_met->update( s, h )
+#define pdSensorDestroy(s)   (s)->_met->destroy( s )
+#define pdSensorProcess(s,h) (s)->_met->process( s, h )
 
 __EXPORT void pdSensorDestroyDefault(pdSensor *sensor);
 

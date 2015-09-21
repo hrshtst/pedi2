@@ -43,11 +43,39 @@ double pdFilterUpdateBW(pdFilter *filter, double dt)
   return pdFilterOutput( filter );
 }
 
+typedef struct{
+  double cf;
+  int dim;
+} _pdFilterBWParam;
+
+static bool _pdFilterFReadBW(FILE *fp, void *prm, char *buf, bool *success);
+
+bool _pdFilterFReadBW(FILE *fp, void *prm, char *buf, bool *success)
+{
+  if( strcmp( buf, "cf" ) == 0 ){
+    ((_pdFilterBWParam *)prm)->cf = zFDouble( fp );
+  } else
+  if( strcmp( buf, "dim" ) == 0 ){
+    ((_pdFilterBWParam *)prm)->dim = zFInt( fp );
+  } else
+    return false;
+  return true;
+}
+
+pdFilter *pdFilterFReadBW(FILE *fp, pdFilter *filter)
+{
+  _pdFilterBWParam prm = { 1.0, 1 };
+
+  zFieldFRead( fp, _pdFilterFReadBW, &prm );
+  return pdFilterCreateBW( filter, prm.cf, prm.dim ) ? filter : NULL;
+}
+
 pdFilterMethod pd_filter_bw_met = {
   type: "bw",
   destroy: pdFilterDestroyBW,
   refresh: pdFilterRefreshBW,
   update: pdFilterUpdateBW,
+  fread: pdFilterFReadBW,
 };
 
 bool pdFilterCreateBW(pdFilter *filter, double cf, int dim)

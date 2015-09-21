@@ -12,6 +12,7 @@ typedef struct{
   void (*destroy)(struct _pdFilter*);
   void (*refresh)(struct _pdFilter*);
   double (*update)(struct _pdFilter*, double dt);
+  struct _pdFilter *(*fread)(FILE *fp, struct _pdFilter*);
 } pdFilterMethod;
 
 typedef struct _pdFilter{
@@ -39,6 +40,19 @@ typedef struct _pdFilter{
 
 __EXPORT void pdFilterDestroyDefault(pdFilter *filter);
 __EXPORT void pdFilterRefreshDefault(pdFilter *filter);
+
+#define PD_FILTER_TAG "filter"
+__EXPORT pdFilter *pdFilterFRead(FILE *fp, pdFilter *filter);
+
+zArrayClass( pdFilterArray, pdFilter );
+
+__EXPORT void pdFilterArrayDestroy(pdFilterArray *arr);
+
+__EXPORT pdFilter *pdFilterArrayNameFind(pdFilterArray *arr, const char *name);
+
+__EXPORT void pdFilterArrayUpdate(pdFilterArray *arr, double dt);
+
+__EXPORT bool pdFilterArrayFRead(FILE *fp, pdFilterArray *arr);
 
 __END_DECLS
 

@@ -86,7 +86,9 @@ bool pdFilterCreateBW(pdFilter *filter, double cf, int dim)
     ZALLOCERROR();
     return false;
   }
-  if( !dzSysCreateBW( &bw->bwf, cf, dim ) ){
+  bw->cf = cf;
+  bw->dim = dim;
+  if( !dzSysCreateBW( &bw->bwf, bw->cf, bw->dim ) ){
     zFree( bw );
     return false;
   }

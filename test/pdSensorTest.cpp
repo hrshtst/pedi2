@@ -9,6 +9,18 @@ protected:
   virtual void SetUp() {};
   virtual void TearDown() {};
 
+  bool zMat3DMatch(zMat3D *m1, zMat3D *m2){
+    return m1->c[0] == m2->c[0] &&
+           m1->c[1] == m2->c[1] &&
+           m1->c[2] == m2->c[2] &&
+           m1->c[3] == m2->c[3] &&
+           m1->c[4] == m2->c[4] &&
+           m1->c[5] == m2->c[5] &&
+           m1->c[6] == m2->c[6] &&
+           m1->c[7] == m2->c[7] &&
+           m1->c[8] == m2->c[8];
+  };
+
   pdSensor sensor;
   RandomInitializer ri;
 };
@@ -20,6 +32,8 @@ TEST_F(pdSensorTest, Init)
   EXPECT_EQ( 0, pdSensorSize( &sensor ) );
   EXPECT_EQ( NULL, pdSensorInput( &sensor ) );
   EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
+  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, zFrame3DPos( pdSensorFrame(&sensor) ) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, zFrame3DAtt( pdSensorFrame(&sensor) ) ) );
   EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( NULL, sensor._prm );

@@ -1,6 +1,7 @@
 #ifndef __PD_SENSOR_H__
 #define __PD_SENSOR_H__
 
+#include <zeo/zeo_frame.h>
 #include <pedi2/pd_filter.h>
 
 __BEGIN_DECLS
@@ -19,6 +20,7 @@ typedef struct _pdSensor{
   int size;
   zVec input;
   zVec output;
+  zFrame3D frame;
   pdFilterArray arr;
   void *_prm;
   pdSensorMethod *_met;
@@ -27,6 +29,7 @@ typedef struct _pdSensor{
 #define pdSensorSize(s)        ( (s)->size )
 #define pdSensorInput(s)       ( (s)->input )
 #define pdSensorOutput(s)      ( (s)->output )
+#define pdSensorFrame(s)       ( &(s)->frame )
 #define pdSensorFilterArray(s) ( &(s)->arr )
 
 #define pdSensorInputVal(s,i)   zVecElem( pdSensorInput(s), i )
@@ -38,6 +41,7 @@ typedef struct _pdSensor{
   pdSensorSize(s) = 0;\
   pdSensorInput(s) = NULL;\
   pdSensorOutput(s) = NULL;\
+  zFrame3DIdent( pdSensorFrame(s) );\
   zArrayInit( pdSensorFilterArray(s) );\
   (s)->_prm = NULL;\
   (s)->_met = NULL;\

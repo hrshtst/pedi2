@@ -11,8 +11,10 @@ typedef struct{
   pdFilterArray _farray;
   pdSensorArray _sarray;
 
-  pdSensorArray _lfsarray;
-  pdSensorArray _rfsarray;
+  pdSensor **_lfsensor;
+  pdSensor **_rfsensor;
+  int _lfsensor_num;
+  int _rfsensor_num;
 
   zVec3D estforce;
   zVec3D estzmp;

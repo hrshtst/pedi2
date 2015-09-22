@@ -2,12 +2,26 @@
 
 void pdEstZMPInit(pdEstZMP *e)
 {
+  zNameSet( e, NULL );
+  e->_lfsensor = NULL;
+  e->_rfsensor = NULL;
+  e->_lfsensor_num = 0;
+  e->_rfsensor_num = 0;
   zVec3DClear( &e->estforce );
   zVec3DClear( &e->estzmp );
 }
 
 void pdEstZMPDestroy(pdEstZMP *e)
 {
+  zNameDestroy( e );
+  zFree( e->_lfsensor );
+  zFree( e->_rfsensor );
+  e->_lfsensor_num = 0;
+  e->_rfsensor_num = 0;
+  zVec3DClear( &e->estforce );
+  zVec3DClear( &e->estzmp );
+}
+
   pdEstZMPInit( e );
 }
 

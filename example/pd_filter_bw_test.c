@@ -8,11 +8,10 @@
 int main(int argc, char *argv[])
 {
   register int i;
-  pdFilterBW *bwf;
+  pdFilter bwf;
   double val;
 
-  bwf = pdFilterBWAlloc();
-  pdFilterBWInit( bwf, DT, CF, DIM );
+  pdFilterCreateBW( &bwf, CF, DIM );
   zRandInit();
 
   /* signal processing */
@@ -21,11 +20,11 @@ int main(int argc, char *argv[])
     val = sin( 0.5 * DT * i ) + zRandF(-1.0,1.0) + 1.0;
     printf( "%f ", val );
     /* signal filtering */
-    pdFilterSetInput( bwf, val );
-    pdFilterUpdate( bwf );
-    printf( "%f ", pdFilterOutput(bwf) );
+    pdFilterInput( &bwf ) = val;
+    pdFilterUpdate( &bwf, DT );
+    printf( "%f ", pdFilterOutput(&bwf) );
     printf( "\n" );
   }
-  pdFilterBWDestroy( bwf );
+  pdFilterDestroy( &bwf );
   return 0;
 }

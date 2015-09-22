@@ -15,8 +15,55 @@ zVec pdSensorProcess6AxisFT(pdSensor *sensor, double dt)
   return pdSensorOutput( sensor );
 }
 
-pdSensor *pdSensorFRead6AxisFT(FILE *fp, pdSensor *sensor)
+#define PD_SENSOR_6AXIS_SIZE 6
+typedef struct{
+  zFrame3D frame;
+  pdFilterArray *srcfarr;
+  pdFilterArray farr;
+  int nf;
+} _pdSensor6AxisFTParam;
+
+static bool __pdSensorFRead6AxisFT(FILE *fp, _pdSensor6AxisFTParam *prm, bool *success);
+static bool _pdSensorFRead6AxisFT(FILE *fp, void *prm, char *buf, bool *success);
+
+bool __pdSensorFRead6AxisFT(FILE *fp, _pdSensor6AxisFTParam *prm, bool *success)
 {
+  register int i;
+  char name[BUFSIZ];
+  pdFilter *src;
+
+  for( i=0; i<PD_SENSOR_6AXIS_SIZE; i++ ){
+    if( !( zFToken( fp, name, BUFSIZ ) ) )
+      *success = false;
+    src = pdFilterArrayNameFind( prm->srcfarr, name );
+    pdFilterClone( src, zArrayElem( &prm->farr, prm->nf++ ) );
+  }
+  return true;
+}
+
+bool _pdSensorFRead6AxisFT(FILE *fp, void *prm, char *buf, bool *success)
+{
+  if( strcmp( buf, "frame" ) == 0 ){
+    zFrame3DFRead( fp, &((_pdSensor6AxisFTParam *)prm)->frame );
+  } else
+  if( strcmp( buf, "filter" ) == 0 ){
+    __pdSensorFRead6AxisFT( fp, prm, success );
+  } else
+    return false;
+  return true;
+}
+
+pdSensor *pdSensorFRead6AxisFT(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr)
+{
+  _pdSensor6AxisFTParam prm;
+
+  zFrame3DIdent( &prm.frame );
+  prm.srcfarr = srcfarr;
+  if( !pdFilterArrayAlloc( &prm.farr, PD_SENSOR_6AXIS_SIZE ) )
+    return NULL;
+  prm.nf = 0;
+  zFieldFRead( fp, _pdSensorFRead6AxisFT, &prm );
+  return pdSensorCreate6AxisFT( sensor, &prm.frame, &prm.farr ) ? sensor : NULL;
 }
 
 pdSensorMethod pd_sensor_6axisft_met = {
@@ -26,7 +73,6 @@ pdSensorMethod pd_sensor_6axisft_met = {
   fread: pdSensorFRead6AxisFT,
 };
 
-#define PD_SENSOR_6AXIS_SIZE 6
 bool pdSensorCreate6AxisFT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr)
 {
   pdSensorInit( sensor );

@@ -12,7 +12,7 @@ typedef struct{
   const char *type;
   void (*destroy)(struct _pdSensor*);
   zVec (*process)(struct _pdSensor*, double dt);
-  struct _pdSensor *(*fread)(FILE *fp, struct _pdSensor*);
+  struct _pdSensor *(*fread)(FILE *fp, struct _pdSensor*, pdFilterArray*);
 } pdSensorMethod;
 
 typedef struct _pdSensor{
@@ -53,7 +53,7 @@ typedef struct _pdSensor{
 __EXPORT void pdSensorDestroyDefault(pdSensor *sensor);
 
 #define PD_SENSOR_TAG "sensor"
-__EXPORT pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor);
+__EXPORT pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr);
 
 
 __END_DECLS

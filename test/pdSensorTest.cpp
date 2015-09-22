@@ -2,24 +2,24 @@
 #include "utility/random_initializer.h"
 #include <pedi2/pd_sensor.h>
 
+bool zMat3DMatch(zMat3D *m1, zMat3D *m2){
+  return m1->c[0] == m2->c[0] &&
+         m1->c[1] == m2->c[1] &&
+         m1->c[2] == m2->c[2] &&
+         m1->c[3] == m2->c[3] &&
+         m1->c[4] == m2->c[4] &&
+         m1->c[5] == m2->c[5] &&
+         m1->c[6] == m2->c[6] &&
+         m1->c[7] == m2->c[7] &&
+         m1->c[8] == m2->c[8];
+};
+
 const double TIME_STEP = 0.01;
 
 class pdSensorTest : public testing::Test {
 protected:
   virtual void SetUp() {};
   virtual void TearDown() {};
-
-  bool zMat3DMatch(zMat3D *m1, zMat3D *m2){
-    return m1->c[0] == m2->c[0] &&
-           m1->c[1] == m2->c[1] &&
-           m1->c[2] == m2->c[2] &&
-           m1->c[3] == m2->c[3] &&
-           m1->c[4] == m2->c[4] &&
-           m1->c[5] == m2->c[5] &&
-           m1->c[6] == m2->c[6] &&
-           m1->c[7] == m2->c[7] &&
-           m1->c[8] == m2->c[8];
-  };
 
   pdSensor sensor;
   RandomInitializer ri;
@@ -67,10 +67,19 @@ TEST_F(pdSensorTest, DestroyDefault)
 
 class pdSensor6AxisFTTest : public testing::Test {
 protected:
-  virtual void SetUp() {};
-  virtual void TearDown() {};
+  virtual void SetUp() {
+    pdFilterArrayAlloc( &orgflt, 2 );
+    pdFilterCreateNone( zArrayElem(&orgflt,0) );
+    pdFilterCreateBW( zArrayElem(&orgflt,1), 0.5, 2 );
+    zNameSet( zArrayElem(&orgflt,0), (char*)"none01" );
+    zNameSet( zArrayElem(&orgflt,1), (char*)"bw01" );
+  };
+  virtual void TearDown() {
+    pdFilterArrayDestroy( &orgflt );
+  };
 
   pdSensor sensor;
+  pdFilterArray orgflt;
   RandomInitializer ri;
 };
 
@@ -96,4 +105,31 @@ TEST_F(pdSensor6AxisFTTest, Create)
   pdFilterCreateNone( zArrayElem(&sensor.arr,4) );
   pdFilterCreateNone( zArrayElem(&sensor.arr,5) );
   pdSensorDestroy( &sensor );
+}
+
+TEST_F(pdSensor6AxisFTTest, FRead)
+{
+  char filename[] = "model/sensor_6axisft.conf";
+  zVec3D v;
+  zMat3D m;
+  FILE *fp;
+
+  zVec3DCreate( &v, 1.0, 2.0, 3.0 );
+  zMat3DCreate( &m,
+                1.0, 0.0, 0.0,
+                0.0, 2.0, 0.0,
+                0.0, 0.0, 3.0 );
+  fp = fopen( filename, "r" );
+  pdSensorFRead( fp, &sensor, &orgflt );
+  EXPECT_STREQ( "lf_FT01", zNamePtr( &sensor ) );
+  EXPECT_TRUE( zVec3DMatch( &v, zFrame3DPos( pdSensorFrame(&sensor) ) ) );
+  EXPECT_TRUE( zMat3DMatch( &m, zFrame3DAtt( pdSensorFrame(&sensor) ) ) );
+  EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,0) ) );
+  EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,1) ) );
+  EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,2) ) );
+  EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,3) ) );
+  EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,4) ) );
+  EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,5) ) );
+  pdSensorDestroy( &sensor );
+  fclose( fp );
 }

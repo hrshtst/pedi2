@@ -22,6 +22,7 @@ typedef struct _pdSensor{
   zVec output;
   zFrame3D frame;
   pdFilterArray arr;
+  char linkname[BUFSIZ];
   void *_prm;
   pdSensorMethod *_met;
 } pdSensor;
@@ -31,6 +32,7 @@ typedef struct _pdSensor{
 #define pdSensorOutput(s)      ( (s)->output )
 #define pdSensorFrame(s)       ( &(s)->frame )
 #define pdSensorFilterArray(s) ( &(s)->arr )
+#define pdSensorLinkName(s)    ( (s)->linkname )
 
 #define pdSensorInputVal(s,i)   zVecElem( pdSensorInput(s), i )
 #define pdSensorOutputVal(s,i)  zVecElem( pdSensorOutput(s), i )
@@ -46,6 +48,7 @@ typedef struct _pdSensor{
   pdSensorOutput(s) = NULL;\
   zFrame3DIdent( pdSensorFrame(s) );\
   zArrayInit( pdSensorFilterArray(s) );\
+  (s)->linkname[0] = '\0';\
   (s)->_prm = NULL;\
   (s)->_met = NULL;\
 } while(0)

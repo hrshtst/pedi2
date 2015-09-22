@@ -42,6 +42,7 @@ pdSensorMethod *_pdSensorMethodByStr(char str[])
 typedef struct{
   pdSensorMethod *met;
   char name[BUFSIZ];
+  char linkname[BUFSIZ];
 } _pdSensorParam;
 
 bool _pdSensorFRead(FILE *fp, void *instance, char *buf, bool *success)
@@ -49,8 +50,13 @@ bool _pdSensorFRead(FILE *fp, void *instance, char *buf, bool *success)
   if( strcmp( buf, "type" ) == 0 ){
     if( !( ((_pdSensorParam *)instance)->met = _pdSensorMethodByStr( zFToken(fp,buf,BUFSIZ) ) ) )
       *success = false;
-  } else if( strcmp( buf, "name" )  == 0 ){
+  } else
+  if( strcmp( buf, "name" )  == 0 ){
     if( !zFToken( fp, ((_pdSensorParam *)instance)->name, BUFSIZ ) )
+      *success = false;
+  } else
+  if( strcmp( buf, "link" )  == 0 ){
+    if( !zFToken( fp, ((_pdSensorParam *)instance)->linkname, BUFSIZ ) )
       *success = false;
   } else
     return false;
@@ -64,6 +70,7 @@ pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr)
 
   prm.met = NULL;
   prm.name[0] = '\0';
+  prm.linkname[0] = '\0';
   cur = ftell( fp );
   zFieldFRead( fp, _pdSensorFRead, &prm );
   if( !prm.met ){
@@ -76,6 +83,7 @@ pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr)
       ZALLOCERROR();
       return NULL;
     }
+    zStrCopy( pdSensorLinkName(sensor), prm.linkname, BUFSIZ );
     return sensor;
   }
   return NULL;

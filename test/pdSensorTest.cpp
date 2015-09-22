@@ -36,6 +36,7 @@ TEST_F(pdSensorTest, Init)
   EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, zFrame3DAtt( pdSensorFrame(&sensor) ) ) );
   EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
+  EXPECT_STREQ( "", pdSensorLinkName( &sensor ) );
   EXPECT_EQ( NULL, sensor._prm );
   EXPECT_EQ( NULL, sensor._met );
 }
@@ -167,6 +168,7 @@ TEST_F(pdSensor6AxisFTTest, FRead)
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,3) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,4) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,5) ) );
+  EXPECT_STREQ( "left_foot", pdSensorLinkName( &sensor ) );
   pdSensorDestroy( &sensor );
   fclose( fp );
 }
@@ -187,6 +189,7 @@ TEST_F(pdSensor6AxisFTTest, FRead2)
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,3) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,4) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,5) ) );
+  EXPECT_STREQ( "left_foot", pdSensorLinkName( &sensor ) );
   pdSensorDestroy( &sensor );
   fclose( fp );
 }

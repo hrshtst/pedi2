@@ -68,18 +68,18 @@ TEST_F(pdSensorTest, DestroyDefault)
 class pdSensor6AxisFTTest : public testing::Test {
 protected:
   virtual void SetUp() {
-    pdFilterArrayAlloc( &orgflt, 2 );
-    pdFilterCreateNone( zArrayElem(&orgflt,0) );
-    pdFilterCreateBW( zArrayElem(&orgflt,1), 0.5, 2 );
-    zNameSet( zArrayElem(&orgflt,0), (char*)"none01" );
-    zNameSet( zArrayElem(&orgflt,1), (char*)"bw01" );
+    pdFilterArrayAlloc( &srcfarr, 2 );
+    pdFilterCreateNone( zArrayElem(&srcfarr,0) );
+    pdFilterCreateBW( zArrayElem(&srcfarr,1), 0.5, 2 );
+    zNameSet( zArrayElem(&srcfarr,0), (char*)"none01" );
+    zNameSet( zArrayElem(&srcfarr,1), (char*)"bw01" );
   };
   virtual void TearDown() {
-    pdFilterArrayDestroy( &orgflt );
+    pdFilterArrayDestroy( &srcfarr );
   };
 
   pdSensor sensor;
-  pdFilterArray orgflt;
+  pdFilterArray srcfarr;
   RandomInitializer ri;
 };
 
@@ -120,7 +120,7 @@ TEST_F(pdSensor6AxisFTTest, FRead)
                 0.0, 2.0, 0.0,
                 0.0, 0.0, 3.0 );
   fp = fopen( filename, "r" );
-  pdSensorFRead( fp, &sensor, &orgflt );
+  pdSensorFRead( fp, &sensor, &srcfarr );
   EXPECT_STREQ( "lf_FT01", zNamePtr( &sensor ) );
   EXPECT_TRUE( zVec3DMatch( &v, zFrame3DPos( pdSensorFrame(&sensor) ) ) );
   EXPECT_TRUE( zMat3DMatch( &m, zFrame3DAtt( pdSensorFrame(&sensor) ) ) );
@@ -131,5 +131,76 @@ TEST_F(pdSensor6AxisFTTest, FRead)
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,4) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,5) ) );
   pdSensorDestroy( &sensor );
+  fclose( fp );
+}
+
+TEST_F(pdSensor6AxisFTTest, FRead2)
+{
+  char filename[] = "model/sensor_6axisft2.conf";
+  FILE *fp;
+
+  fp = fopen( filename, "r" );
+  pdSensorFRead( fp, &sensor, &srcfarr );
+  EXPECT_STREQ( "lf_FT02", zNamePtr( &sensor ) );
+  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, zFrame3DPos( pdSensorFrame(&sensor) ) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, zFrame3DAtt( pdSensorFrame(&sensor) ) ) );
+  EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,0) ) );
+  EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,1) ) );
+  EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,2) ) );
+  EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,3) ) );
+  EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,4) ) );
+  EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,5) ) );
+  pdSensorDestroy( &sensor );
+  fclose( fp );
+}
+
+class pdSensorArrayTest : public testing::Test {
+protected:
+  virtual void SetUp() {
+    pdFilterArrayAlloc( &srcfarr, 6 );
+    pdFilterCreateNone( zArrayElem(&srcfarr,0) );
+    pdFilterCreateBW(   zArrayElem(&srcfarr,1), 0.5, 2 );
+    pdFilterCreateNone( zArrayElem(&srcfarr,2) );
+    pdFilterCreateBW(   zArrayElem(&srcfarr,3), 1.0, 2 );
+    pdFilterCreateNone( zArrayElem(&srcfarr,4) );
+    pdFilterCreateBW(   zArrayElem(&srcfarr,5), 1.5, 3 );
+    zNameSet( zArrayElem(&srcfarr,0), (char*)"none01" );
+    zNameSet( zArrayElem(&srcfarr,1), (char*)"bw01" );
+    zNameSet( zArrayElem(&srcfarr,2), (char*)"none02" );
+    zNameSet( zArrayElem(&srcfarr,3), (char*)"bw02" );
+    zNameSet( zArrayElem(&srcfarr,4), (char*)"none03" );
+    zNameSet( zArrayElem(&srcfarr,5), (char*)"bw03" );
+  };
+  virtual void TearDown() {
+    pdFilterArrayDestroy( &srcfarr );
+  };
+
+  pdSensorArray arr;
+  pdFilterArray srcfarr;
+  RandomInitializer ri;
+};
+
+TEST_F(pdSensorArrayTest, NameFind)
+{
+  pdSensorArrayAlloc( &arr, 2 );
+  pdSensorCreate6AxisFT( zArrayElem(&arr,0), ZFRAME3DIDENT, &srcfarr );
+  pdSensorCreate6AxisFT( zArrayElem(&arr,1), ZFRAME3DIDENT, &srcfarr );
+  zNameSet( zArrayElem(&arr,0), (char*)"lf_FT01" );
+  zNameSet( zArrayElem(&arr,1), (char*)"rf_FT01" );
+  EXPECT_EQ( zArrayElem(&arr,0), pdSensorArrayNameFind(&arr,"lf_FT01") );
+  EXPECT_EQ( zArrayElem(&arr,1), pdSensorArrayNameFind(&arr,"rf_FT01") );
+  // pdSensorArrayDestroy( &arr );
+}
+
+TEST_F(pdSensorArrayTest, FRead)
+{
+  char filename[] = "model/sensor.conf";
+  FILE *fp;
+
+  fp = fopen( filename, "r" );
+  pdSensorArrayFRead( fp, &arr, &srcfarr );
+  EXPECT_STREQ( "lf_FT01", zNamePtr( zArrayElem(&arr,0) ) );
+  EXPECT_STREQ( "rf_FT01", zNamePtr( zArrayElem(&arr,1) ) );
+  pdSensorArrayDestroy( &arr );
   fclose( fp );
 }

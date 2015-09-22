@@ -9,7 +9,6 @@ typedef struct{
 static void _pdFilterDestroyBW(_pdFilterBW *bw);
 static void _pdFilterRefreshBW(_pdFilterBW *bw);
 static double _pdFilterUpdateBW(_pdFilterBW *bw, double dt);
-static _pdFilterBW *_pdFilterCloneBW(_pdFilterBW *src, _pdFilterBW *dst);
 
 void _pdFilterDestroyBW(_pdFilterBW *bw)
 {

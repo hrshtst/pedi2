@@ -55,6 +55,16 @@ __EXPORT void pdSensorDestroyDefault(pdSensor *sensor);
 #define PD_SENSOR_TAG "sensor"
 __EXPORT pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr);
 
+zArrayClass( pdSensorArray, pdSensor );
+
+__EXPORT bool pdSensorArrayAlloc(pdSensorArray *arr, int n);
+__EXPORT void pdSensorArrayDestroy(pdSensorArray *arr);
+
+__EXPORT pdSensor *pdSensorArrayNameFind(pdSensorArray *arr, const char *name);
+
+__EXPORT void pdSensorArrayProcess(pdSensorArray *arr, double dt);
+
+__EXPORT bool pdSensorArrayFRead(FILE *fp, pdSensorArray *arr, pdFilterArray *srcfarr);
 
 __END_DECLS
 

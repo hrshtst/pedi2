@@ -1,5 +1,12 @@
 #include <pedi2/pd_est_zmp.h>
 
+void pdEstZMPInit(pdEstZMP *e)
+{
+  zVec3DClear( &e->estforce );
+  zVec3DClear( &e->estzmp );
+}
+
+#if 0
 void pdEstZMPInit(pdEstZMP *e_zmp, double dt)
 {
   e_zmp->_t = 0;
@@ -98,4 +105,4 @@ bool pdEstZMPConfReadFile(pdEstZMP *e_zmp, const char *filename)
   fclose( fp );
   return result;
 }
-
+#endif

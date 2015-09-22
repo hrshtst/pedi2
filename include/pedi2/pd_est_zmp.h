@@ -1,43 +1,41 @@
 #ifndef __PD_EST_ZMP_H__
 #define __PD_EST_ZMP_H__
 
-#include <zeo/zeo_vec3d.h>
+#include <pedi2/pd_filter.h>
+#include <pedi2/pd_sensor.h>
 
 __BEGIN_DECLS
 
 typedef struct{
-  char name[BUFSIZ];
-  int dim;
-  double freq;
-} filter_t;
+  Z_NAMED_CLASS;
+  pdFilterArray _farray;
+  pdSensorArray _sarray;
 
-typedef struct{
-  char name[BUFSIZ];
-  char type[BUFSIZ];
-} sensor_t;
+  pdSensorArray _lfsarray;
+  pdSensorArray _rfsarray;
 
-typedef struct{
-  double _t;     /* time */
-  double _dt;    /* time step */
-
-  filter_t filter[2];
-  sensor_t sensor[2];
+  zVec3D estforce;
+  zVec3D estzmp;
 } pdEstZMP;
 
 /* c'tor and d'tor */
-__EXPORT void pdEstZMPInit(pdEstZMP *e_zmp, double dt);
-__EXPORT void pdEstZMPDestroy(pdEstZMP *e_zmp);
+__EXPORT void pdEstZMPInit(pdEstZMP *e);
+__EXPORT void pdEstZMPDestroy(pdEstZMP *e);
 
 /* methods to get parameters */
-#define pdEstZMPTime(e)     (e)->_t
-#define pdEstZMPTimeStep(e) (e)->_dt
+#define pdEstZMPEstZMPVec(e)   ( &(e)->estzmp )
+#define pdEstZMPEstZMPX(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zX )
+#define pdEstZMPEstZMPY(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zY )
+#define pdEstZMPEstZMPZ(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zZ )
+#define pdEstZMPEstForceVec(e) ( &(e)->estforce )
+#define pdEstZMPEstForceX(e)   zVec3DElem( pdEstZMPEstForceVec(e), zX )
+#define pdEstZMPEstForceY(e)   zVec3DElem( pdEstZMPEstForceVec(e), zY )
+#define pdEstZMPEstForceZ(e)   zVec3DElem( pdEstZMPEstForceVec(e), zZ )
 
 /* methods to set parameters */
-#define pdEstZMPSetTime(e,t)      ( (e)->_t = (t) )
-#define pdEstZMPSetTimeStep(e,dt) ( (e)->_dt = (dt) )
 
-__EXPORT bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e_zmp);
-__EXPORT bool pdEstZMPConfReadFile(pdEstZMP *e_zmp, const char *filename);
+__EXPORT bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e);
+__EXPORT bool pdEstZMPConfReadFile(pdEstZMP *e, const char *filename);
 
 __END_DECLS
 

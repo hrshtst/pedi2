@@ -62,13 +62,18 @@ protected:
 
 TEST_F(pdSensor6AxisFTTest, Create)
 {
-  EXPECT_TRUE( pdSensorCreate6AxisFT( &sensor ) );
+  zFrame3D frame;
+  pdFilterArray arr;
+
+  zFrame3DIdent( &frame );
+  pdFilterArrayAlloc( &arr, 6 );
+  EXPECT_TRUE( pdSensorCreate6AxisFT( &sensor, &frame, &arr ) );
   EXPECT_EQ( NULL, zNamePtr( &sensor ) );
   EXPECT_EQ( 6, pdSensorSize( &sensor ) );
   EXPECT_EQ( 6, zVecSize( pdSensorInput( &sensor ) ) );
   EXPECT_EQ( 6, zVecSize( pdSensorOutput( &sensor ) ) );
   EXPECT_EQ( 6, zArrayNum( pdSensorFilterArray( &sensor ) ) );
-  EXPECT_TRUE( zArrayBuf( pdSensorFilterArray( &sensor ) ) );
+  EXPECT_EQ( zArrayBuf(&arr), zArrayBuf(pdSensorFilterArray(&sensor)) );
   EXPECT_EQ( &pd_sensor_6axisft_met, sensor._met );
   pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
   pdFilterCreateNone( zArrayElem(&sensor.arr,1) );

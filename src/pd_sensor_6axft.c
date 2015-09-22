@@ -27,13 +27,21 @@ pdSensorMethod pd_sensor_6axisft_met = {
 };
 
 #define PD_SENSOR_6AXIS_SIZE 6
-bool pdSensorCreate6AxisFT(pdSensor *sensor)
+bool pdSensorCreate6AxisFT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr)
 {
   pdSensorInit( sensor );
   pdSensorSize( sensor ) = PD_SENSOR_6AXIS_SIZE;
   pdSensorInput( sensor ) = zVecAlloc( pdSensorSize(sensor) );
   pdSensorOutput( sensor ) = zVecAlloc( pdSensorSize(sensor) );
-  pdFilterArrayAlloc( pdSensorFilterArray(sensor), pdSensorSize(sensor) );
+  zFrame3DSetPos( pdSensorFrame(sensor), zFrame3DPos(frame) );
+  zFrame3DSetAtt( pdSensorFrame(sensor), zFrame3DAtt(frame) );
+  if( zArrayNum(arr) == PD_SENSOR_6AXIS_SIZE ){
+    zArraySetNum( pdSensorFilterArray(sensor), PD_SENSOR_6AXIS_SIZE );
+    zArraySetBuf( pdSensorFilterArray(sensor), zArrayBuf(arr) );
+  } else {
+    ZRUNERROR( "Filter array size is not matched: %d", zArrayNum(arr) );
+    return false;
+  }
   sensor->_met = &pd_sensor_6axisft_met;
   return true;
 }

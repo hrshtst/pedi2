@@ -5,7 +5,7 @@
 
 __BEGIN_DECLS
 
-__EXPORT bool pdSensorCreate6AxisFT(pdSensor *sensor);
+__EXPORT bool pdSensorCreate6AxisFT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr);
 
 extern pdSensorMethod pd_sensor_6axisft_met;
 

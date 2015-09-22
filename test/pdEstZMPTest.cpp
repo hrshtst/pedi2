@@ -54,3 +54,33 @@ TEST_F(pdEstZMPTest, Destroy)
   EXPECT_EQ( 0, pdEstZMPEstZMPY( &e ) );
   EXPECT_EQ( 0, pdEstZMPEstZMPZ( &e ) );
 }
+
+TEST_F(pdEstZMPTest, FRead)
+{
+  char filename[] = "model/zmpest.conf";
+  FILE *fp;
+
+  fp = fopen( filename, "r" );
+  pdEstZMPConfFRead( fp, &e );
+  // test
+  EXPECT_STREQ( "zmpest", zNamePtr(&e) );
+  // check filter array
+  EXPECT_EQ( 2, zArrayNum( pdEstZMPFilterArray(&e) ) );
+  EXPECT_STREQ( "bw01", zNamePtr(zArrayElem(pdEstZMPFilterArray(&e),0)));
+  EXPECT_STREQ( "bw02", zNamePtr(zArrayElem(pdEstZMPFilterArray(&e),1)));
+  // check sensor array
+  EXPECT_EQ( 4, zArrayNum( pdEstZMPSensorArray(&e) ) );
+  EXPECT_STREQ( "lf_FT01", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),0)));
+  EXPECT_STREQ( "lf_FT02", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),1)));
+  EXPECT_STREQ( "rf_FT01", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),2)));
+  EXPECT_STREQ( "rf_FT02", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),3)));
+  // check pdEstZMP class
+  EXPECT_EQ( 2, e._lfsensor_num );
+  EXPECT_EQ( 2, e._rfsensor_num );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),0), e._lfsensor[0] );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),1), e._lfsensor[1] );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),2), e._rfsensor[0] );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),3), e._rfsensor[1] );
+  pdEstZMPDestroy( &e );
+  fclose( fp );
+}

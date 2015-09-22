@@ -25,6 +25,8 @@ __EXPORT void pdEstZMPInit(pdEstZMP *e);
 __EXPORT void pdEstZMPDestroy(pdEstZMP *e);
 
 /* methods to get parameters */
+#define pdEstZMPFilterArray(e) ( &(e)->_farray )
+#define pdEstZMPSensorArray(e) ( &(e)->_sarray )
 #define pdEstZMPEstZMPVec(e)   ( &(e)->estzmp )
 #define pdEstZMPEstZMPX(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zX )
 #define pdEstZMPEstZMPY(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zY )

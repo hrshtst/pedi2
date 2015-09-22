@@ -20,98 +20,137 @@ void pdEstZMPDestroy(pdEstZMP *e)
   e->_rfsensor_num = 0;
   zVec3DClear( &e->estforce );
   zVec3DClear( &e->estzmp );
-}
-
-  pdEstZMPInit( e );
-}
-
-#if 0
-void pdEstZMPInit(pdEstZMP *e_zmp, double dt)
-{
-  e_zmp->_t = 0;
-  e_zmp->_dt = dt;
-}
-
-void pdEstZMPDestroy(pdEstZMP *e_zmp)
-{
-  pdEstZMPInit( e_zmp, 0 );
-}
-
-bool _pdEstZMPConfFReadFilterField(FILE *fp, void *instance, char *buf, bool *success)
-{
-  if( strcmp( buf, "name" ) == 0 ){
-    if( !zFToken( fp, ((filter_t*)instance)->name, BUFSIZ ) ){
-      *success = false;
-      return false;
-    }
-  } else {
-    ZRUNERROR( "unknown field: %s\n", buf );
-    return false;
-  }
-  return true;
-}
-
-pdEstZMP *_pdEstZMPFilterFRead(FILE *fp, pdEstZMP *e, int i)
-{
-  if( !zFieldFRead( fp, _pdEstZMPConfFReadFilterField, &(e->filter[i]) ) )
-    return NULL;
-  return e;
-}
-
-bool _pdEstZMPConfFReadSensorField(FILE *fp, void *instance, char *buf, bool *success)
-{
-  if( strcmp( buf, "name" ) == 0 ){
-    if( !zFToken( fp, ((sensor_t*)instance)->name, BUFSIZ ) ){
-      *success = false;
-      return false;
-    }
-  } else {
-    ZRUNERROR( "unknown field: %s\n", buf );
-    return false;
-  }
-  return true;
-}
-
-pdEstZMP *_pdEstZMPSensorFRead(FILE *fp, pdEstZMP *e, int i)
-{
-  if( !zFieldFRead( fp, _pdEstZMPConfFReadSensorField, &(e->sensor[i]) ) )
-    return NULL;
-  return e;
+  pdFilterArrayDestroy( pdEstZMPFilterArray( e ) );
 }
 
 typedef struct {
-  pdEstZMP *e;
-  int fc;
-  int sc;
+  char name[BUFSIZ];
+  pdSensorArray *sarray;
+  pdSensor **lfsensor;
+  pdSensor **rfsensor;
+  int lfsensor_num;
+  int rfsensor_num;
 } _pdEstZMPParam;
 
-bool _pdEstZMPConfFRead(FILE *fp, void *instance, char *buf, bool *success)
+int _pdEstZMPCountSensorName(FILE *fp, pdSensorArray *sarray)
+{
+  pdSensor *sp;
+  char buf[BUFSIZ];
+  int cur, cnt;
+
+  cnt = 0;
+  cur = ftell( fp );
+  while( !feof(fp) ){
+    if( !zFSkipDefaultComment( fp ) ) break;
+    if( !zFToken( fp, buf, BUFSIZ ) ) break;
+    zArrayFindName( sarray, buf, sp );
+    if( !sp ) break;
+    cnt++;
+  }
+  fseek( fp, cur, SEEK_SET );
+  return cnt;
+}
+
+void _pdEstZMPConnectSensor(FILE *fp, pdSensor **sensor, int num, pdSensorArray *sarray)
+{
+  register int i;
+  char buf[BUFSIZ];
+
+  for( i=0; i<num; i++ ){
+    if( !zFSkipDefaultComment( fp ) ) break;
+    if( !zFToken( fp, buf, BUFSIZ ) ) break;
+    sensor[i] = pdSensorArrayNameFind( sarray, buf );
+  }
+}
+
+bool _pdEstZMPFRead(FILE *fp, void *instance, char *buf, bool *success)
 {
   _pdEstZMPParam *prm;
 
   prm = instance;
-  if( strcmp( buf, "filter" ) == 0 ) {
-    if( !_pdEstZMPFilterFRead( fp, prm->e, prm->fc++ ) )
-      return ( *success = false );
-  } else if( strcmp( buf, "sensor" ) == 0 ) {
-    if( !_pdEstZMPSensorFRead( fp, prm->e, prm->sc++ ) )
+  if( strcmp( buf, "name" ) == 0 ){
+    if( strlen( zFToken( fp, prm->name, BUFSIZ ) ) >= BUFSIZ ){
+      prm->name[BUFSIZ-1] = '\0';
+      ZRUNWARN( "too long name, truncated to %s", buf );
+    }
+  } else
+  if( strcmp( buf, "type" ) == 0 ){
+    if( !zFToken( fp, buf, BUFSIZ ) )
+      *success = false;
+    if( strcmp( buf, "zmp" ) != 0 ){
+      ZRUNERROR( "invalid estimator type %s", buf );
+      *success = false;
+    }
+  } else
+  if( strcmp( buf, "leftfoot" ) == 0 ){
+    prm->lfsensor_num = _pdEstZMPCountSensorName( fp, prm->sarray );
+    prm->lfsensor = zAlloc( pdSensor*, prm->lfsensor_num );
+    if( !prm->lfsensor ){
+      ZALLOCERROR();
+      *success = false;
+    }
+    _pdEstZMPConnectSensor( fp, prm->lfsensor, prm->lfsensor_num, prm->sarray );
+  } else
+  if( strcmp( buf, "rightfoot" ) == 0 ){
+    prm->rfsensor_num = _pdEstZMPCountSensorName( fp, prm->sarray );
+    prm->rfsensor = zAlloc( pdSensor*, prm->rfsensor_num );
+    if( !prm->rfsensor ){
+      ZALLOCERROR();
+      *success = false;
+    }
+    _pdEstZMPConnectSensor( fp, prm->rfsensor, prm->rfsensor_num, prm->sarray );
+  } else
+    return false;
+  return true;
+}
+
+pdEstZMP *pdEstZMPFRead(FILE *fp, pdEstZMP *e)
+{
+  _pdEstZMPParam prm;
+
+  prm.name[0] = '\0';
+  prm.sarray = pdEstZMPSensorArray( e );
+  prm.lfsensor = NULL;
+  prm.rfsensor = NULL;
+  prm.lfsensor_num = 0;
+  prm.rfsensor_num = 0;
+  if( !zFieldFRead( fp, _pdEstZMPFRead, &prm ) )
+    return NULL;
+  zNameSet( e, prm.name );
+  e->_lfsensor_num = prm.lfsensor_num;
+  e->_rfsensor_num = prm.rfsensor_num;
+  e->_lfsensor = prm.lfsensor;
+  e->_rfsensor = prm.rfsensor;
+  return e;
+}
+
+bool _pdEstZMPConfFRead(FILE *fp, void *instance, char *buf, bool *success)
+{
+  if( strcmp( buf, "estimator" ) == 0 ) {
+    if( !pdEstZMPFRead( fp, instance ) )
       return ( *success = false );
   }
   return true;
 }
 
-bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e_zmp)
+bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e)
 {
-  _pdEstZMPParam prm;
-
-  prm.e = e_zmp;
-  prm.fc = 0;
-  prm.sc = 0;
+  pdEstZMPInit( e );
+  if( !pdFilterArrayFRead( fp, pdEstZMPFilterArray(e) ) ){
+    ZRUNERROR( "failed to allocate filter array" );
+    return false;
+  }
   rewind( fp );
-  return zTagFRead( fp, _pdEstZMPConfFRead, &prm );
+  if( !pdSensorArrayFRead( fp, pdEstZMPSensorArray(e), pdEstZMPFilterArray(e) ) ){
+    ZRUNERROR( "failed to allocate sensor array" );
+    return false;
+  }
+  rewind( fp );
+  zTagFRead( fp, _pdEstZMPConfFRead, e );
+  return true;
 }
 
-bool pdEstZMPConfReadFile(pdEstZMP *e_zmp, const char *filename)
+bool pdEstZMPConfReadFile(pdEstZMP *e, const char *filename)
 {
   FILE *fp;
   bool result;
@@ -120,8 +159,7 @@ bool pdEstZMPConfReadFile(pdEstZMP *e_zmp, const char *filename)
     ZOPENERROR( filename );
     return false;
   }
-  result = pdEstZMPConfFRead( fp, e_zmp );
+  result = pdEstZMPConfFRead( fp, e );
   fclose( fp );
   return result;
 }
-#endif

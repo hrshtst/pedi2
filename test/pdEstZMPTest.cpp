@@ -29,3 +29,16 @@ TEST_F(pdEstZMPTest, Init)
   EXPECT_EQ( 0, pdEstZMPEstZMPY( &e ) );
   EXPECT_EQ( 0, pdEstZMPEstZMPZ( &e ) );
 }
+
+TEST_F(pdEstZMPTest, Destroy)
+{
+  pdEstZMPInit( &e );
+  SetRandomValues();
+  pdEstZMPDestroy( &e );
+  EXPECT_EQ( 0, pdEstZMPEstForceX( &e ) );
+  EXPECT_EQ( 0, pdEstZMPEstForceY( &e ) );
+  EXPECT_EQ( 0, pdEstZMPEstForceZ( &e ) );
+  EXPECT_EQ( 0, pdEstZMPEstZMPX( &e ) );
+  EXPECT_EQ( 0, pdEstZMPEstZMPY( &e ) );
+  EXPECT_EQ( 0, pdEstZMPEstZMPZ( &e ) );
+}

@@ -6,6 +6,11 @@ void pdEstZMPInit(pdEstZMP *e)
   zVec3DClear( &e->estzmp );
 }
 
+void pdEstZMPDestroy(pdEstZMP *e)
+{
+  pdEstZMPInit( e );
+}
+
 #if 0
 void pdEstZMPInit(pdEstZMP *e_zmp, double dt)
 {

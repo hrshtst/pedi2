@@ -48,6 +48,9 @@ __EXPORT pdFilter *pdFilterFRead(FILE *fp, pdFilter *filter);
 
 zArrayClass( pdFilterArray, pdFilter );
 
+#define pdFilterArrayInput(arr,i)  pdFilterInput( zArrayElem(arr,i) )
+#define pdFilterArrayOutput(arr,i) pdFilterOutput( zArrayElem(arr,i) )
+
 __EXPORT bool pdFilterArrayAlloc(pdFilterArray *arr, int n);
 __EXPORT void pdFilterArrayDestroy(pdFilterArray *arr);
 

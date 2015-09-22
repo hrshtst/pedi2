@@ -10,6 +10,18 @@ void pdSensorDestroyDefault(pdSensor *sensor)
   pdSensorInit( sensor );
 }
 
+zVec pdSensorProcessDefault(pdSensor *sensor, double dt)
+{
+  register int i;
+
+  for( i=0; i<pdSensorSize(sensor); i++ )
+    pdFilterArrayInput( pdSensorFilterArray(sensor), i ) = pdSensorInputVal( sensor, i );
+  pdFilterArrayUpdate( pdSensorFilterArray(sensor), dt );
+  for( i=0; i<pdSensorSize(sensor); i++ )
+    pdSensorOutputVal( sensor, i ) = pdFilterArrayOutput( pdSensorFilterArray(sensor), i );
+  return pdSensorOutput( sensor );
+}
+
 static pdSensorMethod *_pdSensorMethodByStr(char str[]);
 
 pdSensorMethod *_pdSensorMethodByStr(char str[])

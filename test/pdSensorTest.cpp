@@ -64,6 +64,43 @@ TEST_F(pdSensorTest, DestroyDefault)
   EXPECT_EQ( NULL, sensor._met );
 }
 
+TEST_F(pdSensorTest, ProcessDefault)
+{
+  zVec input, output;
+
+  input = zVecCreateList( 3, 1.0, 2.0, 3.0 );
+  output = zVecAlloc( 3 );
+  pdSensorInit( &sensor );
+  pdSensorSize( &sensor ) = 3;
+  pdSensorInput( &sensor ) = zVecAlloc( 3 );
+  pdSensorOutput( &sensor ) = zVecAlloc( 3 );
+  pdFilterArrayAlloc( &sensor.arr, 3 );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,1) );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,2) );
+  zNameSet( zArrayElem(&sensor.arr,0), (char*)"none00" );
+  zNameSet( zArrayElem(&sensor.arr,1), (char*)"none01" );
+  zNameSet( zArrayElem(&sensor.arr,2), (char*)"none02" );
+  zNameSet( &sensor, (char*)ZNONAME );
+  // methods to testify
+  pdSensorSetInput( &sensor, input );
+  pdSensorProcessDefault( &sensor, TIME_STEP );
+  pdSensorGetOutput( &sensor, output );
+  // test
+  EXPECT_EQ( 1.0, pdSensorInputVal(&sensor,0) );
+  EXPECT_EQ( 2.0, pdSensorInputVal(&sensor,1) );
+  EXPECT_EQ( 3.0, pdSensorInputVal(&sensor,2) );
+  EXPECT_EQ( 1.0, pdSensorOutputVal(&sensor,0) );
+  EXPECT_EQ( 2.0, pdSensorOutputVal(&sensor,1) );
+  EXPECT_EQ( 3.0, pdSensorOutputVal(&sensor,2) );
+  EXPECT_EQ( 1.0, zVecElem(output,0) );
+  EXPECT_EQ( 2.0, zVecElem(output,1) );
+  EXPECT_EQ( 3.0, zVecElem(output,2) );
+  pdSensorDestroyDefault( &sensor );
+  zVecFree( input );
+  zVecFree( output );
+}
+
 
 class pdSensor6AxisFTTest : public testing::Test {
 protected:

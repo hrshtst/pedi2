@@ -36,6 +36,9 @@ typedef struct _pdSensor{
 #define pdSensorOutputVal(s,i)  zVecElem( pdSensorOutput(s), i )
 #define pdSensorFilterElem(s,i) zArrayElem( pdSensorFilterArray(s), i )
 
+#define pdSensorSetInput(s,i)  zVecCopy( i, pdSensorInput(s) )
+#define pdSensorGetOutput(s,o) zVecCopy( pdSensorOutput(s), o )
+
 #define pdSensorInit(s) do{\
   zNameSet( s, NULL );\
   pdSensorSize(s) = 0;\
@@ -51,6 +54,7 @@ typedef struct _pdSensor{
 #define pdSensorProcess(s,h) (s)->_met->process( s, h )
 
 __EXPORT void pdSensorDestroyDefault(pdSensor *sensor);
+__EXPORT zVec pdSensorProcessDefault(pdSensor *sensor, double dt);
 
 #define PD_SENSOR_TAG "sensor"
 __EXPORT pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr);

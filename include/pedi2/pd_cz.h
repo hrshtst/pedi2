@@ -170,7 +170,7 @@ __EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);
 __EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
 
 /* update method */
-__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr);
+__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr);
 __EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *comd, double *thetad);
 
 /* output method */

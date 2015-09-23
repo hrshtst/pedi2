@@ -1,6 +1,6 @@
 #include <pedi2/pd_cz.h>
 
-static void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr);
+static void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr);
 static void _pdCZUpdateVrt(pdCZ *cz);
 static void _pdCZUpdateHrz(pdCZ *cz);
 static zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc);
@@ -77,12 +77,13 @@ void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd)
                          refuw[pdW] + refdw * cos(delta_theta) );
 }
 
-void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr)
+void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr)
 {
   pdCZSetCOMVec( cz, com );
   pdCZSetVelVec( cz, vel );
   pdCZSetAccVec( cz, acc );
   pdCZSetZMPVec( cz, zmp );
+  pdCZSetFZ( cz, fz );
   pdCZSetTheta( cz, theta );
   pdCZSetSR( cz, sr );
   zVecSetElem( cz->_ode.pos, zX, pdCZCOMX(cz) );
@@ -141,9 +142,9 @@ void _pdCZUpdateRef(pdCZ *cz)
 }
 
 
-void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr)
+void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr)
 {
-  _pdCZUpdateState( cz, com, vel, acc, zmp, theta, sr );
+  _pdCZUpdateState( cz, com, vel, acc, zmp, fz, theta, sr );
   _pdCZUpdateVrt( cz );
   _pdCZUpdateHrz( cz );
   zODE2Update( &cz->_ode.solver, pdCZTime(cz), cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz), cz );

@@ -237,6 +237,7 @@ void _pdBipedUpdateCZ(pdBiped *biped, pdState *state)
               &state->com_vel,
               &state->com_acc,
               &state->zmp,
+              state->fz,
               state->base_att.e[0] - offset,
               &state->sr );
 }

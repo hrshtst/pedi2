@@ -163,3 +163,20 @@ zVec3D *pdSensor6FTGetT(pdSensor *sensor, zVec3D *tau)
   return tau;
 }
 
+zVec3D *pdSensor6FTGetWldF(pdSensor *sensor, zVec3D *f)
+{
+  _pdSensor6FT *ft;
+
+  ft = sensor->_prm;
+  zMulMatVec3D( pdSensorWldAtt(sensor), &ft->f, f );
+  return f;
+}
+
+zVec3D *pdSensor6FTGetWldT(pdSensor *sensor, zVec3D *tau)
+{
+  _pdSensor6FT *ft;
+
+  ft = sensor->_prm;
+  zMulMatVec3D( pdSensorWldAtt(sensor), &ft->tau, tau );
+  return tau;
+}

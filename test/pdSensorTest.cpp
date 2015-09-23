@@ -104,6 +104,39 @@ TEST_F(pdSensorTest, ProcessDefault)
   zVecFree( output );
 }
 
+TEST_F(pdSensorTest, FrameUpdateDefault)
+{
+  zVec3D v;
+  zMat3D m;
+  zFrame3D frame;
+
+  // prepare
+  pdSensorInit( &sensor );
+  zVec3DCreate( &v, 0, 0, 1 );
+  zFrame3DCreate( pdSensorLinkFrame(&sensor), &v, ZMAT3DIDENT );
+  zVec3DCreate( &v, 0, 0, -2 );
+  zMat3DCreate( &m, 0, 1, 0, -1, 0, 0, 0, 0, 1 );
+  zFrame3DCreate( &frame, &v, &m );
+  // methods to testify
+  pdSensorFrameUpdateDefault( &sensor, &frame );
+  zVec3DCopy( pdSensorWldPos(&sensor), &v );
+  zMat3DCopy( pdSensorWldAtt(&sensor), &m );
+  EXPECT_EQ( 0,  zVec3DElem(&v,zX) );
+  EXPECT_EQ( 0,  zVec3DElem(&v,zY) );
+  EXPECT_EQ( -1, zVec3DElem(&v,zZ) );
+  EXPECT_EQ( 0,  zMat3DElem9(&m,0) );
+  EXPECT_EQ( -1, zMat3DElem9(&m,1) );
+  EXPECT_EQ( 0,  zMat3DElem9(&m,2) );
+  EXPECT_EQ( 1,  zMat3DElem9(&m,3) );
+  EXPECT_EQ( 0,  zMat3DElem9(&m,4) );
+  EXPECT_EQ( 0,  zMat3DElem9(&m,5) );
+  EXPECT_EQ( 0,  zMat3DElem9(&m,6) );
+  EXPECT_EQ( 0,  zMat3DElem9(&m,7) );
+  EXPECT_EQ( 1,  zMat3DElem9(&m,8) );
+  // test
+  pdSensorDestroyDefault( &sensor );
+}
+
 
 class pdSensor6FTTest : public testing::Test {
 protected:
@@ -228,6 +261,45 @@ TEST_F(pdSensor6FTTest, GetFT)
   EXPECT_EQ( 6.0, zVec3DElem( &tau, zZ ) );
   pdSensorDestroy( &sensor );
 }
+
+TEST_F(pdSensor6FTTest, GetWldFT)
+{
+  zFrame3D sframe;
+  zFrame3D lframe;
+  pdFilterArray arr;
+  zVec v;
+  zVec3D f, tau;
+
+  zVec3D p; zVec3DCreate( &p, 0, 0, -1 );
+  zMat3D m; zMat3DCreate( &m, 0, 1, 0, -1, 0, 0, 0, 0, 1 );
+  zFrame3DCreate( &lframe, &p, &m );
+  // prepare
+  v = zVecCreateList( 6, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0 );
+  zFrame3DIdent( &sframe );
+  pdFilterArrayAlloc( &arr, 6 );
+  pdSensorCreate6FT( &sensor, &sframe, &arr );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,1) );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,2) );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,3) );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,4) );
+  pdFilterCreateNone( zArrayElem(&sensor.arr,5) );
+  // method to testify
+  pdSensorSetInput( &sensor, v );
+  pdSensorProcess( &sensor, TIME_STEP );
+  pdSensorFrameUpdate( &sensor, &lframe );
+  pdSensor6FTGetWldF( &sensor, &f );
+  pdSensor6FTGetWldT( &sensor, &tau );
+  // check
+  EXPECT_EQ( 1.0,  zVec3DElem( &f, zX ) );
+  EXPECT_EQ( 0.0,  zVec3DElem( &f, zY ) );
+  EXPECT_EQ( 1.0,  zVec3DElem( &f, zZ ) );
+  EXPECT_EQ( 0.0,  zVec3DElem( &tau, zX ) );
+  EXPECT_EQ( -1.0, zVec3DElem( &tau, zY ) );
+  EXPECT_EQ( 0.0,  zVec3DElem( &tau, zZ ) );
+  pdSensorDestroy( &sensor );
+}
+
 
 class pdSensorArrayTest : public testing::Test {
 protected:

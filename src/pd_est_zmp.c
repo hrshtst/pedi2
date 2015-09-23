@@ -19,6 +19,19 @@ void pdEstZMPDestroy(pdEstZMP *e)
   pdFilterArrayDestroy( pdEstZMPFilterArray( e ) );
 }
 
+pdSensor *pdEstZMPFindSensor(pdEstZMP *e, const char *name)
+{
+  pdSensor *s;
+
+  zArrayFindName( pdEstZMPSensorArray(e), name, s );
+  return s;
+}
+
+void pdEstZMPSetData(pdEstZMP *e, const char *name, zVec data)
+{
+  pdSensorSetInput( pdEstZMPFindSensor(e, name), data );
+}
+
 zVec3D *pdEstZMPCalcFootForce(pdEstZMP *e, pdSensorPtrArray *s, zVec3D *f)
 {
   register uint i;

@@ -14,6 +14,7 @@ typedef struct{
   zVec3D _vel;      /* COM velocity */
   zVec3D _acc;      /* COM acceleration */
   zVec3D _zmp;      /* ZMP position */
+  double _fz;       /* vertial reaction force */
   double _theta;    /* rotational angle */
   zVec3DList *_sr;  /* supporting region */
 
@@ -61,6 +62,7 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZZMPX(c)     zVec3DElem( pdCZZMP(c), zX )
 #define pdCZZMPY(c)     zVec3DElem( pdCZZMP(c), zY )
 #define pdCZZMPZ(c)     zVec3DElem( pdCZZMP(c), zZ )
+#define pdCZFZ(c)      (c)->_fz
 #define pdCZTheta(c)   (c)->_theta
 #define pdCZSR(c)      (c)->_sr
 #define pdCZVrtPtr(c)  ( &(c)->_vrt )
@@ -135,6 +137,7 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetZMPX(c,xz)         zVec3DSetElem( pdCZZMP(c), zX, xz )
 #define pdCZSetZMPY(c,yz)         zVec3DSetElem( pdCZZMP(c), zY, yz )
 #define pdCZSetZMPZ(c,zz)         zVec3DSetElem( pdCZZMP(c), zZ, zz )
+#define pdCZSetFZ(c,fz)           ( (c)->_fz = (fz) )
 #define pdCZSetTheta(c,t)         ( (c)->_theta = (t) )
 #define pdCZSetSR(c,sr)           ( (c)->_sr = (sr) )
 #define pdCZSetQ1Z(c,q1)          pdCZVrtSetQ1( pdCZVrtPtr(c), q1 )

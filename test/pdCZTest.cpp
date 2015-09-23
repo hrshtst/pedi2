@@ -32,6 +32,7 @@ class pdCZTest : public testing::Test {
     pdCZSetZMPX( &cz, ri.rand() );
     pdCZSetZMPY( &cz, ri.rand() );
     pdCZSetZMPZ( &cz, ri.rand() );
+    pdCZSetFZ( &cz, ri.rand() );
     pdCZSetTheta( &cz, ri.rand() );
     pdCZSetSR( &cz, &sr );
     pdCZSetQ1Z( &cz, ri.rand() );
@@ -92,6 +93,7 @@ TEST_F(pdCZTest, Init)
   EXPECT_EQ( 0, pdCZZMPX( &cz )     );
   EXPECT_EQ( 0, pdCZZMPY( &cz )     );
   EXPECT_EQ( 0, pdCZZMPZ( &cz )     );
+  EXPECT_EQ( 0, pdCZFZ( &cz )       );
   EXPECT_EQ( 0, pdCZTheta( &cz )    );
   EXPECT_EQ( NULL, pdCZSR( &cz )    );
   EXPECT_EQ( 0, pdCZQ1Z( &cz )      );
@@ -146,6 +148,7 @@ TEST_F(pdCZTest, Destroy)
   EXPECT_EQ( 0, pdCZZMPX( &cz )     );
   EXPECT_EQ( 0, pdCZZMPY( &cz )     );
   EXPECT_EQ( 0, pdCZZMPZ( &cz )     );
+  EXPECT_EQ( 0, pdCZFZ( &cz )       );
   EXPECT_EQ( 0, pdCZTheta( &cz )    );
   EXPECT_EQ( NULL, pdCZSR( &cz )    );
   EXPECT_EQ( 0, pdCZQ1Z( &cz )      );

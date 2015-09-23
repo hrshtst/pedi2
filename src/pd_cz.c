@@ -14,6 +14,7 @@ void pdCZInit(pdCZ *c, double dt)
   pdCZSetVel( c, 0, 0, 0 );
   pdCZSetAcc( c, 0, 0, 0 );
   pdCZSetZMP( c, 0, 0, 0 );
+  pdCZSetFZ( c, 0 );
   pdCZSetTheta( c, 0 );
   pdCZSetSR( c, NULL );
   pdCZVrtInit( pdCZVrtPtr(c) );
@@ -52,6 +53,7 @@ void pdCZDestroy(pdCZ *c)
   pdCZSetVel( c, 0, 0, 0 );
   pdCZSetAcc( c, 0, 0, 0 );
   pdCZSetZMP( c, 0, 0, 0 );
+  pdCZSetFZ( c, 0 );
   pdCZSetTheta( c, 0 );
   pdCZSetSR( c, NULL );
 }

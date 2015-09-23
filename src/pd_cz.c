@@ -128,9 +128,9 @@ zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc)
   cz = (pdCZ *)util;
   /* _pdCZUpdateVrt( cz ); */
   /* _pdCZUpdateHrz( cz ); */
-  zVecSetElem( acc, 0, pdCZHrzAccX( pdCZHrzPtr(cz) ) );
-  zVecSetElem( acc, 1, pdCZHrzAccY( pdCZHrzPtr(cz) ) );
-  zVecSetElem( acc, 2, pdCZVrtAcc( pdCZVrtPtr(cz) ) );
+  zVecSetElem( acc, 0, pdCZHrzAccX( pdCZHrzPtr(cz) ) + pdCZAlphaX(cz) );
+  zVecSetElem( acc, 1, pdCZHrzAccY( pdCZHrzPtr(cz) ) + pdCZAlphaY(cz) );
+  zVecSetElem( acc, 2, pdCZVrtAcc( pdCZVrtPtr(cz) ) + pdCZAlphaZ(cz) );
   return acc;
 }
 

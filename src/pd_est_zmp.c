@@ -2,7 +2,6 @@
 
 void pdEstZMPInit(pdEstZMP *e)
 {
-  zNameSet( e, NULL );
   zArrayInit( &e->_lfsensor );
   zArrayInit( &e->_rfsensor );
   zVec3DClear( &e->estforce );
@@ -11,7 +10,6 @@ void pdEstZMPInit(pdEstZMP *e)
 
 void pdEstZMPDestroy(pdEstZMP *e)
 {
-  zNameDestroy( e );
   zArrayFree( &e->_lfsensor );
   zArrayFree( &e->_rfsensor );
   zVec3DClear( &e->estforce );
@@ -26,7 +24,7 @@ pdSensor *pdEstZMPNameFindSensor(pdEstZMP *e, const char *name)
 
 void pdEstZMPSetData(pdEstZMP *e, const char *name, zVec data)
 {
-  pdSensorSetInput( pdEstZMPFindSensor(e, name), data );
+  pdSensorSetInput( pdEstZMPNameFindSensor(e, name), data );
 }
 
 zVec3D *pdEstZMPCalcFootForce(pdEstZMP *e, pdSensorPtrArray *s, zVec3D *f)
@@ -109,7 +107,6 @@ void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz
 
 
 typedef struct {
-  char name[BUFSIZ];
   pdSensorArray *sarray;
   pdSensor **lfsensor;
   pdSensor **rfsensor;
@@ -153,12 +150,6 @@ bool _pdEstZMPFRead(FILE *fp, void *instance, char *buf, bool *success)
   _pdEstZMPParam *prm;
 
   prm = instance;
-  if( strcmp( buf, "name" ) == 0 ){
-    if( strlen( zFToken( fp, prm->name, BUFSIZ ) ) >= BUFSIZ ){
-      prm->name[BUFSIZ-1] = '\0';
-      ZRUNWARN( "too long name, truncated to %s", buf );
-    }
-  } else
   if( strcmp( buf, "type" ) == 0 ){
     if( !zFToken( fp, buf, BUFSIZ ) )
       *success = false;
@@ -193,7 +184,6 @@ pdEstZMP *pdEstZMPFRead(FILE *fp, pdEstZMP *e)
 {
   _pdEstZMPParam prm;
 
-  prm.name[0] = '\0';
   prm.sarray = pdEstZMPSensorArray( e );
   prm.lfsensor = NULL;
   prm.rfsensor = NULL;
@@ -201,7 +191,6 @@ pdEstZMP *pdEstZMPFRead(FILE *fp, pdEstZMP *e)
   prm.rfsensor_num = 0;
   if( !zFieldFRead( fp, _pdEstZMPFRead, &prm ) )
     return NULL;
-  zNameSet( e, prm.name );
   zArraySetNum( &e->_lfsensor, prm.lfsensor_num );
   zArraySetNum( &e->_rfsensor, prm.rfsensor_num );
   zArraySetBuf( &e->_lfsensor, prm.lfsensor );

@@ -9,7 +9,6 @@ __BEGIN_DECLS
 zArrayClass( pdSensorPtrArray, pdSensor* );
 
 typedef struct{
-  Z_NAMED_CLASS;
   pdFilterArray _farray;
   pdSensorArray _sarray;
 

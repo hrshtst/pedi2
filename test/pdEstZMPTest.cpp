@@ -24,7 +24,6 @@ TEST_F(pdEstZMPTest, Init)
 {
   SetRandomValues();
   pdEstZMPInit( &e );
-  EXPECT_EQ( NULL, zNamePtr( &e ) );
   EXPECT_EQ( NULL, zArrayBuf( &e._lfsensor ) );
   EXPECT_EQ( NULL, zArrayBuf( &e._rfsensor ) );
   EXPECT_EQ( 0, zArrayNum( &e._lfsensor ) );
@@ -42,7 +41,6 @@ TEST_F(pdEstZMPTest, Destroy)
   pdEstZMPInit( &e );
   SetRandomValues();
   pdEstZMPDestroy( &e );
-  EXPECT_EQ( NULL, zNamePtr( &e ) );
   EXPECT_EQ( NULL, zArrayBuf( &e._lfsensor ) );
   EXPECT_EQ( NULL, zArrayBuf( &e._rfsensor ) );
   EXPECT_EQ( 0, zArrayNum( &e._lfsensor ) );
@@ -62,8 +60,6 @@ TEST_F(pdEstZMPTest, FRead)
 
   fp = fopen( filename, "r" );
   pdEstZMPConfFRead( fp, &e );
-  // test
-  EXPECT_STREQ( "zmpest", zNamePtr(&e) );
   // check filter array
   EXPECT_EQ( 2, zArrayNum( pdEstZMPFilterArray(&e) ) );
   EXPECT_STREQ( "bw01", zNamePtr(zArrayElem(pdEstZMPFilterArray(&e),0)));

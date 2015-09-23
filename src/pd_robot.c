@@ -214,6 +214,15 @@ void pdRobotDestroy(pdRobot *robot)
   rkChainDestroy( pdRobotChainPtr( robot ) );
 }
 
+void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state)
+{
+  pdRobotUpdateState( robot, state );
+  pdBipedDefaultPoseInit( biped, state );
+  pdRobotSetBipedRefVec( robot, biped );
+  pdRobotSolveIK( robot );
+  pdRobotUpdateState( robot, state );
+}
+
 void pdRobotUnsetAllFlags(pdRobot *robot)
 {
   register int i;

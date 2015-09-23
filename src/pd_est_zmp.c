@@ -19,6 +19,72 @@ void pdEstZMPDestroy(pdEstZMP *e)
   pdFilterArrayDestroy( pdEstZMPFilterArray( e ) );
 }
 
+zVec3D *pdEstZMPCalcFootForce(pdEstZMP *e, pdSensorPtrArray *s, zVec3D *f)
+{
+  register uint i;
+  zVec3D v;
+
+  zVec3DClear( f );
+  for( i=0; i<zArrayNum(s); i++ ){
+    pdSensor6FTGetWldF( zArrayBuf(s)[i], &v );
+    zVec3DAddDRC( f, &v );
+  }
+  return f;
+}
+
+zVec3D *pdEstZMPCalcForce(pdEstZMP *e, zVec3D *f)
+{
+  zVec3D lff, rff;
+
+  pdEstZMPCalcFootForce( e, &e->_lfsensor, &lff );
+  pdEstZMPCalcFootForce( e, &e->_rfsensor, &rff );
+  return zVec3DAdd( &lff, &rff, f );
+}
+
+zVec3D *pdEstZMPCalcFootZMP(pdEstZMP *e, pdSensorPtrArray *s, double pz, zVec3D *zmp, double *fz)
+{
+  register uint i;
+  zVec3D p, f, t;
+  double px, py;
+
+  px = py = 0;
+  *fz = 0;
+  for( i=0; i<zArrayNum(s); i++ ){
+    zVec3DCopy( pdSensorWldPos(zArrayBuf(s)[i]), &p );
+    pdSensor6FTGetWldF( zArrayBuf(s)[i], &f );
+    pdSensor6FTGetWldT( zArrayBuf(s)[i], &t );
+    px += -t.e[zY] - (p.e[zZ]-pz)*f.e[zX] + p.e[zX]*f.e[zZ];
+    py +=  t.e[zX] - (p.e[zZ]-pz)*f.e[zY] + p.e[zY]*f.e[zZ];
+    *fz += f.e[zZ];
+  }
+  if( zIsTiny(*fz) ) px = py = 0;
+  else{
+    px = px / *fz;
+    py = py / *fz;
+  }
+  return zVec3DCreate( zmp, px, py, pz );
+}
+
+zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp)
+{
+  zVec3D lfzmp, rfzmp;
+  double lffz, rffz;
+  double px, py, fz;
+
+  pdEstZMPCalcFootZMP( e, &e->_lfsensor, pz, &lfzmp, &lffz );
+  pdEstZMPCalcFootZMP( e, &e->_rfsensor, pz, &rfzmp, &rffz );
+  px = lfzmp.e[zX]*lffz + rfzmp.e[zX]*rffz;
+  py = lfzmp.e[zY]*lffz + rfzmp.e[zY]*rffz;
+  fz = lffz + rffz;
+  if( zIsTiny(fz) ) px = py = 0;
+  else{
+    px = px / fz;
+    py = py / fz;
+  }
+  return zVec3DCreate( zmp, px, py, pz );
+}
+
+
 typedef struct {
   char name[BUFSIZ];
   pdSensorArray *sarray;

@@ -38,6 +38,11 @@ __EXPORT void pdEstZMPDestroy(pdEstZMP *e);
 
 /* methods to set parameters */
 
+__EXPORT zVec3D *pdEstZMPCalcFootForce(pdEstZMP *e, pdSensorPtrArray *s, zVec3D *f);
+__EXPORT zVec3D *pdEstZMPCalcForce(pdEstZMP *e, zVec3D *f);
+__EXPORT zVec3D *pdEstZMPCalcFootZMP(pdEstZMP *e, pdSensorPtrArray *s, double pz, zVec3D *zmp, double *fz);
+__EXPORT zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp);
+
 __EXPORT bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e);
 __EXPORT bool pdEstZMPConfReadFile(pdEstZMP *e, const char *filename);
 

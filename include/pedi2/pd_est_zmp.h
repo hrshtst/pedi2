@@ -37,13 +37,15 @@ __EXPORT void pdEstZMPDestroy(pdEstZMP *e);
 #define pdEstZMPEstForceZ(e)   zVec3DElem( pdEstZMPEstForceVec(e), zZ )
 
 /* methods to set parameters */
-__EXPORT pdSensor *pdEstZMPFindSensor(pdEstZMP *e, const char *name);
+__EXPORT pdSensor *pdEstZMPNameFindSensor(pdEstZMP *e, const char *name);
 __EXPORT void pdEstZMPSetData(pdEstZMP *e, const char *name, zVec data);
 
 __EXPORT zVec3D *pdEstZMPCalcFootForce(pdEstZMP *e, pdSensorPtrArray *s, zVec3D *f);
 __EXPORT zVec3D *pdEstZMPCalcForce(pdEstZMP *e, zVec3D *f);
 __EXPORT zVec3D *pdEstZMPCalcFootZMP(pdEstZMP *e, pdSensorPtrArray *s, double pz, zVec3D *zmp, double *fz);
 __EXPORT zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp);
+
+__EXPORT void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt);
 
 __EXPORT bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e);
 __EXPORT bool pdEstZMPConfReadFile(pdEstZMP *e, const char *filename);

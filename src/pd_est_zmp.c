@@ -19,12 +19,9 @@ void pdEstZMPDestroy(pdEstZMP *e)
   pdFilterArrayDestroy( pdEstZMPFilterArray( e ) );
 }
 
-pdSensor *pdEstZMPFindSensor(pdEstZMP *e, const char *name)
+pdSensor *pdEstZMPNameFindSensor(pdEstZMP *e, const char *name)
 {
-  pdSensor *s;
-
-  zArrayFindName( pdEstZMPSensorArray(e), name, s );
-  return s;
+  return pdSensorArrayNameFind( pdEstZMPSensorArray(e), name );
 }
 
 void pdEstZMPSetData(pdEstZMP *e, const char *name, zVec data)
@@ -95,6 +92,19 @@ zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp)
     py = py / fz;
   }
   return zVec3DCreate( zmp, px, py, pz );
+}
+
+void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt)
+{
+  register uint i;
+
+  pdSensorArrayProcess( pdEstZMPSensorArray(e), dt );
+  for( i=0; i<zArrayNum(&e->_lfsensor); i++ )
+    pdSensorFrameUpdate( zArrayBuf(&e->_lfsensor)[i], lfframe );
+  for( i=0; i<zArrayNum(&e->_rfsensor); i++ )
+    pdSensorFrameUpdate( zArrayBuf(&e->_rfsensor)[i], rfframe );
+  pdEstZMPCalcForce( e, pdEstZMPEstForceVec(e) );
+  pdEstZMPCalcZMP( e, pz, pdEstZMPEstZMPVec(e) );
 }
 
 

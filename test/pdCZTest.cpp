@@ -339,6 +339,13 @@ TEST_F(pdCZTest, SetZMPXYZ)
   EXPECT_DOUBLE_EQ( 0.3, pdCZZMPZ(&cz) );
 }
 
+TEST_F(pdCZTest, SetFZ)
+{
+  SetRandomValues();
+  pdCZSetFZ( &cz, 0.1 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZFZ(&cz) );
+}
+
 TEST_F(pdCZTest, SetTheta)
 {
   SetRandomValues();

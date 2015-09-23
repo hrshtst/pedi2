@@ -26,14 +26,14 @@ __EXPORT void pdEstZMPDestroy(pdEstZMP *e);
 /* methods to get parameters */
 #define pdEstZMPFilterArray(e) ( &(e)->_farray )
 #define pdEstZMPSensorArray(e) ( &(e)->_sarray )
-#define pdEstZMPEstZMPVec(e)   ( &(e)->estzmp )
-#define pdEstZMPEstZMPX(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zX )
-#define pdEstZMPEstZMPY(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zY )
-#define pdEstZMPEstZMPZ(e)     zVec3DElem( pdEstZMPEstZMPVec(e), zZ )
-#define pdEstZMPEstForceVec(e) ( &(e)->estforce )
-#define pdEstZMPEstForceX(e)   zVec3DElem( pdEstZMPEstForceVec(e), zX )
-#define pdEstZMPEstForceY(e)   zVec3DElem( pdEstZMPEstForceVec(e), zY )
-#define pdEstZMPEstForceZ(e)   zVec3DElem( pdEstZMPEstForceVec(e), zZ )
+#define pdEstZMPEstZMP(e)   ( &(e)->estzmp )
+#define pdEstZMPEstZMPX(e)     zVec3DElem( pdEstZMPEstZMP(e), zX )
+#define pdEstZMPEstZMPY(e)     zVec3DElem( pdEstZMPEstZMP(e), zY )
+#define pdEstZMPEstZMPZ(e)     zVec3DElem( pdEstZMPEstZMP(e), zZ )
+#define pdEstZMPEstForce(e) ( &(e)->estforce )
+#define pdEstZMPEstForceX(e)   zVec3DElem( pdEstZMPEstForce(e), zX )
+#define pdEstZMPEstForceY(e)   zVec3DElem( pdEstZMPEstForce(e), zY )
+#define pdEstZMPEstForceZ(e)   zVec3DElem( pdEstZMPEstForce(e), zZ )
 
 /* methods to set parameters */
 __EXPORT pdSensor *pdEstZMPNameFindSensor(pdEstZMP *e, const char *name);
@@ -45,6 +45,9 @@ __EXPORT zVec3D *pdEstZMPCalcFootZMP(pdEstZMP *e, pdSensorPtrArray *s, double pz
 __EXPORT zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp);
 
 __EXPORT void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt);
+
+__EXPORT void pdEstZMPDataFWrite(FILE *fp, pdEstZMP *e);
+#define pdEstZMPDataWrite(e) pdEstZMPDataFWrite( stdout, e )
 
 __EXPORT bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e);
 __EXPORT bool pdEstZMPConfReadFile(pdEstZMP *e, const char *filename);

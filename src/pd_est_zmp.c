@@ -101,8 +101,15 @@ void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz
     pdSensorFrameUpdate( zArrayBuf(&e->_lfsensor)[i], lfframe );
   for( i=0; i<zArrayNum(&e->_rfsensor); i++ )
     pdSensorFrameUpdate( zArrayBuf(&e->_rfsensor)[i], rfframe );
-  pdEstZMPCalcForce( e, pdEstZMPEstForceVec(e) );
-  pdEstZMPCalcZMP( e, pz, pdEstZMPEstZMPVec(e) );
+  pdEstZMPCalcForce( e, pdEstZMPEstForce(e) );
+  pdEstZMPCalcZMP( e, pz, pdEstZMPEstZMP(e) );
+}
+
+void pdEstZMPDataFWrite(FILE *fp, pdEstZMP *e)
+{
+  fprintf( fp, "%g %g %g %g %g %g\n",
+           pdEstZMPEstForceX(e), pdEstZMPEstForceY(e), pdEstZMPEstForceZ(e),
+           pdEstZMPEstZMPX(e), pdEstZMPEstZMPY(e), pdEstZMPEstZMPZ(e));
 }
 
 

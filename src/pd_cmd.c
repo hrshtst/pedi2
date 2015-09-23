@@ -2,22 +2,12 @@
 
 void pdCmdInit(pdCmd *cmd)
 {
-  cmd->qu1 = cmd->qu2 = 0;
-  cmd->qw1 = cmd->qw2 = 0;
-  cmd->qz1 = cmd->qz2 = 0;
-  cmd->kappa = 0;
-  cmd->rho = 0;
-  cmd->kr = 0;
-  cmd->xd = cmd->yd = cmd->zd = 0;
-  cmd->thetad = 0;
-  cmd->vud = 0;
-  cmd->vwd = 0;
-  cmd->dist = 0;
-  cmd->lfkx = cmd->lfky = cmd->lfkz = 0;
-  cmd->lfcx = cmd->lfcy = cmd->lfcz = 0;
-  cmd->rfkx = cmd->rfky = cmd->rfkz = 0;
-  cmd->rfcx = cmd->rfcy = cmd->rfcz = 0;
-  cmd->lfh = cmd->rfh = 0;
+  register int i;
+
+  if( (sizeof(pdCmd)/sizeof(double)) != PD_CMD_ENTRY_NUM )
+    ZRUNWARN( "size of pdCmd is not matched with num of entries" );
+  for( i=0; i<PD_CMD_ENTRY_NUM; i++ )
+    cmd->entry[i] = 0;
 }
 
 void pdCmdDefaultInit(pdCmd *cmd)

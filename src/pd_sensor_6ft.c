@@ -28,6 +28,11 @@ zVec pdSensorProcess6FT(pdSensor *sensor, double dt)
   return pdSensorOutput( sensor );
 }
 
+void pdSensorFrameUpdate6FT(pdSensor *sensor, zFrame3D *frame)
+{
+  pdSensorFrameUpdateDefault( sensor, frame );
+}
+
 #define PD_SENSOR_6FT_SIZE 6
 typedef struct{
   zFrame3D frame;
@@ -110,6 +115,7 @@ pdSensorMethod pd_sensor_6ft_met = {
   type: "6ft",
   destroy: pdSensorDestroy6FT,
   process: pdSensorProcess6FT,
+  frameupdate: pdSensorFrameUpdate6FT,
   fread: pdSensorFRead6FT,
 };
 

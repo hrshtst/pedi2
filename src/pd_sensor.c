@@ -22,6 +22,11 @@ zVec pdSensorProcessDefault(pdSensor *sensor, double dt)
   return pdSensorOutput( sensor );
 }
 
+void pdSensorFrameUpdateDefault(pdSensor *sensor, zFrame3D *frame)
+{
+  zFrame3DCascade( frame, pdSensorLinkFrame(sensor), pdSensorWldFrame(sensor) );
+}
+
 static pdSensorMethod *_pdSensorMethodByStr(char str[]);
 
 pdSensorMethod *_pdSensorMethodByStr(char str[])

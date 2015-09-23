@@ -12,6 +12,7 @@ typedef struct{
   const char *type;
   void (*destroy)(struct _pdSensor*);
   zVec (*process)(struct _pdSensor*, double dt);
+  void (*frameupdate)(struct _pdSensor*,zFrame3D*);
   struct _pdSensor *(*fread)(FILE *fp, struct _pdSensor*, pdFilterArray*);
 } pdSensorMethod;
 
@@ -20,8 +21,8 @@ typedef struct _pdSensor{
   int size;
   zVec input;
   zVec output;
-  zFrame3D linkframe;
-  zFrame3D wldframe;
+  zFrame3D linkframe;  /* transformation from sensor to link frame */
+  zFrame3D wldframe;   /* transformation from sensor to world frame */
   pdFilterArray arr;
   char linkname[BUFSIZ];
   void *_prm;
@@ -60,11 +61,13 @@ typedef struct _pdSensor{
   (s)->_met = NULL;\
 } while(0)
 
-#define pdSensorDestroy(s)   (s)->_met->destroy( s )
-#define pdSensorProcess(s,h) (s)->_met->process( s, h )
+#define pdSensorDestroy(s)       (s)->_met->destroy( s )
+#define pdSensorProcess(s,h)     (s)->_met->process( s, h )
+#define pdSensorFrameUpdate(s,f) (s)->_met->frameupdate( s, f )
 
 __EXPORT void pdSensorDestroyDefault(pdSensor *sensor);
 __EXPORT zVec pdSensorProcessDefault(pdSensor *sensor, double dt);
+__EXPORT void pdSensorFrameUpdateDefault(pdSensor *sensor, zFrame3D *frame);
 
 #define PD_SENSOR_TAG "sensor"
 __EXPORT pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr);

@@ -162,7 +162,7 @@ bool _pdEstZMPFRead(FILE *fp, void *instance, char *buf, bool *success)
     prm->lfsensor_num = _pdEstZMPCountSensorName( fp, prm->sarray );
     prm->lfsensor = zAlloc( pdSensor*, prm->lfsensor_num );
     if( !prm->lfsensor ){
-      ZALLOCERROR();
+      ZRUNERROR( "no sensors attatched to left foot" );
       *success = false;
     }
     _pdEstZMPConnectSensor( fp, prm->lfsensor, prm->lfsensor_num, prm->sarray );
@@ -171,7 +171,7 @@ bool _pdEstZMPFRead(FILE *fp, void *instance, char *buf, bool *success)
     prm->rfsensor_num = _pdEstZMPCountSensorName( fp, prm->sarray );
     prm->rfsensor = zAlloc( pdSensor*, prm->rfsensor_num );
     if( !prm->rfsensor ){
-      ZALLOCERROR();
+      ZRUNERROR( "no sensors attatched to right foot" );
       *success = false;
     }
     _pdEstZMPConnectSensor( fp, prm->rfsensor, prm->rfsensor_num, prm->sarray );

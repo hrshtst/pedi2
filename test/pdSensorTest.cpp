@@ -34,6 +34,8 @@ TEST_F(pdSensorTest, Init)
   EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
   EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorPos(&sensor) ) );
   EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorAtt(&sensor) ) );
+  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorWldPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorWldAtt(&sensor) ) );
   EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
   EXPECT_STREQ( "", pdSensorLinkName( &sensor ) );

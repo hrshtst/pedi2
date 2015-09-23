@@ -9,6 +9,8 @@ __EXPORT bool pdSensorCreate6FT(pdSensor *sensor, zFrame3D *frame, pdFilterArray
 
 __EXPORT zVec3D *pdSensor6FTGetF(pdSensor *sensor, zVec3D *f);
 __EXPORT zVec3D *pdSensor6FTGetT(pdSensor *sensor, zVec3D *tau);
+__EXPORT zVec3D *pdSensor6FTGetWldF(pdSensor *sensor, zFrame3D *linkframe, zVec3D *f);
+__EXPORT zVec3D *pdSensor6FTGetWldT(pdSensor *sensor, zFrame3D *linkframe, zVec3D *tau);
 
 extern pdSensorMethod pd_sensor_6ft_met;
 

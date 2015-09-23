@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "utility/random_initializer.h"
 #include <pedi2/pd_cz.h>
 
 const double TIME_STEP = 0.01;
@@ -14,57 +15,58 @@ class pdCZTest : public testing::Test {
       pdCZDestroy( &cz );
   };
 
-  void SetVacuousPrm() {
-    pdCZSetCmdCOMX( &cz, 1 );
-    pdCZSetCmdCOMY( &cz, 2 );
-    pdCZSetCmdCOMZ( &cz, 3 );
-    pdCZSetCmdTheta( &cz, 4 );
-    pdCZSetCOMX( &cz, 5 );
-    pdCZSetCOMY( &cz, 6 );
-    pdCZSetCOMZ( &cz, 7 );
-    pdCZSetVelX( &cz, 8 );
-    pdCZSetVelY( &cz, 9 );
-    pdCZSetVelZ( &cz, 10 );
-    pdCZSetAccX( &cz, 11 );
-    pdCZSetAccY( &cz, 12 );
-    pdCZSetAccZ( &cz, 13 );
-    pdCZSetZMPX( &cz, 14 );
-    pdCZSetZMPY( &cz, 15 );
-    pdCZSetZMPZ( &cz, 16 );
-    pdCZSetTheta( &cz, 17 );
+  void SetRandomValues() {
+    pdCZSetCmdCOMX( &cz,  ri.rand() );
+    pdCZSetCmdCOMY( &cz,  ri.rand() );
+    pdCZSetCmdCOMZ( &cz,  ri.rand() );
+    pdCZSetCmdTheta( &cz, ri.rand() );
+    pdCZSetCOMX( &cz, ri.rand() );
+    pdCZSetCOMY( &cz, ri.rand() );
+    pdCZSetCOMZ( &cz, ri.rand() );
+    pdCZSetVelX( &cz, ri.rand() );
+    pdCZSetVelY( &cz, ri.rand() );
+    pdCZSetVelZ( &cz, ri.rand() );
+    pdCZSetAccX( &cz, ri.rand() );
+    pdCZSetAccY( &cz, ri.rand() );
+    pdCZSetAccZ( &cz, ri.rand() );
+    pdCZSetZMPX( &cz, ri.rand() );
+    pdCZSetZMPY( &cz, ri.rand() );
+    pdCZSetZMPZ( &cz, ri.rand() );
+    pdCZSetTheta( &cz, ri.rand() );
     pdCZSetSR( &cz, &sr );
-    pdCZSetQ1Z( &cz, 19 );
-    pdCZSetQ2Z( &cz, 20 );
-    pdCZSetRefVelU( &cz, 21 );
-    pdCZSetQ1U( &cz, 22 );
-    pdCZSetQ2U( &cz, 23 );
-    pdCZSetRefVelW( &cz, 24 );
-    pdCZSetQ1W( &cz, 25 );
-    pdCZSetQ2W( &cz, 26 );
-    pdCZSetRho( &cz, 27 );
-    pdCZSetKr( &cz, 28 );
-    pdCZSetDist( &cz, 29 );
-    pdCZSetKappa( &cz, 30 );
-    pdCZSetRefPosU( &cz, 31 );
-    pdCZSetRefPosW( &cz, 32 );
-    pdCZSetDeltaU( &cz, 33 );
-    pdCZSetDeltaW( &cz, 34 );
-    pdCZSetVelU( &cz, 35 );
-    pdCZSetVelW( &cz, 36 );
-    pdCZRefCOMX( &cz ) = 37;
-    pdCZRefCOMY( &cz ) = 38;
-    pdCZRefCOMZ( &cz ) = 39;
-    pdCZRefVelX( &cz ) = 40;
-    pdCZRefVelY( &cz ) = 41;
-    pdCZRefVelZ( &cz ) = 42;
-    pdCZRefAccX( &cz ) = 43;
-    pdCZRefAccY( &cz ) = 44;
-    pdCZRefAccZ( &cz ) = 45;
-    pdCZRefZMPX( &cz ) = 46;
-    pdCZRefZMPY( &cz ) = 47;
-    pdCZRefZMPZ( &cz ) = 48;
+    pdCZSetQ1Z( &cz, ri.rand() );
+    pdCZSetQ2Z( &cz, ri.rand() );
+    pdCZSetRefVelU( &cz, ri.rand() );
+    pdCZSetQ1U( &cz, ri.rand() );
+    pdCZSetQ2U( &cz, ri.rand() );
+    pdCZSetRefVelW( &cz, ri.rand() );
+    pdCZSetQ1W( &cz, ri.rand() );
+    pdCZSetQ2W( &cz, ri.rand() );
+    pdCZSetRho( &cz, ri.rand() );
+    pdCZSetKr( &cz, ri.rand() );
+    pdCZSetDist( &cz, ri.rand() );
+    pdCZSetKappa( &cz, ri.rand() );
+    pdCZSetRefPosU( &cz, ri.rand() );
+    pdCZSetRefPosW( &cz, ri.rand() );
+    pdCZSetDeltaU( &cz, ri.rand() );
+    pdCZSetDeltaW( &cz, ri.rand() );
+    pdCZSetVelU( &cz, ri.rand() );
+    pdCZSetVelW( &cz, ri.rand() );
+    pdCZRefCOMX( &cz ) = ri.rand();
+    pdCZRefCOMY( &cz ) = ri.rand();
+    pdCZRefCOMZ( &cz ) = ri.rand();
+    pdCZRefVelX( &cz ) = ri.rand();
+    pdCZRefVelY( &cz ) = ri.rand();
+    pdCZRefVelZ( &cz ) = ri.rand();
+    pdCZRefAccX( &cz ) = ri.rand();
+    pdCZRefAccY( &cz ) = ri.rand();
+    pdCZRefAccZ( &cz ) = ri.rand();
+    pdCZRefZMPX( &cz ) = ri.rand();
+    pdCZRefZMPY( &cz ) = ri.rand();
+    pdCZRefZMPZ( &cz ) = ri.rand();
   };
 
+  RandomInitializer ri;
   zVec3DList sr;
   pdCZ cz;
   bool destroyed_flag;
@@ -72,7 +74,7 @@ class pdCZTest : public testing::Test {
 
 TEST_F(pdCZTest, Init)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZInit( &cz, TIME_STEP );
   EXPECT_EQ( 0, pdCZCmdCOMX( &cz )  );
   EXPECT_EQ( 0, pdCZCmdCOMY( &cz )  );
@@ -126,7 +128,7 @@ TEST_F(pdCZTest, Init)
 
 TEST_F(pdCZTest, Destroy)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZDestroy( &cz );
   EXPECT_EQ( 0, pdCZCmdCOMX( &cz )  );
   EXPECT_EQ( 0, pdCZCmdCOMY( &cz )  );
@@ -169,7 +171,7 @@ TEST_F(pdCZTest, Destroy)
 
 TEST_F(pdCZTest, SetCmdCOM)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetCmdCOM( &cz, 0.1, 0.2, 0.3 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZCmdCOMX(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZCmdCOMY(&cz) );
@@ -180,7 +182,7 @@ TEST_F(pdCZTest, SetCmdCOMVec)
 {
   zVec3D v;
 
-  SetVacuousPrm();
+  SetRandomValues();
   zVec3DCreate( &v, 0.1, 0.2, 0.3 );
   pdCZSetCmdCOMVec( &cz, &v );
   EXPECT_DOUBLE_EQ( 0.1, pdCZCmdCOMX(&cz) );
@@ -190,7 +192,7 @@ TEST_F(pdCZTest, SetCmdCOMVec)
 
 TEST_F(pdCZTest, SetCmdCOMXYZ)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetCmdCOMX( &cz, 0.1 );
   pdCZSetCmdCOMY( &cz, 0.2 );
   pdCZSetCmdCOMZ( &cz, 0.3 );
@@ -201,14 +203,14 @@ TEST_F(pdCZTest, SetCmdCOMXYZ)
 
 TEST_F(pdCZTest, SetCmdTheta)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetCmdTheta( &cz, 0.1 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZCmdTheta(&cz) );
 }
 
 TEST_F(pdCZTest, SetCOM)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetCOM( &cz, 0.1, 0.2, 0.3 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZCOMX(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZCOMY(&cz) );
@@ -219,7 +221,7 @@ TEST_F(pdCZTest, SetCOMVec)
 {
   zVec3D v;
 
-  SetVacuousPrm();
+  SetRandomValues();
   zVec3DCreate( &v, 0.1, 0.2, 0.3 );
   pdCZSetCOMVec( &cz, &v );
   EXPECT_DOUBLE_EQ( 0.1, pdCZCOMX(&cz) );
@@ -229,7 +231,7 @@ TEST_F(pdCZTest, SetCOMVec)
 
 TEST_F(pdCZTest, SetCOMXYZ)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetCOMX( &cz, 0.1 );
   pdCZSetCOMY( &cz, 0.2 );
   pdCZSetCOMZ( &cz, 0.3 );
@@ -240,7 +242,7 @@ TEST_F(pdCZTest, SetCOMXYZ)
 
 TEST_F(pdCZTest, SetVel)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetVel( &cz, 0.1, 0.2, 0.3 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZVelX(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZVelY(&cz) );
@@ -251,7 +253,7 @@ TEST_F(pdCZTest, SetVelVec)
 {
   zVec3D v;
 
-  SetVacuousPrm();
+  SetRandomValues();
   zVec3DCreate( &v, 0.1, 0.2, 0.3 );
   pdCZSetVelVec( &cz, &v );
   EXPECT_DOUBLE_EQ( 0.1, pdCZVelX(&cz) );
@@ -261,7 +263,7 @@ TEST_F(pdCZTest, SetVelVec)
 
 TEST_F(pdCZTest, SetVelXYZ)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetVelX( &cz, 0.1 );
   pdCZSetVelY( &cz, 0.2 );
   pdCZSetVelZ( &cz, 0.3 );
@@ -272,7 +274,7 @@ TEST_F(pdCZTest, SetVelXYZ)
 
 TEST_F(pdCZTest, SetAcc)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetAcc( &cz, 0.1, 0.2, 0.3 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZAccX(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZAccY(&cz) );
@@ -283,7 +285,7 @@ TEST_F(pdCZTest, SetAccVec)
 {
   zVec3D v;
 
-  SetVacuousPrm();
+  SetRandomValues();
   zVec3DCreate( &v, 0.1, 0.2, 0.3 );
   pdCZSetAccVec( &cz, &v );
   EXPECT_DOUBLE_EQ( 0.1, pdCZAccX(&cz) );
@@ -293,7 +295,7 @@ TEST_F(pdCZTest, SetAccVec)
 
 TEST_F(pdCZTest, SetAccXYZ)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetAccX( &cz, 0.1 );
   pdCZSetAccY( &cz, 0.2 );
   pdCZSetAccZ( &cz, 0.3 );
@@ -304,7 +306,7 @@ TEST_F(pdCZTest, SetAccXYZ)
 
 TEST_F(pdCZTest, SetZMP)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetZMP( &cz, 0.1, 0.2, 0.3 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZZMPX(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZZMPY(&cz) );
@@ -315,7 +317,7 @@ TEST_F(pdCZTest, SetZMPVec)
 {
   zVec3D v;
 
-  SetVacuousPrm();
+  SetRandomValues();
   zVec3DCreate( &v, 0.1, 0.2, 0.3 );
   pdCZSetZMPVec( &cz, &v );
   EXPECT_DOUBLE_EQ( 0.1, pdCZZMPX(&cz) );
@@ -325,7 +327,7 @@ TEST_F(pdCZTest, SetZMPVec)
 
 TEST_F(pdCZTest, SetZMPXYZ)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetZMPX( &cz, 0.1 );
   pdCZSetZMPY( &cz, 0.2 );
   pdCZSetZMPZ( &cz, 0.3 );
@@ -336,14 +338,14 @@ TEST_F(pdCZTest, SetZMPXYZ)
 
 TEST_F(pdCZTest, SetTheta)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetTheta( &cz, 0.1 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZTheta(&cz) );
 }
 
 TEST_F(pdCZTest, SetRefPosUW)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetRefPosUW( &cz, 0.1, 0.2 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZRefPosU(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZRefPosW(&cz) );
@@ -353,7 +355,7 @@ TEST_F(pdCZTest, SetRefPosUWVec)
 {
   zVec2D v;
 
-  SetVacuousPrm();
+  SetRandomValues();
   zVec2DCreate( v, 0.1, 0.2 );
   pdCZSetRefPosUWVec( &cz, v );
   EXPECT_DOUBLE_EQ( 0.1, pdCZRefPosU(&cz) );
@@ -362,7 +364,7 @@ TEST_F(pdCZTest, SetRefPosUWVec)
 
 TEST_F(pdCZTest, SetRefPosUPosW)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetRefPosU( &cz, 0.1 );
   pdCZSetRefPosW( &cz, 0.2 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZRefPosU(&cz) );
@@ -371,7 +373,7 @@ TEST_F(pdCZTest, SetRefPosUPosW)
 
 TEST_F(pdCZTest, SetDelta)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetDelta( &cz, 0.1, 0.2 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZDeltaU(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZDeltaW(&cz) );
@@ -381,7 +383,7 @@ TEST_F(pdCZTest, SetDeltaVec)
 {
   zVec2D v;
 
-  SetVacuousPrm();
+  SetRandomValues();
   zVec2DCreate( v, 0.1, 0.2 );
   pdCZSetDeltaVec( &cz, v );
   EXPECT_DOUBLE_EQ( 0.1, pdCZDeltaU(&cz) );
@@ -390,7 +392,7 @@ TEST_F(pdCZTest, SetDeltaVec)
 
 TEST_F(pdCZTest, SetDeltaUW)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   pdCZSetDeltaU( &cz, 0.1 );
   pdCZSetDeltaW( &cz, 0.2 );
   EXPECT_DOUBLE_EQ( 0.1, pdCZDeltaU(&cz) );
@@ -399,7 +401,7 @@ TEST_F(pdCZTest, SetDeltaUW)
 
 TEST_F(pdCZTest, SetTime)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   cz._ode._t = 1000;
 
   pdCZInit( &cz, TIME_STEP );
@@ -411,7 +413,7 @@ TEST_F(pdCZTest, SetTime)
 
 TEST_F(pdCZTest, SetTimeStep)
 {
-  SetVacuousPrm();
+  SetRandomValues();
   cz._ode._dt = 1000;
 
   pdCZInit( &cz, TIME_STEP );

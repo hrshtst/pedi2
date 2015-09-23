@@ -6,15 +6,15 @@
 
 __BEGIN_DECLS
 
+zArrayClass( pdSensorPtrArray, pdSensor* );
+
 typedef struct{
   Z_NAMED_CLASS;
   pdFilterArray _farray;
   pdSensorArray _sarray;
 
-  pdSensor **_lfsensor;
-  pdSensor **_rfsensor;
-  int _lfsensor_num;
-  int _rfsensor_num;
+  pdSensorPtrArray _lfsensor;
+  pdSensorPtrArray _rfsensor;
 
   zVec3D estforce;
   zVec3D estzmp;

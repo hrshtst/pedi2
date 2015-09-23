@@ -10,8 +10,8 @@ class pdEstZMPTest : public testing::Test {
   virtual void TearDown() {};
 
   void SetRandomValues() {
-    e._lfsensor_num = ri.rand();
-    e._rfsensor_num = ri.rand();
+    zArraySetNum( &e._lfsensor, ri.rand() );
+    zArraySetNum( &e._rfsensor, ri.rand() );
     ri.SetRandVec3D( &e.estforce );
     ri.SetRandVec3D( &e.estzmp );
   }
@@ -25,10 +25,10 @@ TEST_F(pdEstZMPTest, Init)
   SetRandomValues();
   pdEstZMPInit( &e );
   EXPECT_EQ( NULL, zNamePtr( &e ) );
-  EXPECT_EQ( NULL, e._lfsensor );
-  EXPECT_EQ( NULL, e._rfsensor );
-  EXPECT_EQ( 0, e._lfsensor_num );
-  EXPECT_EQ( 0, e._rfsensor_num );
+  EXPECT_EQ( NULL, zArrayBuf( &e._lfsensor ) );
+  EXPECT_EQ( NULL, zArrayBuf( &e._rfsensor ) );
+  EXPECT_EQ( 0, zArrayNum( &e._lfsensor ) );
+  EXPECT_EQ( 0, zArrayNum( &e._rfsensor ) );
   EXPECT_EQ( 0, pdEstZMPEstForceX( &e ) );
   EXPECT_EQ( 0, pdEstZMPEstForceY( &e ) );
   EXPECT_EQ( 0, pdEstZMPEstForceZ( &e ) );
@@ -43,10 +43,10 @@ TEST_F(pdEstZMPTest, Destroy)
   SetRandomValues();
   pdEstZMPDestroy( &e );
   EXPECT_EQ( NULL, zNamePtr( &e ) );
-  EXPECT_EQ( NULL, e._lfsensor );
-  EXPECT_EQ( NULL, e._rfsensor );
-  EXPECT_EQ( 0, e._lfsensor_num );
-  EXPECT_EQ( 0, e._rfsensor_num );
+  EXPECT_EQ( NULL, zArrayBuf( &e._lfsensor ) );
+  EXPECT_EQ( NULL, zArrayBuf( &e._rfsensor ) );
+  EXPECT_EQ( 0, zArrayNum( &e._lfsensor ) );
+  EXPECT_EQ( 0, zArrayNum( &e._rfsensor ) );
   EXPECT_EQ( 0, pdEstZMPEstForceX( &e ) );
   EXPECT_EQ( 0, pdEstZMPEstForceY( &e ) );
   EXPECT_EQ( 0, pdEstZMPEstForceZ( &e ) );
@@ -75,12 +75,12 @@ TEST_F(pdEstZMPTest, FRead)
   EXPECT_STREQ( "rf_FT01", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),2)));
   EXPECT_STREQ( "rf_FT02", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),3)));
   // check pdEstZMP class
-  EXPECT_EQ( 2, e._lfsensor_num );
-  EXPECT_EQ( 2, e._rfsensor_num );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),0), e._lfsensor[0] );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),1), e._lfsensor[1] );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),2), e._rfsensor[0] );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),3), e._rfsensor[1] );
+  EXPECT_EQ( 2, zArrayNum( &e._lfsensor ) );
+  EXPECT_EQ( 2, zArrayNum( &e._rfsensor ) );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),0), zArrayBuf(&e._lfsensor)[0] );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),1), zArrayBuf(&e._lfsensor)[1] );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),2), zArrayBuf(&e._rfsensor)[0] );
+  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),3), zArrayBuf(&e._rfsensor)[1] );
   pdEstZMPDestroy( &e );
   fclose( fp );
 }

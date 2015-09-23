@@ -3,10 +3,8 @@
 void pdEstZMPInit(pdEstZMP *e)
 {
   zNameSet( e, NULL );
-  e->_lfsensor = NULL;
-  e->_rfsensor = NULL;
-  e->_lfsensor_num = 0;
-  e->_rfsensor_num = 0;
+  zArrayInit( &e->_lfsensor );
+  zArrayInit( &e->_rfsensor );
   zVec3DClear( &e->estforce );
   zVec3DClear( &e->estzmp );
 }
@@ -14,10 +12,8 @@ void pdEstZMPInit(pdEstZMP *e)
 void pdEstZMPDestroy(pdEstZMP *e)
 {
   zNameDestroy( e );
-  zFree( e->_lfsensor );
-  zFree( e->_rfsensor );
-  e->_lfsensor_num = 0;
-  e->_rfsensor_num = 0;
+  zArrayFree( &e->_lfsensor );
+  zArrayFree( &e->_rfsensor );
   zVec3DClear( &e->estforce );
   zVec3DClear( &e->estzmp );
   pdFilterArrayDestroy( pdEstZMPFilterArray( e ) );
@@ -117,10 +113,10 @@ pdEstZMP *pdEstZMPFRead(FILE *fp, pdEstZMP *e)
   if( !zFieldFRead( fp, _pdEstZMPFRead, &prm ) )
     return NULL;
   zNameSet( e, prm.name );
-  e->_lfsensor_num = prm.lfsensor_num;
-  e->_rfsensor_num = prm.rfsensor_num;
-  e->_lfsensor = prm.lfsensor;
-  e->_rfsensor = prm.rfsensor;
+  zArraySetNum( &e->_lfsensor, prm.lfsensor_num );
+  zArraySetNum( &e->_rfsensor, prm.rfsensor_num );
+  zArraySetBuf( &e->_lfsensor, prm.lfsensor );
+  zArraySetBuf( &e->_rfsensor, prm.rfsensor );
   return e;
 }
 

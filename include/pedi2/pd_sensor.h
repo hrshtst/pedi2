@@ -75,6 +75,6 @@ __EXPORT bool pdSensorArrayFRead(FILE *fp, pdSensorArray *arr, pdFilterArray *sr
 
 __END_DECLS
 
-#include <pedi2/pd_sensor_6axft.h> /* six-axis force/torque sensor */
+#include <pedi2/pd_sensor_6ft.h> /* six-axis force/torque sensor */
 
 #endif /* __PD_SENSOR_H__ */

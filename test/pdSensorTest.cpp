@@ -103,7 +103,7 @@ TEST_F(pdSensorTest, ProcessDefault)
 }
 
 
-class pdSensor6AxisFTTest : public testing::Test {
+class pdSensor6FTTest : public testing::Test {
 protected:
   virtual void SetUp() {
     pdFilterArrayAlloc( &srcfarr, 2 );
@@ -121,21 +121,21 @@ protected:
   RandomInitializer ri;
 };
 
-TEST_F(pdSensor6AxisFTTest, Create)
+TEST_F(pdSensor6FTTest, Create)
 {
   zFrame3D frame;
   pdFilterArray arr;
 
   zFrame3DIdent( &frame );
   pdFilterArrayAlloc( &arr, 6 );
-  EXPECT_TRUE( pdSensorCreate6AxisFT( &sensor, &frame, &arr ) );
+  EXPECT_TRUE( pdSensorCreate6FT( &sensor, &frame, &arr ) );
   EXPECT_EQ( NULL, zNamePtr( &sensor ) );
   EXPECT_EQ( 6, pdSensorSize( &sensor ) );
   EXPECT_EQ( 6, zVecSize( pdSensorInput( &sensor ) ) );
   EXPECT_EQ( 6, zVecSize( pdSensorOutput( &sensor ) ) );
   EXPECT_EQ( 6, zArrayNum( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( zArrayBuf(&arr), zArrayBuf(pdSensorFilterArray(&sensor)) );
-  EXPECT_EQ( &pd_sensor_6axisft_met, sensor._met );
+  EXPECT_EQ( &pd_sensor_6ft_met, sensor._met );
   pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
   pdFilterCreateNone( zArrayElem(&sensor.arr,1) );
   pdFilterCreateNone( zArrayElem(&sensor.arr,2) );
@@ -145,9 +145,9 @@ TEST_F(pdSensor6AxisFTTest, Create)
   pdSensorDestroy( &sensor );
 }
 
-TEST_F(pdSensor6AxisFTTest, FRead)
+TEST_F(pdSensor6FTTest, FRead)
 {
-  char filename[] = "model/sensor_6axisft.conf";
+  char filename[] = "model/sensor_6ft.conf";
   zVec3D v;
   zMat3D m;
   FILE *fp;
@@ -173,9 +173,9 @@ TEST_F(pdSensor6AxisFTTest, FRead)
   fclose( fp );
 }
 
-TEST_F(pdSensor6AxisFTTest, FRead2)
+TEST_F(pdSensor6FTTest, FRead2)
 {
-  char filename[] = "model/sensor_6axisft2.conf";
+  char filename[] = "model/sensor_6ft2.conf";
   FILE *fp;
 
   fp = fopen( filename, "r" );
@@ -223,8 +223,8 @@ protected:
 TEST_F(pdSensorArrayTest, NameFind)
 {
   pdSensorArrayAlloc( &arr, 2 );
-  pdSensorCreate6AxisFT( zArrayElem(&arr,0), ZFRAME3DIDENT, &srcfarr );
-  pdSensorCreate6AxisFT( zArrayElem(&arr,1), ZFRAME3DIDENT, &srcfarr );
+  pdSensorCreate6FT( zArrayElem(&arr,0), ZFRAME3DIDENT, &srcfarr );
+  pdSensorCreate6FT( zArrayElem(&arr,1), ZFRAME3DIDENT, &srcfarr );
   zNameSet( zArrayElem(&arr,0), (char*)"lf_FT01" );
   zNameSet( zArrayElem(&arr,1), (char*)"rf_FT01" );
   EXPECT_EQ( zArrayElem(&arr,0), pdSensorArrayNameFind(&arr,"lf_FT01") );

@@ -27,7 +27,7 @@ static pdSensorMethod *_pdSensorMethodByStr(char str[]);
 pdSensorMethod *_pdSensorMethodByStr(char str[])
 {
   static pdSensorMethod *met_array[] = {
-    &pd_sensor_6axisft_met,
+    &pd_sensor_6ft_met,
     NULL,
   };
   register int i;

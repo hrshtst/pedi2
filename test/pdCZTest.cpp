@@ -53,6 +53,12 @@ class pdCZTest : public testing::Test {
     pdCZSetDeltaW( &cz, ri.rand() );
     pdCZSetVelU( &cz, ri.rand() );
     pdCZSetVelW( &cz, ri.rand() );
+    pdCZSetErrCompKX( &cz, ri.rand() );
+    pdCZSetErrCompKY( &cz, ri.rand() );
+    pdCZSetErrCompKZ( &cz, ri.rand() );
+    pdCZAlphaX( &cz )  = ri.rand();
+    pdCZAlphaY( &cz )  = ri.rand();
+    pdCZAlphaZ( &cz )  = ri.rand();
     pdCZRefCOMX( &cz ) = ri.rand();
     pdCZRefCOMY( &cz ) = ri.rand();
     pdCZRefCOMZ( &cz ) = ri.rand();
@@ -114,6 +120,12 @@ TEST_F(pdCZTest, Init)
   EXPECT_EQ( 0, pdCZDeltaW( &cz )  );
   EXPECT_EQ( 0, pdCZVelU( &cz )  );
   EXPECT_EQ( 0, pdCZVelW( &cz )  );
+  EXPECT_EQ( 0, pdCZAlphaX( &cz )   );
+  EXPECT_EQ( 0, pdCZAlphaY( &cz )   );
+  EXPECT_EQ( 0, pdCZAlphaZ( &cz )   );
+  EXPECT_EQ( 0, pdCZErrCompKX( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompKY( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompKZ( &cz ) );
   EXPECT_EQ( 0, pdCZRefCOMX( &cz )  );
   EXPECT_EQ( 0, pdCZRefCOMY( &cz )  );
   EXPECT_EQ( 0, pdCZRefCOMZ( &cz )  );
@@ -169,6 +181,9 @@ TEST_F(pdCZTest, Destroy)
   EXPECT_EQ( 0, pdCZDeltaW( &cz )  );
   EXPECT_EQ( 0, pdCZVelU( &cz )  );
   EXPECT_EQ( 0, pdCZVelW( &cz )  );
+  EXPECT_EQ( 0, pdCZErrCompKX( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompKY( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompKZ( &cz ) );
   destroyed_flag = true;
 }
 
@@ -431,6 +446,17 @@ TEST_F(pdCZTest, SetTimeStep)
 
   pdCZSetTimeStep( &cz, 0.001 );
   EXPECT_DOUBLE_EQ( 0.001, pdCZTimeStep(&cz) );
+}
+
+TEST_F(pdCZTest, SetErrCompKXYZ)
+{
+  SetRandomValues();
+  pdCZSetErrCompKX( &cz, 0.1 );
+  pdCZSetErrCompKY( &cz, 0.2 );
+  pdCZSetErrCompKZ( &cz, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZErrCompKX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZErrCompKY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZErrCompKZ(&cz) );
 }
 
 TEST_F(pdCZTest, CalcDeltaTheta_KappaIsZero)

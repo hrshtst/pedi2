@@ -26,6 +26,12 @@ void pdCZInit(pdCZ *c, double dt)
   zODE2Assign( &c->_ode.solver, Regular, NULL, NULL, NULL, NULL );
   zODE2AssignRegular( &c->_ode.solver, RK4 );
   zODE2Init( &c->_ode.solver, 3, 0, _pdCZUpdate );
+  pdCZSetErrCompKX( c, 0 );
+  pdCZSetErrCompKY( c, 0 );
+  pdCZSetErrCompKZ( c, 0 );
+  pdCZAlphaX( c ) = 0;
+  pdCZAlphaY( c ) = 0;
+  pdCZAlphaZ( c ) = 0;
   pdCZRefCOMX( c ) = 0;
   pdCZRefCOMY( c ) = 0;
   pdCZRefCOMZ( c ) = 0;
@@ -56,6 +62,9 @@ void pdCZDestroy(pdCZ *c)
   pdCZSetFZ( c, 0 );
   pdCZSetTheta( c, 0 );
   pdCZSetSR( c, NULL );
+  pdCZSetErrCompKX( c, 0 );
+  pdCZSetErrCompKY( c, 0 );
+  pdCZSetErrCompKZ( c, 0 );
 }
 
 double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw)

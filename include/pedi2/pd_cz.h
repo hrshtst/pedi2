@@ -22,6 +22,11 @@ typedef struct{
   pdCZHrz _hrz;     /* horizontal motion controller */
 
   struct{
+    double _alpha[3]; /* estimated error */
+    double _k[3];     /* relaxation coefficient */
+  } _errcomp;         /* error compensator */
+
+  struct{
     double _t;       /* time */
     double _dt;      /* time step */
     zVec pos, vel;  /* state vector: pos = [ x y z ]^T */
@@ -89,6 +94,12 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZVelUW(c)    pdCZHrzVelUW( pdCZHrzPtr(c) )
 #define pdCZVelU(c)     pdCZHrzVelU( pdCZHrzPtr(c) )
 #define pdCZVelW(c)     pdCZHrzVelW( pdCZHrzPtr(c) )
+#define pdCZAlphaX(c)  ( (c)->_errcomp._alpha[0] )
+#define pdCZAlphaY(c)  ( (c)->_errcomp._alpha[1] )
+#define pdCZAlphaZ(c)  ( (c)->_errcomp._alpha[2] )
+#define pdCZErrCompKX(c) ( (c)->_errcomp._k[0] )
+#define pdCZErrCompKY(c) ( (c)->_errcomp._k[1] )
+#define pdCZErrCompKZ(c) ( (c)->_errcomp._k[2] )
 #define pdCZRefCOM(c)  ( &(c)->refcom )
 #define pdCZRefCOMX(c) zVec3DElem( pdCZRefCOM(c), zX )
 #define pdCZRefCOMY(c) zVec3DElem( pdCZRefCOM(c), zY )
@@ -164,6 +175,9 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetVelUWVec(c,v)     pdCZHrzSetVelUW( pdCZHrzPtr(c), v )
 #define pdCZSetVelU(c,vu)        pdCZHrzSetVelU( pdCZHrzPtr(c), vu )
 #define pdCZSetVelW(c,vw)        pdCZHrzSetVelW( pdCZHrzPtr(c), vw )
+#define pdCZSetErrCompKX(c,kx)   ( (c)->_errcomp._k[0] = (kx) )
+#define pdCZSetErrCompKY(c,ky)   ( (c)->_errcomp._k[1] = (ky) )
+#define pdCZSetErrCompKZ(c,kz)   ( (c)->_errcomp._k[2] = (kz) )
 
 /* calculation method */
 __EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);

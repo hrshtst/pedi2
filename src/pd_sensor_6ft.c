@@ -1,13 +1,31 @@
 #include <pedi2/pd_sensor.h>
 
+typedef struct{
+  zVec3D f;
+  zVec3D tau;
+} _pdSensor6FT;
+
 void pdSensorDestroy6FT(pdSensor *sensor)
 {
+  zFree( sensor->_prm );
   pdSensorDestroyDefault( sensor );
 }
 
 zVec pdSensorProcess6FT(pdSensor *sensor, double dt)
 {
-  return pdSensorProcessDefault( sensor, dt );
+  _pdSensor6FT *ft;
+
+  ft = sensor->_prm;
+  pdSensorProcessDefault( sensor, dt );
+  zVec3DCreate( &ft->f,
+                pdSensorOutputVal(sensor,0),
+                pdSensorOutputVal(sensor,1),
+                pdSensorOutputVal(sensor,2) );
+  zVec3DCreate( &ft->tau,
+                pdSensorOutputVal(sensor,3),
+                pdSensorOutputVal(sensor,4),
+                pdSensorOutputVal(sensor,5) );
+  return pdSensorOutput( sensor );
 }
 
 #define PD_SENSOR_6FT_SIZE 6
@@ -97,6 +115,12 @@ pdSensorMethod pd_sensor_6ft_met = {
 
 bool pdSensorCreate6FT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr)
 {
+  _pdSensor6FT *ft;
+
+  if( !( ft = zAlloc( _pdSensor6FT, 1 ) ) ){
+    ZALLOCERROR();
+    return false;
+  }
   pdSensorInit( sensor );
   pdSensorSize( sensor ) = PD_SENSOR_6FT_SIZE;
   pdSensorInput( sensor ) = zVecAlloc( pdSensorSize(sensor) );
@@ -110,6 +134,26 @@ bool pdSensorCreate6FT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr)
     ZRUNERROR( "Filter array size is not matched: %d", zArrayNum(arr) );
     return false;
   }
+  sensor->_prm = ft;
   sensor->_met = &pd_sensor_6ft_met;
   return true;
 }
+
+zVec3D *pdSensor6FTGetF(pdSensor *sensor, zVec3D *f)
+{
+  _pdSensor6FT *ft;
+
+  ft = sensor->_prm;
+  zVec3DCopy( &ft->f, f );
+  return f;
+}
+
+zVec3D *pdSensor6FTGetT(pdSensor *sensor, zVec3D *tau)
+{
+  _pdSensor6FT *ft;
+
+  ft = sensor->_prm;
+  zVec3DCopy( &ft->tau, tau );
+  return tau;
+}
+

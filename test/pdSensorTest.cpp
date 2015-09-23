@@ -32,8 +32,8 @@ TEST_F(pdSensorTest, Init)
   EXPECT_EQ( 0, pdSensorSize( &sensor ) );
   EXPECT_EQ( NULL, pdSensorInput( &sensor ) );
   EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
-  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, zFrame3DPos( pdSensorLinkFrame(&sensor) ) ) );
-  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, zFrame3DAtt( pdSensorLinkFrame(&sensor) ) ) );
+  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorAtt(&sensor) ) );
   EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
   EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
   EXPECT_STREQ( "", pdSensorLinkName( &sensor ) );
@@ -160,8 +160,8 @@ TEST_F(pdSensor6FTTest, FRead)
   fp = fopen( filename, "r" );
   pdSensorFRead( fp, &sensor, &srcfarr );
   EXPECT_STREQ( "lf_FT01", zNamePtr( &sensor ) );
-  EXPECT_TRUE( zVec3DMatch( &v, zFrame3DPos( pdSensorLinkFrame(&sensor) ) ) );
-  EXPECT_TRUE( zMat3DMatch( &m, zFrame3DAtt( pdSensorLinkFrame(&sensor) ) ) );
+  EXPECT_TRUE( zVec3DMatch( &v, pdSensorPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( &m, pdSensorAtt(&sensor) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,0) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,1) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,2) ) );
@@ -181,8 +181,8 @@ TEST_F(pdSensor6FTTest, FRead2)
   fp = fopen( filename, "r" );
   pdSensorFRead( fp, &sensor, &srcfarr );
   EXPECT_STREQ( "lf_FT02", zNamePtr( &sensor ) );
-  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, zFrame3DPos( pdSensorLinkFrame(&sensor) ) ) );
-  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, zFrame3DAtt( pdSensorLinkFrame(&sensor) ) ) );
+  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorAtt(&sensor) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,0) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,1) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,2) ) );

@@ -125,8 +125,8 @@ bool pdSensorCreate6FT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr)
   pdSensorSize( sensor ) = PD_SENSOR_6FT_SIZE;
   pdSensorInput( sensor ) = zVecAlloc( pdSensorSize(sensor) );
   pdSensorOutput( sensor ) = zVecAlloc( pdSensorSize(sensor) );
-  zFrame3DSetPos( pdSensorFrame(sensor), zFrame3DPos(frame) );
-  zFrame3DSetAtt( pdSensorFrame(sensor), zFrame3DAtt(frame) );
+  zFrame3DSetPos( pdSensorLinkFrame(sensor), zFrame3DPos(frame) );
+  zFrame3DSetAtt( pdSensorLinkFrame(sensor), zFrame3DAtt(frame) );
   if( zArrayNum(arr) == PD_SENSOR_6FT_SIZE ){
     zArraySetNum( pdSensorFilterArray(sensor), PD_SENSOR_6FT_SIZE );
     zArraySetBuf( pdSensorFilterArray(sensor), zArrayBuf(arr) );

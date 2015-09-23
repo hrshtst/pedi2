@@ -31,6 +31,8 @@ typedef struct _pdSensor{
 #define pdSensorInput(s)       ( (s)->input )
 #define pdSensorOutput(s)      ( (s)->output )
 #define pdSensorLinkFrame(s)   ( &(s)->linkframe )
+#define pdSensorPos(s)         zFrame3DPos( pdSensorLinkFrame(s) )
+#define pdSensorAtt(s)         zFrame3DAtt( pdSensorLinkFrame(s) )
 #define pdSensorFilterArray(s) ( &(s)->arr )
 #define pdSensorLinkName(s)    ( (s)->linkname )
 

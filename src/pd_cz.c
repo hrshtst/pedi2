@@ -165,9 +165,9 @@ void _pdCZUpdateRef(pdCZ *cz)
 void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr)
 {
   _pdCZUpdateState( cz, com, vel, acc, zmp, fz, theta, sr );
+  _pdCZUpdateAlpha( cz );
   _pdCZUpdateVrt( cz );
   _pdCZUpdateHrz( cz );
-  _pdCZUpdateAlpha( cz );
   zODE2Update( &cz->_ode.solver, pdCZTime(cz), cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz), cz );
   _pdCZUpdateRef( cz );
   pdCZIncrTime( cz );

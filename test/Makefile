@@ -20,7 +20,7 @@ CPPFLAGS += -isystem $(GTEST_INC_DIR)
 CXXFLAGS += -g -std=c++11 -Wall -Wextra -pthread
 
 # Edit below when you add a new test
-TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest pdFootUWTest pdFootZTest pdFootTest pdRobotTest pdStateTest pdCmdTest pdBipedTest pdFilterTest pdEstZMPTest
+TESTS=pdCZVrtTest pdCZHrzUTest pdCZHrzWTest pdCZHrzUWTest pdCZHrzTest pdCZTest pdFootUWTest pdFootZTest pdFootTest pdRobotTest pdStateTest pdCmdTest pdBipedTest pdFilterTest pdSensorTest pdEstZMPTest
 # Add depending objects (make sure $(SRCDIR)/makefile)
 OBJ=pd_cz_vrt.o pd_cz_hrz_u.o pd_cz_hrz_w.o pd_cz_hrz_uw.o pd_cz_hrz.o pd_cz.o pd_foot_uw.o pd_foot_z.o pd_foot.o pd_robot.o pd_state.o pd_cmd.o pd_biped.o pd_filter.o pd_filter_none.o pd_filter_bw.o pd_sensor.o pd_sensor_6ft.o pd_est_zmp.o
 

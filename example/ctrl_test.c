@@ -73,11 +73,7 @@ int main(int argc, char *argv[])
   dis = zVecAlloc( pdRobotJointSize(&robot) );
 
   /* initialize robot state */
-  pdRobotUpdateState( &robot, &state );
-  pdBipedDefaultPoseInit( &biped, &state );
-  pdRobotSetBipedRefVec( &robot, &biped );
-  pdRobotSolveIK( &robot );
-  pdRobotUpdateState( &robot, &state );
+  pdRobotDefaultBipedInit( &robot, &biped, &state );
 
   /* output data for plotting */
   fp = fopen( "data.log", "w" );

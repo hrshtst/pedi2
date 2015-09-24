@@ -35,11 +35,7 @@ int main(void)
   cmd.kappa = 0.0;         /* referential curvature for rotation */
 
   /* initialize robot state */
-  pdRobotUpdateState( &robot, &state );
-  pdBipedDefaultPoseInit( &biped, &state );
-  pdRobotSetBipedRefVec( &robot, &biped );
-  pdRobotSolveIK( &robot );
-  pdRobotUpdateState( &robot, &state );
+  pdRobotDefaultBipedInit( &robot, &biped, &state );
 
   /* main loop */
   for( i=0; i<STEP; i++ ){

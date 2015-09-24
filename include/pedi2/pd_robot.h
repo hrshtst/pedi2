@@ -43,9 +43,10 @@ typedef struct{
 } pdRobot;
 
 /* c'tor and d'tor */
-void pdRobotInit(pdRobot *robot);
-bool pdRobotLoad(pdRobot *robot, const char model[]);
-void pdRobotDestroy(pdRobot *robot);
+__EXPORT void pdRobotInit(pdRobot *robot);
+__EXPORT bool pdRobotLoad(pdRobot *robot, const char model[]);
+__EXPORT void pdRobotDestroy(pdRobot *robot);
+__EXPORT void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state);
 
 /* methods to get parameters */
 #define pdRobotChainPtr(r) ( &(r)->_chain )

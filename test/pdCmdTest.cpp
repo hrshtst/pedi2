@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "utility/random_initializer.h"
 #include <pedi2/pd_cmd.h>
 
 class pdCmdTest : public testing::Test {
@@ -10,11 +11,27 @@ class pdCmdTest : public testing::Test {
     pdCmdDestroy( &cmd );
   };
 
+  void SetRandomValues() {
+    for(int i=0; i<PD_CMD_ENTRY_NUM; ++i)
+      cmd.entry[i] = ri.rand();
+  }
+
+  RandomInitializer ri;
   pdCmd cmd;
 };
 
+TEST_F(pdCmdTest, EntryNum)
+{
+  int n_entry;
+
+  n_entry = sizeof(pdCmd) / sizeof(double);
+  EXPECT_EQ( PD_CMD_ENTRY_NUM, n_entry );
+}
+
 TEST_F(pdCmdTest, Init)
 {
+  SetRandomValues();
+  pdCmdInit( &cmd );
   EXPECT_EQ( 0, cmd.qu1 );
   EXPECT_EQ( 0, cmd.qu2 );
   EXPECT_EQ( 0, cmd.qw1 );
@@ -31,6 +48,9 @@ TEST_F(pdCmdTest, Init)
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
   EXPECT_EQ( 0, cmd.dist );
+  EXPECT_EQ( 0, cmd.kx );
+  EXPECT_EQ( 0, cmd.ky );
+  EXPECT_EQ( 0, cmd.kz );
   EXPECT_EQ( 0, cmd.lfkx );
   EXPECT_EQ( 0, cmd.lfky );
   EXPECT_EQ( 0, cmd.lfkz );
@@ -49,6 +69,8 @@ TEST_F(pdCmdTest, Init)
 
 TEST_F(pdCmdTest, Destroy)
 {
+  SetRandomValues();
+  pdCmdDestroy( &cmd );
   EXPECT_EQ( 0, cmd.qu1 );
   EXPECT_EQ( 0, cmd.qu2 );
   EXPECT_EQ( 0, cmd.qw1 );
@@ -65,6 +87,9 @@ TEST_F(pdCmdTest, Destroy)
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
   EXPECT_EQ( 0, cmd.dist );
+  EXPECT_EQ( 0, cmd.kx );
+  EXPECT_EQ( 0, cmd.ky );
+  EXPECT_EQ( 0, cmd.kz );
   EXPECT_EQ( 0, cmd.lfkx );
   EXPECT_EQ( 0, cmd.lfky );
   EXPECT_EQ( 0, cmd.lfkz );

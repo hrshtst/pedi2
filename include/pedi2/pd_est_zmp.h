@@ -46,6 +46,8 @@ __EXPORT zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp);
 
 __EXPORT void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt);
 
+__EXPORT void pdEstZMPFWrite(FILE *fp, pdEstZMP *e);
+#define pdEstZMPWrite(e) pdEstZMPFWrite( stdout, e )
 __EXPORT void pdEstZMPDataFWrite(FILE *fp, pdEstZMP *e);
 #define pdEstZMPDataWrite(e) pdEstZMPDataFWrite( stdout, e )
 

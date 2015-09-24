@@ -105,6 +105,14 @@ void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz
   pdEstZMPCalcZMP( e, pz, pdEstZMPEstZMP(e) );
 }
 
+void pdEstZMPFWrite(FILE *fp, pdEstZMP *e)
+{
+  fprintf( fp, "Force: ");
+  zVec3DFWrite( fp, pdEstZMPEstForce(e) );
+  fprintf( fp, "ZMP: ");
+  zVec3DFWrite( fp, pdEstZMPEstZMP(e) );
+}
+
 void pdEstZMPDataFWrite(FILE *fp, pdEstZMP *e)
 {
   fprintf( fp, "%g %g %g %g %g %g\n",

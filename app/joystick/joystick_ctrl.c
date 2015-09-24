@@ -49,6 +49,7 @@ static rkglChain ge;
 static int env = 0;
 static rkglCamera cam;
 static rkglLight light;
+static int path = 0;
 
 static zxWindow win;
 static Window glwin;
@@ -237,7 +238,7 @@ void joystickCtrlSetCamera(void)
   xd = cmd.xd;
   yd = cmd.yd;
   zd = cmd.zd;
-  rkglCALookAt( &cam, xd-12*zd*c, yd-12*zd*s, 2*zd, xd, yd, zd, 0, 0, 1 );
+  rkglCALookAt( &cam, xd-15*zd*c, yd-15*zd*s, 2.5*zd, xd, yd, zd, 0, 0, 1 );
 }
 
 void joystickCtrlReshape(void)
@@ -261,6 +262,8 @@ void joystickCtrlDraw(void)
     glCallList( env );
     glEnable( GL_LIGHTING );
   }
+  if( path > 0 )
+    glCallList( path );
   rkglChainDraw( &gl_chain );
 }
 
@@ -397,9 +400,111 @@ void joystickCtrlUpdate(void)
   liwSleep( (long)atof( opt[OPT_DT].arg ), 0 );
 }
 
+int _joystickCtrlDrawArc(zVec3D *org, double r, double theta1, double theta2, double w, GLfloat color[])
+{
+#define JOYSTICK_CTRL_ARC_DIV 0.01
+  int entry;
+  double th_s, th_e;
+  zEdge3D edge;
+  zVec3D e1, e2;
+
+  th_s = zMin( theta1, theta2 );
+  th_e = zMax( theta1, theta2 );
+
+  entry = rkglBeginList();
+  glLineWidth( w );
+  glColor3fv( color );
+  for( ; th_s <= th_e; th_s += JOYSTICK_CTRL_ARC_DIV ){
+    zVec3DCreatePolar( &e1, r, zPI_2, th_s );
+    zVec3DCreatePolar( &e2, r, zPI_2, th_s+JOYSTICK_CTRL_ARC_DIV );
+    zVec3DAddDRC( &e1, org );
+    zVec3DAddDRC( &e2, org );
+    zEdge3DCreate( &edge, &e1, &e2 );
+    rkglEdge( &edge );
+  }
+  glEndList();
+  return entry;
+}
+
+int joystickCtrlDrawArc(zVec3D *start, double kappa, double theta, double alpha, double w, GLfloat color[])
+{
+  zVec3D v, org;
+  double s, c;
+  double r, theta1, theta2;
+
+  if( zIsTiny( kappa ) ){
+    ZRUNERROR( "kappa == 0 cannot be approved" );
+    return 0;
+  }
+  theta1 = theta;
+  zSinCos( theta, &s, &c );
+  zVec3DCreate( &v, c, s, 0 );
+  r = 1 / kappa;
+  zVec3DMulDRC( &v, -r );
+  zVec3DAdd( start, &v, &org );
+  theta2 = theta1 + alpha;
+  return _joystickCtrlDrawArc( &org, r, theta1, theta2, w, color );
+}
+
+int _joystickCtrlDrawLine(zVec3D *s, zVec3D *e, double w, GLfloat color[])
+{
+  int entry;
+  zEdge3D edge;
+
+  entry = rkglBeginList();
+  glLineWidth( w );
+  glColor3fv( color );
+  zEdge3DCreate( &edge, s, e );
+  rkglEdge( &edge );
+  glEndList();
+  return entry;
+}
+
+int joystickCtrlDrawLine(zVec3D *start, double r, double theta, double alpha, double w, GLfloat color[])
+{
+  zVec3D v, end;
+  double s, c;
+  double d;
+
+  zSinCos( theta, &s, &c );
+  zVec3DCreate( &v, -s, c, 0 );
+  d = r*sin( alpha );
+  zVec3DMulDRC( &v, d );
+  zVec3DAdd( start, &v, &end );
+  return _joystickCtrlDrawLine( start, &end, w, color );
+}
+
+void joystickCtrlUpdatePath(void)
+{
+  zVec3D v;
+  GLfloat color[4] = { 1.0, 0.0, 0.0, 1.0 }; /* red */
+  double alpha;
+  zOpticalInfo oi;
+
+  alpha = zPI_2;
+  zOpticalInfoCreateSimple( &oi, color[0], color[1], color[2], NULL );
+  rkglMaterial( &oi );
+  zVec3DCreate( &v, cmd.xd, cmd.yd, 0 );
+  if( zIsTiny( cmd.kappa ) && cmd.vud > 0 )
+    path = joystickCtrlDrawLine( &v, 2, cmd.thetad, alpha, 5.0, color );
+  else if( zIsTiny( cmd.kappa ) && cmd.vud < 0 )
+    path = joystickCtrlDrawLine( &v, -2, cmd.thetad, alpha, 5.0, color );
+  else if( cmd.kappa > 0 && cmd.vud > 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, alpha, 5.0, color );
+  else if( cmd.kappa < 0 && cmd.vud > 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, -alpha, 5.0, color );
+  else if( cmd.kappa > 0 && cmd.vud < 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, -alpha, 5.0, color );
+  else if( cmd.kappa < 0 && cmd.vud < 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, alpha, 5.0, color );
+  else
+    path = 0;
+}
+
 void joystickCtrlPlay(void)
 {
   joystickCtrlUpdate();
+  joystickCtrlUpdatePath();
   joystickCtrlReshape();
   joystickCtrlDisplay();
   if( opt[OPT_REPLAY].flag ){
@@ -408,6 +513,7 @@ void joystickCtrlPlay(void)
     cmd_fp = fopen( opt[OPT_REPLAY].arg, "r" );
     while( !joystickCtrlReplayIsTerminated() ){
       joystickCtrlUpdate();
+      joystickCtrlUpdatePath();
       joystickCtrlDrawStatusbar();
       joystickCtrlRedisplay();
       joystickCtrlCapture();
@@ -417,6 +523,7 @@ void joystickCtrlPlay(void)
     while( 1 ){
       if( joystickCtrlEvent() < 0 ) return;
       joystickCtrlUpdate();
+      joystickCtrlUpdatePath();
       joystickCtrlDrawStatusbar();
       joystickCtrlRedisplay();
       if( is_logging )

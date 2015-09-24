@@ -2,6 +2,8 @@
 #define __PD_ROBOT_H__
 
 #include <roki/rk_ik.h>
+#include <pedi2/pd_biped.h>
+#include <pedi2/pd_state.h>
 
 __BEGIN_DECLS
 
@@ -41,9 +43,10 @@ typedef struct{
 } pdRobot;
 
 /* c'tor and d'tor */
-void pdRobotInit(pdRobot *robot);
-bool pdRobotLoad(pdRobot *robot, const char model[]);
-void pdRobotDestroy(pdRobot *robot);
+__EXPORT void pdRobotInit(pdRobot *robot);
+__EXPORT bool pdRobotLoad(pdRobot *robot, const char model[]);
+__EXPORT void pdRobotDestroy(pdRobot *robot);
+__EXPORT void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state);
 
 /* methods to get parameters */
 #define pdRobotChainPtr(r) ( &(r)->_chain )
@@ -70,7 +73,7 @@ void pdRobotDestroy(pdRobot *robot);
 
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);
-__EXPORT void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
+__EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefCOM(r,v)     pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotSetRefBaseAtt(r,v) pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_BASE_ATT )
 #define pdRobotSetRefLFPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LF_POS )
@@ -81,6 +84,7 @@ __EXPORT void pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefLHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LH_ATT )
 #define pdRobotSetRefRHPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_POS )
 #define pdRobotSetRefRHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_ATT )
+__EXPORT void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped);
 __EXPORT void pdRobotSolveIK(pdRobot *robot);
 
 /* methods to get parameters */
@@ -104,6 +108,7 @@ __EXPORT void pdRobotFootAtt(pdRobot *robot, zVec3D *lf, zVec3D *rf);
 __EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr);
+__EXPORT void pdRobotUpdateState(pdRobot *robot, pdState *state);
 
 /* output method */
 __EXPORT void pdRobotFWrite(FILE *fp, pdRobot *robot);

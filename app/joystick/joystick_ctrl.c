@@ -3,7 +3,9 @@
 #include <zx11/zximage_png.h>
 #include <liw/liw_time.h>
 #include <pedi2/pd_cmd.h>
-#include <pedi2/pd_core.h>
+#include <pedi2/pd_state.h>
+#include <pedi2/pd_biped.h>
+#include <pedi2/pd_robot.h>
 #include <aviator.h>
 #include <pthread.h>
 
@@ -39,20 +41,23 @@ zOption opt[] = {
 };
 
 #define JOYSTICK_CTRL_BUFSIZ 512
-static rkChain robot;
-static rkglChain gl_robot;
+static rkChain chain;
+static rkglChain gl_chain;
 
 static rkChain chain_env;
 static rkglChain ge;
 static int env = 0;
 static rkglCamera cam;
 static rkglLight light;
+static int path = 0;
 
 static zxWindow win;
 static Window glwin;
 
 static pdCmd cmd;
-static pdCore core;
+static pdState state;
+static pdBiped biped;
+static pdRobot robot;
 static zVec dis;
 
 static pthread_t thread;
@@ -123,17 +128,25 @@ void joystickCtrlLoad(char modelfile[])
     cmd.lfh = atof(opt[OPT_HMAX].arg);
     cmd.rfh = atof(opt[OPT_HMAX].arg);
   }
-  pdCoreInit( &core, &cmd, atof( opt[OPT_DT].arg ) );
-  if( !pdCoreLoad( &core, modelfile ) )
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, atof( opt[OPT_DT].arg ) );
+  pdRobotInit( &robot );
+  if( !pdRobotLoad( &robot, modelfile ) )
     exit( 1 );
 
-  if( !rkChainReadFile( &robot, modelfile ) ||
-      !rkglChainLoad( &gl_robot, &robot, NULL ) ){
+  if( !rkChainReadFile( &chain, modelfile ) ||
+      !rkglChainLoad( &gl_chain, &chain, NULL ) ){
     ZOPENERROR( modelfile );
     exit( 1 );
   }
 
-  dis = zVecAlloc( pdCoreJointSize( &core ) );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+
+  pdRobotUpdateState( &robot, &state );
+  pdBipedDefaultPoseInit( &biped, &state );
+  pdRobotSetBipedRefVec( &robot, &biped );
+  pdRobotSolveIK( &robot );
+  pdRobotUpdateState( &robot, &state );
 
   if( !opt[OPT_HMAX].flag ) {
     cmd.lfh = cmd.rfh = 0.1 * cmd.zd;
@@ -220,12 +233,12 @@ void joystickCtrlSetCamera(void)
   double s, c;
   double xd, yd, zd;
 
-  theta = zVec3DElem( &core.state.base_att, 0 );
+  theta = zVec3DElem( &state.base_att, 0 );
   zSinCos( theta, &s, &c );
-  xd = core.cmd->xd;
-  yd = core.cmd->yd;
-  zd = core.cmd->zd;
-  rkglCALookAt( &cam, xd-12*zd*c, yd-12*zd*s, 2*zd, xd, yd, zd, 0, 0, 1 );
+  xd = cmd.xd;
+  yd = cmd.yd;
+  zd = cmd.zd;
+  rkglCALookAt( &cam, xd-15*zd*c, yd-15*zd*s, 2.5*zd, xd, yd, zd, 0, 0, 1 );
 }
 
 void joystickCtrlReshape(void)
@@ -249,7 +262,9 @@ void joystickCtrlDraw(void)
     glCallList( env );
     glEnable( GL_LIGHTING );
   }
-  rkglChainDraw( &gl_robot );
+  if( path > 0 )
+    glCallList( path );
+  rkglChainDraw( &gl_chain );
 }
 
 void joystickCtrlDisplay(void)
@@ -304,8 +319,8 @@ void joystickCtrlCapture(void)
 
 void joystickCtrlLog(void)
 {
-  pdCoreDataFWrite( data_fp, &core );
-  /* pdStateSRDataFWrite( sr_fp, &core.state ); */
+  pdBipedDataFWrite( data_fp, &biped );
+  pdStateSRDataFWrite( sr_fp, &state );
 }
 
 void joystickCtrlCommandLog(void)
@@ -375,15 +390,121 @@ int joystickCtrlEvent(void)
 
 void joystickCtrlUpdate(void)
 {
-  pdCoreUpdate( &core );
-  zVecCopy( pdCoreJointDis( &core ), dis );
-  rkChainFK( &robot, dis );
+  pdBipedUpdate( &biped, &state );
+  pdRobotSetBipedRefVec( &robot, &biped );
+  pdRobotSolveIK( &robot );
+  zVecCopy( pdRobotJointDis( &robot ), dis );
+  rkChainFK( &chain, dis );
+  pdBipedUpdateState( &biped, &state );
+  pdRobotUpdateState( &robot, &state );
   liwSleep( (long)atof( opt[OPT_DT].arg ), 0 );
+}
+
+int _joystickCtrlDrawArc(zVec3D *org, double r, double theta1, double theta2, double w, GLfloat color[])
+{
+#define JOYSTICK_CTRL_ARC_DIV 0.01
+  int entry;
+  double th_s, th_e;
+  zEdge3D edge;
+  zVec3D e1, e2;
+
+  th_s = zMin( theta1, theta2 );
+  th_e = zMax( theta1, theta2 );
+
+  entry = rkglBeginList();
+  glLineWidth( w );
+  glColor3fv( color );
+  for( ; th_s <= th_e; th_s += JOYSTICK_CTRL_ARC_DIV ){
+    zVec3DCreatePolar( &e1, r, zPI_2, th_s );
+    zVec3DCreatePolar( &e2, r, zPI_2, th_s+JOYSTICK_CTRL_ARC_DIV );
+    zVec3DAddDRC( &e1, org );
+    zVec3DAddDRC( &e2, org );
+    zEdge3DCreate( &edge, &e1, &e2 );
+    rkglEdge( &edge );
+  }
+  glEndList();
+  return entry;
+}
+
+int joystickCtrlDrawArc(zVec3D *start, double kappa, double theta, double alpha, double w, GLfloat color[])
+{
+  zVec3D v, org;
+  double s, c;
+  double r, theta1, theta2;
+
+  if( zIsTiny( kappa ) ){
+    ZRUNERROR( "kappa == 0 cannot be approved" );
+    return 0;
+  }
+  theta1 = theta;
+  zSinCos( theta, &s, &c );
+  zVec3DCreate( &v, c, s, 0 );
+  r = 1 / kappa;
+  zVec3DMulDRC( &v, -r );
+  zVec3DAdd( start, &v, &org );
+  theta2 = theta1 + alpha;
+  return _joystickCtrlDrawArc( &org, r, theta1, theta2, w, color );
+}
+
+int _joystickCtrlDrawLine(zVec3D *s, zVec3D *e, double w, GLfloat color[])
+{
+  int entry;
+  zEdge3D edge;
+
+  entry = rkglBeginList();
+  glLineWidth( w );
+  glColor3fv( color );
+  zEdge3DCreate( &edge, s, e );
+  rkglEdge( &edge );
+  glEndList();
+  return entry;
+}
+
+int joystickCtrlDrawLine(zVec3D *start, double r, double theta, double alpha, double w, GLfloat color[])
+{
+  zVec3D v, end;
+  double s, c;
+  double d;
+
+  zSinCos( theta, &s, &c );
+  zVec3DCreate( &v, -s, c, 0 );
+  d = r*sin( alpha );
+  zVec3DMulDRC( &v, d );
+  zVec3DAdd( start, &v, &end );
+  return _joystickCtrlDrawLine( start, &end, w, color );
+}
+
+void joystickCtrlUpdatePath(void)
+{
+  zVec3D v;
+  GLfloat color[4] = { 1.0, 0.0, 0.0, 1.0 }; /* red */
+  double alpha;
+  zOpticalInfo oi;
+
+  alpha = zPI_2;
+  zOpticalInfoCreateSimple( &oi, color[0], color[1], color[2], NULL );
+  rkglMaterial( &oi );
+  zVec3DCreate( &v, cmd.xd, cmd.yd, 0 );
+  if( zIsTiny( cmd.kappa ) && cmd.vud > 0 )
+    path = joystickCtrlDrawLine( &v, 2, cmd.thetad, alpha, 5.0, color );
+  else if( zIsTiny( cmd.kappa ) && cmd.vud < 0 )
+    path = joystickCtrlDrawLine( &v, -2, cmd.thetad, alpha, 5.0, color );
+  else if( cmd.kappa > 0 && cmd.vud > 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, alpha, 5.0, color );
+  else if( cmd.kappa < 0 && cmd.vud > 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, -alpha, 5.0, color );
+  else if( cmd.kappa > 0 && cmd.vud < 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, -alpha, 5.0, color );
+  else if( cmd.kappa < 0 && cmd.vud < 0 )
+    path = joystickCtrlDrawArc( &v, cmd.kappa, cmd.thetad, alpha, 5.0, color );
+  else
+    path = 0;
 }
 
 void joystickCtrlPlay(void)
 {
   joystickCtrlUpdate();
+  joystickCtrlUpdatePath();
   joystickCtrlReshape();
   joystickCtrlDisplay();
   if( opt[OPT_REPLAY].flag ){
@@ -392,6 +513,7 @@ void joystickCtrlPlay(void)
     cmd_fp = fopen( opt[OPT_REPLAY].arg, "r" );
     while( !joystickCtrlReplayIsTerminated() ){
       joystickCtrlUpdate();
+      joystickCtrlUpdatePath();
       joystickCtrlDrawStatusbar();
       joystickCtrlRedisplay();
       joystickCtrlCapture();
@@ -401,6 +523,7 @@ void joystickCtrlPlay(void)
     while( 1 ){
       if( joystickCtrlEvent() < 0 ) return;
       joystickCtrlUpdate();
+      joystickCtrlUpdatePath();
       joystickCtrlDrawStatusbar();
       joystickCtrlRedisplay();
       if( is_logging )
@@ -417,9 +540,12 @@ void joystickCtrlExit(void)
 {
   aviator_close( &av );
   zVecFree( dis );
-  rkglChainUnload( &gl_robot );
-  rkChainDestroy( &robot );
-  pdCoreDestroy( &core );
+  rkglChainUnload( &gl_chain );
+  rkChainDestroy( &chain );
+  pdRobotDestroy( &robot );
+  pdBipedDestroy( &biped );
+  pdStateDestroy( &state );
+  pdCmdDestroy( &cmd );
   glDeleteLists( env, 1 );
   rkglWindowDestroyGLX( glwin );
   rkglCloseGLX();

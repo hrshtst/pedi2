@@ -7,7 +7,7 @@ BINDIR=$(PREFIX)/bin
 CC=gcc
 CFLAGS=-ansi -Wall -O3 $(INCLUDE) $(LIB)
 
-LINK=-lpedi2 `roki-config -l`
+LINK=-lpedi2 -ldzco `roki-config -l`
 
 COMPILE=$(CC) $(CFLAGS) -o $@ $< $(LINK)
 

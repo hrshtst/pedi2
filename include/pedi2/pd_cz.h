@@ -14,11 +14,17 @@ typedef struct{
   zVec3D _vel;      /* COM velocity */
   zVec3D _acc;      /* COM acceleration */
   zVec3D _zmp;      /* ZMP position */
+  double _fz;       /* vertial reaction force */
   double _theta;    /* rotational angle */
   zVec3DList *_sr;  /* supporting region */
 
   pdCZVrt _vrt;     /* vertical motion controller */
   pdCZHrz _hrz;     /* horizontal motion controller */
+
+  struct{
+    double _alpha[3]; /* estimated error */
+    double _k[3];     /* relaxation coefficient */
+  } _errcomp;         /* error compensator */
 
   struct{
     double _t;       /* time */
@@ -61,6 +67,7 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZZMPX(c)     zVec3DElem( pdCZZMP(c), zX )
 #define pdCZZMPY(c)     zVec3DElem( pdCZZMP(c), zY )
 #define pdCZZMPZ(c)     zVec3DElem( pdCZZMP(c), zZ )
+#define pdCZFZ(c)      (c)->_fz
 #define pdCZTheta(c)   (c)->_theta
 #define pdCZSR(c)      (c)->_sr
 #define pdCZVrtPtr(c)  ( &(c)->_vrt )
@@ -87,6 +94,12 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZVelUW(c)    pdCZHrzVelUW( pdCZHrzPtr(c) )
 #define pdCZVelU(c)     pdCZHrzVelU( pdCZHrzPtr(c) )
 #define pdCZVelW(c)     pdCZHrzVelW( pdCZHrzPtr(c) )
+#define pdCZAlphaX(c)  ( (c)->_errcomp._alpha[0] )
+#define pdCZAlphaY(c)  ( (c)->_errcomp._alpha[1] )
+#define pdCZAlphaZ(c)  ( (c)->_errcomp._alpha[2] )
+#define pdCZErrCompKX(c) ( (c)->_errcomp._k[0] )
+#define pdCZErrCompKY(c) ( (c)->_errcomp._k[1] )
+#define pdCZErrCompKZ(c) ( (c)->_errcomp._k[2] )
 #define pdCZRefCOM(c)  ( &(c)->refcom )
 #define pdCZRefCOMX(c) zVec3DElem( pdCZRefCOM(c), zX )
 #define pdCZRefCOMY(c) zVec3DElem( pdCZRefCOM(c), zY )
@@ -135,6 +148,7 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetZMPX(c,xz)         zVec3DSetElem( pdCZZMP(c), zX, xz )
 #define pdCZSetZMPY(c,yz)         zVec3DSetElem( pdCZZMP(c), zY, yz )
 #define pdCZSetZMPZ(c,zz)         zVec3DSetElem( pdCZZMP(c), zZ, zz )
+#define pdCZSetFZ(c,fz)           ( (c)->_fz = (fz) )
 #define pdCZSetTheta(c,t)         ( (c)->_theta = (t) )
 #define pdCZSetSR(c,sr)           ( (c)->_sr = (sr) )
 #define pdCZSetQ1Z(c,q1)          pdCZVrtSetQ1( pdCZVrtPtr(c), q1 )
@@ -161,13 +175,16 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetVelUWVec(c,v)     pdCZHrzSetVelUW( pdCZHrzPtr(c), v )
 #define pdCZSetVelU(c,vu)        pdCZHrzSetVelU( pdCZHrzPtr(c), vu )
 #define pdCZSetVelW(c,vw)        pdCZHrzSetVelW( pdCZHrzPtr(c), vw )
+#define pdCZSetErrCompKX(c,kx)   ( (c)->_errcomp._k[0] = (kx) )
+#define pdCZSetErrCompKY(c,ky)   ( (c)->_errcomp._k[1] = (ky) )
+#define pdCZSetErrCompKZ(c,kz)   ( (c)->_errcomp._k[2] = (kz) )
 
 /* calculation method */
 __EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);
 __EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
 
 /* update method */
-__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double theta, zVec3DList *sr);
+__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr);
 __EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *comd, double *thetad);
 
 /* output method */

@@ -45,6 +45,7 @@ void pdCZInit(pdCZ *c, double dt)
   pdCZRefZMPX( c ) = 0;
   pdCZRefZMPY( c ) = 0;
   pdCZRefZMPZ( c ) = 0;
+  pdCZRefFZ( c ) = 0;
 }
 
 void pdCZDestroy(pdCZ *c)
@@ -159,6 +160,7 @@ void _pdCZUpdateRef(pdCZ *cz)
   zVec3DSetElem( &cz->refzmp, zX, pdCZHrzZMPX( pdCZHrzPtr(cz) ) );
   zVec3DSetElem( &cz->refzmp, zY, pdCZHrzZMPY( pdCZHrzPtr(cz) ) );
   zVec3DSetElem( &cz->refzmp, zZ, pdCZVrtZMP( pdCZVrtPtr(cz) ) );
+  cz->reffz = pdCZVrtRF( pdCZVrtPtr(cz) );
 }
 
 

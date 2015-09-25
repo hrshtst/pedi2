@@ -37,6 +37,7 @@ typedef struct{
   zVec3D refvel;    /* referential COM velocity */
   zVec3D refacc;    /* referential COM acceleration */
   zVec3D refzmp;    /* referential ZMP position */
+  double reffz;     /* referential vertical reaction force */
 } pdCZ;
 
 /* c'tor and d'tor */
@@ -116,6 +117,7 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZRefZMPX(c) zVec3DElem( pdCZRefZMP(c), zX )
 #define pdCZRefZMPY(c) zVec3DElem( pdCZRefZMP(c), zY )
 #define pdCZRefZMPZ(c) zVec3DElem( pdCZRefZMP(c), zZ )
+#define pdCZRefFZ(c)   ( (c)->reffz )
 
 /* methods to set parameters */
 #define pdCZSetTime(c,t)          ( (c)->_ode._t = (t) )

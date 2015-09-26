@@ -110,7 +110,7 @@ void _pdCZUpdateVrt(pdCZ *cz)
 {
   pdCZVrtSetRef( pdCZVrtPtr( cz ), pdCZCmdCOMZ( cz ) );
   pdCZVrtUpdateAcc( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZVelZ(cz) );
-  pdCZVrtUpdateZeta( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZAccZ(cz), pdCZZMPZ(cz) );
+  pdCZVrtUpdateZeta( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZVrtAcc(pdCZVrtPtr(cz)), pdCZZMPZ(cz) );
   pdCZVrtUpdateZMP( pdCZVrtPtr(cz) ); /* may not be updated here */
 }
 

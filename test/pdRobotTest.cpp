@@ -61,7 +61,7 @@ class pdRobotTest : public testing::Test {
     pdRobotSetRefRHPos( &robot, &rh_pos );
     // pdRobotSetRefLHAtt( &robot, &lh_att );
     // pdRobotSetRefRHAtt( &robot, &rh_att );
-    pdRobotSolveIK( &robot );
+    pdRobotSolveIK( &robot, 0 );
   };
 
   void SetRandomState() {
@@ -764,7 +764,7 @@ TEST_F(pdRobotTest, SupportRegion_Double)
   pdRobotSetRefBaseAtt( &robot, &base_att );
   pdRobotSetRefLFAtt( &robot, &lf_att );
   pdRobotSetRefRFAtt( &robot, &rf_att );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
@@ -852,7 +852,7 @@ TEST_F(pdRobotTest, SupportRegion_Single_Left)
   pdRobotSetRefBaseAtt( &robot, &base_att );
   pdRobotSetRefLFAtt( &robot, &lf_att );
   pdRobotSetRefRFAtt( &robot, &rf_att );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
@@ -917,7 +917,7 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   pdRobotSetRefBaseAtt( &robot, &base_att );
   pdRobotSetRefLFAtt( &robot, &lf_att );
   pdRobotSetRefRFAtt( &robot, &rf_att );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 

@@ -99,7 +99,7 @@ __EXPORT void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped);
 __EXPORT bool pdRobotJointRegIndex(pdRobot *robot, zIndex index, double weight);
 __EXPORT bool pdRobotJointUnregIndex(pdRobot *robot, zIndex index);
 
-__EXPORT void pdRobotSolveIK(pdRobot *robot);
+__EXPORT void pdRobotSolveIK(pdRobot *robot, int iter);
 
 /* methods to get parameters */
 #define pdRobotJointSize(r)  rkChainJointSize( pdRobotChainPtr(r) )

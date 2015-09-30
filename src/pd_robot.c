@@ -219,7 +219,7 @@ void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state)
   pdRobotUpdateState( robot, state );
   pdBipedDefaultPoseInit( biped, state );
   pdRobotSetBipedRefVec( robot, biped );
-  pdRobotSolveIK( robot );
+  pdRobotSolveIK( robot, 0 );
   pdRobotUpdateState( robot, state );
 }
 
@@ -291,7 +291,7 @@ bool pdRobotJointUnregIndex(pdRobot *robot, zIndex index)
   return true;
 }
 
-void pdRobotSolveIK(pdRobot *robot)
+void pdRobotSolveIK(pdRobot *robot, int iter)
 {
   register int i;
 
@@ -299,7 +299,7 @@ void pdRobotSolveIK(pdRobot *robot)
   for( i=0; i<pdRobotCellNum( robot ); i++ )
     if( pdRobotFlagIsOn( robot, i ) )
       rkIKCellSetRefVec( robot->_cell[i], &robot->_ref_vec[i] );
-  rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, 0 );
+  rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, iter );
   pdRobotUnsetAllFlags( robot );
 }
 

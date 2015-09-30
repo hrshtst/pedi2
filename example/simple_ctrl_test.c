@@ -48,7 +48,7 @@ int main(void)
     /* update controller */
     pdBipedUpdate( &biped, &state );
     pdRobotSetBipedRefVec( &robot, &biped );
-    pdRobotSolveIK( &robot );
+    pdRobotSolveIK( &robot, 0 );
 
     /* output */
     /* obtain desired joint displacement as a zVec instance */

@@ -129,7 +129,7 @@ void frame_one(zxWindow *win, pdRobot *robot, pdBiped *biped, pdState *state, dm
     /* udpate controller */
     pdBipedUpdate( biped, state );
     pdRobotSetBipedRefVec( robot, biped );
-    pdRobotSolveIK( robot );
+    pdRobotSolveIK( robot, 0 );
     /* update state */
     pdBipedUpdateState( biped, state );
     pdRobotUpdateState( robot, state );
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
   pdRobotUpdateState( &robot, &state );
   pdBipedDefaultPoseInit( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
   pdRobotUpdateState( &robot, &state );
 
   mainloop( &mainwin, &robot, &biped, &state, &con, &sx, &sy, model );

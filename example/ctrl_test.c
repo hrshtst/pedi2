@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     /* update */
     pdBipedUpdate( &biped, &state );
     pdRobotSetBipedRefVec( &robot, &biped );
-    pdRobotSolveIK( &robot );
+    pdRobotSolveIK( &robot, 0 );
 
 #ifdef DEBUG_MODE
     pdCZVrtWrite( pdCZVrtPtr( pdBipedCZPtr(&biped) ) );

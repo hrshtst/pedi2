@@ -397,6 +397,21 @@ TEST_F(pdRobotTest, SetRefVec_Error)
   zEchoOn();
 }
 
+TEST_F(pdRobotTest, SetExtraRefVec)
+{
+  char model[] = "model/mighty6.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, 0, -zPI_2 );
+  pdRobotSetExtraRefVec( &robot, &v, 0 );
+  EXPECT_EQ( 11, pdRobotCellNum( &robot ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[10], zX ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[10], zY ) );
+  EXPECT_DOUBLE_EQ( -zPI_2, zVec3DElem( &robot._ref_vec[10], zZ ) );
+  EXPECT_TRUE( pdRobotExtraFlagIsOn( &robot, 0 ) );
+}
+
 TEST_F(pdRobotTest, SetRefCOM)
 {
   char model[] = "model/mighty.zkc";

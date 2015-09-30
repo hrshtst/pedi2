@@ -58,8 +58,7 @@ typedef struct _pdJoint{
 __EXPORT void pdJointSetDisDefault(pdJoint *joint, double dis);
 __EXPORT void pdJointSetVelDefault(pdJoint *joint, double vel);
 __EXPORT void pdJointSetRefDefault(pdJoint *joint, double refdis);
-__EXPORT void pdJointRefreshDefault(pdJoint *joint, double q);
-__EXPORT void pdJointUpdateDefault(pdJoint *joint, double dt);
+__EXPORT void pdJointRefreshDefault(pdJoint *joint, double dis);
 __EXPORT void pdJointDestroyDefault(pdJoint *joint);
 
 __END_DECLS

@@ -223,6 +223,18 @@ void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state)
   pdRobotUpdateState( robot, state );
 }
 
+void pdRobotLinkSetJointDis(pdRobot *robot, int id, double *dis)
+{
+  rkChainLinkSetJointDis( pdRobotChainPtr(robot), id, dis );
+  rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
+}
+
+void pdRobotSetJointDis(pdRobot *robot, zIndex index, zVec dis)
+{
+  rkChainSetJointDis( pdRobotChainPtr(robot), index, dis );
+  rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
+}
+
 void pdRobotFK(pdRobot *robot, zVec dis)
 {
   rkChainFK( pdRobotChainPtr(robot), dis );

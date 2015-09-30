@@ -132,6 +132,49 @@ TEST_F(pdRobotTest, Load)
   EXPECT_EQ( 25, (int)rkChainNum( pdRobotChainPtr( &robot ) ) );
 }
 
+TEST_F(pdRobotTest, LinkSetJointDis)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis;
+  double d[1];
+
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( 26 );
+
+  d[0] = 0.02;
+  pdRobotLinkSetJointDis( &robot, 1, d );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_EQ( 0.02, zVecElem( dis, 6 ) );
+  d[0] = 0.04;
+  pdRobotLinkSetJointDis( &robot, 3, d );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_EQ( 0.04, zVecElem( dis, 8 ) );
+  zVecFree( dis );
+}
+
+TEST_F(pdRobotTest, SetJointDis)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis, setdis;
+  zIndex index;
+
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( 26 );
+  setdis = zVecCreateList( 4, 0.01, 0.02, 0.03, 0.04 );
+  index  = zIndexCreateList( 4, 1, 2, 3, 4 );
+
+  pdRobotSetJointDis( &robot, index, setdis );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_EQ( 0.01, zVecElem( dis, 6 ) );
+  EXPECT_EQ( 0.02, zVecElem( dis, 7 ) );
+  EXPECT_EQ( 0.03, zVecElem( dis, 8 ) );
+  EXPECT_EQ( 0.04, zVecElem( dis, 9 ) );
+
+  zIndexFree( index );
+  zVecFree( setdis );
+  zVecFree( dis );
+}
+
 TEST_F(pdRobotTest, FK)
 {
   char model[] = "model/mighty.zkc";
@@ -153,6 +196,7 @@ TEST_F(pdRobotTest, FK)
   EXPECT_DOUBLE_EQ( 0.03, zVecElem( dis, 9 ) );
   EXPECT_DOUBLE_EQ( 0.04, zVecElem( dis, 10 ) );
   EXPECT_DOUBLE_EQ( 0.05, zVecElem( dis, 11 ) );
+  zVecFree( dis );
 }
 
 TEST_F(pdRobotTest, Load_UnsetAllFlag)
@@ -1018,6 +1062,7 @@ TEST_F(pdRobotTest, JointRegIndex)
     EXPECT_TRUE( ik->joint_sw[i] );
     EXPECT_EQ( 0.02, ik->joint_weight[i] );
   }
+  zIndexFree( index );
 }
 
 TEST_F(pdRobotTest, JointUnregIndex)
@@ -1041,5 +1086,6 @@ TEST_F(pdRobotTest, JointUnregIndex)
     EXPECT_FALSE( ik->joint_sw[i] );
     EXPECT_EQ( 0, ik->joint_weight[i] );
   }
+  zIndexFree( index );
 }
 

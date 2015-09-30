@@ -22,7 +22,8 @@ typedef struct{
   pdCZHrz _hrz;     /* horizontal motion controller */
 
   struct{
-    double _alpha[3]; /* estimated error */
+    double _alpha[3]; /* estimated ZMP error */
+    double _beta[3];  /* estimated COM error */
     double _k[3];     /* relaxation coefficient */
   } _errcomp;         /* error compensator */
 
@@ -95,9 +96,12 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZVelUW(c)    pdCZHrzVelUW( pdCZHrzPtr(c) )
 #define pdCZVelU(c)     pdCZHrzVelU( pdCZHrzPtr(c) )
 #define pdCZVelW(c)     pdCZHrzVelW( pdCZHrzPtr(c) )
-#define pdCZAlphaX(c)  ( (c)->_errcomp._alpha[0] )
-#define pdCZAlphaY(c)  ( (c)->_errcomp._alpha[1] )
-#define pdCZAlphaZ(c)  ( (c)->_errcomp._alpha[2] )
+#define pdCZAlphaX(c)   ( (c)->_errcomp._alpha[0] )
+#define pdCZAlphaY(c)   ( (c)->_errcomp._alpha[1] )
+#define pdCZAlphaZ(c)   ( (c)->_errcomp._alpha[2] )
+#define pdCZBetaX(c)    ( (c)->_errcomp._beta[0] )
+#define pdCZBetaY(c)    ( (c)->_errcomp._beta[1] )
+#define pdCZBetaZ(c)    ( (c)->_errcomp._beta[2] )
 #define pdCZErrCompKX(c) ( (c)->_errcomp._k[0] )
 #define pdCZErrCompKY(c) ( (c)->_errcomp._k[1] )
 #define pdCZErrCompKZ(c) ( (c)->_errcomp._k[2] )

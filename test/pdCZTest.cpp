@@ -59,6 +59,9 @@ class pdCZTest : public testing::Test {
     pdCZAlphaX( &cz )  = ri.rand();
     pdCZAlphaY( &cz )  = ri.rand();
     pdCZAlphaZ( &cz )  = ri.rand();
+    pdCZBetaX( &cz )   = ri.rand();
+    pdCZBetaY( &cz )   = ri.rand();
+    pdCZBetaZ( &cz )   = ri.rand();
     pdCZRefCOMX( &cz ) = ri.rand();
     pdCZRefCOMY( &cz ) = ri.rand();
     pdCZRefCOMZ( &cz ) = ri.rand();
@@ -124,6 +127,9 @@ TEST_F(pdCZTest, Init)
   EXPECT_EQ( 0, pdCZAlphaX( &cz )   );
   EXPECT_EQ( 0, pdCZAlphaY( &cz )   );
   EXPECT_EQ( 0, pdCZAlphaZ( &cz )   );
+  EXPECT_EQ( 0, pdCZBetaX( &cz )   );
+  EXPECT_EQ( 0, pdCZBetaY( &cz )   );
+  EXPECT_EQ( 0, pdCZBetaZ( &cz )   );
   EXPECT_EQ( 0, pdCZErrCompKX( &cz ) );
   EXPECT_EQ( 0, pdCZErrCompKY( &cz ) );
   EXPECT_EQ( 0, pdCZErrCompKZ( &cz ) );

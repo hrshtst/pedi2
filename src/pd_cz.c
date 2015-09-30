@@ -34,6 +34,9 @@ void pdCZInit(pdCZ *c, double dt)
   pdCZAlphaX( c ) = 0;
   pdCZAlphaY( c ) = 0;
   pdCZAlphaZ( c ) = 0;
+  pdCZBetaX( c )  = 0;
+  pdCZBetaY( c )  = 0;
+  pdCZBetaZ( c )  = 0;
   pdCZRefCOMX( c ) = 0;
   pdCZRefCOMY( c ) = 0;
   pdCZRefCOMZ( c ) = 0;
@@ -134,6 +137,10 @@ void _pdCZUpdateAlpha(pdCZ *cz)
   pdCZAlphaZ(cz) -= pdCZErrCompKZ(cz)*(pdCZFZ(cz)-pdCZVrtRF(v));
 }
 
+void _pdCZUpdateBeta(pdCZ *cz, zVec3D *com)
+{
+}
+
 zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc)
 {
   pdCZ *cz;
@@ -182,6 +189,7 @@ void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, do
 {
   _pdCZUpdateState( cz, com, vel, acc, zmp, fz, theta, sr );
   _pdCZUpdateAlpha( cz );
+  _pdCZUpdateBeta( cz, com );
   _pdCZUpdateVrt( cz );
   _pdCZUpdateHrz( cz );
   /* zODE2Update( &cz->_ode.solver, pdCZTime(cz), cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz), cz ); */

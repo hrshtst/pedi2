@@ -71,6 +71,7 @@ class pdCZTest : public testing::Test {
     pdCZRefZMPX( &cz ) = ri.rand();
     pdCZRefZMPY( &cz ) = ri.rand();
     pdCZRefZMPZ( &cz ) = ri.rand();
+    pdCZRefFZ( &cz )   = ri.rand();
   };
 
   RandomInitializer ri;
@@ -138,6 +139,7 @@ TEST_F(pdCZTest, Init)
   EXPECT_EQ( 0, pdCZRefZMPX( &cz )  );
   EXPECT_EQ( 0, pdCZRefZMPY( &cz )  );
   EXPECT_EQ( 0, pdCZRefZMPZ( &cz )  );
+  EXPECT_EQ( 0, pdCZRefFZ( &cz ) );
 }
 
 TEST_F(pdCZTest, Destroy)

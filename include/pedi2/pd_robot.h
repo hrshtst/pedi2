@@ -84,12 +84,18 @@ __EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefLHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LH_ATT )
 #define pdRobotSetRefRHPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_POS )
 #define pdRobotSetRefRHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_ATT )
+
+#define pdRobotJointReg(r,i,w)    rkIKJointReg( pdRobotIKPtr(r), i, w )
+#define pdRobotJointRegAll(r,w)   rkIKJointRegAll( pdRobotIKPtr(r), w )
+#define pdRobotJointUnreg(r,i)    rkIKJointUnreg( pdRobotIKPtr(r), i )
+
 __EXPORT void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped);
 __EXPORT void pdRobotSolveIK(pdRobot *robot);
 
 /* methods to get parameters */
-#define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )
-#define pdRobotJointDis(r)  (r)->dis
+#define pdRobotJointSize(r)  rkChainJointSize( pdRobotChainPtr(r) )
+#define pdRobotJointDis(r)   (r)->dis
+#define pdRobotLinkNum(r)    rkChainNum( pdRobotChainPtr(r) )
 #define pdRobotRefVec(r,id)  ( &(r)->_ref_vec[id] )
 #define pdRobotRefCOM(r)     pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotRefBaseAtt(r) pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_BASE_ATT )

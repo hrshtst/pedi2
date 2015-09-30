@@ -917,3 +917,59 @@ TEST_F(pdRobotTest, UpdateState)
   // EXPECT_NEAR( 0.0,    state.rh_att.e[1], GTEST_TOL_LOOSE );
   // EXPECT_NEAR( 0.0,    state.rh_att.e[2], GTEST_TOL_LOOSE );
 }
+
+TEST_F(pdRobotTest, JointReg)
+{
+  char model[] = "model/mighty5.zkc";
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  EXPECT_FALSE( ik->joint_sw[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
+
+  // method to testify
+  pdRobotJointReg( &robot, CHECK_ID, 0.01 );
+  EXPECT_TRUE( ik->joint_sw[CHECK_ID] );
+  EXPECT_EQ( 0.01, ik->joint_weight[CHECK_ID] );
+}
+
+TEST_F(pdRobotTest, JointRegAll)
+{
+  char model[] = "model/mighty5.zkc";
+  rkChain *c;
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  c = pdRobotChainPtr( &robot );
+  ik = pdRobotIKPtr( &robot );
+
+  // method to testify
+  pdRobotJointRegAll( &robot, 0.02 );
+  for( uint i=0; i<pdRobotLinkNum(&robot); i++ )
+    if( rkChainLinkJointType(c,i) != RK_JOINT_FIXED ){
+      EXPECT_TRUE( ik->joint_sw[i] );
+      EXPECT_EQ( 0.02, ik->joint_weight[i] );
+    }
+}
+
+TEST_F(pdRobotTest, JointUnreg)
+{
+  char model[] = "model/mighty5.zkc";
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  pdRobotJointReg( &robot, CHECK_ID, 0.01 );
+  EXPECT_TRUE( ik->joint_sw[CHECK_ID] );
+  EXPECT_EQ( 0.01, ik->joint_weight[CHECK_ID] );
+
+  // method to testify
+  pdRobotJointUnreg( &robot, CHECK_ID );
+  EXPECT_FALSE( ik->joint_sw[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
+}

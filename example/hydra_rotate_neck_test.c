@@ -12,7 +12,7 @@ void move_neck(int step, zVec v)
   double amp;
 
   amp = 0.5 * ( NECK_P_MAX - NECK_P_MIN );
-  deg = amp * sin(0.005*zPIx2*step) + amp;
+  deg = - amp * cos(0.005*zPIx2*step) + amp;
   zVecSetElem( v, 0, zDeg2Rad(deg) );
 }
 

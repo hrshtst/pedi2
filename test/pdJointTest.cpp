@@ -65,7 +65,9 @@ TEST_F(pdJointTest, RefreshDefault)
   dis = ri.rand();
   pdJointRefreshDefault( &joint, dis );
   EXPECT_EQ( dis, pdJointDis( &joint ) );
+  EXPECT_EQ( dis, pdJointDisOld( &joint ) );
   EXPECT_EQ( 0, pdJointVel( &joint ) );
+  EXPECT_EQ( 0, pdJointVelOld( &joint ) );
 }
 
 TEST_F(pdJointTest, DestroyDefault)

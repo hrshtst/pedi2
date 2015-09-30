@@ -18,7 +18,9 @@ void pdJointSetRefDefault(pdJoint *joint, double refdis)
 void pdJointRefreshDefault(pdJoint *joint, double dis)
 {
   joint->dis = dis;
+  joint->disold = dis;
   joint->vel = 0;
+  joint->velold = 0;
 }
 
 void pdJointDestroyDefault(pdJoint *joint)

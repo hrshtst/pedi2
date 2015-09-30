@@ -84,12 +84,14 @@ __EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefLHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LH_ATT )
 #define pdRobotSetRefRHPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_POS )
 #define pdRobotSetRefRHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_ATT )
+__EXPORT void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped);
 
 #define pdRobotJointReg(r,i,w)    rkIKJointReg( pdRobotIKPtr(r), i, w )
 #define pdRobotJointRegAll(r,w)   rkIKJointRegAll( pdRobotIKPtr(r), w )
 #define pdRobotJointUnreg(r,i)    rkIKJointUnreg( pdRobotIKPtr(r), i )
+__EXPORT bool pdRobotJointRegIndex(pdRobot *robot, zIndex index, double weight);
+__EXPORT bool pdRobotJointUnregIndex(pdRobot *robot, zIndex index);
 
-__EXPORT void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped);
 __EXPORT void pdRobotSolveIK(pdRobot *robot);
 
 /* methods to get parameters */

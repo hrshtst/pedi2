@@ -253,6 +253,26 @@ void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped)
   pdRobotSetRefRFAtt( robot, pdBipedRefRFAtt(biped) );
 }
 
+bool pdRobotJointRegIndex(pdRobot *robot, zIndex index, double weight)
+{
+  register int i;
+
+  for( i=0; i<zArrayNum(index); i++ )
+    if( !pdRobotJointReg( robot, zIndexElem(index,i), weight ) )
+      return false;
+  return true;
+}
+
+bool pdRobotJointUnregIndex(pdRobot *robot, zIndex index)
+{
+  register int i;
+
+  for( i=0; i<zArrayNum(index); i++ )
+    if( !pdRobotJointUnreg( robot, zIndexElem(index,i) ) )
+      return false;
+  return true;
+}
+
 void pdRobotSolveIK(pdRobot *robot)
 {
   register int i;

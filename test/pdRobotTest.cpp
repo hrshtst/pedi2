@@ -966,10 +966,57 @@ TEST_F(pdRobotTest, JointUnreg)
   const int CHECK_ID = 1;        // left_shoulder_flexion
   pdRobotJointReg( &robot, CHECK_ID, 0.01 );
   EXPECT_TRUE( ik->joint_sw[CHECK_ID] );
-  EXPECT_EQ( 0.01, ik->joint_weight[CHECK_ID] );
+  EXPECT_LT( 0.0, ik->joint_weight[CHECK_ID] );
 
   // method to testify
   pdRobotJointUnreg( &robot, CHECK_ID );
   EXPECT_FALSE( ik->joint_sw[CHECK_ID] );
   EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
 }
+
+TEST_F(pdRobotTest, JointRegIndex)
+{
+  char model[] = "model/mighty5.zkc";
+  zIndex index;
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+  index = zIndexCreateList( 4, 1, 2, 3, 4 );
+  // check
+  for( int i=1; i<=4; i++ ){
+    EXPECT_FALSE( ik->joint_sw[i] );
+    EXPECT_EQ( 0, ik->joint_weight[i] );
+  }
+
+  // method to testify
+  pdRobotJointRegIndex( &robot, index, 0.02 );
+  for( int i=1; i<=4; i++ ){
+    EXPECT_TRUE( ik->joint_sw[i] );
+    EXPECT_EQ( 0.02, ik->joint_weight[i] );
+  }
+}
+
+TEST_F(pdRobotTest, JointUnregIndex)
+{
+  char model[] = "model/mighty5.zkc";
+  zIndex index;
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+  index = zIndexCreateList( 6, 5, 6, 7, 8, 9, 10 );
+  // check
+  for( int i=6; i<=10; i++ ){
+    EXPECT_TRUE( ik->joint_sw[i] );
+    EXPECT_LT( 0, ik->joint_weight[i] );
+  }
+
+  // method to testify
+  pdRobotJointUnregIndex( &robot, index );
+  for( int i=6; i<=10; i++ ){
+    EXPECT_FALSE( ik->joint_sw[i] );
+    EXPECT_EQ( 0, ik->joint_weight[i] );
+  }
+}
+

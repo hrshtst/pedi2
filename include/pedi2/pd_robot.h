@@ -71,6 +71,9 @@ __EXPORT void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *s
 #define pdRobotLHID(r)     (r)->_lh_id
 #define pdRobotRHID(r)     (r)->_rh_id
 
+/* methods to solve FK */
+__EXPORT void pdRobotFK(pdRobot *robot, zVec dis);
+
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);
 __EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
@@ -98,6 +101,7 @@ __EXPORT void pdRobotSolveIK(pdRobot *robot);
 #define pdRobotJointSize(r)  rkChainJointSize( pdRobotChainPtr(r) )
 #define pdRobotJointDis(r)   (r)->dis
 #define pdRobotLinkNum(r)    rkChainNum( pdRobotChainPtr(r) )
+#define pdRobotGetJointDisAll(r,v) zVecCopy( pdRobotJointDis(r), v )
 #define pdRobotRefVec(r,id)  ( &(r)->_ref_vec[id] )
 #define pdRobotRefCOM(r)     pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotRefBaseAtt(r) pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_BASE_ATT )

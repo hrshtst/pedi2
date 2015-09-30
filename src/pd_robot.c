@@ -223,6 +223,12 @@ void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state)
   pdRobotUpdateState( robot, state );
 }
 
+void pdRobotFK(pdRobot *robot, zVec dis)
+{
+  rkChainFK( pdRobotChainPtr(robot), dis );
+  rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
+}
+
 void pdRobotUnsetAllFlags(pdRobot *robot)
 {
   register int i;

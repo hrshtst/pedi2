@@ -132,6 +132,29 @@ TEST_F(pdRobotTest, Load)
   EXPECT_EQ( 25, (int)rkChainNum( pdRobotChainPtr( &robot ) ) );
 }
 
+TEST_F(pdRobotTest, FK)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis;
+
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( 26 );
+  zVecClear( dis );
+  zVecSetElem( dis,  7, 0.01 );
+  zVecSetElem( dis,  8, 0.02 );
+  zVecSetElem( dis,  9, 0.03 );
+  zVecSetElem( dis, 10, 0.04 );
+  zVecSetElem( dis, 11, 0.05 );
+
+  pdRobotFK( &robot, dis );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_DOUBLE_EQ( 0.01, zVecElem( dis, 7 ) );
+  EXPECT_DOUBLE_EQ( 0.02, zVecElem( dis, 8 ) );
+  EXPECT_DOUBLE_EQ( 0.03, zVecElem( dis, 9 ) );
+  EXPECT_DOUBLE_EQ( 0.04, zVecElem( dis, 10 ) );
+  EXPECT_DOUBLE_EQ( 0.05, zVecElem( dis, 11 ) );
+}
+
 TEST_F(pdRobotTest, Load_UnsetAllFlag)
 {
   char model[] = "model/mighty.zkc";

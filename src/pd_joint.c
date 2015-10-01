@@ -2,11 +2,13 @@
 
 void pdJointSetDisDefault(pdJoint *joint, double dis)
 {
+  joint->disold = joint->dis;
   joint->dis = dis;
 }
 
 void pdJointSetVelDefault(pdJoint *joint, double vel)
 {
+  joint->velold = joint->vel;
   joint->vel = vel;
 }
 

@@ -29,22 +29,30 @@ TEST_F(pdJointTest, Init)
 
 TEST_F(pdJointTest, SetDisDefault)
 {
-  double dis;
+  double dis1, dis2;
 
   pdJointInit( &joint );
-  dis = ri.rand();
-  pdJointSetDisDefault( &joint, dis );
-  EXPECT_EQ( dis, pdJointDis( &joint ) );
+  dis1 = ri.rand();
+  pdJointSetDisDefault( &joint, dis1 );
+  EXPECT_EQ( dis1, pdJointDis( &joint ) );
+
+  pdJointSetDisDefault( &joint, dis2 );
+  EXPECT_EQ( dis2, pdJointDis( &joint ) );
+  EXPECT_EQ( dis1, pdJointDisOld( &joint ) );
 }
 
 TEST_F(pdJointTest, SetVelDefault)
 {
-  double vel;
+  double vel1, vel2;
 
   pdJointInit( &joint );
-  vel = ri.rand();
-  pdJointSetVelDefault( &joint, vel );
-  EXPECT_EQ( vel, pdJointVel( &joint ) );
+  vel1 = ri.rand();
+  pdJointSetVelDefault( &joint, vel1 );
+  EXPECT_EQ( vel1, pdJointVel( &joint ) );
+
+  pdJointSetVelDefault( &joint, vel2 );
+  EXPECT_EQ( vel2, pdJointVel( &joint ) );
+  EXPECT_EQ( vel1, pdJointVelOld( &joint ) );
 }
 
 TEST_F(pdJointTest, SetRefDefault)

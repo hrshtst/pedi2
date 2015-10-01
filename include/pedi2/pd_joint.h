@@ -29,6 +29,8 @@ typedef struct _pdJoint{
   double refdisold;
   double refvelold;
   double output;
+  bool is_set_vel;
+  bool is_set_refvel;
   void *_prm;
   pdJointMethod *_met;
 } pdJoint;
@@ -54,6 +56,8 @@ typedef struct _pdJoint{
   pdJointRefDisOld(j) = 0;\
   pdJointRefVelOld(j) = 0;\
   pdJointOutput(j) = 0;\
+  (j)->is_set_vel = false;\
+  (j)->is_set_refvel = false;\
   (j)->_prm = NULL;\
   (j)->_met = NULL;\
 } while(0)
@@ -71,6 +75,7 @@ __EXPORT void pdJointSetVelDefault(pdJoint *joint, double vel);
 __EXPORT void pdJointSetRefDisDefault(pdJoint *joint, double refdis);
 __EXPORT void pdJointSetRefVelDefault(pdJoint *joint, double refvel);
 __EXPORT void pdJointRefreshDefault(pdJoint *joint, double dis);
+__EXPORT void pdJointUpdateDefault(pdJoint *joint, double dt);
 __EXPORT void pdJointDestroyDefault(pdJoint *joint);
 
 __END_DECLS

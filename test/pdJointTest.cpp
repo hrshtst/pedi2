@@ -41,6 +41,8 @@ TEST_F(pdJointTest, Init)
   EXPECT_EQ( 0.0, pdJointRefDisOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointRefVelOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( NULL, joint._prm );
   EXPECT_EQ( NULL, joint._met );
 }
@@ -68,11 +70,13 @@ TEST_F(pdJointTest, SetVelDefault)
   vel1 = ri.rand();
   pdJointSetVelDefault( &joint, vel1 );
   EXPECT_EQ( vel1, pdJointVel( &joint ) );
+  EXPECT_TRUE( joint.is_set_vel );
 
   vel2 = ri.rand();
   pdJointSetVelDefault( &joint, vel2 );
   EXPECT_EQ( vel2, pdJointVel( &joint ) );
   EXPECT_EQ( vel1, pdJointVelOld( &joint ) );
+  EXPECT_TRUE( joint.is_set_vel );
 }
 
 TEST_F(pdJointTest, SetRefDisDefault)
@@ -98,11 +102,13 @@ TEST_F(pdJointTest, SetRefVelDefault)
   refvel1 = ri.rand();
   pdJointSetRefVelDefault( &joint, refvel1 );
   EXPECT_EQ( refvel1, pdJointRefVel( &joint ) );
+  EXPECT_TRUE( joint.is_set_refvel );
 
   refvel2 = ri.rand();
   pdJointSetRefVelDefault( &joint, refvel2 );
   EXPECT_EQ( refvel2, pdJointRefVel( &joint ) );
   EXPECT_EQ( refvel1, pdJointRefVelOld( &joint ) );
+  EXPECT_TRUE( joint.is_set_refvel );
 }
 
 TEST_F(pdJointTest, RefreshDefault)
@@ -117,10 +123,72 @@ TEST_F(pdJointTest, RefreshDefault)
   EXPECT_EQ( dis, pdJointDisOld( &joint ) );
   EXPECT_EQ( 0,   pdJointVel( &joint ) );
   EXPECT_EQ( 0,   pdJointVelOld( &joint ) );
-  EXPECT_EQ( 0,   pdJointRefDis( &joint ) );
-  EXPECT_EQ( 0,   pdJointRefDisOld( &joint ) );
+  EXPECT_EQ( dis, pdJointRefDis( &joint ) );
+  EXPECT_EQ( dis, pdJointRefDisOld( &joint ) );
   EXPECT_EQ( 0,   pdJointRefVel( &joint ) );
   EXPECT_EQ( 0,   pdJointRefVelOld( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
+}
+
+TEST_F(pdJointTest, UpdateDefault)
+{
+  pdJointInit( &joint );
+  pdJointRefreshDefault( &joint, 10 );
+
+  pdJointSetRefDisDefault( &joint, 20 );
+  pdJointSetDisDefault( &joint, 10 );
+  pdJointUpdateDefault( &joint, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 0, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
+
+  pdJointSetRefDisDefault( &joint, 30 );
+  pdJointSetDisDefault( &joint, 15 );
+  pdJointUpdateDefault( &joint, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 500, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
+}
+
+TEST_F(pdJointTest, UpdateDefault_SetVel)
+{
+  pdJointInit( &joint );
+  pdJointRefreshDefault( &joint, 10 );
+
+  pdJointSetRefDisDefault( &joint, 20 );
+  pdJointSetDisDefault( &joint, 10 );
+  pdJointUpdateDefault( &joint, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 0, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
+
+  pdJointSetRefDisDefault( &joint, 30 );
+  pdJointSetDisDefault( &joint, 15 );
+  pdJointSetVelDefault( &joint, 600 );
+  pdJointUpdateDefault( &joint, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 600, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
+}
+
+TEST_F(pdJointTest, UpdateDefault_SetRefVel)
+{
+  pdJointInit( &joint );
+  pdJointRefreshDefault( &joint, 10 );
+
+  pdJointSetRefDisDefault( &joint, 20 );
+  pdJointSetDisDefault( &joint, 10 );
+  pdJointUpdateDefault( &joint, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 0, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
+
+  pdJointSetRefDisDefault( &joint, 30 );
+  pdJointSetDisDefault( &joint, 15 );
+  pdJointSetRefVelDefault( &joint, 900 );
+  pdJointUpdateDefault( &joint, TIME_STEP );
+  EXPECT_DOUBLE_EQ( 500, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 900, pdJointRefVel( &joint ) );
 }
 
 TEST_F(pdJointTest, DestroyDefault)
@@ -153,6 +221,8 @@ TEST_F(pdJointTest, DestroyDefault)
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
   EXPECT_EQ( NULL, joint._prm );
   EXPECT_EQ( NULL, joint._met );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
 }
 
 
@@ -200,6 +270,8 @@ TEST_F(pdJointPDTrqTest, Create)
   EXPECT_EQ( 0.0, pdJointRefDisOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointRefVelOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( pgain, ((_pdJointPDTrq*)joint._prm)->pgain );
   EXPECT_EQ( dgain, ((_pdJointPDTrq*)joint._prm)->dgain );
   EXPECT_EQ( -HUGE_VAL, ((_pdJointPDTrq*)joint._prm)->trqmin );
@@ -225,6 +297,8 @@ TEST_F(pdJointPDTrqTest, Destroy)
   EXPECT_EQ( 0.0, pdJointRefDisOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointRefVelOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( NULL, joint._prm );
   EXPECT_EQ( NULL, joint._met );
 }
@@ -344,6 +418,8 @@ TEST_F(pdJointPIDTrqTest, Create)
   EXPECT_EQ( 0.0, pdJointRefDisOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointRefVelOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( pgain, ((_pdJointPIDTrq*)joint._prm)->pgain );
   EXPECT_EQ( igain, ((_pdJointPIDTrq*)joint._prm)->igain );
   EXPECT_EQ( dgain, ((_pdJointPIDTrq*)joint._prm)->dgain );
@@ -370,6 +446,8 @@ TEST_F(pdJointPIDTrqTest, Destroy)
   EXPECT_EQ( 0.0, pdJointRefDisOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointRefVelOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
+  EXPECT_FALSE( joint.is_set_vel );
+  EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( NULL, joint._prm );
   EXPECT_EQ( NULL, joint._met );
 }

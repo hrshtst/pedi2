@@ -307,6 +307,8 @@ TEST_F(pdJointPDTrqTest, Update)
 {
   pdJointCreatePDTrq( &joint, 2, 3 );
   pdJointRefresh( &joint, 0 );
+  pdJointSetDis( &joint, 0 );
+  pdJointSetRefDis( &joint, 10 );
   pdJointSetRefDis( &joint, 10 );
   pdJointUpdate( &joint, 0.01 );
   EXPECT_DOUBLE_EQ( 20, pdJointOutput( &joint ) );
@@ -456,6 +458,8 @@ TEST_F(pdJointPIDTrqTest, Update)
 {
   pdJointCreatePIDTrq( &joint, 2, 4, 3 );
   pdJointRefresh( &joint, 0 );
+  pdJointSetDis( &joint, 0 );
+  pdJointSetRefDis( &joint, 10 );
   pdJointSetRefDis( &joint, 10 );
   pdJointUpdate( &joint, 0.01 );
   EXPECT_DOUBLE_EQ( 20.4, pdJointOutput( &joint ) );

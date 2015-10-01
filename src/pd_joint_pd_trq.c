@@ -16,12 +16,12 @@ void pdJointUpdatePDTrq(pdJoint *joint, double dt)
   double x, v;
   _pdJointPDTrq *pd;
 
-  x = pdJointDis(joint) - pdJointRefDis(joint);
-  v = ( pdJointDis(joint) - pdJointDisOld(joint) ) / dt;
+  pdJointUpdateDefault( joint, dt );
+  x = pdJointRefDis(joint) - pdJointDis(joint);
+  v = pdJointRefVel(joint) - pdJointVel(joint);
   pd = joint->_prm;
-  joint->output = -pd->pgain * x - pd->dgain * v;
+  joint->output = pd->pgain * x + pd->dgain * v;
   joint->output = zLimit( joint->output, pd->trqmin, pd->trqmax );
-  pdJointSetVel( joint, v );
 }
 
 pdJointMethod pd_joint_pd_trq_met = {

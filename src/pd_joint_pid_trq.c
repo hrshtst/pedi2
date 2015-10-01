@@ -17,13 +17,13 @@ void pdJointUpdatePIDTrq(pdJoint *joint, double dt)
   double x, v;
   _pdJointPIDTrq *pid;
 
-  x = pdJointDis(joint) - pdJointRefDis(joint);
-  v = ( pdJointDis(joint) - pdJointDisOld(joint) ) / dt;
+  pdJointUpdateDefault( joint, dt );
+  x = pdJointRefDis(joint) - pdJointDis(joint);
+  v = pdJointRefVel(joint) - pdJointVel(joint);
   pid = joint->_prm;
   pid->err += x * dt;
-  joint->output = -pid->pgain * x - pid->dgain * v - pid->igain * pid->err;
+  joint->output = pid->pgain * x + pid->dgain * v + pid->igain * pid->err;
   joint->output = zLimit( joint->output, pid->trqmin, pid->trqmax );
-  pdJointSetVel( joint, v );
 }
 
 pdJointMethod pd_joint_pid_trq_met = {

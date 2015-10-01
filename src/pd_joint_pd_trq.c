@@ -60,3 +60,20 @@ void pdJointPDTrqSetLim(pdJoint *joint, double min, double max)
   pd->trqmin = zMin( min, max );
   pd->trqmax = zMax( min, max );
 }
+
+void pdJointPDTrqSetPgain(pdJoint *joint, double pgain)
+{
+  _pdJointPDTrq *pd;
+
+  pd = joint->_prm;
+  pd->pgain = pgain;
+}
+
+void pdJointPDTrqSetDgain(pdJoint *joint, double dgain)
+{
+  _pdJointPDTrq *pd;
+
+  pd = joint->_prm;
+  pd->dgain = dgain;
+}
+

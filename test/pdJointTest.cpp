@@ -214,6 +214,30 @@ TEST_F(pdJointPDTrqTest, Output_Limit)
   EXPECT_DOUBLE_EQ( -100, pdJointOutput( &joint ) );
 }
 
+TEST_F(pdJointPDTrqTest, SetPgain)
+{
+  double p;
+
+  pdJointCreatePDTrq( &joint, pgain, dgain );
+  p = ri.rand();
+  EXPECT_NE( p, ((_pdJointPDTrq*)joint._prm)->pgain );
+
+  pdJointPDTrqSetPgain( &joint, p );
+  EXPECT_EQ( p, ((_pdJointPDTrq*)joint._prm)->pgain );
+}
+
+TEST_F(pdJointPDTrqTest, SetDgain)
+{
+  double d;
+
+  pdJointCreatePDTrq( &joint, pgain, dgain );
+  d = ri.rand();
+  EXPECT_NE( d, ((_pdJointPDTrq*)joint._prm)->dgain );
+
+  pdJointPDTrqSetDgain( &joint, d );
+  EXPECT_EQ( d, ((_pdJointPDTrq*)joint._prm)->dgain );
+}
+
 #if 0
 typedef struct{
   double pgain, dgain, igain;

@@ -8,6 +8,8 @@ __BEGIN_DECLS
 __EXPORT bool pdJointCreatePDTrq(pdJoint *joint, double pgain, double dgain);
 
 __EXPORT void pdJointPDTrqSetLim(pdJoint *joint, double min, double max);
+__EXPORT void pdJointPDTrqSetPgain(pdJoint *joint, double pgain);
+__EXPORT void pdJointPDTrqSetDgain(pdJoint *joint, double dgain);
 
 extern pdJointMethod pd_joint_pd_trq_met;
 

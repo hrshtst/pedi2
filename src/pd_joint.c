@@ -12,9 +12,16 @@ void pdJointSetVelDefault(pdJoint *joint, double vel)
   joint->vel = vel;
 }
 
-void pdJointSetRefDefault(pdJoint *joint, double refdis)
+void pdJointSetRefDisDefault(pdJoint *joint, double refdis)
 {
+  joint->refdisold = joint->refdis;
   joint->refdis = refdis;
+}
+
+void pdJointSetRefVelDefault(pdJoint *joint, double refvel)
+{
+  joint->refvelold = joint->refvel;
+  joint->refvel = refvel;
 }
 
 void pdJointRefreshDefault(pdJoint *joint, double dis)
@@ -23,6 +30,10 @@ void pdJointRefreshDefault(pdJoint *joint, double dis)
   joint->disold = dis;
   joint->vel = 0;
   joint->velold = 0;
+  joint->refdis = 0;
+  joint->refdisold = 0;
+  joint->refvel = 0;
+  joint->refvelold = 0;
 }
 
 void pdJointDestroyDefault(pdJoint *joint)

@@ -11,7 +11,8 @@ typedef struct{
   const char *type;
   void (*setdis)(struct _pdJoint*, double);
   void (*setvel)(struct _pdJoint*, double);
-  void (*setref)(struct _pdJoint*, double);
+  void (*setrefdis)(struct _pdJoint*, double);
+  void (*setrefvel)(struct _pdJoint*, double);
   void (*refresh)(struct _pdJoint*, double);
   void (*update)(struct _pdJoint*, double);
   void (*destroy)(struct _pdJoint*);
@@ -24,17 +25,23 @@ typedef struct _pdJoint{
   double disold;
   double velold;
   double refdis;
+  double refvel;
+  double refdisold;
+  double refvelold;
   double output;
   void *_prm;
   pdJointMethod *_met;
 } pdJoint;
 
-#define pdJointDis(j) ( (j)->dis )
-#define pdJointVel(j) ( (j)->vel )
-#define pdJointDisOld(j) ( (j)->disold )
-#define pdJointVelOld(j) ( (j)->velold )
-#define pdJointRefDis(j) ( (j)->refdis )
-#define pdJointOutput(j) ( (j)->output )
+#define pdJointDis(j)       ( (j)->dis )
+#define pdJointVel(j)       ( (j)->vel )
+#define pdJointDisOld(j)    ( (j)->disold )
+#define pdJointVelOld(j)    ( (j)->velold )
+#define pdJointRefDis(j)    ( (j)->refdis )
+#define pdJointRefVel(j)    ( (j)->refvel )
+#define pdJointRefDisOld(j) ( (j)->refdisold )
+#define pdJointRefVelOld(j) ( (j)->refvelold )
+#define pdJointOutput(j)    ( (j)->output )
 
 #define pdJointInit(j) do{\
   zNameSet( j, NULL );\
@@ -43,21 +50,26 @@ typedef struct _pdJoint{
   pdJointDisOld(j) = 0;\
   pdJointVelOld(j) = 0;\
   pdJointRefDis(j) = 0;\
+  pdJointRefVel(j) = 0;\
+  pdJointRefDisOld(j) = 0;\
+  pdJointRefVelOld(j) = 0;\
   pdJointOutput(j) = 0;\
   (j)->_prm = NULL;\
   (j)->_met = NULL;\
 } while(0)
 
-#define pdJointSetDis(j,q)  (j)->_met->setdis( j, q )
-#define pdJointSetVel(j,v)  (j)->_met->setvel( j, v )
-#define pdJointSetRef(j,q)  (j)->_met->setref( j, q )
-#define pdJointRefresh(j,q) (j)->_met->refresh( j, q )
-#define pdJointUpdate(j,dt) (j)->_met->update( j, dt )
-#define pdJointDestroy(j)   (j)->_met->destroy( j )
+#define pdJointSetDis(j,q)    (j)->_met->setdis( j, q )
+#define pdJointSetVel(j,v)    (j)->_met->setvel( j, v )
+#define pdJointSetRefDis(j,q) (j)->_met->setrefdis( j, q )
+#define pdJointSetRefVel(j,q) (j)->_met->setrefvel( j, q )
+#define pdJointRefresh(j,q)   (j)->_met->refresh( j, q )
+#define pdJointUpdate(j,dt)   (j)->_met->update( j, dt )
+#define pdJointDestroy(j)     (j)->_met->destroy( j )
 
 __EXPORT void pdJointSetDisDefault(pdJoint *joint, double dis);
 __EXPORT void pdJointSetVelDefault(pdJoint *joint, double vel);
-__EXPORT void pdJointSetRefDefault(pdJoint *joint, double refdis);
+__EXPORT void pdJointSetRefDisDefault(pdJoint *joint, double refdis);
+__EXPORT void pdJointSetRefVelDefault(pdJoint *joint, double refvel);
 __EXPORT void pdJointRefreshDefault(pdJoint *joint, double dis);
 __EXPORT void pdJointDestroyDefault(pdJoint *joint);
 

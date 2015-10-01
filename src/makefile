@@ -20,7 +20,7 @@ OBJ=pd_cz_vrt.o \
     pd_filter.o pd_filter_none.o pd_filter_bw.o \
     pd_sensor.o pd_sensor_6ft.o \
     pd_est_zmp.o \
-    pd_joint.o  pd_joint_pd_trq.o
+    pd_joint.o  pd_joint_pd_trq.o pd_joint_pid_trq.o
 DLIB=libpedi2.so
 
 TARGET=$(DLIB)

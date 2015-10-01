@@ -63,6 +63,7 @@ __EXPORT void pdJointDestroyDefault(pdJoint *joint);
 
 __END_DECLS
 
-#include <pedi2/pd_joint_pd_trq.h>  /* Torque PD control */
+#include <pedi2/pd_joint_pd_trq.h>   /* Torque PD control */
+#include <pedi2/pd_joint_pid_trq.h>  /* Torque PID control */
 
 #endif /* __PD_JOINT_H__ */

@@ -20,6 +20,7 @@ void pdJointUpdatePDTrq(pdJoint *joint, double dt)
   v = ( pdJointDis(joint) - pdJointDisOld(joint) ) / dt;
   pd = joint->_prm;
   joint->output = -pd->pgain * x - pd->dgain * v;
+  joint->output = zLimit( joint->output, pd->trqmin, pd->trqmax );
   pdJointSetVel( joint, v );
 }
 
@@ -49,4 +50,13 @@ bool pdJointCreatePDTrq(pdJoint *joint, double pgain, double dgain)
   joint->_prm = pd;
   joint->_met = &pd_joint_pd_trq_met;
   return true;
+}
+
+void pdJointPDTrqSetLim(pdJoint *joint, double min, double max)
+{
+  _pdJointPDTrq *pd;
+
+  pd = joint->_prm;
+  pd->trqmin = zMin( min, max );
+  pd->trqmax = zMax( min, max );
 }

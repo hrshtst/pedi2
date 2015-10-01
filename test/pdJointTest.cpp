@@ -197,3 +197,112 @@ TEST_F(pdJointPDTrqTest, Update)
   EXPECT_DOUBLE_EQ( 5, pdJointDisOld( &joint ) );
   EXPECT_DOUBLE_EQ( 500, pdJointVelOld( &joint ) );
 }
+
+TEST_F(pdJointPDTrqTest, Output_Limit)
+{
+  pdJointCreatePDTrq( &joint, 2, 3 );
+  pdJointPDTrqSetLim( &joint, -100, 100 );
+
+  pdJointRefresh( &joint, 0 );
+  pdJointSetRef( &joint, 200 );
+  pdJointUpdate( &joint, 0.01 );
+  EXPECT_DOUBLE_EQ( 100, pdJointOutput( &joint ) );
+
+  pdJointRefresh( &joint, 0 );
+  pdJointSetRef( &joint, -200 );
+  pdJointUpdate( &joint, 0.01 );
+  EXPECT_DOUBLE_EQ( -100, pdJointOutput( &joint ) );
+}
+
+#if 0
+typedef struct{
+  double pgain, dgain, igain;
+  double trqmin, trqmax;
+} _pdJointPIDTrq;
+
+class pdJointPIDTrqTest : public testing::Test {
+protected:
+  virtual void SetUp() {
+    pgain = ri.rand();
+    dgain = ri.rand();
+    igain = ri.rand();
+  };
+  virtual void TearDown() {};
+
+  double pgain;
+  double dgain;
+  double igain;
+  pdJoint joint;
+  RandomInitializer ri;
+};
+
+TEST_F(pdJointPIDTrqTest, Create)
+{
+  EXPECT_TRUE( pdJointCreatePIDTrq( &joint, pgain, dgain, igain ) );
+  EXPECT_EQ( NULL, zNamePtr( &joint ) );
+  EXPECT_EQ( 0.0, pdJointDis( &joint ) );
+  EXPECT_EQ( 0.0, pdJointVel( &joint ) );
+  EXPECT_EQ( 0.0, pdJointDisOld( &joint ) );
+  EXPECT_EQ( 0.0, pdJointVelOld( &joint ) );
+  EXPECT_EQ( 0.0, pdJointRefDis( &joint ) );
+  EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
+  EXPECT_EQ( pgain, ((_pdJointPIDTrq*)joint._prm)->pgain );
+  EXPECT_EQ( dgain, ((_pdJointPIDTrq*)joint._prm)->dgain );
+  EXPECT_EQ( igain, ((_pdJointPIDTrq*)joint._prm)->igain );
+  EXPECT_EQ( -HUGE_VAL, ((_pdJointPIDTrq*)joint._prm)->trqmin );
+  EXPECT_EQ(  HUGE_VAL, ((_pdJointPIDTrq*)joint._prm)->trqmax );
+  EXPECT_TRUE( joint._prm );
+  EXPECT_EQ( &pd_joint_pd_trq_met, joint._met );
+  pdJointDestroy( &joint );
+}
+
+TEST_F(pdJointPIDTrqTest, Destroy)
+{
+  pdJointCreatePIDTrq( &joint, pgain, dgain );
+  zNameSet( &joint, (char*)ZNONAME );
+  pdJointDis( &joint ) = ri.rand();
+  pdJointVel( &joint ) = ri.rand();
+  pdJointDisOld( &joint ) = ri.rand();
+  pdJointVelOld( &joint ) = ri.rand();
+  pdJointRefDis( &joint ) = ri.rand();
+  pdJointOutput( &joint ) = ri.rand();
+  pdJointDestroy( &joint );
+  EXPECT_EQ( NULL, zNamePtr( &joint ) );
+  EXPECT_EQ( 0.0, pdJointDis( &joint ) );
+  EXPECT_EQ( 0.0, pdJointVel( &joint ) );
+  EXPECT_EQ( 0.0, pdJointDisOld( &joint ) );
+  EXPECT_EQ( 0.0, pdJointVelOld( &joint ) );
+  EXPECT_EQ( 0.0, pdJointRefDis( &joint ) );
+  EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
+  EXPECT_EQ( NULL, joint._prm );
+  EXPECT_EQ( NULL, joint._met );
+}
+
+TEST_F(pdJointPIDTrqTest, Update)
+{
+  pdJointCreatePIDTrq( &joint, 2, 3 );
+  pdJointRefresh( &joint, 0 );
+  pdJointSetRef( &joint, 10 );
+  pdJointUpdate( &joint, 0.01 );
+  EXPECT_DOUBLE_EQ( 20, pdJointOutput( &joint ) );
+  EXPECT_DOUBLE_EQ( 0, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 0, pdJointDisOld( &joint ) );
+  EXPECT_DOUBLE_EQ( 0, pdJointVelOld( &joint ) );
+
+  pdJointSetDis( &joint, 5 );
+  pdJointSetRef( &joint, 10 );
+  pdJointUpdate( &joint, 0.01 );
+  EXPECT_DOUBLE_EQ( -1490, pdJointOutput( &joint ) );
+  EXPECT_DOUBLE_EQ( 500, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 0, pdJointDisOld( &joint ) );
+  EXPECT_DOUBLE_EQ( 0, pdJointVelOld( &joint ) );
+
+  pdJointSetDis( &joint, 7 );
+  pdJointSetRef( &joint, 10 );
+  pdJointUpdate( &joint, 0.01 );
+  EXPECT_DOUBLE_EQ( -594, pdJointOutput( &joint ) );
+  EXPECT_DOUBLE_EQ( 200, pdJointVel( &joint ) );
+  EXPECT_DOUBLE_EQ( 5, pdJointDisOld( &joint ) );
+  EXPECT_DOUBLE_EQ( 500, pdJointVelOld( &joint ) );
+}
+#endif

@@ -5,6 +5,7 @@ static void _pdCZUpdateVrt(pdCZ *cz);
 static void _pdCZUpdateHrz(pdCZ *cz);
 static void _pdCZUpdateAlpha(pdCZ *cz);
 static zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc);
+static void _pdCZODE2Update(pdCZ *cz, zVec p, zVec v, double dt);
 static void _pdCZUpdateRef(pdCZ *cz);
 
 void pdCZInit(pdCZ *c, double dt)
@@ -45,6 +46,7 @@ void pdCZInit(pdCZ *c, double dt)
   pdCZRefZMPX( c ) = 0;
   pdCZRefZMPY( c ) = 0;
   pdCZRefZMPZ( c ) = 0;
+  pdCZRefFZ( c ) = 0;
 }
 
 void pdCZDestroy(pdCZ *c)
@@ -108,7 +110,7 @@ void _pdCZUpdateVrt(pdCZ *cz)
 {
   pdCZVrtSetRef( pdCZVrtPtr( cz ), pdCZCmdCOMZ( cz ) );
   pdCZVrtUpdateAcc( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZVelZ(cz) );
-  pdCZVrtUpdateZeta( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZAccZ(cz), pdCZZMPZ(cz) );
+  pdCZVrtUpdateZeta( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZVrtAcc(pdCZVrtPtr(cz)), pdCZZMPZ(cz) );
   pdCZVrtUpdateZMP( pdCZVrtPtr(cz) ); /* may not be updated here */
 }
 
@@ -145,6 +147,19 @@ zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc)
   return acc;
 }
 
+void _pdCZODE2Update(pdCZ *cz, zVec p, zVec v, double dt)
+{
+  double acc[3], vel[3];
+
+  zRawVecCopy( zVecBuf(v), vel, 3 );
+  acc[0] = pdCZHrzAccX( pdCZHrzPtr(cz) ) + pdCZAlphaX(cz);
+  acc[1] = pdCZHrzAccY( pdCZHrzPtr(cz) ) + pdCZAlphaY(cz);
+  acc[2] =  pdCZVrtAcc( pdCZVrtPtr(cz) ) + pdCZAlphaZ(cz);
+  cz->_ode._dt = dt;
+  zRawVecCat( zVecBuf(p), dt, vel, zVecBuf(p), 3 );
+  zRawVecCat( zVecBuf(v), dt, acc, zVecBuf(v), 3 );
+}
+
 void _pdCZUpdateRef(pdCZ *cz)
 {
   zVec3DSetElem( &cz->refcom, zX, zVecElem( cz->_ode.pos, zX ) );
@@ -159,16 +174,18 @@ void _pdCZUpdateRef(pdCZ *cz)
   zVec3DSetElem( &cz->refzmp, zX, pdCZHrzZMPX( pdCZHrzPtr(cz) ) );
   zVec3DSetElem( &cz->refzmp, zY, pdCZHrzZMPY( pdCZHrzPtr(cz) ) );
   zVec3DSetElem( &cz->refzmp, zZ, pdCZVrtZMP( pdCZVrtPtr(cz) ) );
+  cz->reffz = pdCZVrtRF( pdCZVrtPtr(cz) );
 }
 
 
 void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr)
 {
   _pdCZUpdateState( cz, com, vel, acc, zmp, fz, theta, sr );
+  _pdCZUpdateAlpha( cz );
   _pdCZUpdateVrt( cz );
   _pdCZUpdateHrz( cz );
-  _pdCZUpdateAlpha( cz );
-  zODE2Update( &cz->_ode.solver, pdCZTime(cz), cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz), cz );
+  /* zODE2Update( &cz->_ode.solver, pdCZTime(cz), cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz), cz ); */
+  _pdCZODE2Update( cz, cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz) );
   _pdCZUpdateRef( cz );
   pdCZIncrTime( cz );
 }

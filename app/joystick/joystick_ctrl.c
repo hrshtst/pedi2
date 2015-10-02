@@ -145,7 +145,7 @@ void joystickCtrlLoad(char modelfile[])
   pdRobotUpdateState( &robot, &state );
   pdBipedDefaultPoseInit( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
   pdRobotUpdateState( &robot, &state );
 
   if( !opt[OPT_HMAX].flag ) {
@@ -392,7 +392,7 @@ void joystickCtrlUpdate(void)
 {
   pdBipedUpdate( &biped, &state );
   pdRobotSetBipedRefVec( &robot, &biped );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
   zVecCopy( pdRobotJointDis( &robot ), dis );
   rkChainFK( &chain, dis );
   pdBipedUpdateState( &biped, &state );

@@ -219,8 +219,26 @@ void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state)
   pdRobotUpdateState( robot, state );
   pdBipedDefaultPoseInit( biped, state );
   pdRobotSetBipedRefVec( robot, biped );
-  pdRobotSolveIK( robot );
+  pdRobotSolveIK( robot, 0 );
   pdRobotUpdateState( robot, state );
+}
+
+void pdRobotLinkSetJointDis(pdRobot *robot, int id, double *dis)
+{
+  rkChainLinkSetJointDis( pdRobotChainPtr(robot), id, dis );
+  rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
+}
+
+void pdRobotSetJointDis(pdRobot *robot, zIndex index, zVec dis)
+{
+  rkChainSetJointDis( pdRobotChainPtr(robot), index, dis );
+  rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
+}
+
+void pdRobotFK(pdRobot *robot, zVec dis)
+{
+  rkChainFK( pdRobotChainPtr(robot), dis );
+  rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
 }
 
 void pdRobotUnsetAllFlags(pdRobot *robot)
@@ -253,7 +271,27 @@ void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped)
   pdRobotSetRefRFAtt( robot, pdBipedRefRFAtt(biped) );
 }
 
-void pdRobotSolveIK(pdRobot *robot)
+bool pdRobotJointRegIndex(pdRobot *robot, zIndex index, double weight)
+{
+  register int i;
+
+  for( i=0; i<zArrayNum(index); i++ )
+    if( !pdRobotJointReg( robot, zIndexElem(index,i), weight ) )
+      return false;
+  return true;
+}
+
+bool pdRobotJointUnregIndex(pdRobot *robot, zIndex index)
+{
+  register int i;
+
+  for( i=0; i<zArrayNum(index); i++ )
+    if( !pdRobotJointUnreg( robot, zIndexElem(index,i) ) )
+      return false;
+  return true;
+}
+
+void pdRobotSolveIK(pdRobot *robot, int iter)
 {
   register int i;
 
@@ -261,7 +299,7 @@ void pdRobotSolveIK(pdRobot *robot)
   for( i=0; i<pdRobotCellNum( robot ); i++ )
     if( pdRobotFlagIsOn( robot, i ) )
       rkIKCellSetRefVec( robot->_cell[i], &robot->_ref_vec[i] );
-  rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, 0 );
+  rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, iter );
   pdRobotUnsetAllFlags( robot );
 }
 

@@ -54,6 +54,7 @@ __EXPORT void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *s
 #define pdRobotCellNum(r)  (r)->_cell_num
 
 #define pdRobotFlagIsOn(r,id) ( (r)->_ref_set_flag[id] )
+#define pdRobotExtraFlagIsOn(r,id) pdRobotFlagIsOn( r, PD_ROBOT_REQUIRED_CONST_NUM + id )
 #define pdRobotCOMFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotBaseAttFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_BASE_ATT )
 #define pdRobotLFPosFlagIsOn(r) pdRobotFlagIsOn( r, PD_ROBOT_IKCELL_ID_LF_POS )
@@ -71,9 +72,15 @@ __EXPORT void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *s
 #define pdRobotLHID(r)     (r)->_lh_id
 #define pdRobotRHID(r)     (r)->_rh_id
 
+/* methods to solve FK */
+__EXPORT void pdRobotLinkSetJointDis(pdRobot *robot, int id, double *dis);
+__EXPORT void pdRobotSetJointDis(pdRobot *robot, zIndex index, zVec dis);
+__EXPORT void pdRobotFK(pdRobot *robot, zVec dis);
+
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);
 __EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
+#define pdRobotSetExtraRefVec(r,v,id) pdRobotSetRefVec( r, v, PD_ROBOT_REQUIRED_CONST_NUM + id )
 #define pdRobotSetRefCOM(r,v)     pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotSetRefBaseAtt(r,v) pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_BASE_ATT )
 #define pdRobotSetRefLFPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_LF_POS )
@@ -85,11 +92,20 @@ __EXPORT bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id);
 #define pdRobotSetRefRHPos(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_POS )
 #define pdRobotSetRefRHAtt(r,v)   pdRobotSetRefVec( r, v, PD_ROBOT_IKCELL_ID_RH_ATT )
 __EXPORT void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped);
-__EXPORT void pdRobotSolveIK(pdRobot *robot);
+
+#define pdRobotJointReg(r,i,w)    rkIKJointReg( pdRobotIKPtr(r), i, w )
+#define pdRobotJointRegAll(r,w)   rkIKJointRegAll( pdRobotIKPtr(r), w )
+#define pdRobotJointUnreg(r,i)    rkIKJointUnreg( pdRobotIKPtr(r), i )
+__EXPORT bool pdRobotJointRegIndex(pdRobot *robot, zIndex index, double weight);
+__EXPORT bool pdRobotJointUnregIndex(pdRobot *robot, zIndex index);
+
+__EXPORT void pdRobotSolveIK(pdRobot *robot, int iter);
 
 /* methods to get parameters */
-#define pdRobotJointSize(r) rkChainJointSize( pdRobotChainPtr(r) )
-#define pdRobotJointDis(r)  (r)->dis
+#define pdRobotJointSize(r)  rkChainJointSize( pdRobotChainPtr(r) )
+#define pdRobotJointDis(r)   (r)->dis
+#define pdRobotLinkNum(r)    rkChainNum( pdRobotChainPtr(r) )
+#define pdRobotGetJointDisAll(r,v) zVecCopy( pdRobotJointDis(r), v )
 #define pdRobotRefVec(r,id)  ( &(r)->_ref_vec[id] )
 #define pdRobotRefCOM(r)     pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotRefBaseAtt(r) pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_BASE_ATT )

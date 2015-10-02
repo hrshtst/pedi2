@@ -3,6 +3,19 @@
 #include <pedi2/pd_biped.h>
 #include <pedi2/pd_robot.h>
 
+#define NECK_P_ID 15
+#define NECK_P_MIN 0
+#define NECK_P_MAX 120
+void move_neck(int step, zVec v)
+{
+  double deg;
+  double amp;
+
+  amp = 0.5 * ( NECK_P_MAX - NECK_P_MIN );
+  deg = - amp * cos(0.005*zPIx2*step) + amp;
+  zVecSetElem( v, 0, zDeg2Rad(deg) );
+}
+
 #define DT   0.01
 #define STEP 1000
 int main(void)
@@ -12,6 +25,9 @@ int main(void)
   pdBiped biped;  /* bipdal locomotion controller */
   pdRobot robot;  /* robot model instance */
   zVec dis;       /* joint displacement vector */
+
+  zIndex idx;     /* for neck movement */
+  zVec v;         /* for neck movement */
   register int i;
 
   /* initialization */
@@ -37,13 +53,24 @@ int main(void)
   /* initialize robot state */
   pdRobotDefaultBipedInit( &robot, &biped, &state );
 
+  /* for neck movement */
+  idx = zIndexCreate( 1 );
+  v   = zVecAlloc( 1 );
+
+  /* unregister neck joint */
+  zIndexSetElem( idx, 0, NECK_P_ID );
+  pdRobotJointUnregIndex( &robot, idx );
+
   /* main loop */
   for( i=0; i<STEP; i++ ){
     /* modify command values */
     cmd.rho = 1.0;
-    if( i > 200 )
-      cmd.vud = 0.1;
+    cmd.vud = 0.1;
     cmd.kappa = 0.0;
+
+    /* neck movement */
+    move_neck( i, v );
+    pdRobotSetJointDis( &robot, idx, v );
 
     /* update controller */
     pdBipedUpdate( &biped, &state );
@@ -63,6 +90,8 @@ int main(void)
   }
 
   /* destroy */
+  zIndexFree( idx );
+  zVecFree( v );
   pdRobotDestroy( &robot );
   pdBipedDestroy( &biped );
   pdStateDestroy( &state );

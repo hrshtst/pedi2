@@ -61,7 +61,7 @@ class pdRobotTest : public testing::Test {
     pdRobotSetRefRHPos( &robot, &rh_pos );
     // pdRobotSetRefLHAtt( &robot, &lh_att );
     // pdRobotSetRefRHAtt( &robot, &rh_att );
-    pdRobotSolveIK( &robot );
+    pdRobotSolveIK( &robot, 0 );
   };
 
   void SetRandomState() {
@@ -130,6 +130,73 @@ TEST_F(pdRobotTest, Load)
 
   pdRobotLoad( &robot, model );
   EXPECT_EQ( 25, (int)rkChainNum( pdRobotChainPtr( &robot ) ) );
+}
+
+TEST_F(pdRobotTest, LinkSetJointDis)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis;
+  double d[1];
+
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( 26 );
+
+  d[0] = 0.02;
+  pdRobotLinkSetJointDis( &robot, 1, d );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_EQ( 0.02, zVecElem( dis, 6 ) );
+  d[0] = 0.04;
+  pdRobotLinkSetJointDis( &robot, 3, d );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_EQ( 0.04, zVecElem( dis, 8 ) );
+  zVecFree( dis );
+}
+
+TEST_F(pdRobotTest, SetJointDis)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis, setdis;
+  zIndex index;
+
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( 26 );
+  setdis = zVecCreateList( 4, 0.01, 0.02, 0.03, 0.04 );
+  index  = zIndexCreateList( 4, 1, 2, 3, 4 );
+
+  pdRobotSetJointDis( &robot, index, setdis );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_EQ( 0.01, zVecElem( dis, 6 ) );
+  EXPECT_EQ( 0.02, zVecElem( dis, 7 ) );
+  EXPECT_EQ( 0.03, zVecElem( dis, 8 ) );
+  EXPECT_EQ( 0.04, zVecElem( dis, 9 ) );
+
+  zIndexFree( index );
+  zVecFree( setdis );
+  zVecFree( dis );
+}
+
+TEST_F(pdRobotTest, FK)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis;
+
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( 26 );
+  zVecClear( dis );
+  zVecSetElem( dis,  7, 0.01 );
+  zVecSetElem( dis,  8, 0.02 );
+  zVecSetElem( dis,  9, 0.03 );
+  zVecSetElem( dis, 10, 0.04 );
+  zVecSetElem( dis, 11, 0.05 );
+
+  pdRobotFK( &robot, dis );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_DOUBLE_EQ( 0.01, zVecElem( dis, 7 ) );
+  EXPECT_DOUBLE_EQ( 0.02, zVecElem( dis, 8 ) );
+  EXPECT_DOUBLE_EQ( 0.03, zVecElem( dis, 9 ) );
+  EXPECT_DOUBLE_EQ( 0.04, zVecElem( dis, 10 ) );
+  EXPECT_DOUBLE_EQ( 0.05, zVecElem( dis, 11 ) );
+  zVecFree( dis );
 }
 
 TEST_F(pdRobotTest, Load_UnsetAllFlag)
@@ -328,6 +395,21 @@ TEST_F(pdRobotTest, SetRefVec_Error)
   zVec3DCreate( &v, 0, 0, 0.26 );
   EXPECT_FALSE( pdRobotSetRefVec( &robot, &v, 10 ) );
   zEchoOn();
+}
+
+TEST_F(pdRobotTest, SetExtraRefVec)
+{
+  char model[] = "model/mighty6.zkc";
+  zVec3D v;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v, 0, 0, -zPI_2 );
+  pdRobotSetExtraRefVec( &robot, &v, 0 );
+  EXPECT_EQ( 11, pdRobotCellNum( &robot ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[10], zX ) );
+  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[10], zY ) );
+  EXPECT_DOUBLE_EQ( -zPI_2, zVec3DElem( &robot._ref_vec[10], zZ ) );
+  EXPECT_TRUE( pdRobotExtraFlagIsOn( &robot, 0 ) );
 }
 
 TEST_F(pdRobotTest, SetRefCOM)
@@ -682,7 +764,7 @@ TEST_F(pdRobotTest, SupportRegion_Double)
   pdRobotSetRefBaseAtt( &robot, &base_att );
   pdRobotSetRefLFAtt( &robot, &lf_att );
   pdRobotSetRefRFAtt( &robot, &rf_att );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
@@ -770,7 +852,7 @@ TEST_F(pdRobotTest, SupportRegion_Single_Left)
   pdRobotSetRefBaseAtt( &robot, &base_att );
   pdRobotSetRefLFAtt( &robot, &lf_att );
   pdRobotSetRefRFAtt( &robot, &rf_att );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
@@ -835,7 +917,7 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   pdRobotSetRefBaseAtt( &robot, &base_att );
   pdRobotSetRefLFAtt( &robot, &lf_att );
   pdRobotSetRefRFAtt( &robot, &rf_att );
-  pdRobotSolveIK( &robot );
+  pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
@@ -917,3 +999,108 @@ TEST_F(pdRobotTest, UpdateState)
   // EXPECT_NEAR( 0.0,    state.rh_att.e[1], GTEST_TOL_LOOSE );
   // EXPECT_NEAR( 0.0,    state.rh_att.e[2], GTEST_TOL_LOOSE );
 }
+
+TEST_F(pdRobotTest, JointReg)
+{
+  char model[] = "model/mighty5.zkc";
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  EXPECT_FALSE( ik->joint_sw[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
+
+  // method to testify
+  pdRobotJointReg( &robot, CHECK_ID, 0.01 );
+  EXPECT_TRUE( ik->joint_sw[CHECK_ID] );
+  EXPECT_EQ( 0.01, ik->joint_weight[CHECK_ID] );
+}
+
+TEST_F(pdRobotTest, JointRegAll)
+{
+  char model[] = "model/mighty5.zkc";
+  rkChain *c;
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  c = pdRobotChainPtr( &robot );
+  ik = pdRobotIKPtr( &robot );
+
+  // method to testify
+  pdRobotJointRegAll( &robot, 0.02 );
+  for( uint i=0; i<pdRobotLinkNum(&robot); i++ )
+    if( rkChainLinkJointType(c,i) != RK_JOINT_FIXED ){
+      EXPECT_TRUE( ik->joint_sw[i] );
+      EXPECT_EQ( 0.02, ik->joint_weight[i] );
+    }
+}
+
+TEST_F(pdRobotTest, JointUnreg)
+{
+  char model[] = "model/mighty5.zkc";
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  pdRobotJointReg( &robot, CHECK_ID, 0.01 );
+  EXPECT_TRUE( ik->joint_sw[CHECK_ID] );
+  EXPECT_LT( 0.0, ik->joint_weight[CHECK_ID] );
+
+  // method to testify
+  pdRobotJointUnreg( &robot, CHECK_ID );
+  EXPECT_FALSE( ik->joint_sw[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
+}
+
+TEST_F(pdRobotTest, JointRegIndex)
+{
+  char model[] = "model/mighty5.zkc";
+  zIndex index;
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+  index = zIndexCreateList( 4, 1, 2, 3, 4 );
+  // check
+  for( int i=1; i<=4; i++ ){
+    EXPECT_FALSE( ik->joint_sw[i] );
+    EXPECT_EQ( 0, ik->joint_weight[i] );
+  }
+
+  // method to testify
+  pdRobotJointRegIndex( &robot, index, 0.02 );
+  for( int i=1; i<=4; i++ ){
+    EXPECT_TRUE( ik->joint_sw[i] );
+    EXPECT_EQ( 0.02, ik->joint_weight[i] );
+  }
+  zIndexFree( index );
+}
+
+TEST_F(pdRobotTest, JointUnregIndex)
+{
+  char model[] = "model/mighty5.zkc";
+  zIndex index;
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKPtr( &robot );
+  index = zIndexCreateList( 6, 5, 6, 7, 8, 9, 10 );
+  // check
+  for( int i=6; i<=10; i++ ){
+    EXPECT_TRUE( ik->joint_sw[i] );
+    EXPECT_LT( 0, ik->joint_weight[i] );
+  }
+
+  // method to testify
+  pdRobotJointUnregIndex( &robot, index );
+  for( int i=6; i<=10; i++ ){
+    EXPECT_FALSE( ik->joint_sw[i] );
+    EXPECT_EQ( 0, ik->joint_weight[i] );
+  }
+  zIndexFree( index );
+}
+

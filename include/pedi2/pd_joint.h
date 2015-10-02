@@ -101,6 +101,8 @@ __EXPORT void pdJointArrayDestroy(pdJointArray *arr);
 __EXPORT bool pdJointArrayAlloc(pdJointArray *arr, int n);
 __EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
 __EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr);
+__EXPORT bool pdJointArrayReadFile(pdJointArray *arr, const char *filename);
+
 
 __END_DECLS
 

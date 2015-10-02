@@ -254,3 +254,17 @@ bool pdJointArrayFRead(FILE *fp, pdJointArray *arr)
   prm.arr = arr;
   return zTagFRead( fp, _pdJointArrayFRead, &prm );
 }
+
+bool pdJointArrayReadFile(pdJointArray *arr, const char *filename)
+{
+  FILE *fp;
+  bool result;
+
+  if( !( fp = fopen( filename, "r" ) ) ){
+    ZOPENERROR( filename );
+    return false;
+  }
+  result = pdJointArrayFRead( fp, arr );
+  fclose( fp );
+  return result;
+}

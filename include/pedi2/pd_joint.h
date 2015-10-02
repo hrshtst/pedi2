@@ -87,11 +87,8 @@ zArrayClass( pdJointArray, pdJoint );
 #define pdJointArrayDis(arr,i)      pdJointDis( zArrayElem(arr,i) )
 #define pdJointArrayVel(arr,i)      pdJointVel( zArrayElem(arr,i) )
 #define pdJointArrayRefDis(arr,i)   pdJointRefDis( zArrayElem(arr,i) )
-#define pdJointArrayRefVel(arr,i)   pdJointRefOld( zArrayElem(arr,i) )
+#define pdJointArrayRefVel(arr,i)   pdJointRefVel( zArrayElem(arr,i) )
 #define pdJointArrayOutput(arr,i)   pdJointOutput( zArrayElem(arr,i) )
-
-__EXPORT bool pdJointArrayAlloc(pdJointArray *arr, int n);
-__EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
 
 __EXPORT void pdJointArraySetDis(pdJointArray *arr, zVec q);
 __EXPORT void pdJointArraySetVel(pdJointArray *arr, zVec v);
@@ -101,6 +98,8 @@ __EXPORT void pdJointArrayRefresh(pdJointArray *arr, zVec q);
 __EXPORT void pdJointArrayUpdate(pdJointArray *arr, double dt);
 __EXPORT void pdJointArrayDestroy(pdJointArray *arr);
 
+__EXPORT bool pdJointArrayAlloc(pdJointArray *arr, int n);
+__EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
 __EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr);
 
 __END_DECLS

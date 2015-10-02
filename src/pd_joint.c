@@ -121,6 +121,76 @@ pdJoint *pdJointFRead(FILE *fp, pdJoint *joint)
   return NULL;
 }
 
+#define PD_JOINT_ERR_MSG_SIZE_MISMATCH \
+  "Joint controller number is not matched with the vecotr size"
+
+void pdJointArraySetDis(pdJointArray *arr, zVec q)
+{
+  register int i;
+
+  if( (int)zArrayNum(arr) != zVecSize(q) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetDis( zArrayElem( arr, i ), zVecElem( q, i) );
+}
+
+void pdJointArraySetVel(pdJointArray *arr, zVec v)
+{
+  register int i;
+
+  if( (int)zArrayNum(arr) != zVecSize(v) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetVel( zArrayElem( arr, i ), zVecElem( v, i) );
+}
+
+void pdJointArraySetRefDis(pdJointArray *arr, zVec q)
+{
+  register int i;
+
+  if( (int)zArrayNum(arr) != zVecSize(q) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetRefDis( zArrayElem( arr, i ), zVecElem( q, i) );
+}
+
+void pdJointArraySetRefVel(pdJointArray *arr, zVec v)
+{
+  register int i;
+
+  if( (int)zArrayNum(arr) != zVecSize(v) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetRefVel( zArrayElem( arr, i ), zVecElem( v, i) );
+}
+
+void pdJointArrayRefresh(pdJointArray *arr, zVec q)
+{
+  register int i;
+
+  if( (int)zArrayNum(arr) != zVecSize(q) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointRefresh( zArrayElem( arr, i ), zVecElem( q, i) );
+}
+
+void pdJointArrayUpdate(pdJointArray *arr, double dt)
+{
+  register int i;
+
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointUpdate( zArrayElem(arr,i), dt );
+}
+
+void pdJointArrayDestroy(pdJointArray *arr)
+{
+  register uint i;
+
+  for( i=0; i<zArrayNum(arr); i++ )
+    pdJointDestroy( zArrayElem(arr,i) );
+  zArrayFree( arr );
+}
+
 bool pdJointArrayAlloc(pdJointArray *arr, int n)
 {
   zArrayAlloc( arr, pdJoint, n );
@@ -139,15 +209,6 @@ bool _pdJointFAlloc(FILE *fp, pdJointArray *arr)
 
   n = zFCountTag( fp, PD_JOINT_TAG );
   return pdJointArrayAlloc( arr, n );
-}
-
-void pdJointArrayDestroy(pdJointArray *arr)
-{
-  register uint i;
-
-  for( i=0; i<zArrayNum(arr); i++ )
-    pdJointDestroy( zArrayElem(arr,i) );
-  zArrayFree( arr );
 }
 
 pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name)

@@ -585,10 +585,104 @@ protected:
   };
   virtual void TearDown() {};
 
+  void MakeJointArray() {
+    zArrayAlloc( &arr, pdJoint, 4 );
+    pdJointCreatePDTrq( zArrayElem(&arr,0), pgain, dgain );
+    pdJointCreatePDTrq( zArrayElem(&arr,1), pgain, dgain );
+    pdJointCreatePDTrq( zArrayElem(&arr,2), pgain, dgain );
+    pdJointCreatePDTrq( zArrayElem(&arr,3), pgain, dgain );
+    zNameSet( zArrayElem(&arr,0), (char*)"joint01" );
+    zNameSet( zArrayElem(&arr,1), (char*)"joint02" );
+    zNameSet( zArrayElem(&arr,2), (char*)"joint03" );
+    zNameSet( zArrayElem(&arr,3), (char*)"joint04" );
+  };
+
   double pgain, igain, dgain;
   pdJointArray arr;
   RandomInitializer ri;
 };
+
+TEST_F(pdJointArrayTest, SetDis)
+{
+  zVec v;
+  int i;
+
+  v = zVecAlloc( 4 );
+  for( i=0; i<4; i++ )
+    zVecSetElem( v, i, ri.rand() );
+  MakeJointArray();
+  pdJointArraySetDis( &arr, v );
+  for( i=0; i<4; i++ )
+    EXPECT_EQ( zVecElem(v,i), pdJointArrayDis(&arr,i) );
+  pdJointArrayDestroy( &arr );
+  zVecFree( v );
+}
+
+TEST_F(pdJointArrayTest, SetVel)
+{
+  zVec v;
+  int i;
+
+  v = zVecAlloc( 4 );
+  for( i=0; i<4; i++ )
+    zVecSetElem( v, i, ri.rand() );
+  MakeJointArray();
+  pdJointArraySetVel( &arr, v );
+  for( i=0; i<4; i++ )
+    EXPECT_EQ( zVecElem(v,i), pdJointArrayVel(&arr,i) );
+  pdJointArrayDestroy( &arr );
+  zVecFree( v );
+}
+
+TEST_F(pdJointArrayTest, SetRefDis)
+{
+  zVec v;
+  int i;
+
+  v = zVecAlloc( 4 );
+  for( i=0; i<4; i++ )
+    zVecSetElem( v, i, ri.rand() );
+  MakeJointArray();
+  pdJointArraySetRefDis( &arr, v );
+  for( i=0; i<4; i++ )
+    EXPECT_EQ( zVecElem(v,i), pdJointArrayRefDis(&arr,i) );
+  pdJointArrayDestroy( &arr );
+  zVecFree( v );
+}
+
+TEST_F(pdJointArrayTest, SetRefVel)
+{
+  zVec v;
+  int i;
+
+  v = zVecAlloc( 4 );
+  for( i=0; i<4; i++ )
+    zVecSetElem( v, i, ri.rand() );
+  MakeJointArray();
+  pdJointArraySetRefVel( &arr, v );
+  for( i=0; i<4; i++ )
+    EXPECT_EQ( zVecElem(v,i), pdJointArrayRefVel(&arr,i) );
+  pdJointArrayDestroy( &arr );
+  zVecFree( v );
+}
+
+TEST_F(pdJointArrayTest, Refresh)
+{
+  zVec v;
+  int i;
+
+  v = zVecAlloc( 4 );
+  for( i=0; i<4; i++ )
+    zVecSetElem( v, i, ri.rand() );
+  MakeJointArray();
+  pdJointArrayRefresh( &arr, v );
+  for( i=0; i<4; i++ ){
+    EXPECT_EQ( zVecElem(v,i), pdJointArrayDis(&arr,i) );
+    EXPECT_EQ( zVecElem(v,i), pdJointArrayRefDis(&arr,i) );
+  }
+  pdJointArrayDestroy( &arr );
+  zVecFree( v );
+}
 
 TEST_F(pdJointArrayTest, NameFind)
 {

@@ -16,6 +16,7 @@ typedef struct{
   void (*refresh)(struct _pdJoint*, double);
   void (*update)(struct _pdJoint*, double);
   void (*destroy)(struct _pdJoint*);
+  struct _pdJoint *(*fread)(FILE *fp, struct _pdJoint*);
 } pdJointMethod;
 
 typedef struct _pdJoint{
@@ -77,6 +78,9 @@ __EXPORT void pdJointSetRefVelDefault(pdJoint *joint, double refvel);
 __EXPORT void pdJointRefreshDefault(pdJoint *joint, double dis);
 __EXPORT void pdJointUpdateDefault(pdJoint *joint, double dt);
 __EXPORT void pdJointDestroyDefault(pdJoint *joint);
+
+#define PD_JOINT_TAG "joint"
+__EXPORT pdJoint *pdJointFRead(FILE *fp, pdJoint *joint);
 
 __END_DECLS
 

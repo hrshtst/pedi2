@@ -373,6 +373,25 @@ TEST_F(pdJointPDTrqTest, SetDgain)
   EXPECT_EQ( d, ((_pdJointPDTrq*)joint._prm)->dgain );
 }
 
+TEST_F(pdJointPDTrqTest, FRead)
+{
+  char filename[] = "model/joint_pd.conf";
+  _pdJointPDTrq *pd;
+  FILE *fp;
+
+  fp = fopen( filename, "r" );
+  pdJointFRead( fp, &joint );
+  pd = (_pdJointPDTrq*)joint._prm;
+  EXPECT_STREQ( "test_joint", zNamePtr( &joint ) );
+  EXPECT_EQ( 1000, pd->pgain );
+  EXPECT_EQ( 50, pd->dgain );
+  EXPECT_EQ( 5000, pd->trqmax );
+  EXPECT_EQ( -5000, pd->trqmin );
+  EXPECT_EQ( &pd_joint_pd_trq_met, joint._met );
+  pdJointDestroy( &joint );
+  fclose( fp );
+}
+
 
 typedef struct{
   double pgain, igain, dgain;
@@ -534,4 +553,24 @@ TEST_F(pdJointPIDTrqTest, SetDgain)
 
   pdJointPIDTrqSetDgain( &joint, d );
   EXPECT_EQ( d, ((_pdJointPIDTrq*)joint._prm)->dgain );
+}
+
+TEST_F(pdJointPIDTrqTest, FRead)
+{
+  char filename[] = "model/joint_pid.conf";
+  _pdJointPIDTrq *pid;
+  FILE *fp;
+
+  fp = fopen( filename, "r" );
+  pdJointFRead( fp, &joint );
+  pid = (_pdJointPIDTrq*)joint._prm;
+  EXPECT_STREQ( "test_joint_pid", zNamePtr( &joint ) );
+  EXPECT_EQ( 200, pid->pgain );
+  EXPECT_EQ( 50, pid->igain );
+  EXPECT_EQ( 10, pid->dgain );
+  EXPECT_EQ( 1000, pid->trqmax );
+  EXPECT_EQ( -1000, pid->trqmin );
+  EXPECT_EQ( &pd_joint_pid_trq_met, joint._met );
+  pdJointDestroy( &joint );
+  fclose( fp );
 }

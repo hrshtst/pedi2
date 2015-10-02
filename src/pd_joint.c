@@ -60,3 +60,63 @@ void pdJointDestroyDefault(pdJoint *joint)
   zFree( joint->_prm );
   pdJointInit( joint );
 }
+
+static pdJointMethod *_pdJointMethodByStr(char str[]);
+
+pdJointMethod *_pdJointMethodByStr(char str[])
+{
+  static pdJointMethod *met_array[] = {
+    &pd_joint_pd_trq_met, &pd_joint_pid_trq_met,
+    NULL,
+  };
+  register int i;
+
+  for( i=0; met_array[i]; i++ ){
+    if( strcmp( met_array[i]->type, str ) == 0 ) return met_array[i];
+  }
+  ZRUNERROR( "cannot find a joint type %s", str );
+  return NULL;
+}
+
+typedef struct{
+  pdJointMethod *met;
+  char name[BUFSIZ];
+} _pdJointParam;
+
+bool _pdJointFRead(FILE *fp, void *instance, char *buf, bool *success)
+{
+  if( strcmp( buf, "type" ) == 0 ){
+    if( !( ((_pdJointParam *)instance)->met = _pdJointMethodByStr( zFToken(fp,buf,BUFSIZ) ) ) )
+      *success = false;
+  } else
+  if( strcmp( buf, "name" ) == 0 ){
+    if( !zFToken( fp, ((_pdJointParam *)instance)->name, BUFSIZ ) )
+      *success = false;
+  } else
+    return false;
+  return true;
+}
+
+pdJoint *pdJointFRead(FILE *fp, pdJoint *joint)
+{
+  _pdJointParam prm;
+  int cur;
+
+  prm.met = NULL;
+  prm.name[0] = '\0';
+  cur = ftell( fp );
+  zFieldFRead( fp, _pdJointFRead, &prm );
+  if( !prm.met ){
+    ZRUNERROR( "type not specified" );
+    return NULL;
+  }
+  fseek( fp, cur, SEEK_SET );
+  if( prm.met->fread( fp, joint ) ){
+    if( !zNameSet( joint, prm.name ) ){
+      ZALLOCERROR();
+      return NULL;
+    }
+    return joint;
+  }
+  return NULL;
+}

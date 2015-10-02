@@ -24,6 +24,42 @@ void pdJointUpdatePDTrq(pdJoint *joint, double dt)
   joint->output = zLimit( joint->output, pd->trqmin, pd->trqmax );
 }
 
+typedef struct{
+  double pgain, dgain;
+  double trqmin, trqmax;
+} _pdJointPDTrqParam;
+
+static bool _pdJointFReadPDTrq(FILE *fp, void *prm, char *buf, bool *success);
+
+bool _pdJointFReadPDTrq(FILE *fp, void *prm, char *buf, bool *success)
+{
+  if( strcmp( buf, "pgain" ) == 0 ){
+    ((_pdJointPDTrqParam *)prm)->pgain = zFDouble( fp );
+  } else
+  if( strcmp( buf, "dgain" ) == 0 ){
+    ((_pdJointPDTrqParam *)prm)->dgain = zFDouble( fp );
+  } else
+  if( strcmp( buf, "min" ) == 0 ){
+    ((_pdJointPDTrqParam *)prm)->trqmin = zFDouble( fp );
+  } else
+  if( strcmp( buf, "max" ) == 0 ){
+    ((_pdJointPDTrqParam *)prm)->trqmax = zFDouble( fp );
+  } else
+    return false;
+  return true;
+}
+
+pdJoint *pdJointFReadPDTrq(FILE *fp, pdJoint *joint)
+{
+  _pdJointPDTrq prm = { 0, 0, -HUGE_VAL, HUGE_VAL };
+
+  zFieldFRead( fp, _pdJointFReadPDTrq, &prm );
+  if( !pdJointCreatePDTrq( joint, prm.pgain, prm.dgain ) )
+    return NULL;
+  pdJointPDTrqSetLim( joint, prm.trqmin, prm.trqmax );
+  return joint;
+}
+
 pdJointMethod pd_joint_pd_trq_met = {
   type: "PDtrq",
   setdis: pdJointSetDisDefault,
@@ -33,6 +69,7 @@ pdJointMethod pd_joint_pd_trq_met = {
   refresh: pdJointRefreshDefault,
   update: pdJointUpdatePDTrq,
   destroy: pdJointDestroyPDTrq,
+  fread: pdJointFReadPDTrq,
 };
 
 bool pdJointCreatePDTrq(pdJoint *joint, double pgain, double dgain)
@@ -77,4 +114,3 @@ void pdJointPDTrqSetDgain(pdJoint *joint, double dgain)
   pd = joint->_prm;
   pd->dgain = dgain;
 }
-

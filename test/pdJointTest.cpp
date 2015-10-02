@@ -718,23 +718,61 @@ TEST_F(pdJointArrayTest, FRead)
   EXPECT_STREQ( "waist_p",     zNamePtr( zArrayElem(&arr,12) ) );
   EXPECT_STREQ( "waist_r",     zNamePtr( zArrayElem(&arr,13) ) );
   EXPECT_STREQ( "neck_p",      zNamePtr( zArrayElem(&arr,14) ) );
-  EXPECT_STREQ( "neck_y",      zNamePtr( zArrayElem(&arr,15) ) );
-  EXPECT_STREQ( "rscaplae_y",  zNamePtr( zArrayElem(&arr,16) ) );
-  EXPECT_STREQ( "rshoulder_p", zNamePtr( zArrayElem(&arr,17) ) );
-  EXPECT_STREQ( "rshoulder_r", zNamePtr( zArrayElem(&arr,18) ) );
-  EXPECT_STREQ( "rshoulder_y", zNamePtr( zArrayElem(&arr,19) ) );
-  EXPECT_STREQ( "relbow_p",    zNamePtr( zArrayElem(&arr,20) ) );
-  EXPECT_STREQ( "rwrist_y",    zNamePtr( zArrayElem(&arr,21) ) );
-  EXPECT_STREQ( "rwrist_r",    zNamePtr( zArrayElem(&arr,22) ) );
-  EXPECT_STREQ( "rwrist_p",    zNamePtr( zArrayElem(&arr,23) ) );
-  EXPECT_STREQ( "lscaplae_y",  zNamePtr( zArrayElem(&arr,24) ) );
-  EXPECT_STREQ( "lshoulder_p", zNamePtr( zArrayElem(&arr,25) ) );
-  EXPECT_STREQ( "lshoulder_r", zNamePtr( zArrayElem(&arr,26) ) );
-  EXPECT_STREQ( "lshoulder_y", zNamePtr( zArrayElem(&arr,27) ) );
-  EXPECT_STREQ( "lelbow_p",    zNamePtr( zArrayElem(&arr,28) ) );
-  EXPECT_STREQ( "lwrist_y",    zNamePtr( zArrayElem(&arr,29) ) );
-  EXPECT_STREQ( "lwrist_r",    zNamePtr( zArrayElem(&arr,30) ) );
-  EXPECT_STREQ( "lwrist_p",    zNamePtr( zArrayElem(&arr,31) ) );
+  EXPECT_STREQ( "rscaplae_y",  zNamePtr( zArrayElem(&arr,15) ) );
+  EXPECT_STREQ( "rshoulder_p", zNamePtr( zArrayElem(&arr,16) ) );
+  EXPECT_STREQ( "rshoulder_r", zNamePtr( zArrayElem(&arr,17) ) );
+  EXPECT_STREQ( "rshoulder_y", zNamePtr( zArrayElem(&arr,18) ) );
+  EXPECT_STREQ( "relbow_p",    zNamePtr( zArrayElem(&arr,19) ) );
+  EXPECT_STREQ( "rwrist_y",    zNamePtr( zArrayElem(&arr,20) ) );
+  EXPECT_STREQ( "rwrist_r",    zNamePtr( zArrayElem(&arr,21) ) );
+  EXPECT_STREQ( "rwrist_p",    zNamePtr( zArrayElem(&arr,22) ) );
+  EXPECT_STREQ( "lscaplae_y",  zNamePtr( zArrayElem(&arr,23) ) );
+  EXPECT_STREQ( "lshoulder_p", zNamePtr( zArrayElem(&arr,24) ) );
+  EXPECT_STREQ( "lshoulder_r", zNamePtr( zArrayElem(&arr,25) ) );
+  EXPECT_STREQ( "lshoulder_y", zNamePtr( zArrayElem(&arr,26) ) );
+  EXPECT_STREQ( "lelbow_p",    zNamePtr( zArrayElem(&arr,27) ) );
+  EXPECT_STREQ( "lwrist_y",    zNamePtr( zArrayElem(&arr,28) ) );
+  EXPECT_STREQ( "lwrist_r",    zNamePtr( zArrayElem(&arr,29) ) );
+  EXPECT_STREQ( "lwrist_p",    zNamePtr( zArrayElem(&arr,30) ) );
   pdJointArrayDestroy( &arr );
   fclose( fp );
 }
+
+TEST_F(pdJointArrayTest, CreateDefaultIndex)
+{
+  char modelfile[] = "model/hydra.zkc";
+  char conffile[]  = "model/joint.conf";
+  rkChain chain;
+  pdJointArray joint;
+  zIndex index;
+  register int i;
+
+  rkChainReadFile( &chain, modelfile );
+  pdJointArrayReadFile( &joint, conffile );
+  index = pdJointArrayCreateDefaultIndex( &joint, &chain );
+  EXPECT_EQ( 31, zArrayNum( index ) );
+  for( i=0; i<(int)zArrayNum(index); i++ )
+    EXPECT_EQ( 6+i, zIndexElem( index, i ) );
+  zIndexFree( index );
+  pdJointArrayDestroy( &joint );
+  rkChainDestroy( &chain );
+}
+
+TEST_F(pdJointArrayTest, CreateDefaultIndex_NoNameErr)
+{
+  char modelfile[] = "model/hydra.zkc";
+  char conffile[]  = "model/joint_noname_err.conf";
+  rkChain chain;
+  pdJointArray joint;
+  zIndex index;
+
+  rkChainReadFile( &chain, modelfile );
+  pdJointArrayReadFile( &joint, conffile );
+  zEchoOff();
+  index = pdJointArrayCreateDefaultIndex( &joint, &chain );
+  EXPECT_EQ( NULL, index );
+  pdJointArrayDestroy( &joint );
+  rkChainDestroy( &chain );
+  zEchoOn();
+}
+

@@ -268,3 +268,34 @@ bool pdJointArrayReadFile(pdJointArray *arr, const char *filename)
   fclose( fp );
   return result;
 }
+
+static rkLink *_rkChainLinkFindName(rkChain *c, const char *name);
+rkLink *_rkChainLinkFindName(rkChain *c, const char *name)
+{
+  rkLink *link;
+
+  zNameFind( rkChainRoot(c), rkChainNum(c), name, link );
+  return link;
+}
+
+zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c)
+{
+  register int i;
+  zIndex index;
+  rkLink *link;
+
+  if( !( index = zIndexCreate( zArrayNum(arr) ) ) ){
+    ZALLOCERROR();
+    return NULL;
+  }
+  for( i=0; i<(int)zArrayNum(arr); i++ ){
+    link = _rkChainLinkFindName(c,zName(zArrayElem(arr,i)));
+    if( !link ){
+      ZRUNERROR( "joint name %s is not found", zName(zArrayElem(arr,i)) );
+      zIndexFree( index );
+      return NULL;
+    } else
+      zIndexSetElem( index, i, rkLinkOffset(link) );
+  }
+  return index;
+}

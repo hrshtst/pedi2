@@ -2,6 +2,7 @@
 #define __PD_JOINT_H__
 
 #include <zm/zm_vec.h>
+#include <roki/rk_chain.h>
 
 __BEGIN_DECLS
 
@@ -103,6 +104,7 @@ __EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
 __EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr);
 __EXPORT bool pdJointArrayReadFile(pdJointArray *arr, const char *filename);
 
+__EXPORT zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c);
 
 __END_DECLS
 

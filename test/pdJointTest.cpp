@@ -574,3 +574,99 @@ TEST_F(pdJointPIDTrqTest, FRead)
   pdJointDestroy( &joint );
   fclose( fp );
 }
+
+
+class pdJointArrayTest : public testing::Test {
+protected:
+  virtual void SetUp() {
+    pgain = ri.rand();
+    igain = ri.rand();
+    dgain = ri.rand();
+  };
+  virtual void TearDown() {};
+
+  double pgain, igain, dgain;
+  pdJointArray arr;
+  RandomInitializer ri;
+};
+
+TEST_F(pdJointArrayTest, NameFind)
+{
+  zArrayAlloc( &arr, pdJoint, 2 );
+  pdJointCreatePDTrq( zArrayElem(&arr,0), pgain, dgain );
+  pdJointCreatePIDTrq( zArrayElem(&arr,1), pgain, igain, dgain );
+  zNameSet( zArrayElem(&arr,0), (char*)"joint_pi" );
+  zNameSet( zArrayElem(&arr,1), (char*)"joint_pid" );
+  EXPECT_EQ( zArrayElem(&arr,0), pdJointArrayNameFind( &arr, "joint_pi" ) );
+  EXPECT_EQ( zArrayElem(&arr,1), pdJointArrayNameFind( &arr, "joint_pid" ) );
+  pdJointArrayDestroy( &arr );
+}
+
+TEST_F(pdJointArrayTest, FRead)
+{
+  char filename[] = "model/joint.conf";
+  FILE *fp;
+
+  fp  = fopen( filename, "r" );
+  pdJointArrayFRead( fp, &arr );
+  EXPECT_STREQ( "rhip_y",      zNamePtr( zArrayElem(&arr, 0) ) );
+  EXPECT_STREQ( "rhip_p",      zNamePtr( zArrayElem(&arr, 1) ) );
+  EXPECT_STREQ( "rhip_r",      zNamePtr( zArrayElem(&arr, 2) ) );
+  EXPECT_STREQ( "rknee_p",     zNamePtr( zArrayElem(&arr, 3) ) );
+  EXPECT_STREQ( "rankle_r",    zNamePtr( zArrayElem(&arr, 4) ) );
+  EXPECT_STREQ( "rankle_p",    zNamePtr( zArrayElem(&arr, 5) ) );
+  EXPECT_STREQ( "lhip_y",      zNamePtr( zArrayElem(&arr, 6) ) );
+  EXPECT_STREQ( "lhip_p",      zNamePtr( zArrayElem(&arr, 7) ) );
+  EXPECT_STREQ( "lhip_r",      zNamePtr( zArrayElem(&arr, 8) ) );
+  EXPECT_STREQ( "lknee_p",     zNamePtr( zArrayElem(&arr, 9) ) );
+  EXPECT_STREQ( "lankle_r",    zNamePtr( zArrayElem(&arr,10) ) );
+  EXPECT_STREQ( "lankle_p",    zNamePtr( zArrayElem(&arr,11) ) );
+  EXPECT_STREQ( "waist_p",     zNamePtr( zArrayElem(&arr,12) ) );
+  EXPECT_STREQ( "waist_r",     zNamePtr( zArrayElem(&arr,13) ) );
+  EXPECT_STREQ( "neck_p",      zNamePtr( zArrayElem(&arr,14) ) );
+  EXPECT_STREQ( "neck_y",      zNamePtr( zArrayElem(&arr,15) ) );
+  EXPECT_STREQ( "rscaplae_y",  zNamePtr( zArrayElem(&arr,16) ) );
+  EXPECT_STREQ( "rshoulder_p", zNamePtr( zArrayElem(&arr,17) ) );
+  EXPECT_STREQ( "rshoulder_r", zNamePtr( zArrayElem(&arr,18) ) );
+  EXPECT_STREQ( "rshoulder_y", zNamePtr( zArrayElem(&arr,19) ) );
+  EXPECT_STREQ( "relbow_p",    zNamePtr( zArrayElem(&arr,20) ) );
+  EXPECT_STREQ( "rwrist_y",    zNamePtr( zArrayElem(&arr,21) ) );
+  EXPECT_STREQ( "rwrist_r",    zNamePtr( zArrayElem(&arr,22) ) );
+  EXPECT_STREQ( "rwrist_p",    zNamePtr( zArrayElem(&arr,23) ) );
+  EXPECT_STREQ( "lscaplae_y",  zNamePtr( zArrayElem(&arr,24) ) );
+  EXPECT_STREQ( "lshoulder_p", zNamePtr( zArrayElem(&arr,25) ) );
+  EXPECT_STREQ( "lshoulder_r", zNamePtr( zArrayElem(&arr,26) ) );
+  EXPECT_STREQ( "lshoulder_y", zNamePtr( zArrayElem(&arr,27) ) );
+  EXPECT_STREQ( "lelbow_p",    zNamePtr( zArrayElem(&arr,28) ) );
+  EXPECT_STREQ( "lwrist_y",    zNamePtr( zArrayElem(&arr,29) ) );
+  EXPECT_STREQ( "lwrist_r",    zNamePtr( zArrayElem(&arr,30) ) );
+  EXPECT_STREQ( "lwrist_p",    zNamePtr( zArrayElem(&arr,31) ) );
+  EXPECT_STREQ( "rfinger1_1",  zNamePtr( zArrayElem(&arr,32) ) );
+  EXPECT_STREQ( "rfinger1_2",  zNamePtr( zArrayElem(&arr,33) ) );
+  EXPECT_STREQ( "rfinger1_3",  zNamePtr( zArrayElem(&arr,34) ) );
+  EXPECT_STREQ( "rfinger1_4",  zNamePtr( zArrayElem(&arr,35) ) );
+  EXPECT_STREQ( "rfinger2_1",  zNamePtr( zArrayElem(&arr,36) ) );
+  EXPECT_STREQ( "rfinger2_2",  zNamePtr( zArrayElem(&arr,37) ) );
+  EXPECT_STREQ( "rfinger2_3",  zNamePtr( zArrayElem(&arr,38) ) );
+  EXPECT_STREQ( "rfinger3_1",  zNamePtr( zArrayElem(&arr,39) ) );
+  EXPECT_STREQ( "rfinger3_2",  zNamePtr( zArrayElem(&arr,40) ) );
+  EXPECT_STREQ( "rfinger3_3",  zNamePtr( zArrayElem(&arr,41) ) );
+  EXPECT_STREQ( "rfinger4_1",  zNamePtr( zArrayElem(&arr,42) ) );
+  EXPECT_STREQ( "rfinger4_2",  zNamePtr( zArrayElem(&arr,43) ) );
+  EXPECT_STREQ( "rfinger4_3",  zNamePtr( zArrayElem(&arr,44) ) );
+  EXPECT_STREQ( "lfinger1_1",  zNamePtr( zArrayElem(&arr,45) ) );
+  EXPECT_STREQ( "lfinger1_2",  zNamePtr( zArrayElem(&arr,46) ) );
+  EXPECT_STREQ( "lfinger1_3",  zNamePtr( zArrayElem(&arr,47) ) );
+  EXPECT_STREQ( "lfinger1_4",  zNamePtr( zArrayElem(&arr,48) ) );
+  EXPECT_STREQ( "lfinger2_1",  zNamePtr( zArrayElem(&arr,49) ) );
+  EXPECT_STREQ( "lfinger2_2",  zNamePtr( zArrayElem(&arr,50) ) );
+  EXPECT_STREQ( "lfinger2_3",  zNamePtr( zArrayElem(&arr,51) ) );
+  EXPECT_STREQ( "lfinger3_1",  zNamePtr( zArrayElem(&arr,52) ) );
+  EXPECT_STREQ( "lfinger3_2",  zNamePtr( zArrayElem(&arr,53) ) );
+  EXPECT_STREQ( "lfinger3_3",  zNamePtr( zArrayElem(&arr,54) ) );
+  EXPECT_STREQ( "lfinger4_1",  zNamePtr( zArrayElem(&arr,55) ) );
+  EXPECT_STREQ( "lfinger4_2",  zNamePtr( zArrayElem(&arr,56) ) );
+  EXPECT_STREQ( "lfinger4_3",  zNamePtr( zArrayElem(&arr,57) ) );
+  pdJointArrayDestroy( &arr );
+  fclose( fp );
+}

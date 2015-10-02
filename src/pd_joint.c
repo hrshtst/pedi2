@@ -120,3 +120,76 @@ pdJoint *pdJointFRead(FILE *fp, pdJoint *joint)
   }
   return NULL;
 }
+
+bool pdJointArrayAlloc(pdJointArray *arr, int n)
+{
+  zArrayAlloc( arr, pdJoint, n );
+  if( !zArrayBuf(arr) ){
+    ZALLOCERROR();
+    return false;
+  }
+  return true;
+}
+
+static bool _pdJointFAlloc(FILE *fp, pdJointArray *arr);
+
+bool _pdJointFAlloc(FILE *fp, pdJointArray *arr)
+{
+  int n;
+
+  n = zFCountTag( fp, PD_JOINT_TAG );
+  return pdJointArrayAlloc( arr, n );
+}
+
+void pdJointArrayDestroy(pdJointArray *arr)
+{
+  register uint i;
+
+  for( i=0; i<zArrayNum(arr); i++ )
+    pdJointDestroy( zArrayElem(arr,i) );
+  zArrayFree( arr );
+}
+
+pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name)
+{
+  pdJoint *joint = NULL;
+
+  zArrayFindName( arr, name, joint );
+  if( !joint ){
+    ZRUNERROR( "invalid joint name %s", name );
+    return NULL;
+  }
+  return joint;
+}
+
+typedef struct{
+  pdJointArray *arr;
+  int count;
+} _pdJointArrayParam;
+
+bool _pdJointArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
+{
+  _pdJointArrayParam *prm;
+
+  prm = instance;
+  if( strcmp( buf, PD_JOINT_TAG ) == 0 ){
+    if( !pdJointFRead( fp, zArrayElem(prm->arr,prm->count++) ) ){
+      *success = false;
+      return false;
+    }
+  } else
+    return false;
+  return true;
+}
+
+bool pdJointArrayFRead(FILE *fp, pdJointArray *arr)
+{
+  _pdJointArrayParam prm;
+
+  zArrayInit( arr );
+  if( !_pdJointFAlloc( fp, arr ) ) return false;
+  rewind( fp );
+  prm.count = 0;
+  prm.arr = arr;
+  return zTagFRead( fp, _pdJointArrayFRead, &prm );
+}

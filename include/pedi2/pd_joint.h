@@ -82,6 +82,27 @@ __EXPORT void pdJointDestroyDefault(pdJoint *joint);
 #define PD_JOINT_TAG "joint"
 __EXPORT pdJoint *pdJointFRead(FILE *fp, pdJoint *joint);
 
+zArrayClass( pdJointArray, pdJoint );
+
+#define pdJointArrayDis(arr,i)      pdJointDis( zArrayElem(arr,i) )
+#define pdJointArrayVel(arr,i)      pdJointVel( zArrayElem(arr,i) )
+#define pdJointArrayRefDis(arr,i)   pdJointRefDis( zArrayElem(arr,i) )
+#define pdJointArrayRefVel(arr,i)   pdJointRefOld( zArrayElem(arr,i) )
+#define pdJointArrayOutput(arr,i)   pdJointOutput( zArrayElem(arr,i) )
+
+__EXPORT bool pdJointArrayAlloc(pdJointArray *arr, int n);
+__EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
+
+__EXPORT void pdJointArraySetDis(pdJointArray *arr, zVec q);
+__EXPORT void pdJointArraySetVel(pdJointArray *arr, zVec v);
+__EXPORT void pdJointArraySetRefDis(pdJointArray *arr, zVec qref);
+__EXPORT void pdJointArraySetRefVel(pdJointArray *arr, zVec vref);
+__EXPORT void pdJointArrayRefresh(pdJointArray *arr, zVec q);
+__EXPORT void pdJointArrayUpdate(pdJointArray *arr, double dt);
+__EXPORT void pdJointArrayDestroy(pdJointArray *arr);
+
+__EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr);
+
 __END_DECLS
 
 #include <pedi2/pd_joint_pd_trq.h>   /* Torque PD control */

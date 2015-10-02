@@ -776,3 +776,100 @@ TEST_F(pdJointArrayTest, CreateDefaultIndex_NoNameErr)
   zEchoOn();
 }
 
+TEST_F(pdJointArrayTest, SetDisIndex)
+{
+  zVec q;
+  zIndex idx;
+
+  q = zVecCreateList( 6, ri.rand(), ri.rand(), ri.rand(),
+                         ri.rand(), ri.rand(), ri.rand() );
+  idx = zIndexCreateList( 4, 0, 1, 3, 5 );
+  MakeJointArray();
+  pdJointArraySetDisIndex( &arr, idx, q );
+  EXPECT_EQ( zVecElem(q,0), pdJointArrayDis(&arr,0) );
+  EXPECT_EQ( zVecElem(q,1), pdJointArrayDis(&arr,1) );
+  EXPECT_NE( zVecElem(q,2), pdJointArrayDis(&arr,2) );
+  EXPECT_EQ( zVecElem(q,3), pdJointArrayDis(&arr,2) );
+  EXPECT_NE( zVecElem(q,4), pdJointArrayDis(&arr,3) );
+  EXPECT_EQ( zVecElem(q,5), pdJointArrayDis(&arr,3) );
+}
+
+TEST_F(pdJointArrayTest, SetVelIndex)
+{
+  zVec v;
+  zIndex idx;
+
+  v = zVecCreateList( 6, ri.rand(), ri.rand(), ri.rand(),
+                         ri.rand(), ri.rand(), ri.rand() );
+  idx = zIndexCreateList( 4, 0, 1, 3, 5 );
+  MakeJointArray();
+  pdJointArraySetVelIndex( &arr, idx, v );
+  EXPECT_EQ( zVecElem(v,0), pdJointArrayVel(&arr,0) );
+  EXPECT_EQ( zVecElem(v,1), pdJointArrayVel(&arr,1) );
+  EXPECT_NE( zVecElem(v,2), pdJointArrayVel(&arr,2) );
+  EXPECT_EQ( zVecElem(v,3), pdJointArrayVel(&arr,2) );
+  EXPECT_NE( zVecElem(v,4), pdJointArrayVel(&arr,3) );
+  EXPECT_EQ( zVecElem(v,5), pdJointArrayVel(&arr,3) );
+}
+
+TEST_F(pdJointArrayTest, SetRefDisIndex)
+{
+  zVec q;
+  zIndex idx;
+
+  q = zVecCreateList( 6, ri.rand(), ri.rand(), ri.rand(),
+                         ri.rand(), ri.rand(), ri.rand() );
+  idx = zIndexCreateList( 4, 0, 1, 3, 5 );
+  MakeJointArray();
+  pdJointArraySetRefDisIndex( &arr, idx, q );
+  EXPECT_EQ( zVecElem(q,0), pdJointArrayRefDis(&arr,0) );
+  EXPECT_EQ( zVecElem(q,1), pdJointArrayRefDis(&arr,1) );
+  EXPECT_NE( zVecElem(q,2), pdJointArrayRefDis(&arr,2) );
+  EXPECT_EQ( zVecElem(q,3), pdJointArrayRefDis(&arr,2) );
+  EXPECT_NE( zVecElem(q,4), pdJointArrayRefDis(&arr,3) );
+  EXPECT_EQ( zVecElem(q,5), pdJointArrayRefDis(&arr,3) );
+}
+
+TEST_F(pdJointArrayTest, SetRefVelIndex)
+{
+  zVec v;
+  zIndex idx;
+
+  v = zVecCreateList( 6, ri.rand(), ri.rand(), ri.rand(),
+                         ri.rand(), ri.rand(), ri.rand() );
+  idx = zIndexCreateList( 4, 0, 1, 3, 5 );
+  MakeJointArray();
+  pdJointArraySetRefVelIndex( &arr, idx, v );
+  EXPECT_EQ( zVecElem(v,0), pdJointArrayRefVel(&arr,0) );
+  EXPECT_EQ( zVecElem(v,1), pdJointArrayRefVel(&arr,1) );
+  EXPECT_NE( zVecElem(v,2), pdJointArrayRefVel(&arr,2) );
+  EXPECT_EQ( zVecElem(v,3), pdJointArrayRefVel(&arr,2) );
+  EXPECT_NE( zVecElem(v,4), pdJointArrayRefVel(&arr,3) );
+  EXPECT_EQ( zVecElem(v,5), pdJointArrayRefVel(&arr,3) );
+}
+
+TEST_F(pdJointArrayTest, RefreshIndex)
+{
+  zVec q;
+  zIndex idx;
+
+  q = zVecCreateList( 6, ri.rand(), ri.rand(), ri.rand(),
+                         ri.rand(), ri.rand(), ri.rand() );
+  idx = zIndexCreateList( 4, 0, 1, 3, 5 );
+  MakeJointArray();
+  pdJointArrayRefreshIndex( &arr, idx, q );
+  EXPECT_EQ( zVecElem(q,0), pdJointArrayDis(&arr,0) );
+  EXPECT_EQ( zVecElem(q,1), pdJointArrayDis(&arr,1) );
+  EXPECT_NE( zVecElem(q,2), pdJointArrayDis(&arr,2) );
+  EXPECT_EQ( zVecElem(q,3), pdJointArrayDis(&arr,2) );
+  EXPECT_NE( zVecElem(q,4), pdJointArrayDis(&arr,3) );
+  EXPECT_EQ( zVecElem(q,5), pdJointArrayDis(&arr,3) );
+
+  EXPECT_EQ( zVecElem(q,0), pdJointArrayRefDis(&arr,0) );
+  EXPECT_EQ( zVecElem(q,1), pdJointArrayRefDis(&arr,1) );
+  EXPECT_NE( zVecElem(q,2), pdJointArrayRefDis(&arr,2) );
+  EXPECT_EQ( zVecElem(q,3), pdJointArrayRefDis(&arr,2) );
+  EXPECT_NE( zVecElem(q,4), pdJointArrayRefDis(&arr,3) );
+  EXPECT_EQ( zVecElem(q,5), pdJointArrayRefDis(&arr,3) );
+}
+

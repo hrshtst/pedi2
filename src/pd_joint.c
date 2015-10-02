@@ -121,7 +121,7 @@ pdJoint *pdJointFRead(FILE *fp, pdJoint *joint)
   return NULL;
 }
 
-#define PD_JOINT_ERR_MSG_SIZE_MISMATCH \
+#define PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH \
   "Joint controller number is not matched with the vecotr size"
 
 void pdJointArraySetDis(pdJointArray *arr, zVec q)
@@ -129,7 +129,7 @@ void pdJointArraySetDis(pdJointArray *arr, zVec q)
   register int i;
 
   if( (int)zArrayNum(arr) != zVecSize(q) )
-    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+    ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
   for( i=0; i<(int)zArrayNum(arr); i++ )
     pdJointSetDis( zArrayElem( arr, i ), zVecElem( q, i) );
 }
@@ -139,7 +139,7 @@ void pdJointArraySetVel(pdJointArray *arr, zVec v)
   register int i;
 
   if( (int)zArrayNum(arr) != zVecSize(v) )
-    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+    ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
   for( i=0; i<(int)zArrayNum(arr); i++ )
     pdJointSetVel( zArrayElem( arr, i ), zVecElem( v, i) );
 }
@@ -149,7 +149,7 @@ void pdJointArraySetRefDis(pdJointArray *arr, zVec q)
   register int i;
 
   if( (int)zArrayNum(arr) != zVecSize(q) )
-    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+    ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
   for( i=0; i<(int)zArrayNum(arr); i++ )
     pdJointSetRefDis( zArrayElem( arr, i ), zVecElem( q, i) );
 }
@@ -159,7 +159,7 @@ void pdJointArraySetRefVel(pdJointArray *arr, zVec v)
   register int i;
 
   if( (int)zArrayNum(arr) != zVecSize(v) )
-    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+    ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
   for( i=0; i<(int)zArrayNum(arr); i++ )
     pdJointSetRefVel( zArrayElem( arr, i ), zVecElem( v, i) );
 }
@@ -169,7 +169,7 @@ void pdJointArrayRefresh(pdJointArray *arr, zVec q)
   register int i;
 
   if( (int)zArrayNum(arr) != zVecSize(q) )
-    ZRUNERROR( PD_JOINT_ERR_MSG_SIZE_MISMATCH );
+    ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
   for( i=0; i<(int)zArrayNum(arr); i++ )
     pdJointRefresh( zArrayElem( arr, i ), zVecElem( q, i) );
 }
@@ -299,4 +299,57 @@ zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c)
       zIndexSetElem( index, i, rkLinkOffset(link) );
   }
   return index;
+}
+
+#define PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH \
+  "Joint controller number is not matched with the index size"
+
+void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q)
+{
+  register int i;
+
+  if( zArrayNum(arr) != zArrayNum(idx) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetDis( zArrayElem(arr,i), zVecElem(q,zIndexElem(idx,i)) );
+}
+
+void pdJointArraySetVelIndex(pdJointArray *arr, zIndex idx, zVec v)
+{
+  register int i;
+
+  if( zArrayNum(arr) != zArrayNum(idx) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetVel( zArrayElem(arr,i), zVecElem(v,zIndexElem(idx,i)) );
+}
+
+void pdJointArraySetRefDisIndex(pdJointArray *arr, zIndex idx, zVec q)
+{
+  register int i;
+
+  if( zArrayNum(arr) != zArrayNum(idx) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetRefDis( zArrayElem(arr,i), zVecElem(q,zIndexElem(idx,i)) );
+}
+
+void pdJointArraySetRefVelIndex(pdJointArray *arr, zIndex idx, zVec v)
+{
+  register int i;
+
+  if( zArrayNum(arr) != zArrayNum(idx) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetRefVel( zArrayElem(arr,i), zVecElem(v,zIndexElem(idx,i)) );
+}
+
+void pdJointArrayRefreshIndex(pdJointArray *arr, zIndex idx, zVec q)
+{
+  register int i;
+
+  if( zArrayNum(arr) != zArrayNum(idx) )
+    ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointRefresh( zArrayElem(arr,i), zVecElem(q,zIndexElem(idx,i)) );
 }

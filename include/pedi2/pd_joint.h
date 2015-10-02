@@ -105,6 +105,11 @@ __EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr);
 __EXPORT bool pdJointArrayReadFile(pdJointArray *arr, const char *filename);
 
 __EXPORT zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c);
+__EXPORT void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q);
+__EXPORT void pdJointArraySetVelIndex(pdJointArray *arr, zIndex idx, zVec v);
+__EXPORT void pdJointArraySetRefDisIndex(pdJointArray *arr, zIndex idx, zVec qref);
+__EXPORT void pdJointArraySetRefVelIndex(pdJointArray *arr, zIndex idx, zVec vref);
+__EXPORT void pdJointArrayRefreshIndex(pdJointArray *arr, zIndex idx, zVec q);
 
 __END_DECLS
 

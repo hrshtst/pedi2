@@ -291,7 +291,8 @@ zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c)
   for( i=0; i<(int)zArrayNum(arr); i++ ){
     link = _rkChainLinkFindName(c,zName(zArrayElem(arr,i)));
     if( !link ){
-      ZRUNERROR( "joint name %s is not found", zName(zArrayElem(arr,i)) );
+      ZRUNERROR( "joint %s cannot be found in robot model",
+                 zName(zArrayElem(arr,i)) );
       zIndexFree( index );
       return NULL;
     } else

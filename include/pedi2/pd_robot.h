@@ -76,6 +76,7 @@ __EXPORT void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *s
 __EXPORT void pdRobotLinkSetJointDis(pdRobot *robot, int id, double *dis);
 __EXPORT void pdRobotSetJointDis(pdRobot *robot, zIndex index, zVec dis);
 __EXPORT void pdRobotFK(pdRobot *robot, zVec dis);
+__EXPORT void pdRobotResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis);
 
 /* methods to solve IK */
 __EXPORT void pdRobotUnsetAllFlags(pdRobot *robot);

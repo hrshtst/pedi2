@@ -145,6 +145,9 @@ void _pdCZUpdateAlpha(pdCZ *cz)
 
 void _pdCZUpdateBeta(pdCZ *cz, zVec3D *com)
 {
+  pdCZBetaX(cz) -= pdCZErrCompBX(cz)*(pdCZCOMX(cz)-pdCZRefCOMX(cz));
+  pdCZBetaY(cz) -= pdCZErrCompBY(cz)*(pdCZCOMY(cz)-pdCZRefCOMY(cz));
+  pdCZBetaZ(cz) -= pdCZErrCompBZ(cz)*(pdCZCOMZ(cz)-pdCZRefCOMZ(cz));
 }
 
 zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc)
@@ -175,9 +178,9 @@ void _pdCZODE2Update(pdCZ *cz, zVec p, zVec v, double dt)
 
 void _pdCZUpdateRef(pdCZ *cz)
 {
-  zVec3DSetElem( &cz->refcom, zX, zVecElem( cz->_ode.pos, zX ) );
-  zVec3DSetElem( &cz->refcom, zY, zVecElem( cz->_ode.pos, zY ) );
-  zVec3DSetElem( &cz->refcom, zZ, zVecElem( cz->_ode.pos, zZ ) );
+  zVec3DSetElem( &cz->refcom, zX, zVecElem( cz->_ode.pos, zX ) + pdCZBetaX(cz) );
+  zVec3DSetElem( &cz->refcom, zY, zVecElem( cz->_ode.pos, zY ) + pdCZBetaY(cz) );
+  zVec3DSetElem( &cz->refcom, zZ, zVecElem( cz->_ode.pos, zZ ) + pdCZBetaZ(cz) );
   zVec3DSetElem( &cz->refvel, zX, zVecElem( cz->_ode.vel, zX ) );
   zVec3DSetElem( &cz->refvel, zY, zVecElem( cz->_ode.vel, zY ) );
   zVec3DSetElem( &cz->refvel, zZ, zVecElem( cz->_ode.vel, zZ ) );

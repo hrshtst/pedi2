@@ -214,6 +214,9 @@ void _pdBipedUpdateCommand(pdBiped *biped)
   pdCZSetErrCompKX( pdBipedCZPtr( biped ), biped->cmd->kx );
   pdCZSetErrCompKY( pdBipedCZPtr( biped ), biped->cmd->ky );
   pdCZSetErrCompKZ( pdBipedCZPtr( biped ), biped->cmd->kz );
+  pdCZSetErrCompBX( pdBipedCZPtr( biped ), biped->cmd->bx );
+  pdCZSetErrCompBY( pdBipedCZPtr( biped ), biped->cmd->by );
+  pdCZSetErrCompBZ( pdBipedCZPtr( biped ), biped->cmd->bz );
   pdFootSetMaxHeight( pdBipedLFPtr( biped ), biped->cmd->lfh );
   pdFootSetTrXK( pdBipedLFPtr( biped ), biped->cmd->lfkx );
   pdFootSetTrXC( pdBipedLFPtr( biped ), biped->cmd->lfcx );

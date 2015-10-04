@@ -5,7 +5,7 @@
 
 __BEGIN_DECLS
 
-#define PD_CMD_ENTRY_NUM 33
+#define PD_CMD_ENTRY_NUM 36
 typedef union{
   struct{
     double qu1, qu2;
@@ -16,6 +16,7 @@ typedef union{
     double thetad;
     double vud, vwd, dist;
     double kx, ky, kz;
+    double bx, by, bz;
     double lfkx, lfky, lfkz;
     double lfcx, lfcy, lfcz;
     double rfkx, rfky, rfkz;

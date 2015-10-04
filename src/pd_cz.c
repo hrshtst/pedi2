@@ -31,9 +31,9 @@ void pdCZInit(pdCZ *c, double dt)
   pdCZSetErrCompKX( c, 0 );
   pdCZSetErrCompKY( c, 0 );
   pdCZSetErrCompKZ( c, 0 );
-  pdCZSetErrCompDX( c, 0 );
-  pdCZSetErrCompDY( c, 0 );
-  pdCZSetErrCompDZ( c, 0 );
+  pdCZSetErrCompBX( c, 0 );
+  pdCZSetErrCompBY( c, 0 );
+  pdCZSetErrCompBZ( c, 0 );
   pdCZAlphaX( c ) = 0;
   pdCZAlphaY( c ) = 0;
   pdCZAlphaZ( c ) = 0;
@@ -74,9 +74,9 @@ void pdCZDestroy(pdCZ *c)
   pdCZSetErrCompKX( c, 0 );
   pdCZSetErrCompKY( c, 0 );
   pdCZSetErrCompKZ( c, 0 );
-  pdCZSetErrCompDX( c, 0 );
-  pdCZSetErrCompDY( c, 0 );
-  pdCZSetErrCompDZ( c, 0 );
+  pdCZSetErrCompBX( c, 0 );
+  pdCZSetErrCompBY( c, 0 );
+  pdCZSetErrCompBZ( c, 0 );
 }
 
 double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw)

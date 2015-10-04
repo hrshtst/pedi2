@@ -31,6 +31,26 @@ def plotXY(data):
     fig.legend()
 
 
+def plotX(data):
+    fig = FigureCreator()
+    fig.plot(data.t, data.x, label='COM')
+    fig.plot(data.t, data.xd, label='Ref')
+    fig.plot(data.t, data.xz, label='ZMP')
+    fig.setTitleLabels(xlabel='time', ylabel='x position')
+    # fig.setYLimit([0.2, 0.35])
+    fig.legend()
+
+
+def plotY(data):
+    fig = FigureCreator()
+    fig.plot(data.t, data.y, label='COM')
+    fig.plot(data.t, data.yd, label='Ref')
+    fig.plot(data.t, data.yz, label='ZMP')
+    fig.setTitleLabels(xlabel='time', ylabel='y position')
+    # fig.setYLimit([0.2, 0.35])
+    fig.legend()
+
+
 def plotZ(data):
     fig = FigureCreator()
     fig.plot(data.t, data.z, label='COM')
@@ -66,7 +86,9 @@ def main():
     # plot
     data = Data(datafile, LABEL_LIST)
     plotXY(data)
-    plotZ(data)
+    plotX(data)
+    plotY(data)
+    # plotZ(data)
 
     if showflag:
         plt.show()

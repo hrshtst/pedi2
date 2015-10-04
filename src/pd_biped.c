@@ -336,6 +336,8 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
     }
     if( biped->mode.walk )
       pdCZSetQ2U( pdBipedCZPtr( biped ), 0.0 );
+  } else if( biped->mode.step ){
+    pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
   }
 
   if( biped->mode.sidewalk ) {

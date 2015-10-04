@@ -24,7 +24,8 @@ typedef struct{
   struct{
     double _alpha[3]; /* estimated ZMP error */
     double _beta[3];  /* estimated COM error */
-    double _k[3];     /* relaxation coefficient */
+    double _k[3];     /* relaxation coefficient for ZMP error */
+    double _d[3];     /* relaxation coefficient for COM error */
   } _errcomp;         /* error compensator */
 
   struct{
@@ -105,6 +106,9 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZErrCompKX(c) ( (c)->_errcomp._k[0] )
 #define pdCZErrCompKY(c) ( (c)->_errcomp._k[1] )
 #define pdCZErrCompKZ(c) ( (c)->_errcomp._k[2] )
+#define pdCZErrCompDX(c) ( (c)->_errcomp._d[0] )
+#define pdCZErrCompDY(c) ( (c)->_errcomp._d[1] )
+#define pdCZErrCompDZ(c) ( (c)->_errcomp._d[2] )
 #define pdCZRefCOM(c)  ( &(c)->refcom )
 #define pdCZRefCOMX(c) zVec3DElem( pdCZRefCOM(c), zX )
 #define pdCZRefCOMY(c) zVec3DElem( pdCZRefCOM(c), zY )
@@ -184,6 +188,9 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetErrCompKX(c,kx)   ( (c)->_errcomp._k[0] = (kx) )
 #define pdCZSetErrCompKY(c,ky)   ( (c)->_errcomp._k[1] = (ky) )
 #define pdCZSetErrCompKZ(c,kz)   ( (c)->_errcomp._k[2] = (kz) )
+#define pdCZSetErrCompDX(c,dx)   ( (c)->_errcomp._d[0] = (dx) )
+#define pdCZSetErrCompDY(c,dy)   ( (c)->_errcomp._d[1] = (dy) )
+#define pdCZSetErrCompDZ(c,dz)   ( (c)->_errcomp._d[2] = (dz) )
 
 /* calculation method */
 __EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);

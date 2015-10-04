@@ -56,6 +56,8 @@ def plotX(data):
     fig.plot(data.t, data.x, label='COM position')
     fig.plot(data.t, data.xz, label='ZMP position')
     fig.plot(data.t, data.xd, label='Ref COM position')
+    fig.plot(data.t, data.lfpx, label='Left foot pos.')
+    fig.plot(data.t, data.rfpx, label='Right foot pos.')
     fig.setTitleLabels(xlabel='time [s]', ylabel='x position [m]')
     fig.legend()
 
@@ -65,6 +67,8 @@ def plotY(data):
     fig.plot(data.t, data.y, label='COM position')
     fig.plot(data.t, data.yz, label='ZMP position')
     fig.plot(data.t, data.yd, label='Ref COM position')
+    fig.plot(data.t, data.lfpy, label='Left foot pos.')
+    fig.plot(data.t, data.rfpy, label='Right foot pos.')
     fig.setTitleLabels(xlabel='time [s]', ylabel='y position [m]')
     fig.legend()
 

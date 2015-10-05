@@ -77,6 +77,7 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
   zVec3DCopy( &state->com_pos, &v );
   zVec3DSetElem( &v, zZ, com_height );
   zVec3DCopy( &v, pdBipedRefCOMPos( biped ) );
+  zVec3DCopy( &v, pdCZRefCOM( pdBipedCZPtr( biped ) ) );
 
   zVec3DCopy( &state->base_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );

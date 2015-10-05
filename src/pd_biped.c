@@ -298,7 +298,7 @@ double _pdBipedCalcDesFootDistFollow(pdBiped *biped, pdState *state)
 
 double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped, pdState *state)
 {
-  return biped->cmd->dist;
+  return pdStateFootDist( state );
 }
 
 double _pdBipedCalcDesFootDistBrake(pdBiped *biped, pdState *state)
@@ -315,7 +315,7 @@ double _pdBipedCalcDesFootDistBrake(pdBiped *biped, pdState *state)
 
 double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped, pdState *state)
 {
-  return biped->cmd->dist;
+  return pdStateFootDist( state );
 }
 
 void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
@@ -336,6 +336,8 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
     }
     if( biped->mode.walk )
       pdCZSetQ2U( pdBipedCZPtr( biped ), 0.0 );
+  } else if( biped->mode.step ){
+    pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
   }
 
   if( biped->mode.sidewalk ) {

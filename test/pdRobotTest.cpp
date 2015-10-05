@@ -7,6 +7,7 @@ const int MIGHTY_LH_ID = 5;
 const int MIGHTY_LF_ID = 12;
 const int MIGHTY_RH_ID = 17;
 const int MIGHTY_RF_ID = 24;
+const double DT = 0.01;
 #define GTEST_TOL 1e-12
 #define GTEST_TOL_LOOSE 1e-04
 
@@ -81,6 +82,7 @@ class pdRobotTest : public testing::Test {
   pdRobot robot;
   pdState state;
   pdBiped biped;
+  pdCmd cmd;
   RandomInitializer ri;
 };
 
@@ -196,6 +198,39 @@ TEST_F(pdRobotTest, FK)
   EXPECT_DOUBLE_EQ( 0.03, zVecElem( dis, 9 ) );
   EXPECT_DOUBLE_EQ( 0.04, zVecElem( dis, 10 ) );
   EXPECT_DOUBLE_EQ( 0.05, zVecElem( dis, 11 ) );
+  zVecFree( dis );
+}
+
+TEST_F(pdRobotTest, ResetPose)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis;
+
+  pdCmdDefaultInit( &cmd );
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  pdRobotDefaultBipedInit( &robot, &biped, &state );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotUpdateState( &robot, &state );
+
+  // method to testify
+  zVecSetElem( dis, 0, -1 );
+  zVecSetElem( dis, 1, 1 );
+  zVecSetElem( dis, 2, 0.33 );
+  zVecSetElem( dis, 3, 0 );
+  zVecSetElem( dis, 4, 0 );
+  zVecSetElem( dis, 5, 1.57 );
+  pdRobotResetPose( &robot, &biped, &state, dis );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_DOUBLE_EQ( -1,    zVecElem(dis,0) );
+  EXPECT_DOUBLE_EQ( 1,    zVecElem(dis,1) );
+  EXPECT_DOUBLE_EQ( 0.33, zVecElem(dis,2) );
+  EXPECT_DOUBLE_EQ( 0,    zVecElem(dis,3) );
+  EXPECT_DOUBLE_EQ( 0,    zVecElem(dis,4) );
+  EXPECT_DOUBLE_EQ( 1.57,    zVecElem(dis,5) );
   zVecFree( dis );
 }
 

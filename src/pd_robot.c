@@ -237,6 +237,12 @@ void pdRobotSetJointDis(pdRobot *robot, zIndex index, zVec dis)
 
 void pdRobotFK(pdRobot *robot, zVec dis)
 {
+  double base, foot;
+
+  base = zVec3DElem(rkChainLinkWldPos(pdRobotChainPtr(robot),pdRobotBaseID(robot)),zZ);
+  foot = zMin( zVec3DElem(rkChainLinkWldPos(pdRobotChainPtr(robot),pdRobotLFID(robot)),zZ),
+               zVec3DElem(rkChainLinkWldPos(pdRobotChainPtr(robot),pdRobotRFID(robot)),zZ) );
+  zVecSetElem( dis, zZ, base - foot );
   rkChainFK( pdRobotChainPtr(robot), dis );
   rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
 }

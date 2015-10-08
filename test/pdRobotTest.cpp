@@ -201,6 +201,30 @@ TEST_F(pdRobotTest, FK)
   zVecFree( dis );
 }
 
+TEST_F(pdRobotTest, FK_LargeBodyOffset)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis;
+
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( 26 );
+  zVecClear( dis );
+  zVecSetElem( dis, 0, 10 );
+  zVecSetElem( dis, 1, 10 );
+  zVecSetElem( dis, 2, 10 );
+  zVecSetElem( dis, 3, 0 );
+  zVecSetElem( dis, 4, 0 );
+  zVecSetElem( dis, 5, 0 );
+
+  pdRobotFK( &robot, dis );
+  double lf, rf;
+  lf = zVec3DElem( rkChainLinkWldPos(pdRobotChainPtr(&robot), pdRobotLFID(&robot)), zZ );
+  rf = zVec3DElem( rkChainLinkWldPos(pdRobotChainPtr(&robot), pdRobotRFID(&robot)), zZ );
+  EXPECT_NEAR( 0, lf, 1e-06 );
+  EXPECT_NEAR( 0, rf, 1e-06 );
+  zVecFree( dis );
+}
+
 TEST_F(pdRobotTest, ResetPose)
 {
   char model[] = "model/mighty.zkc";
@@ -219,18 +243,18 @@ TEST_F(pdRobotTest, ResetPose)
   // method to testify
   zVecSetElem( dis, 0, -1 );
   zVecSetElem( dis, 1, 1 );
-  zVecSetElem( dis, 2, 0.33 );
+  zVecSetElem( dis, 2, 0.34 );
   zVecSetElem( dis, 3, 0 );
   zVecSetElem( dis, 4, 0 );
   zVecSetElem( dis, 5, 1.57 );
   pdRobotResetPose( &robot, &biped, &state, dis );
   pdRobotGetJointDisAll( &robot, dis );
-  EXPECT_DOUBLE_EQ( -1,    zVecElem(dis,0) );
-  EXPECT_DOUBLE_EQ( 1,    zVecElem(dis,1) );
-  EXPECT_DOUBLE_EQ( 0.33, zVecElem(dis,2) );
-  EXPECT_DOUBLE_EQ( 0,    zVecElem(dis,3) );
-  EXPECT_DOUBLE_EQ( 0,    zVecElem(dis,4) );
-  EXPECT_DOUBLE_EQ( 1.57,    zVecElem(dis,5) );
+  EXPECT_DOUBLE_EQ( -1, zVecElem(dis,0) );
+  EXPECT_DOUBLE_EQ( 1,  zVecElem(dis,1) );
+  EXPECT_NEAR( 0.347, zVecElem(dis,2), 1e03 );
+  EXPECT_DOUBLE_EQ( 0, zVecElem(dis,3) );
+  EXPECT_DOUBLE_EQ( 0, zVecElem(dis,4) );
+  EXPECT_DOUBLE_EQ( 1.57, zVecElem(dis,5) );
   zVecFree( dis );
 }
 

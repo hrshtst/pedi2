@@ -280,7 +280,14 @@ bool pdRobotSetRefVec(pdRobot *robot, zVec3D *ref, int id)
 
 void pdRobotSetBipedRefVec(pdRobot *robot, pdBiped *biped)
 {
-  pdRobotSetRefCOM( robot, pdBipedRefCOMPos(biped) );
+  zVec3D v;
+
+  zVec3DCreate( &v,
+                pdBipedRefCOMPosX(biped) + pdCZBetaX(pdBipedCZPtr(biped)),
+                pdBipedRefCOMPosY(biped) + pdCZBetaY(pdBipedCZPtr(biped)),
+                pdBipedRefCOMPosZ(biped) + pdCZBetaZ(pdBipedCZPtr(biped)) );
+  /* pdRobotSetRefCOM( robot, pdBipedRefCOMPos(biped) ); */
+  pdRobotSetRefCOM( robot, &v );
   pdRobotSetRefBaseAtt( robot, pdBipedRefBaseAtt(biped) );
   pdRobotSetRefLFPos( robot, pdBipedRefLFPos(biped) );
   pdRobotSetRefLFAtt( robot, pdBipedRefLFAtt(biped) );

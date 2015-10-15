@@ -254,7 +254,7 @@ void _pdBipedUpdateFoot(pdBiped *biped, pdState *state)
   pdFootUpdate( pdBipedLFPtr(biped), pdBipedRFPtr(biped),
                 pdCZDelta( pdBipedCZPtr(biped) ),
                 pdCZVelUW( pdBipedCZPtr(biped) ),
-                &state->zmp,
+                &state->deszmp,
                 &state->lf_pos,
                 &state->rf_pos,
                 &state->lf_att,
@@ -387,6 +387,7 @@ void pdBipedUpdateState(pdBiped *biped, pdState *state)
   zVec3DCopy( pdBipedRefRFPos(biped), &state->rf_pos );
   zVec3DCopy( pdBipedRefRFAtt(biped), &state->rf_att );
   zVec3DCopy( pdCZRefZMP( pdBipedCZPtr(biped) ), &state->zmp );
+  zVec3DCopy( pdCZRefZMP( pdBipedCZPtr(biped) ), &state->deszmp );
   state->fz = pdCZVrtRF( &biped->cz._vrt );
 }
 

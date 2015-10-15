@@ -248,6 +248,25 @@ void pdRobotFK(pdRobot *robot, zVec dis)
   rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
 }
 
+void pdRobotFKIndex(pdRobot *robot, zIndex index, zVec dis)
+{
+  register int i;
+
+  for( i=0; i<(int)zArrayNum(index); i++ )
+    zVecSetElem( pdRobotJointDis(robot), zIndexElem(index,i), zVecElem(dis,i) );
+  pdRobotFK( robot, pdRobotJointDis( robot ) );
+}
+
+void pdRobotResetJointDis(pdRobot *robot)
+{
+  zVec v;
+
+  v = zVecAlloc( pdRobotJointSize(robot) );
+  zVecClear( v );
+  pdRobotFK( robot, v );
+  zVecFree( v );
+}
+
 void pdRobotResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis)
 {
   double offset;

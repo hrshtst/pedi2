@@ -225,6 +225,37 @@ TEST_F(pdRobotTest, FK_LargeBodyOffset)
   zVecFree( dis );
 }
 
+TEST_F(pdRobotTest, FKIndex)
+{
+  char model[] = "model/mighty.zkc";
+  zVec dis;
+  zIndex index;
+  zVec3D com;
+
+  pdRobotLoad( &robot, model );
+  dis = zVecCreateList( 2, 1.57, 1.57 );
+  index  = zIndexCreateList( 2, 7, 19 );
+  pdRobotFKIndex( &robot, index, dis );
+  pdRobotCOMPos( &robot, &com );
+  EXPECT_EQ( 1.57, zVecElem( pdRobotJointDis(&robot), 7 ) );
+  EXPECT_EQ( 1.57, zVecElem( pdRobotJointDis(&robot), 19 ) );
+  EXPECT_NEAR( 0.2996089431, zVec3DElem( &com, zZ ), 1e-06 );
+}
+
+TEST_F(pdRobotTest, ResetJointDis)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  pdRobotResetJointDis( &robot );
+  for(int i=0; i<26; i++){
+    if( i==2 )
+      EXPECT_NE( 0, zVecElem( pdRobotJointDis(&robot), i ) );
+    else
+      EXPECT_EQ( 0, zVecElem( pdRobotJointDis(&robot), i ) );
+  }
+}
+
 TEST_F(pdRobotTest, ResetPose)
 {
   char model[] = "model/mighty.zkc";

@@ -1,6 +1,7 @@
 from matplotlib import rcParams
 rcParams['ps.usedistiller'] = 'xpdf'
 import matplotlib.pyplot as plt
+import os
 
 
 class FigureCreator(object):
@@ -51,6 +52,6 @@ class FigureCreator(object):
         leg = self.ax.legend(loc=loc, fancybox=True)
         leg.get_frame().set_alpha(frameaplha)
 
-    def save(self, filename):
-        self.fig.savefig(filename,
+    def save(self, filename, dirname='.'):
+        self.fig.savefig(os.path.join(dirname, filename),
                          bbox_inches='tight', pad_inches=0.0)

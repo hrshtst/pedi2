@@ -56,9 +56,15 @@ class pdCZTest : public testing::Test {
     pdCZSetErrCompKX( &cz, ri.rand() );
     pdCZSetErrCompKY( &cz, ri.rand() );
     pdCZSetErrCompKZ( &cz, ri.rand() );
+    pdCZSetErrCompBX( &cz, ri.rand() );
+    pdCZSetErrCompBY( &cz, ri.rand() );
+    pdCZSetErrCompBZ( &cz, ri.rand() );
     pdCZAlphaX( &cz )  = ri.rand();
     pdCZAlphaY( &cz )  = ri.rand();
     pdCZAlphaZ( &cz )  = ri.rand();
+    pdCZBetaX( &cz )   = ri.rand();
+    pdCZBetaY( &cz )   = ri.rand();
+    pdCZBetaZ( &cz )   = ri.rand();
     pdCZRefCOMX( &cz ) = ri.rand();
     pdCZRefCOMY( &cz ) = ri.rand();
     pdCZRefCOMZ( &cz ) = ri.rand();
@@ -124,9 +130,15 @@ TEST_F(pdCZTest, Init)
   EXPECT_EQ( 0, pdCZAlphaX( &cz )   );
   EXPECT_EQ( 0, pdCZAlphaY( &cz )   );
   EXPECT_EQ( 0, pdCZAlphaZ( &cz )   );
+  EXPECT_EQ( 0, pdCZBetaX( &cz )   );
+  EXPECT_EQ( 0, pdCZBetaY( &cz )   );
+  EXPECT_EQ( 0, pdCZBetaZ( &cz )   );
   EXPECT_EQ( 0, pdCZErrCompKX( &cz ) );
   EXPECT_EQ( 0, pdCZErrCompKY( &cz ) );
   EXPECT_EQ( 0, pdCZErrCompKZ( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompBX( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompBY( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompBZ( &cz ) );
   EXPECT_EQ( 0, pdCZRefCOMX( &cz )  );
   EXPECT_EQ( 0, pdCZRefCOMY( &cz )  );
   EXPECT_EQ( 0, pdCZRefCOMZ( &cz )  );
@@ -186,6 +198,9 @@ TEST_F(pdCZTest, Destroy)
   EXPECT_EQ( 0, pdCZErrCompKX( &cz ) );
   EXPECT_EQ( 0, pdCZErrCompKY( &cz ) );
   EXPECT_EQ( 0, pdCZErrCompKZ( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompBX( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompBY( &cz ) );
+  EXPECT_EQ( 0, pdCZErrCompBZ( &cz ) );
   destroyed_flag = true;
 }
 
@@ -459,6 +474,17 @@ TEST_F(pdCZTest, SetErrCompKXYZ)
   EXPECT_DOUBLE_EQ( 0.1, pdCZErrCompKX(&cz) );
   EXPECT_DOUBLE_EQ( 0.2, pdCZErrCompKY(&cz) );
   EXPECT_DOUBLE_EQ( 0.3, pdCZErrCompKZ(&cz) );
+}
+
+TEST_F(pdCZTest, SetErrCompBXYZ)
+{
+  SetRandomValues();
+  pdCZSetErrCompBX( &cz, 0.1 );
+  pdCZSetErrCompBY( &cz, 0.2 );
+  pdCZSetErrCompBZ( &cz, 0.3 );
+  EXPECT_DOUBLE_EQ( 0.1, pdCZErrCompBX(&cz) );
+  EXPECT_DOUBLE_EQ( 0.2, pdCZErrCompBY(&cz) );
+  EXPECT_DOUBLE_EQ( 0.3, pdCZErrCompBZ(&cz) );
 }
 
 TEST_F(pdCZTest, CalcDeltaTheta_KappaIsZero)

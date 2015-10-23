@@ -18,7 +18,8 @@ typedef struct{
   zVec3D base_att;
   zVec3D lf_att, rf_att;
   zVec3D lh_att, rh_att;
-  zVec3D zmp;
+  zVec3D zmp;       /* actual ZMP position */
+  zVec3D deszmp;    /* desired ZMP position */
   double fz;
   zVec3DList sr_lf;
   zVec3DList sr_rf;

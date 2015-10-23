@@ -107,15 +107,12 @@ void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *z
   pdCZSetFZ( cz, fz );
   pdCZSetTheta( cz, theta );
   pdCZSetSR( cz, sr );
-  zVecSetElem( cz->_ode.pos, zX, pdCZCOMX(cz) );
-  zVecSetElem( cz->_ode.pos, zY, pdCZCOMY(cz) );
-  zVecSetElem( cz->_ode.pos, zZ, pdCZCOMZ(cz) );
-  /* zVecSetElem( cz->_ode.pos, zX, pdCZRefCOMX(cz) ); */
-  /* zVecSetElem( cz->_ode.pos, zY, pdCZRefCOMY(cz) ); */
-  /* zVecSetElem( cz->_ode.pos, zZ, pdCZRefCOMZ(cz) ); */
-  zVecSetElem( cz->_ode.vel, zX, pdCZVelX(cz) );
-  zVecSetElem( cz->_ode.vel, zY, pdCZVelY(cz) );
-  zVecSetElem( cz->_ode.vel, zZ, pdCZVelZ(cz) );
+  zVecSetElem( cz->_ode.pos, zX, pdCZRefCOMX(cz) );
+  zVecSetElem( cz->_ode.pos, zY, pdCZRefCOMY(cz) );
+  zVecSetElem( cz->_ode.pos, zZ, pdCZRefCOMZ(cz) );
+  zVecSetElem( cz->_ode.vel, zX, pdCZRefVelX(cz) );
+  zVecSetElem( cz->_ode.vel, zY, pdCZRefVelY(cz) );
+  zVecSetElem( cz->_ode.vel, zZ, pdCZRefVelZ(cz) );
 }
 
 void _pdCZUpdateVrt(pdCZ *cz)

@@ -141,9 +141,9 @@ void _pdCZUpdateAlpha(pdCZ *cz)
   pdCZHrz *h = pdCZHrzPtr(cz);
   pdCZVrt *v = pdCZVrtPtr(cz);
 
-  pdCZAlphaX(cz) -= pdCZErrCompKX(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPX(h)-pdCZZMPX(cz));
-  pdCZAlphaY(cz) -= pdCZErrCompKY(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPY(h)-pdCZZMPY(cz));
-  pdCZAlphaZ(cz) -= pdCZErrCompKZ(cz)*(pdCZFZ(cz)-pdCZVrtRF(v));
+  pdCZAlphaX(cz) = pdCZErrCompKX(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPX(h)-pdCZZMPX(cz));
+  pdCZAlphaY(cz) = pdCZErrCompKY(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPY(h)-pdCZZMPY(cz));
+  pdCZAlphaZ(cz) = pdCZErrCompKZ(cz)*(pdCZFZ(cz)-pdCZVrtRF(v));
 }
 
 void _pdCZUpdateBeta(pdCZ *cz, zVec3D *com)

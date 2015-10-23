@@ -248,6 +248,25 @@ void pdRobotFK(pdRobot *robot, zVec dis)
   rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
 }
 
+void pdRobotFKIndex(pdRobot *robot, zIndex index, zVec dis)
+{
+  register int i;
+
+  for( i=0; i<(int)zArrayNum(index); i++ )
+    zVecSetElem( pdRobotJointDis(robot), zIndexElem(index,i), zVecElem(dis,i) );
+  pdRobotFK( robot, pdRobotJointDis( robot ) );
+}
+
+void pdRobotResetJointDis(pdRobot *robot)
+{
+  zVec v;
+
+  v = zVecAlloc( pdRobotJointSize(robot) );
+  zVecClear( v );
+  pdRobotFK( robot, v );
+  zVecFree( v );
+}
+
 void pdRobotResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis)
 {
   double offset;
@@ -258,7 +277,7 @@ void pdRobotResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis)
   zVec3DClear( &state->com_acc );
   zVec3DSetElem( &state->lf_pos, zZ, 0 );
   zVec3DSetElem( &state->rf_pos, zZ, 0 );
-  zVec3DMid( &state->lf_pos, &state->rf_pos, &state->zmp );
+  zVec3DMid( &state->lf_pos, &state->rf_pos, &state->deszmp );
   offset = zPI_2;
   pdBipedCmd(biped)->thetad = state->base_att.e[0] - offset;
   pdBipedDefaultPoseInit( biped, state );

@@ -22,8 +22,10 @@ typedef struct{
   pdCZHrz _hrz;     /* horizontal motion controller */
 
   struct{
-    double _alpha[3]; /* estimated error */
-    double _k[3];     /* relaxation coefficient */
+    double _alpha[3]; /* estimated ZMP error */
+    double _beta[3];  /* estimated COM error */
+    double _k[3];     /* relaxation coefficient for ZMP error */
+    double _b[3];     /* relaxation coefficient for COM error */
   } _errcomp;         /* error compensator */
 
   struct{
@@ -95,12 +97,18 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZVelUW(c)    pdCZHrzVelUW( pdCZHrzPtr(c) )
 #define pdCZVelU(c)     pdCZHrzVelU( pdCZHrzPtr(c) )
 #define pdCZVelW(c)     pdCZHrzVelW( pdCZHrzPtr(c) )
-#define pdCZAlphaX(c)  ( (c)->_errcomp._alpha[0] )
-#define pdCZAlphaY(c)  ( (c)->_errcomp._alpha[1] )
-#define pdCZAlphaZ(c)  ( (c)->_errcomp._alpha[2] )
+#define pdCZAlphaX(c)   ( (c)->_errcomp._alpha[0] )
+#define pdCZAlphaY(c)   ( (c)->_errcomp._alpha[1] )
+#define pdCZAlphaZ(c)   ( (c)->_errcomp._alpha[2] )
+#define pdCZBetaX(c)    ( (c)->_errcomp._beta[0] )
+#define pdCZBetaY(c)    ( (c)->_errcomp._beta[1] )
+#define pdCZBetaZ(c)    ( (c)->_errcomp._beta[2] )
 #define pdCZErrCompKX(c) ( (c)->_errcomp._k[0] )
 #define pdCZErrCompKY(c) ( (c)->_errcomp._k[1] )
 #define pdCZErrCompKZ(c) ( (c)->_errcomp._k[2] )
+#define pdCZErrCompBX(c) ( (c)->_errcomp._b[0] )
+#define pdCZErrCompBY(c) ( (c)->_errcomp._b[1] )
+#define pdCZErrCompBZ(c) ( (c)->_errcomp._b[2] )
 #define pdCZRefCOM(c)  ( &(c)->refcom )
 #define pdCZRefCOMX(c) zVec3DElem( pdCZRefCOM(c), zX )
 #define pdCZRefCOMY(c) zVec3DElem( pdCZRefCOM(c), zY )
@@ -180,6 +188,9 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetErrCompKX(c,kx)   ( (c)->_errcomp._k[0] = (kx) )
 #define pdCZSetErrCompKY(c,ky)   ( (c)->_errcomp._k[1] = (ky) )
 #define pdCZSetErrCompKZ(c,kz)   ( (c)->_errcomp._k[2] = (kz) )
+#define pdCZSetErrCompBX(c,dx)   ( (c)->_errcomp._b[0] = (dx) )
+#define pdCZSetErrCompBY(c,dy)   ( (c)->_errcomp._b[1] = (dy) )
+#define pdCZSetErrCompBZ(c,dz)   ( (c)->_errcomp._b[2] = (dz) )
 
 /* calculation method */
 __EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);

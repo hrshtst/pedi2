@@ -31,9 +31,15 @@ void pdCZInit(pdCZ *c, double dt)
   pdCZSetErrCompKX( c, 0 );
   pdCZSetErrCompKY( c, 0 );
   pdCZSetErrCompKZ( c, 0 );
+  pdCZSetErrCompBX( c, 0 );
+  pdCZSetErrCompBY( c, 0 );
+  pdCZSetErrCompBZ( c, 0 );
   pdCZAlphaX( c ) = 0;
   pdCZAlphaY( c ) = 0;
   pdCZAlphaZ( c ) = 0;
+  pdCZBetaX( c )  = 0;
+  pdCZBetaY( c )  = 0;
+  pdCZBetaZ( c )  = 0;
   pdCZRefCOMX( c ) = 0;
   pdCZRefCOMY( c ) = 0;
   pdCZRefCOMZ( c ) = 0;
@@ -68,6 +74,9 @@ void pdCZDestroy(pdCZ *c)
   pdCZSetErrCompKX( c, 0 );
   pdCZSetErrCompKY( c, 0 );
   pdCZSetErrCompKZ( c, 0 );
+  pdCZSetErrCompBX( c, 0 );
+  pdCZSetErrCompBY( c, 0 );
+  pdCZSetErrCompBZ( c, 0 );
 }
 
 double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw)
@@ -98,12 +107,12 @@ void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *z
   pdCZSetFZ( cz, fz );
   pdCZSetTheta( cz, theta );
   pdCZSetSR( cz, sr );
-  zVecSetElem( cz->_ode.pos, zX, pdCZCOMX(cz) );
-  zVecSetElem( cz->_ode.pos, zY, pdCZCOMY(cz) );
-  zVecSetElem( cz->_ode.pos, zZ, pdCZCOMZ(cz) );
-  zVecSetElem( cz->_ode.vel, zX, pdCZVelX(cz) );
-  zVecSetElem( cz->_ode.vel, zY, pdCZVelY(cz) );
-  zVecSetElem( cz->_ode.vel, zZ, pdCZVelZ(cz) );
+  zVecSetElem( cz->_ode.pos, zX, pdCZRefCOMX(cz) );
+  zVecSetElem( cz->_ode.pos, zY, pdCZRefCOMY(cz) );
+  zVecSetElem( cz->_ode.pos, zZ, pdCZRefCOMZ(cz) );
+  zVecSetElem( cz->_ode.vel, zX, pdCZRefVelX(cz) );
+  zVecSetElem( cz->_ode.vel, zY, pdCZRefVelY(cz) );
+  zVecSetElem( cz->_ode.vel, zZ, pdCZRefVelZ(cz) );
 }
 
 void _pdCZUpdateVrt(pdCZ *cz)
@@ -111,6 +120,8 @@ void _pdCZUpdateVrt(pdCZ *cz)
   pdCZVrtSetRef( pdCZVrtPtr( cz ), pdCZCmdCOMZ( cz ) );
   pdCZVrtUpdateAcc( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZVelZ(cz) );
   pdCZVrtUpdateZeta( pdCZVrtPtr(cz), pdCZCOMZ(cz), pdCZVrtAcc(pdCZVrtPtr(cz)), pdCZZMPZ(cz) );
+  /* pdCZVrtUpdateAcc( pdCZVrtPtr(cz), pdCZRefCOMZ(cz), pdCZVelZ(cz) ); */
+  /* pdCZVrtUpdateZeta( pdCZVrtPtr(cz), pdCZRefCOMZ(cz), pdCZVrtAcc(pdCZVrtPtr(cz)), pdCZZMPZ(cz) ); */
   pdCZVrtUpdateZMP( pdCZVrtPtr(cz) ); /* may not be updated here */
 }
 
@@ -119,6 +130,7 @@ void _pdCZUpdateHrz(pdCZ *cz)
   zVec2D xy, vxy, xyd;
 
   zVec2DCreate( xy,  pdCZCOMX(cz), pdCZCOMY(cz) );
+  /* zVec2DCreate( xy,  pdCZRefCOMX(cz), pdCZRefCOMY(cz) ); */
   zVec2DCreate( vxy, pdCZVelX(cz), pdCZVelY(cz) );
   zVec2DCreate( xyd, pdCZCmdCOMX(cz), pdCZCmdCOMY(cz) );
   pdCZHrzUpdateAcc( pdCZHrzPtr(cz), xy, pdCZTheta(cz), vxy, xyd, pdCZCmdTheta(cz), pdCZSR(cz) );
@@ -129,9 +141,16 @@ void _pdCZUpdateAlpha(pdCZ *cz)
   pdCZHrz *h = pdCZHrzPtr(cz);
   pdCZVrt *v = pdCZVrtPtr(cz);
 
-  pdCZAlphaX(cz) -= pdCZErrCompKX(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPX(h)-pdCZZMPX(cz));
-  pdCZAlphaY(cz) -= pdCZErrCompKY(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPY(h)-pdCZZMPY(cz));
-  pdCZAlphaZ(cz) -= pdCZErrCompKZ(cz)*(pdCZFZ(cz)-pdCZVrtRF(v));
+  pdCZAlphaX(cz) = pdCZErrCompKX(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPX(h)-pdCZZMPX(cz));
+  pdCZAlphaY(cz) = pdCZErrCompKY(cz)*zSqr(pdCZZeta(cz))*(pdCZHrzZMPY(h)-pdCZZMPY(cz));
+  pdCZAlphaZ(cz) = pdCZErrCompKZ(cz)*(pdCZFZ(cz)-pdCZVrtRF(v));
+}
+
+void _pdCZUpdateBeta(pdCZ *cz, zVec3D *com)
+{
+  pdCZBetaX(cz) -= pdCZErrCompBX(cz)*(pdCZCOMX(cz)-pdCZRefCOMX(cz));
+  pdCZBetaY(cz) -= pdCZErrCompBY(cz)*(pdCZCOMY(cz)-pdCZRefCOMY(cz));
+  pdCZBetaZ(cz) -= pdCZErrCompBZ(cz)*(pdCZCOMZ(cz)-pdCZRefCOMZ(cz));
 }
 
 zVec _pdCZUpdate(double t, zVec pos, zVec vel, void *util, zVec acc)
@@ -182,6 +201,7 @@ void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, do
 {
   _pdCZUpdateState( cz, com, vel, acc, zmp, fz, theta, sr );
   _pdCZUpdateAlpha( cz );
+  _pdCZUpdateBeta( cz, com );
   _pdCZUpdateVrt( cz );
   _pdCZUpdateHrz( cz );
   /* zODE2Update( &cz->_ode.solver, pdCZTime(cz), cz->_ode.pos, cz->_ode.vel, pdCZTimeStep(cz), cz ); */

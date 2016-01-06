@@ -21,6 +21,7 @@ protected:
     joint.refdisold = ri.rand();
     joint.refvelold = ri.rand();
     joint.output = ri.rand();
+    joint.offset = (int)ri.rand();
   };
 
   pdJoint joint;
@@ -43,6 +44,7 @@ TEST_F(pdJointTest, Init)
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
+  EXPECT_EQ( 0, pdJointOffset( &joint ) );
   EXPECT_EQ( NULL, joint._prm );
   EXPECT_EQ( NULL, joint._met );
 }
@@ -114,10 +116,12 @@ TEST_F(pdJointTest, SetRefVelDefault)
 TEST_F(pdJointTest, RefreshDefault)
 {
   double dis;
+  int offset;
 
   pdJointInit( &joint );
   SetRandomValues();
   dis = ri.rand();
+  offset = pdJointOffset( &joint );
   pdJointRefreshDefault( &joint, dis );
   EXPECT_EQ( dis, pdJointDis( &joint ) );
   EXPECT_EQ( dis, pdJointDisOld( &joint ) );
@@ -129,6 +133,7 @@ TEST_F(pdJointTest, RefreshDefault)
   EXPECT_EQ( 0,   pdJointRefVelOld( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
+  EXPECT_EQ( offset, pdJointOffset( &joint ) );
 }
 
 TEST_F(pdJointTest, UpdateDefault)
@@ -223,6 +228,16 @@ TEST_F(pdJointTest, DestroyDefault)
   EXPECT_EQ( NULL, joint._met );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
+  EXPECT_EQ( 0, pdJointOffset( &joint ) );
+}
+
+TEST_F(pdJointTest, SetOffset)
+{
+  pdJointInit( &joint );
+  pdJointSetOffset( &joint, 1 );
+  EXPECT_EQ( 1, pdJointOffset( &joint ) );
+  pdJointSetOffset( &joint, 2 );
+  EXPECT_EQ( 2, pdJointOffset( &joint ) );
 }
 
 
@@ -249,6 +264,7 @@ protected:
     joint.refdisold = ri.rand();
     joint.refvelold = ri.rand();
     joint.output = ri.rand();
+    joint.offset = (int)ri.rand();
   };
 
   double pgain;
@@ -272,6 +288,7 @@ TEST_F(pdJointPDTrqTest, Create)
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
+  EXPECT_EQ( 0, pdJointOffset( &joint ) );
   EXPECT_EQ( pgain, ((_pdJointPDTrq*)joint._prm)->pgain );
   EXPECT_EQ( dgain, ((_pdJointPDTrq*)joint._prm)->dgain );
   EXPECT_EQ( -HUGE_VAL, ((_pdJointPDTrq*)joint._prm)->trqmin );
@@ -299,6 +316,7 @@ TEST_F(pdJointPDTrqTest, Destroy)
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
+  EXPECT_EQ( 0, pdJointOffset( &joint ) );
   EXPECT_EQ( NULL, joint._prm );
   EXPECT_EQ( NULL, joint._met );
 }
@@ -417,6 +435,7 @@ protected:
     joint.refdisold = ri.rand();
     joint.refvelold = ri.rand();
     joint.output = ri.rand();
+    joint.offset = (int)ri.rand();
   };
 
   double pgain;
@@ -441,6 +460,7 @@ TEST_F(pdJointPIDTrqTest, Create)
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
+  EXPECT_EQ( 0, pdJointOffset( &joint ) );
   EXPECT_EQ( pgain, ((_pdJointPIDTrq*)joint._prm)->pgain );
   EXPECT_EQ( igain, ((_pdJointPIDTrq*)joint._prm)->igain );
   EXPECT_EQ( dgain, ((_pdJointPIDTrq*)joint._prm)->dgain );
@@ -469,6 +489,7 @@ TEST_F(pdJointPIDTrqTest, Destroy)
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
+  EXPECT_EQ( 0, pdJointOffset( &joint ) );
   EXPECT_EQ( NULL, joint._prm );
   EXPECT_EQ( NULL, joint._met );
 }
@@ -872,4 +893,3 @@ TEST_F(pdJointArrayTest, RefreshIndex)
   EXPECT_NE( zVecElem(q,4), pdJointArrayRefDis(&arr,3) );
   EXPECT_EQ( zVecElem(q,5), pdJointArrayRefDis(&arr,3) );
 }
-

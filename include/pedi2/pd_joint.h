@@ -33,6 +33,7 @@ typedef struct _pdJoint{
   double output;
   bool is_set_vel;
   bool is_set_refvel;
+  int offset;
   void *_prm;
   pdJointMethod *_met;
 } pdJoint;
@@ -46,6 +47,7 @@ typedef struct _pdJoint{
 #define pdJointRefDisOld(j) ( (j)->refdisold )
 #define pdJointRefVelOld(j) ( (j)->refvelold )
 #define pdJointOutput(j)    ( (j)->output )
+#define pdJointOffset(j)    ( (j)->offset )
 
 #define pdJointInit(j) do{\
   zNameSet( j, NULL );\
@@ -60,6 +62,7 @@ typedef struct _pdJoint{
   pdJointOutput(j) = 0;\
   (j)->is_set_vel = false;\
   (j)->is_set_refvel = false;\
+  pdJointSetOffset( j, 0 ); \
   (j)->_prm = NULL;\
   (j)->_met = NULL;\
 } while(0)
@@ -71,6 +74,7 @@ typedef struct _pdJoint{
 #define pdJointRefresh(j,q)   (j)->_met->refresh( j, q )
 #define pdJointUpdate(j,dt)   (j)->_met->update( j, dt )
 #define pdJointDestroy(j)     (j)->_met->destroy( j )
+#define pdJointSetOffset(j,o) ( (j)->offset = (o) )
 
 __EXPORT void pdJointSetDisDefault(pdJoint *joint, double dis);
 __EXPORT void pdJointSetVelDefault(pdJoint *joint, double vel);

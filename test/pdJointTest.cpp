@@ -607,7 +607,7 @@ protected:
   virtual void TearDown() {};
 
   void MakeJointArray() {
-    zArrayAlloc( &arr, pdJoint, 4 );
+    pdJointArrayAlloc( &arr, 4 );
     pdJointCreatePDTrq( zArrayElem(&arr,0), pgain, dgain );
     pdJointCreatePDTrq( zArrayElem(&arr,1), pgain, dgain );
     pdJointCreatePDTrq( zArrayElem(&arr,2), pgain, dgain );
@@ -622,6 +622,16 @@ protected:
   pdJointArray arr;
   RandomInitializer ri;
 };
+
+TEST_F(pdJointArrayTest, ArrayAlloc)
+{
+  ASSERT_TRUE( pdJointArrayAlloc( &arr, 5 ) );
+  EXPECT_EQ( 5, zArrayNum( &arr ) );
+  for( int i=0; i<(int)zArrayNum(&arr); i++ ){
+    EXPECT_EQ( i, pdJointOffset( zArrayElem(&arr,i) ) );
+  }
+  zArrayFree( &arr );
+}
 
 TEST_F(pdJointArrayTest, SetDis)
 {
@@ -707,7 +717,7 @@ TEST_F(pdJointArrayTest, Refresh)
 
 TEST_F(pdJointArrayTest, NameFind)
 {
-  zArrayAlloc( &arr, pdJoint, 2 );
+  pdJointArrayAlloc( &arr, 2 );
   pdJointCreatePDTrq( zArrayElem(&arr,0), pgain, dgain );
   pdJointCreatePIDTrq( zArrayElem(&arr,1), pgain, igain, dgain );
   zNameSet( zArrayElem(&arr,0), (char*)"joint_pi" );

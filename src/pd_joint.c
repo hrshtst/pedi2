@@ -193,11 +193,15 @@ void pdJointArrayDestroy(pdJointArray *arr)
 
 bool pdJointArrayAlloc(pdJointArray *arr, int n)
 {
+  register int i;
+
   zArrayAlloc( arr, pdJoint, n );
   if( !zArrayBuf(arr) ){
     ZALLOCERROR();
     return false;
   }
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetOffset( zArrayElem(arr,i), i );
   return true;
 }
 

@@ -628,7 +628,7 @@ TEST_F(pdJointArrayTest, ArrayAlloc)
   ASSERT_TRUE( pdJointArrayAlloc( &arr, 5 ) );
   EXPECT_EQ( 5, zArrayNum( &arr ) );
   for( int i=0; i<(int)zArrayNum(&arr); i++ ){
-    EXPECT_EQ( i, pdJointOffset( zArrayElem(&arr,i) ) );
+    EXPECT_EQ( i, pdJointArrayOffset( &arr, i ) );
   }
   zArrayFree( &arr );
 }

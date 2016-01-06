@@ -94,6 +94,7 @@ zArrayClass( pdJointArray, pdJoint );
 #define pdJointArrayRefDis(arr,i)   pdJointRefDis( zArrayElem(arr,i) )
 #define pdJointArrayRefVel(arr,i)   pdJointRefVel( zArrayElem(arr,i) )
 #define pdJointArrayOutput(arr,i)   pdJointOutput( zArrayElem(arr,i) )
+#define pdJointArrayOffset(arr,i)   pdJointOffset( zArrayElem(arr,i) )
 
 __EXPORT void pdJointArraySetDis(pdJointArray *arr, zVec q);
 __EXPORT void pdJointArraySetVel(pdJointArray *arr, zVec v);

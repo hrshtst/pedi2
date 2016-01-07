@@ -288,6 +288,34 @@ bool _pdJointArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
   return true;
 }
 
+static void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*));
+void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*))
+{
+  register int i, j;
+  uint s;
+  pdJoint *saved, *value;
+
+  s = sizeof(pdJoint);
+  saved = zAlloc( pdJoint, 1 );
+  for( j=1; j<(int)zArrayNum(arr); j++ ){
+    i = j - 1;
+    value = zArrayElem(arr, j);
+    while( i >= 0 && cmp(zArrayElem(arr,i), value) > 0 ) i--;
+    if( ++i == j ) continue;
+    memmove( saved, value, s );
+    memmove( zArrayElem(arr,i+1), zArrayElem(arr,i), s*(j-i) );
+    memmove( zArrayElem(arr,i), saved, s );
+  }
+  zFree( saved );
+}
+
+static int _pdJointOffsetCmp(pdJoint *p, pdJoint *q);
+int _pdJointOffsetCmp(pdJoint *p, pdJoint *q)
+{
+  if( pdJointOffset(p) == pdJointOffset(q) ) return 0;
+  return ( pdJointOffset(p) > pdJointOffset(q) ) ? 1 : -1;
+}
+
 bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c)
 {
   _pdJointArrayParam prm;
@@ -301,6 +329,7 @@ bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c)
   result = zTagFRead( fp, _pdJointArrayFRead, &prm );
   if( c )
     result &= pdJointArraySetOffsetMapping( arr, c );
+  _pdJointArrayInsertionSort( arr, _pdJointOffsetCmp );
   return result;
 }
 

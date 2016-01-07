@@ -227,52 +227,6 @@ pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name)
   return joint;
 }
 
-typedef struct{
-  pdJointArray *arr;
-  int count;
-} _pdJointArrayParam;
-
-bool _pdJointArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  _pdJointArrayParam *prm;
-
-  prm = instance;
-  if( strcmp( buf, PD_JOINT_TAG ) == 0 ){
-    if( !pdJointFRead( fp, zArrayElem(prm->arr,prm->count++) ) ){
-      *success = false;
-      return false;
-    }
-  } else
-    return false;
-  return true;
-}
-
-bool pdJointArrayFRead(FILE *fp, pdJointArray *arr)
-{
-  _pdJointArrayParam prm;
-
-  zArrayInit( arr );
-  if( !_pdJointFAlloc( fp, arr ) ) return false;
-  rewind( fp );
-  prm.count = 0;
-  prm.arr = arr;
-  return zTagFRead( fp, _pdJointArrayFRead, &prm );
-}
-
-bool pdJointArrayReadFile(pdJointArray *arr, const char *filename)
-{
-  FILE *fp;
-  bool result;
-
-  if( !( fp = fopen( filename, "r" ) ) ){
-    ZOPENERROR( filename );
-    return false;
-  }
-  result = pdJointArrayFRead( fp, arr );
-  fclose( fp );
-  return result;
-}
-
 static rkLink *_rkChainLinkFindName(rkChain *c, const char *name);
 rkLink *_rkChainLinkFindName(rkChain *c, const char *name)
 {
@@ -303,6 +257,73 @@ zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c)
       zIndexSetElem( index, i, rkLinkOffset(link) );
   }
   return index;
+}
+
+bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c)
+{
+  register int i;
+  rkLink *link;
+
+  for( i=0; i<(int)zArrayNum(arr); i++ ){
+    link = _rkChainLinkFindName(c,zName(zArrayElem(arr,i)));
+    if( !link ){
+      ZRUNERROR( "joint %s cannot be found in robot model",
+                 zName(zArrayElem(arr,i)) );
+      return false;
+    } else
+      pdJointArraySetOffset( arr, i, rkLinkOffset(link) );
+  }
+  return true;
+}
+
+typedef struct{
+  pdJointArray *arr;
+  int count;
+} _pdJointArrayParam;
+
+bool _pdJointArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
+{
+  _pdJointArrayParam *prm;
+
+  prm = instance;
+  if( strcmp( buf, PD_JOINT_TAG ) == 0 ){
+    if( !pdJointFRead( fp, zArrayElem(prm->arr,prm->count++) ) ){
+      *success = false;
+      return false;
+    }
+  } else
+    return false;
+  return true;
+}
+
+bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c)
+{
+  _pdJointArrayParam prm;
+  bool result;
+
+  zArrayInit( arr );
+  if( !_pdJointFAlloc( fp, arr ) ) return false;
+  rewind( fp );
+  prm.count = 0;
+  prm.arr = arr;
+  result = zTagFRead( fp, _pdJointArrayFRead, &prm );
+  if( c )
+    result &= pdJointArraySetOffsetMapping( arr, c );
+  return result;
+}
+
+bool pdJointArrayReadFile(pdJointArray *arr, const char *filename, rkChain *c)
+{
+  FILE *fp;
+  bool result;
+
+  if( !( fp = fopen( filename, "r" ) ) ){
+    ZOPENERROR( filename );
+    return false;
+  }
+  result = pdJointArrayFRead( fp, arr, c );
+  fclose( fp );
+  return result;
 }
 
 #define PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH \

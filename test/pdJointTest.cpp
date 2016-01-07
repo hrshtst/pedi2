@@ -733,7 +733,7 @@ TEST_F(pdJointArrayTest, FRead)
   FILE *fp;
 
   fp  = fopen( filename, "r" );
-  pdJointArrayFRead( fp, &arr );
+  pdJointArrayFRead( fp, &arr, NULL );
   EXPECT_STREQ( "rhip_y",      zNamePtr( zArrayElem(&arr, 0) ) );
   EXPECT_STREQ( "rhip_p",      zNamePtr( zArrayElem(&arr, 1) ) );
   EXPECT_STREQ( "rhip_r",      zNamePtr( zArrayElem(&arr, 2) ) );
@@ -769,6 +769,26 @@ TEST_F(pdJointArrayTest, FRead)
   fclose( fp );
 }
 
+TEST_F(pdJointArrayTest, FRead_CheckOffset)
+{
+  char modelfile[] = "model/hydra.zkc";
+  char conffile[]  = "model/joint.conf";
+  rkChain chain;
+  pdJointArray joint;
+  FILE *fp;
+  register int i;
+
+  rkChainReadFile( &chain, modelfile );
+  fp = fopen( conffile, "r" );
+  pdJointArrayFRead( fp, &joint, &chain );
+  for( i=0; i<(int)zArrayNum(&joint); i++ ){
+    EXPECT_EQ( 6+i, pdJointArrayOffset( &joint, i ) );
+  }
+  pdJointArrayDestroy( &joint );
+  rkChainDestroy( &chain );
+  fclose( fp );
+}
+
 TEST_F(pdJointArrayTest, CreateDefaultIndex)
 {
   char modelfile[] = "model/hydra.zkc";
@@ -779,7 +799,7 @@ TEST_F(pdJointArrayTest, CreateDefaultIndex)
   register int i;
 
   rkChainReadFile( &chain, modelfile );
-  pdJointArrayReadFile( &joint, conffile );
+  pdJointArrayReadFile( &joint, conffile, &chain );
   index = pdJointArrayCreateDefaultIndex( &joint, &chain );
   EXPECT_EQ( 31, zArrayNum( index ) );
   for( i=0; i<(int)zArrayNum(index); i++ )
@@ -798,8 +818,8 @@ TEST_F(pdJointArrayTest, CreateDefaultIndex_NoNameErr)
   zIndex index;
 
   rkChainReadFile( &chain, modelfile );
-  pdJointArrayReadFile( &joint, conffile );
   zEchoOff();
+  pdJointArrayReadFile( &joint, conffile, &chain );
   index = pdJointArrayCreateDefaultIndex( &joint, &chain );
   EXPECT_EQ( NULL, index );
   pdJointArrayDestroy( &joint );

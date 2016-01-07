@@ -329,7 +329,8 @@ bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c)
   result = zTagFRead( fp, _pdJointArrayFRead, &prm );
   if( c )
     result &= pdJointArraySetOffsetMapping( arr, c );
-  _pdJointArrayInsertionSort( arr, _pdJointOffsetCmp );
+  if( result )
+    _pdJointArrayInsertionSort( arr, _pdJointOffsetCmp );
   return result;
 }
 

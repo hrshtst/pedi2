@@ -789,7 +789,24 @@ TEST_F(pdJointArrayTest, FRead_CheckOffset)
   fclose( fp );
 }
 
-TEST_F(pdJointArrayTest, CreateDefaultIndex)
+TEST_F(pdJointArrayTest, FRead_NoNameErr)
+{
+  char modelfile[] = "model/hydra.zkc";
+  char conffile[]  = "model/joint_noname_err.conf";
+  rkChain chain;
+  pdJointArray joint;
+  bool result;
+
+  rkChainReadFile( &chain, modelfile );
+  zEchoOff();
+  result = pdJointArrayReadFile( &joint, conffile, &chain );
+  EXPECT_FALSE( result );
+  pdJointArrayDestroy( &joint );
+  rkChainDestroy( &chain );
+  zEchoOn();
+}
+
+TEST_F(pdJointArrayTest, CreateIndex)
 {
   char modelfile[] = "model/hydra.zkc";
   char conffile[]  = "model/joint.conf";
@@ -800,31 +817,13 @@ TEST_F(pdJointArrayTest, CreateDefaultIndex)
 
   rkChainReadFile( &chain, modelfile );
   pdJointArrayReadFile( &joint, conffile, &chain );
-  index = pdJointArrayCreateDefaultIndex( &joint, &chain );
+  index = pdJointArrayCreateIndex( &joint );
   EXPECT_EQ( 31, zArrayNum( index ) );
   for( i=0; i<(int)zArrayNum(index); i++ )
     EXPECT_EQ( 6+i, zIndexElem( index, i ) );
   zIndexFree( index );
   pdJointArrayDestroy( &joint );
   rkChainDestroy( &chain );
-}
-
-TEST_F(pdJointArrayTest, CreateDefaultIndex_NoNameErr)
-{
-  char modelfile[] = "model/hydra.zkc";
-  char conffile[]  = "model/joint_noname_err.conf";
-  rkChain chain;
-  pdJointArray joint;
-  zIndex index;
-
-  rkChainReadFile( &chain, modelfile );
-  zEchoOff();
-  pdJointArrayReadFile( &joint, conffile, &chain );
-  index = pdJointArrayCreateDefaultIndex( &joint, &chain );
-  EXPECT_EQ( NULL, index );
-  pdJointArrayDestroy( &joint );
-  rkChainDestroy( &chain );
-  zEchoOn();
 }
 
 TEST_F(pdJointArrayTest, SetDisIndex)

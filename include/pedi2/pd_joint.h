@@ -111,7 +111,7 @@ __EXPORT bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c);
 __EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c);
 __EXPORT bool pdJointArrayReadFile(pdJointArray *arr, const char *filename, rkChain *c);
 
-__EXPORT zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c);
+__EXPORT zIndex pdJointArrayCreateIndex(pdJointArray *arr);
 __EXPORT void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q);
 __EXPORT void pdJointArraySetVelIndex(pdJointArray *arr, zIndex idx, zVec v);
 __EXPORT void pdJointArraySetRefDisIndex(pdJointArray *arr, zIndex idx, zVec qref);

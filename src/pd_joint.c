@@ -236,25 +236,17 @@ rkLink *_rkChainLinkFindName(rkChain *c, const char *name)
   return link;
 }
 
-zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c)
+zIndex pdJointArrayCreateIndex(pdJointArray *arr)
 {
   register int i;
   zIndex index;
-  rkLink *link;
 
   if( !( index = zIndexCreate( zArrayNum(arr) ) ) ){
     ZALLOCERROR();
     return NULL;
   }
   for( i=0; i<(int)zArrayNum(arr); i++ ){
-    link = _rkChainLinkFindName(c,zName(zArrayElem(arr,i)));
-    if( !link ){
-      ZRUNERROR( "joint %s cannot be found in robot model",
-                 zName(zArrayElem(arr,i)) );
-      zIndexFree( index );
-      return NULL;
-    } else
-      zIndexSetElem( index, i, rkLinkOffset(link) );
+    zIndexSetElem( index, i, pdJointArrayOffset( arr, i ) );
   }
   return index;
 }

@@ -151,6 +151,12 @@ void joystickCtrlLoad(char modelfile[])
   if( !opt[OPT_HMAX].flag ) {
     cmd.lfh = cmd.rfh = 0.1 * cmd.zd;
   }
+
+  pdRobotGetJointDisAll( &robot, dis );
+  zVecSetElem( dis, 0, 2.5 );
+  zVecSetElem( dis, 1, 3.5 );
+  zVecSetElem( dis, 5, -zPI_2 );
+  pdRobotResetPose( &robot, &biped, &state, dis );
 }
 
 int joystickCtrlLoadEnv(void)

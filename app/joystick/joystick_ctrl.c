@@ -151,12 +151,6 @@ void joystickCtrlLoad(char modelfile[])
   if( !opt[OPT_HMAX].flag ) {
     cmd.lfh = cmd.rfh = 0.1 * cmd.zd;
   }
-
-  pdRobotGetJointDisAll( &robot, dis );
-  zVecSetElem( dis, 0, 2.5 );
-  zVecSetElem( dis, 1, 3.5 );
-  zVecSetElem( dis, 5, -zPI_2 );
-  pdRobotResetPose( &robot, &biped, &state, dis );
 }
 
 int joystickCtrlLoadEnv(void)
@@ -178,6 +172,37 @@ int joystickCtrlLoadEnv(void)
   rkglChainDraw( &ge );
   glEndList();
   return entry;
+}
+
+int _joystickCtrlFindLinkID(char *name)
+{
+  register int i;
+
+  for( i=0; i<(int)rkChainNum( &chain_env ); i++ ){
+    if( !strcmp( name, rkChainLinkName( &chain_env, i ) ) )
+      return i;
+  }
+  return -1;
+}
+
+void joystickCtrlSetStartPos(void)
+{
+  int id;
+  zVec3D v;
+  zMat3D m;
+
+  if( ( id = _joystickCtrlFindLinkID( "start" ) ) < 0 )
+    return;
+  zVec3DCopy( rkChainLinkWldPos( &chain_env, id ), &v );
+  zMat3DCopy( rkChainLinkWldAtt( &chain_env, id ), &m );
+
+  pdRobotGetJointDisAll( &robot, dis );
+  zVecSetElem( dis, 0, zVec3DElem( &v, 0 ) );
+  zVecSetElem( dis, 1, zVec3DElem( &v, 1 ) );
+  zMat3DToAA( &m, &v );
+  zVecSetElem( dis, 5, zVec3DElem( &v, 2 ) );
+
+  pdRobotResetPose( &robot, &biped, &state, dis );
 }
 
 void joystickCtrlInit(void)
@@ -229,6 +254,8 @@ bool joystickCtrlCommandArgs(int argc, char *argv[])
   }
   joystickCtrlInit();
   joystickCtrlLoad( zListHead( &arglist )->data );
+  if( opt[OPT_ENVFILE].flag )
+    joystickCtrlSetStartPos();
   zStrListDestroy( &arglist, false );
   return true;
 }

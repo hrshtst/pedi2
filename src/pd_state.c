@@ -32,6 +32,12 @@ void pdStateDestroy(pdState *state)
   pdStateInit( state );
 }
 
+#define PD_STATE_FOOT_TOL  (1e-03)
+bool pdStateFootIsOn(pdState *state, zVec3D *p, zVec3DList *sr)
+{
+  return zVec3DElem( p, zZ ) < PD_STATE_FOOT_TOL && zListNum( sr ) > 0;
+}
+
 double pdStateFootDist(pdState *state)
 {
   return zVec3DDist( &state->lf_pos, &state->rf_pos );

@@ -17,6 +17,12 @@ double RandomInitializer::SetRandScalar(double &s)
   return s;
 }
 
+bool RandomInitializer::SetRandBool(bool &b)
+{
+  b = mt_() % 2;
+  return b;
+}
+
 zVec3D &RandomInitializer::SetRandVec3D(zVec3D &v)
 {
   for(int i=0; i<3; i++){

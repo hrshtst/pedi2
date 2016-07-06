@@ -30,6 +30,11 @@ __EXPORT void pdCmdInit(pdCmd *cmd);
 __EXPORT void pdCmdDefaultInit(pdCmd *cmd);
 __EXPORT void pdCmdDestroy(pdCmd *cmd);
 
+__EXPORT bool pdCmdTryStop(pdCmd *cmd);
+__EXPORT bool pdCmdTryStep(pdCmd *cmd);
+__EXPORT bool pdCmdTryWalk(pdCmd *cmd);
+__EXPORT bool pdCmdTryWalkSideways(pdCmd *cmd);
+
 __EXPORT void pdCmdDataFWrite(FILE *fp, pdCmd *cmd);
 #define pdCmdDataWrite(c) pdCmdDataFWrite( stdout, c )
 __EXPORT bool pdCmdDataFRead(FILE *fp, pdCmd *cmd);

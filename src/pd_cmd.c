@@ -33,6 +33,28 @@ void pdCmdDestroy(pdCmd *cmd)
   pdCmdInit( cmd );
 }
 
+bool pdCmdTryStop(pdCmd *cmd)
+{
+  return ( zIsTiny( cmd->rho ) &&
+           zIsTiny( cmd->vud ) &&
+           zIsTiny( cmd->vwd ) );
+}
+
+bool pdCmdTryStep(pdCmd *cmd)
+{
+  return !zIsTiny( cmd->rho );
+}
+
+bool pdCmdTryWalk(pdCmd *cmd)
+{
+  return !zIsTiny( cmd->vud );
+}
+
+bool pdCmdTryWalkSideways(pdCmd *cmd)
+{
+  return !zIsTiny( cmd->vwd );
+}
+
 void pdCmdDataFWrite(FILE *fp, pdCmd *cmd)
 {
   register int i;

@@ -7,7 +7,7 @@ __BEGIN_DECLS
 
 typedef struct{
   bool standing;
-  bool trywalk;
+  bool trymove;
   bool stepping;
   bool walking;
   bool sideways;

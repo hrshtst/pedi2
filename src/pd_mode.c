@@ -3,7 +3,7 @@
 void pdModeInit(pdMode *mode)
 {
   mode->standing  = true;
-  mode->trywalk   = false;
+  mode->trymove   = false;
   mode->stepping  = false;
   mode->walking   = false;
   mode->sideways  = false;
@@ -22,7 +22,7 @@ void pdModeDestroy(pdMode *mode)
 void pdModeFWrite(FILE *fp, pdMode *mode)
 {
   pdModeFWriteElem( fp, mode, standing );
-  pdModeFWriteElem( fp, mode, trywalk );
+  pdModeFWriteElem( fp, mode, trymove );
   pdModeFWriteElem( fp, mode, stepping );
   pdModeFWriteElem( fp, mode, walking );
   pdModeFWriteElem( fp, mode, sideways );

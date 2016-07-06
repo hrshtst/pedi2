@@ -1,7 +1,8 @@
 #ifndef __PD_MODE_H__
 #define __PD_MODE_H__
 
-#include <cure/cure_defs.h>
+#include <pedi2/pd_cmd.h>
+#include <pedi2/pd_state.h>
 
 __BEGIN_DECLS
 
@@ -19,7 +20,7 @@ typedef struct{
 __EXPORT void pdModeInit(pdMode *mode);
 __EXPORT void pdModeDestroy(pdMode *mode);
 
-__EXPORT void pdModeUpdate(pdMode *mode);
+__EXPORT void pdModeUpdate(pdMode *mode, pdCmd *cmd, pdState *state);
 
 __EXPORT void pdModeFWrite(FILE *fp, pdMode *mode);
 #define pdModeWrite(m) pdModeFWrite( stdout, m )

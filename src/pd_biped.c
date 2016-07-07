@@ -17,7 +17,7 @@ void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt)
   pdFootInit( pdBipedRFPtr( biped ), pdCZHrzPtr( pdBipedCZPtr( biped ) ),
               PD_FOOT_RIGHT, pdBipedTimeStep( biped ) );
   biped->cmd = cmd;
-  pdBipedInitMode( biped );
+  pdModeInit( &biped->mode );
   zVec3DClear( pdBipedRefCOMPos( biped ) );
   zVec3DClear( pdBipedRefBaseAtt( biped ) );
   zVec3DClear( pdBipedRefLFPos( biped ) );
@@ -138,59 +138,6 @@ bool pdBipedDoesIntendToWalk(pdBiped *biped)
 bool pdBipedDoesIntendToSidewalk(pdBiped *biped)
 {
   return !zIsTiny( biped->cmd->vwd );
-}
-
-void pdBipedInitMode(pdBiped *biped)
-{
-  biped->mode.stand = true;
-  biped->mode.step = false;
-  biped->mode.walk = false;
-  biped->mode.sidewalk = false;
-  biped->mode.follow   = false;
-  biped->mode.brake    = false;
-}
-
-void pdBipedUpdateMode(pdBiped *biped)
-{
-  if( pdBipedIsBothFeetOn( biped ) ){
-    if( pdBipedDoesIntendToStand( biped ) || !biped->mode.step ){
-      biped->mode.stand = true;
-      biped->mode.step = false;
-    }
-    if( !pdBipedDoesIntendToWalk( biped ) )
-      biped->mode.walk = false;
-    if( !pdBipedDoesIntendToSidewalk( biped ) )
-      biped->mode.sidewalk = false;
-    biped->mode.follow = false;
-    biped->mode.brake  = false;
-  }
-  if( pdBipedIsEitherFootOff( biped ) ){
-    biped->mode.stand = false;
-    biped->mode.step = true;
-    if( pdBipedDoesIntendToWalk( biped ) )
-      biped->mode.walk = true;
-    if( pdBipedDoesIntendToSidewalk( biped ) ) {
-      biped->mode.sidewalk = true;
-      biped->mode.follow = false;
-      biped->mode.brake  = false;
-      if( pdFootIsOff( pdBipedBFPtr(biped) ) )
-        biped->mode.follow = true;
-      else if( pdFootIsOff( pdBipedFFPtr(biped) ) )
-        biped->mode.brake = true;
-    }
-  }
-}
-
-#define pdBipedBool2Str(b) ( b ? "TRUE" : "FALSE" )
-void pdBipedWriteMode(pdBiped *biped)
-{
-  printf( "stand:%s, step:%s, walk:%s, sidewalk:%s, follow:%s, brake:%s\n",
-          pdBipedBool2Str(biped->mode.stand),
-          pdBipedBool2Str(biped->mode.step),
-          pdBipedBool2Str(biped->mode.walk),
-          pdBipedBool2Str(biped->mode.sidewalk),
-          pdBipedBool2Str(biped->mode.follow),
-          pdBipedBool2Str(biped->mode.brake) );
 }
 
 void _pdBipedUpdateCommand(pdBiped *biped)
@@ -332,22 +279,22 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
   pdCZSetRefVelU( pdBipedCZPtr( biped ), biped->cmd->vud );
   pdCZSetRefVelW( pdBipedCZPtr( biped ), biped->cmd->vwd );
   pdCZSetDist( pdBipedCZPtr( biped ), biped->cmd->dist );
-  if( pdBipedDoesIntendToWalk( biped ) || pdBipedDoesIntendToSidewalk( biped ) ){
+  if( biped->mode.trymove ){
     pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
-    if( !biped->mode.step ) {
+    if( !biped->mode.stepping ) {
       pdCZSetRefVelU( pdBipedCZPtr( biped ), 0.0 );
       pdCZSetRefVelW( pdBipedCZPtr( biped ), 0.0 );
     }
-    if( biped->mode.walk )
+    if( biped->mode.walking )
       pdCZSetQ2U( pdBipedCZPtr( biped ), 0.0 );
-  } else if( biped->mode.step ){
+  } else if( biped->mode.stepping ){
     pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
   }
 
-  if( biped->mode.sidewalk ) {
-    if( biped->mode.follow )
+  if( biped->mode.sideways ) {
+    if( biped->mode.following )
       ref_dist = _pdBipedCalcDesFootDistFollow( biped, state );
-    else if( biped->mode.brake )
+    else if( biped->mode.braking )
       ref_dist = _pdBipedCalcDesFootDistBrake( biped, state );
     else if( pdCZVelW( pdBipedCZPtr(biped) ) * biped->cmd->vwd > 0 )
       ref_dist = _pdBipedCalcDesFootDistFollowToBrake( biped, state );
@@ -358,7 +305,7 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
     biped->cmd->xd = pd.e[zX];
     biped->cmd->yd = pd.e[zY];
   }
-  if( biped->mode.walk && !biped->mode.sidewalk ){
+  if( biped->mode.walking && !biped->mode.sideways ){
     pdCZAutoUpdateRef( pdBipedCZPtr(biped), &pd, &biped->cmd->thetad );
     biped->cmd->xd = pd.e[zX];
     biped->cmd->yd = pd.e[zY];
@@ -372,7 +319,7 @@ void pdBipedUpdate(pdBiped *biped, pdState *state)
   _pdBipedUpdateFoot( biped, state );
   _pdBipedUpdateRef( biped, state );
   _pdBipedModifyCommand( biped, state );
-  pdBipedUpdateMode( biped );
+  pdModeUpdate( &biped->mode, biped->cmd, state );
   pdBipedIncrTime( biped );
 }
 

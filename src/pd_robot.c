@@ -281,7 +281,7 @@ void pdRobotResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis)
   offset = zPI_2;
   pdBipedCmd(biped)->thetad = state->base_att.e[0] - offset;
   pdBipedDefaultPoseInit( biped, state );
-  pdBipedInitMode( biped );
+  pdModeInit( &biped->mode );
 }
 
 void pdRobotUnsetAllFlags(pdRobot *robot)

@@ -5,17 +5,9 @@
 #include <pedi2/pd_foot.h>
 #include <pedi2/pd_cmd.h>
 #include <pedi2/pd_state.h>
+#include <pedi2/pd_mode.h>
 
 __BEGIN_DECLS
-
-typedef struct{
-  bool stand;
-  bool step;
-  bool walk;
-  bool sidewalk;
-  bool follow;
-  bool brake;
-} pdBipedMode;
 
 typedef struct{
   double _t;
@@ -23,7 +15,7 @@ typedef struct{
   pdCZ cz;
   pdFoot lf, rf;
   pdCmd *cmd;
-  pdBipedMode mode;
+  pdMode mode;
 
   zVec3D ref_com_pos;
   zVec3D ref_base_att;
@@ -109,10 +101,6 @@ bool pdBipedDoesIntendToSidewalk(pdBiped *biped);
 #define pdBipedIsBothFeetOnAttempt(c) pdFootIsBothOnAttempt( pdBipedLFPtr(c), pdBipedRFPtr(c) )
 #define pdBipedIsEitherFootOnAttempt(c) pdFootIsEitherOnAttempt( pdBipedLFPtr(c), pdBipedRFPtr(c) )
 #define pdBipedIsEitherFootOffAttempt(c) pdFootIsEitherOffAttempt( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-
-__EXPORT void pdBipedInitMode(pdBiped *biped);
-__EXPORT void pdBipedUpdateMode(pdBiped *biped);
-__EXPORT void pdBipedWriteMode(pdBiped *biped);
 
 /* update method */
 __EXPORT void pdBipedUpdate(pdBiped *biped, pdState *state);

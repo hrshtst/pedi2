@@ -171,3 +171,45 @@ TEST_F(pdStateTest, BothFeetOn)
   EXPECT_FALSE( pdStateEitherFootOff( &state ) );
   EXPECT_TRUE( pdStateBothFeetOn( &state ) );
 }
+
+TEST_F(pdStateTest, FFOn)
+{
+  SupportOnBothFeet();
+  EXPECT_TRUE( pdStateFFOn( &state, 0.1 ) );
+  EXPECT_FALSE( pdStateFFOff( &state, 0.1 ) );
+  EXPECT_TRUE( pdStateFFOn( &state, -0.1 ) );
+  EXPECT_FALSE( pdStateFFOff( &state, -0.1 ) );
+
+  SupportOnLeftFoot();
+  EXPECT_FALSE( pdStateFFOn( &state, 0.1 ) );
+  EXPECT_TRUE( pdStateFFOff( &state, 0.1 ) );
+  EXPECT_TRUE( pdStateFFOn( &state, -0.1 ) );
+  EXPECT_FALSE( pdStateFFOff( &state, -0.1 ) );
+
+  SupportOnRightFoot();
+  EXPECT_TRUE( pdStateFFOn( &state, 0.1 ) );
+  EXPECT_FALSE( pdStateFFOff( &state, 0.1 ) );
+  EXPECT_FALSE( pdStateFFOn( &state, -0.1 ) );
+  EXPECT_TRUE( pdStateFFOff( &state, -0.1 ) );
+}
+
+TEST_F(pdStateTest, BFOn)
+{
+  SupportOnBothFeet();
+  EXPECT_TRUE( pdStateBFOn( &state, 0.1 ) );
+  EXPECT_FALSE( pdStateBFOff( &state, 0.1 ) );
+  EXPECT_TRUE( pdStateBFOn( &state, -0.1 ) );
+  EXPECT_FALSE( pdStateBFOff( &state, -0.1 ) );
+
+  SupportOnLeftFoot();
+  EXPECT_TRUE( pdStateBFOn( &state, 0.1 ) );
+  EXPECT_FALSE( pdStateBFOff( &state, 0.1 ) );
+  EXPECT_FALSE( pdStateBFOn( &state, -0.1 ) );
+  EXPECT_TRUE( pdStateBFOff( &state, -0.1 ) );
+
+  SupportOnRightFoot();
+  EXPECT_FALSE( pdStateBFOn( &state, 0.1 ) );
+  EXPECT_TRUE( pdStateBFOff( &state, 0.1 ) );
+  EXPECT_TRUE( pdStateBFOn( &state, -0.1 ) );
+  EXPECT_FALSE( pdStateBFOff( &state, -0.1 ) );
+}

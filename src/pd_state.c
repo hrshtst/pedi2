@@ -38,6 +38,28 @@ bool pdStateFootIsOn(pdState *state, zVec3D *p, zVec3DList *sr)
   return zVec3DElem( p, zZ ) < PD_STATE_FOOT_TOL && zListNum( sr ) > 0;
 }
 
+bool pdStateFFOn(pdState *state, double vwd)
+{
+  if( zIsTiny( vwd ) ){
+    ZRUNWARN( "The role of foot (FF or BF) cannot be determined" );
+    return false;
+  } else if( vwd > 0 )
+    return pdStateFootIsOn( state, &state->rf_pos, &state->sr_rf );
+  else
+    return pdStateFootIsOn( state, &state->lf_pos, &state->sr_lf );
+}
+
+bool pdStateBFOn(pdState *state, double vwd)
+{
+  if( zIsTiny( vwd ) ){
+    ZRUNWARN( "The role of foot (FF or BF) cannot be determined" );
+    return false;
+  } else if( vwd > 0 )
+    return pdStateFootIsOn( state, &state->lf_pos, &state->sr_lf );
+  else
+    return pdStateFootIsOn( state, &state->rf_pos, &state->sr_rf );
+}
+
 double pdStateFootDist(pdState *state)
 {
   return zVec3DDist( &state->lf_pos, &state->rf_pos );

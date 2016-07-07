@@ -40,6 +40,10 @@ __EXPORT bool pdStateFootIsOn(pdState *state, zVec3D *p, zVec3DList *sr);
 #define pdStateBothFeetOn(s) ( pdStateLFIsOn( s ) && pdStateRFIsOn( s ) )
 #define pdStateEitherFootOn(s) ( pdStateLFIsOn( s ) || pdStateRFIsOn( s ) )
 #define pdStateEitherFootOff(s) ( pdStateLFIsOff( s ) || pdStateRFIsOff( s ) )
+__EXPORT bool pdStateFFOn(pdState *state, double vwd);
+#define pdStateFFOff(s,vwd) !pdStateFFOn( s, vwd )
+__EXPORT bool pdStateBFOn(pdState *state, double vwd);
+#define pdStateBFOff(s,vwd) !pdStateBFOn( s, vwd )
 __EXPORT double pdStateFootDist(pdState *state);
 
 /* output method  */

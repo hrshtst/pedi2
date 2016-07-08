@@ -301,15 +301,10 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
     else
       ref_dist = _pdBipedCalcDesFootDistBrakeToFollow( biped, state );
     pdCZSetDist( pdBipedCZPtr( biped ), ref_dist );
-    pdFootCalcCOMRefPos( pdBipedLFPtr(biped), pdBipedRFPtr(biped), &state->lf_pos, &state->rf_pos, &pd );
-    biped->cmd->xd = pd.e[zX];
-    biped->cmd->yd = pd.e[zY];
   }
-  if( biped->mode.walking && !biped->mode.sideways ){
-    pdCZAutoUpdateRef( pdBipedCZPtr(biped), &pd, &biped->cmd->thetad );
-    biped->cmd->xd = pd.e[zX];
-    biped->cmd->yd = pd.e[zY];
-  }
+  pdCZAutoUpdateRef( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
+  biped->cmd->xd = pd.e[zX];
+  biped->cmd->yd = pd.e[zY];
 }
 
 void pdBipedUpdate(pdBiped *biped, pdState *state)

@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     pdCZHrzWrite( pdCZHrzPtr( pdBipedCZPtr(&biped) ) );
     pdCZWrite( pdBipedCZPtr(&biped) );
     pdFootWrite( pdBipedLFPtr(&biped), pdBipedRFPtr(&biped) );
-    pdRobotWrite( pdBipedRobotPtr(&biped) );
+    pdRobotWrite( &robot );
     getchar();
 #endif
 

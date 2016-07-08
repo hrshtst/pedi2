@@ -85,15 +85,23 @@ double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw)
                 1.0+pdCZKappa(cz)*(pdCZDeltaW(cz)-refuw[pdW]) );
 }
 
+double pdCZCalcDeltaW(pdCZ *cz, zVec2D refuw, double delta_theta)
+{
+  double delta_w;
+
+  delta_w = ( pdCZDeltaW( cz ) - refuw[pdW] ) / cos( delta_theta );
+  if( !zIsTiny( pdCZKappa( cz ) ) )
+    delta_w += ( 1.0 - cos(delta_theta) ) / ( pdCZKappa(cz) * cos(delta_theta) );
+  return delta_w;
+}
+
 void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd)
 {
   double refdw;
   double delta_theta;
 
   delta_theta = pdCZCalcDeltaTheta( cz, refuw );
-  refdw = ( pdCZDeltaW( cz ) - refuw[pdW] ) / cos( delta_theta );
-  if( !zIsTiny( pdCZKappa( cz ) ) )
-    refdw += ( 1.0 - cos(delta_theta) ) / ( pdCZKappa(cz) * cos(delta_theta) );
+  refdw = pdCZCalcDeltaW( cz, refuw, delta_theta );
   zVec2DCreate( nextuwd, refuw[pdU] - refdw * sin(delta_theta),
                          refuw[pdW] + refdw * cos(delta_theta) );
 }

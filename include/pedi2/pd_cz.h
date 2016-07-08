@@ -194,6 +194,7 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 
 /* calculation method */
 __EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);
+__EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D refuw, double delta_theta);
 __EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
 
 /* update method */

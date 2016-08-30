@@ -73,21 +73,22 @@ double _pdFootZFindInnerEdgeW(pdFootZ *f)
   return inner_w;
 }
 
-double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zComplex *pz)
+double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zVec2D vel, zVec2D zmp)
 {
   double r2, r, dr, da, d;
   double inner_w;
   zComplex p_in, p;
 
   if( !pdFootZIsSRSet( pf ) ) return 0.0; /* pf is floating */
-  r2 = zComplexSqrAbs( pz );
+  pdFootZCalcZMPPhase( pf, delta, vel, zmp, &pf->pz );
+  r2 = zComplexSqrAbs( &pf->pz );
   r  = sqrt( r2 );
   inner_w = _pdFootZFindInnerEdgeW( pf );
   dr = inner_w - delta[pdW];
   da = acos( fabs(dr) / r );
   if( ( d = r2 - zSqr(dr) ) > 0 ){
     zComplexCreate( &p_in, dr, -pdFootZSign(pf)*sqrt(d) );
-    zComplexCDiv( pz, &p_in, &p );
+    zComplexCDiv( &pf->pz, &p_in, &p );
     return zLimit( 0.5 * zComplexArg(&p)/da, 0, 1 );
   } else
     return 0.0;
@@ -110,8 +111,7 @@ double pdFootZCalcRefZ(pdFootZ *kf, double phase, zComplex *pz)
 
 void pdFootZUpdate(pdFootZ *pf, pdFootZ *kf, zVec2D delta, zVec2D vel, zVec2D zmp)
 {
-  pdFootZCalcZMPPhase( pf, delta, vel, zmp, &pf->pz );
-  kf->phase = pdFootZCalcFootPhase( pf, delta, &pf->pz );
+  kf->phase = pdFootZCalcFootPhase( pf, delta, vel, zmp );
   kf->refz = pdFootZCalcRefZ( kf, kf->phase, &pf->pz );
 }
 

@@ -91,7 +91,26 @@ int pdFootZFindIntersection(pdFootZ *f, zVec2D zmp, zVec3D ip[])
   return n;
 }
 
-double pdFootZFindInnerEdgeW(pdFootZ *f, zVec2D zmp)
+int pdFootZFindInnerPoint(pdFootZ *f, zVec2D zmp, zVec3D *p)
+{
+  zVec3D ip[2];
+  int n_ip;
+
+  n_ip = pdFootZFindIntersection( f, zmp, ip );
+  if( n_ip == 0 ) return 0;
+  if( n_ip == 1 )
+    zVec3DCopy( &ip[0], p );
+  else {
+    if( pdFootZSign(f) * ( ip[1].e[pdW] - ip[0].e[pdW] ) > 0 )
+      zVec3DCopy( &ip[0], p );
+    else
+      zVec3DCopy( &ip[1], p );
+  }
+  return 1;
+}
+
+static double _pdFootZFindInnerEdgeW(pdFootZ *f);
+double _pdFootZFindInnerEdgeW(pdFootZ *f)
 {
   double inner_w;
   zVec3DListCell *cp;
@@ -116,7 +135,7 @@ double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zVec2D vel, zVec2D zmp)
 
   if( !pdFootZIsSRSet( pf ) ) return 0.0; /* pf is floating */
   pdFootZCalcZMPPhase( pf, delta, vel, zmp, &pf->pz );
-  inner_w = pdFootZFindInnerEdgeW( pf, zmp );
+  inner_w = _pdFootZFindInnerEdgeW( pf );
   r2 = zComplexSqrAbs( &pf->pz );
   r  = sqrt( r2 );
   dr = inner_w - delta[pdW];

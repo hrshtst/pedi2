@@ -334,6 +334,184 @@ TEST_F(pdFootZTest, FindIntersection2)
   EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
 }
 
+TEST_F(pdFootZTest, FindInnerPoint_LeftFoot)
+{
+  zVec3D v[4], p;
+  zVec2D zmp;
+
+  // make convex hull of left foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, 0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, 0.15, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+  pdFootZSetSR( &rf, NULL, 0 );
+
+  // no intersections
+  zVec2DCreate( zmp, 0.05, 0.07 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // share an edge
+  zVec2DCreate( zmp, 0.04, 0.07 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_NEAR( 0.04, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( 0.1,  zVec3DElem(&p,zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // two intersections
+  zVec2DCreate( zmp, 0.01, 0.07 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_NEAR( 0.01, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( 0.1,  zVec3DElem(&p,zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // two intersections, ZMP is inside SR
+  zVec2DCreate( zmp, -0.01, 0.12 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_NEAR( -0.01, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( 0.1,   zVec3DElem(&p,zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+}
+
+TEST_F(pdFootZTest, FindInnerPoint_LeftFoot2)
+{
+  zVec3D v[4], p;
+  zVec2D zmp;
+
+  // make convex hull of left foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.0,  0.04, 0.0 );
+  zVec3DCreate( &v[1],  0.04, 0.08, 0.0 );
+  zVec3DCreate( &v[2],  0.0,  0.12, 0.0 );
+  zVec3DCreate( &v[3], -0.04, 0.08, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+  pdFootZSetSR( &rf, NULL, 0 );
+
+  // no intersections
+  zVec2DCreate( zmp, 0.06, 0.04 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // one intersection
+  zVec2DCreate( zmp, 0.04, 0.04 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_NEAR( 0.04, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( 0.08, zVec3DElem(&p,zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // two intersections
+  zVec2DCreate( zmp, 0.02, 0.04 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_NEAR( 0.02, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( 0.06, zVec3DElem(&p,zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // two intersections, intersect on vertices
+  zVec2DCreate( zmp, 0.0, 0.02 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_NEAR( 0.0,  zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( 0.04, zVec3DElem(&p,zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // two intersections, ZMP is on a vertex
+  zVec2DCreate( zmp, 0.0, 0.04 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_NEAR( 0.0,  zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( 0.04, zVec3DElem(&p,zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+}
+
+TEST_F(pdFootZTest, FindInnerPoint_RightFoot)
+{
+  zVec3D v[4], p;
+  zVec2D zmp;
+
+  // make convex hull of right foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, -0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, -0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, -0.15, 0.0 );
+  pdFootZSetSR( &lf, NULL, 0 );
+  pdFootZSetSR( &rf, v, 4 );
+
+  // no intersections
+  zVec2DCreate( zmp, 0.05, 0.07 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // share an edge
+  zVec2DCreate( zmp, 0.04, 0.07 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+  EXPECT_NEAR( 0.04, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( -0.1, zVec3DElem(&p,zY), 1e-12 );
+
+  // two intersections
+  zVec2DCreate( zmp, 0.01, 0.07 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+  EXPECT_NEAR( 0.01, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( -0.1, zVec3DElem(&p,zY), 1e-12 );
+
+  // two intersections, ZMP is inside SR
+  zVec2DCreate( zmp, -0.01, 0.12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+  EXPECT_NEAR( -0.01, zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( -0.1,  zVec3DElem(&p,zY), 1e-12 );
+}
+
+TEST_F(pdFootZTest, FindInnerPoint_RightFoot2)
+{
+  zVec3D v[4], p;
+  zVec2D zmp;
+
+  // make convex hull of right foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.0,  -0.04, 0.0 );
+  zVec3DCreate( &v[1],  0.04, -0.08, 0.0 );
+  zVec3DCreate( &v[2],  0.0,  -0.12, 0.0 );
+  zVec3DCreate( &v[3], -0.04, -0.08, 0.0 );
+  pdFootZSetSR( &lf, NULL, 0 );
+  pdFootZSetSR( &rf, v, 4 );
+
+  // no intersections
+  zVec2DCreate( zmp, 0.06, 0.04 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+
+  // one intersection
+  zVec2DCreate( zmp, 0.04, 0.04 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+  EXPECT_NEAR( 0.04,  zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( -0.08, zVec3DElem(&p,zY), 1e-12 );
+
+  // two intersections
+  zVec2DCreate( zmp, 0.02, 0.04 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+  EXPECT_NEAR( 0.02,  zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( -0.06, zVec3DElem(&p,zY), 1e-12 );
+
+  // two intersections, intersect on vertices
+  zVec2DCreate( zmp, 0.0, 0.02 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+  EXPECT_NEAR( 0.0,   zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( -0.04, zVec3DElem(&p,zY), 1e-12 );
+
+  // two intersections, ZMP is on a vertex
+  zVec2DCreate( zmp, 0.0, 0.04 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, zmp, &p ) );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, zmp, &p ) );
+  EXPECT_NEAR( 0.0,   zVec3DElem(&p,zX), 1e-12 );
+  EXPECT_NEAR( -0.04, zVec3DElem(&p,zY), 1e-12 );
+}
+
 TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)
 {
   zVec3D v[4];

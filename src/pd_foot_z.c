@@ -109,36 +109,20 @@ int pdFootZFindInnerPoint(pdFootZ *f, zVec2D zmp, zVec3D *p)
   return 1;
 }
 
-static double _pdFootZFindInnerEdgeW(pdFootZ *f);
-double _pdFootZFindInnerEdgeW(pdFootZ *f)
-{
-  double inner_w;
-  zVec3DListCell *cp;
-
-  inner_w = zVec3DElem( zListTail( pdFootZSR( f ) )->data, pdW );
-  zListForEach( pdFootZSR( f ), cp ){
-    if( pdFootZSign(f) > 0 )
-      /* left foot */
-      inner_w = zMin( inner_w, zVec3DElem( cp->data, pdW ) );
-    else
-      /* right foot */
-      inner_w = zMax( inner_w, zVec3DElem( cp->data, pdW ) );
-  }
-  return inner_w;
-}
-
 double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zVec2D vel, zVec2D zmp)
 {
   double r2, r, dr, da, d;
-  double inner_w;
+  zVec3D inner_p;
   zComplex p_in, p;
 
-  if( !pdFootZIsSRSet( pf ) ) return 0.0; /* pf is floating */
+  if( !pdFootZIsSRSet( pf ) ||
+      !pdFootZFindInnerPoint( pf, zmp, &inner_p ) )
+    /* pf is floating or ZMP does not lie on SR */
+    return 0.0;
   pdFootZCalcZMPPhase( pf, delta, vel, zmp, &pf->pz );
-  inner_w = _pdFootZFindInnerEdgeW( pf );
   r2 = zComplexSqrAbs( &pf->pz );
   r  = sqrt( r2 );
-  dr = inner_w - delta[pdW];
+  dr = zVec3DElem( &inner_p, pdW ) - delta[pdW];
   da = acos( fabs(dr) / r );
   if( ( d = r2 - zSqr(dr) ) > 0 ){
     zComplexCreate( &p_in, dr, -pdFootZSign(pf)*sqrt(d) );

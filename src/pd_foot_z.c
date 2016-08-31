@@ -91,8 +91,7 @@ int pdFootZFindIntersection(pdFootZ *f, zVec2D zmp, zVec3D ip[])
   return n;
 }
 
-static double _pdFootZFindInnerEdgeW(pdFootZ *f);
-double _pdFootZFindInnerEdgeW(pdFootZ *f)
+double pdFootZFindInnerEdgeW(pdFootZ *f, zVec2D zmp)
 {
   double inner_w;
   zVec3DListCell *cp;
@@ -117,9 +116,9 @@ double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zVec2D vel, zVec2D zmp)
 
   if( !pdFootZIsSRSet( pf ) ) return 0.0; /* pf is floating */
   pdFootZCalcZMPPhase( pf, delta, vel, zmp, &pf->pz );
+  inner_w = pdFootZFindInnerEdgeW( pf, zmp );
   r2 = zComplexSqrAbs( &pf->pz );
   r  = sqrt( r2 );
-  inner_w = _pdFootZFindInnerEdgeW( pf );
   dr = inner_w - delta[pdW];
   da = acos( fabs(dr) / r );
   if( ( d = r2 - zSqr(dr) ) > 0 ){

@@ -233,6 +233,107 @@ TEST_F(pdFootZTest, SetSR_None)
   EXPECT_EQ( 3, lf._vert_num );
 }
 
+TEST_F(pdFootZTest, FindIntersection)
+{
+  zVec3D v[4], ip[2];
+  zVec2D zmp;
+
+  // make convex hull of left foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, 0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, 0.15, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+  pdFootZSetSR( &rf, NULL, 0 );
+
+  // no intersections
+  zVec2DCreate( zmp, 0.05, 0.07 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+
+  // share an edge
+  zVec2DCreate( zmp, 0.04, 0.07 );
+  EXPECT_EQ( 2, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_NEAR( 0.04, zVec3DElem(&ip[0],zX), 1e-12 );
+  EXPECT_NEAR( 0.1,  zVec3DElem(&ip[0],zY), 1e-12 );
+  EXPECT_NEAR( 0.04, zVec3DElem(&ip[1],zX), 1e-12 );
+  EXPECT_NEAR( 0.15, zVec3DElem(&ip[1],zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+
+  // two intersections
+  zVec2DCreate( zmp, 0.01, 0.07 );
+  EXPECT_EQ( 2, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_NEAR( 0.01, zVec3DElem(&ip[0],zX), 1e-12 );
+  EXPECT_NEAR( 0.1,  zVec3DElem(&ip[0],zY), 1e-12 );
+  EXPECT_NEAR( 0.01, zVec3DElem(&ip[1],zX), 1e-12 );
+  EXPECT_NEAR( 0.15, zVec3DElem(&ip[1],zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+
+  // two intersections, ZMP is inside SR
+  zVec2DCreate( zmp, -0.01, 0.12 );
+  EXPECT_EQ( 2, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_NEAR( -0.01, zVec3DElem(&ip[0],zX), 1e-12 );
+  EXPECT_NEAR( 0.1,   zVec3DElem(&ip[0],zY), 1e-12 );
+  EXPECT_NEAR( -0.01, zVec3DElem(&ip[1],zX), 1e-12 );
+  EXPECT_NEAR( 0.15,  zVec3DElem(&ip[1],zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+}
+
+TEST_F(pdFootZTest, FindIntersection2)
+{
+  zVec3D v[4], ip[2];
+  zVec2D zmp;
+
+  // make convex hull of left foot
+  // orthogonal to the moving frame
+  zVec3DCreate( &v[0],  0.0,  0.04, 0.0 );
+  zVec3DCreate( &v[1],  0.04, 0.08, 0.0 );
+  zVec3DCreate( &v[2],  0.0,  0.12, 0.0 );
+  zVec3DCreate( &v[3], -0.04, 0.08, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+  pdFootZSetSR( &rf, NULL, 0 );
+
+  // no intersections
+  zVec2DCreate( zmp, 0.06, 0.04 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+
+  // one intersection
+  zVec2DCreate( zmp, 0.04, 0.04 );
+  EXPECT_EQ( 1, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_NEAR( 0.04, zVec3DElem(&ip[0],zX), 1e-12 );
+  EXPECT_NEAR( 0.08, zVec3DElem(&ip[0],zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+
+  // two intersections
+  zVec2DCreate( zmp, 0.02, 0.04 );
+  EXPECT_EQ( 2, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_NEAR( 0.02, zVec3DElem(&ip[0],zX), 1e-12 );
+  EXPECT_NEAR( 0.06, zVec3DElem(&ip[0],zY), 1e-12 );
+  EXPECT_NEAR( 0.02, zVec3DElem(&ip[1],zX), 1e-12 );
+  EXPECT_NEAR( 0.1,  zVec3DElem(&ip[1],zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+
+  // two intersections, intersect on vertices
+  zVec2DCreate( zmp, 0.0, 0.02 );
+  EXPECT_EQ( 2, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_NEAR( 0.0,  zVec3DElem(&ip[0],zX), 1e-12 );
+  EXPECT_NEAR( 0.04, zVec3DElem(&ip[0],zY), 1e-12 );
+  EXPECT_NEAR( 0.0,  zVec3DElem(&ip[1],zX), 1e-12 );
+  EXPECT_NEAR( 0.12, zVec3DElem(&ip[1],zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+
+  // two intersections, ZMP is on a vertex
+  zVec2DCreate( zmp, 0.0, 0.04 );
+  EXPECT_EQ( 2, pdFootZFindIntersection( &lf, zmp, ip ) );
+  EXPECT_NEAR( 0.0,  zVec3DElem(&ip[0],zX), 1e-12 );
+  EXPECT_NEAR( 0.04, zVec3DElem(&ip[0],zY), 1e-12 );
+  EXPECT_NEAR( 0.0,  zVec3DElem(&ip[1],zX), 1e-12 );
+  EXPECT_NEAR( 0.12, zVec3DElem(&ip[1],zY), 1e-12 );
+  EXPECT_EQ( 0, pdFootZFindIntersection( &rf, zmp, ip ) );
+}
+
 TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)
 {
   zVec3D v[4];

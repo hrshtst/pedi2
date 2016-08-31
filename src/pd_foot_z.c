@@ -55,6 +55,42 @@ void pdFootZSetSR(pdFootZ *f, zVec3D p[], int num)
   f->_vert_num = num;
 }
 
+int pdFootZFindIntersection(pdFootZ *f, zVec2D zmp, zVec3D ip[])
+{
+  zVec3DList *ch;
+  zVec3DListCell *vc, *vcp;
+  int n;
+  double k;
+  zVec3D v;
+
+  ch = pdFootZSR( f );
+  if( zListNum( ch ) == 0 ) return 0;
+  vcp = zListHead( ch );
+  if( zListNum( ch ) == 1 &&
+      zIsTiny( zVec3DElem( vcp->data, pdU ) - zmp[pdU] )){
+    zVec3DCopy( vcp->data, &ip[0] );
+    zVec3DCopy( vcp->data, &ip[1] );
+    return 1;
+  }
+  n = 0;
+  zListForEach( ch, vc ){
+    if( n > 1 ) break;
+    if( zIsTiny( zVec3DElem( vc->data,  pdU ) - zmp[pdU] ) ){
+      /* intersect on a vertex */
+      zVec3DCopy( vc->data, &ip[n++] );
+    } else if( ( zVec3DElem( vc->data,  pdU ) - zmp[pdU] ) *
+               ( zVec3DElem( vcp->data, pdU ) - zmp[pdU] ) < 0 &&
+               !zIsTiny( vcp->data->e[0] - vc->data->e[0] ) ){
+      /* intersect on an edge */
+      k = ( zmp[pdU] - vc->data->e[0] ) / ( vcp->data->e[0] - vc->data->e[0] );
+      zVec3DSub( vcp->data, vc->data, &v );
+      zVec3DCat( vc->data, k, &v, &ip[n++] );
+    }
+    vcp = vc;
+  }
+  return n;
+}
+
 static double _pdFootZFindInnerEdgeW(pdFootZ *f);
 double _pdFootZFindInnerEdgeW(pdFootZ *f)
 {

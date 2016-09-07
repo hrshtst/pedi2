@@ -157,7 +157,7 @@ int main(void)
       pdCZSetKappa( &cz, -1.0 );
 
     /* update */
-    pdCZUpdate( &cz, &com, &vel, &acc, &zmp, fz, theta, &sr );
+    pdCZUpdate( &cz, &com, &vel, &acc, &zmp, fz, ZVEC3DZERO, theta, &sr );
     pdFootUpdate( &lf, &rf, pdCZDelta(&cz), pdCZVelUW(&cz), &zmp, &lfp, &rfp, &lfa, &rfa, &sr_lf, &sr_rf );
     /* output */
     pdFootDataWrite( &lf, &rf );

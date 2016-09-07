@@ -95,6 +95,7 @@ TEST_F(pdStateTest, Init)
   EXPECT_TRUE( zVec3DIsTiny( &state.zmp ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.deszmp ) );
   EXPECT_EQ( 0, state.fz );
+  EXPECT_TRUE( zVec3DIsTiny( &state.ef ) );
   EXPECT_EQ( 0, zListNum( &state.sr_lf ) );
   EXPECT_EQ( 0, zListNum( &state.sr_rf ) );
   EXPECT_EQ( 0, zListNum( &state.sr ) );
@@ -122,6 +123,7 @@ TEST_F(pdStateTest, Destroy)
   EXPECT_TRUE( zVec3DIsTiny( &state.zmp ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.deszmp ) );
   EXPECT_EQ( 0, state.fz );
+  EXPECT_TRUE( zVec3DIsTiny( &state.ef ) );
   EXPECT_EQ( 0, zListNum( &state.sr_lf ) );
   EXPECT_EQ( 0, zListNum( &state.sr_rf ) );
   EXPECT_EQ( 0, zListNum( &state.sr ) );

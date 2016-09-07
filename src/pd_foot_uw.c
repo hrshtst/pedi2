@@ -28,7 +28,7 @@ double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp)
                 1.0+pdFootUWKappa(fuw)*(delta[pdW]-regzmp[pdW]));
 }
 
-void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, zVec2D refpos)
+void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, zVec2D refpos)
 {
   double phi;
   double ud, wd;
@@ -44,6 +44,20 @@ void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, 
   ud -= 0.5 * pdFootUWSign( fuw ) * pdFootUWDist( fuw ) * sin( phi );
   wd += 0.5 * pdFootUWSign( fuw ) * pdFootUWDist( fuw ) * cos( phi );
   zVec2DCreate( refpos, ud, wd );
+}
+
+void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D delta, zVec2D vel, zVec2D regzmp, zVec2D refpos)
+{
+  double phi;
+  double dr;
+  zVec2D e;
+
+  phi = pdFootUWCalcPhi( fuw, delta, vel, regzmp );
+  dr = regzmp[pdU]*tan(0.5*phi) + delta[pdW] - regzmp[pdW] + 0.5 * pdFootUWSign( fuw ) * pdFootUWDist( fuw );
+  zVec2DCreate( e, -sin( phi ), cos( phi ) );
+  if( pdFootUWSign( fuw ) * dr < 0 )
+    dr = 0;
+  zVec2DCat( regzmp, dr, e, refpos );
 }
 
 void pdFootUWCalcCOMRefPos(zVec2D lf_pos, zVec2D rf_pos, zVec2D ref_pos)

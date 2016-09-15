@@ -314,8 +314,8 @@ void pdBipedUpdate(pdBiped *biped, pdState *state)
   _pdBipedUpdateCZ( biped, state );
   _pdBipedUpdateFoot( biped, state );
   _pdBipedUpdateRef( biped, state );
-  _pdBipedModifyCommand( biped, state );
   pdModeUpdate( &biped->mode, biped->cmd, state );
+  _pdBipedModifyCommand( biped, state );
   pdBipedIncrTime( biped );
 }
 

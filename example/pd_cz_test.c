@@ -33,6 +33,7 @@ int main(void)
   set_ctrl_parameters( &cz );
   /* init states */
   zVec3DCreate( &com, 0, 0, 0.3 );
+  zVec3DCopy( &com, pdCZRefCOM( &cz ) );
   zVec3DClear( &vel );
   zVec3DClear( &acc );
   zVec3DClear( &zmp );

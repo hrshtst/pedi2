@@ -278,6 +278,7 @@ void pdRobotResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis)
   zVec3DSetElem( &state->lf_pos, zZ, 0 );
   zVec3DSetElem( &state->rf_pos, zZ, 0 );
   zVec3DMid( &state->lf_pos, &state->rf_pos, &state->deszmp );
+  zVec3DCopy( &state->deszmp, &state->zmp );
   offset = zPI_2;
   pdBipedCmd(biped)->thetad = state->base_att.e[0] - offset;
   pdBipedDefaultPoseInit( biped, state );

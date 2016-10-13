@@ -98,9 +98,9 @@ void* joystickCtrlCommand(void *args)
   while( 1 ){
     aviator_action( &av, NULL );
     pthread_setcanceltype( PTHREAD_CANCEL_DEFERRED, &last_tmp );
-    cmd.vud   = -0.3 * av.pitch / JOYSTICK_CTRL_VAL_LIM;
-    cmd.vwd   = -0.1 * av.roll  / JOYSTICK_CTRL_VAL_LIM;
-    cmd.kappa = -3.0 * av.yaw   / JOYSTICK_CTRL_VAL_LIM;
+    cmd.vud   = -0.15 * av.pitch / JOYSTICK_CTRL_VAL_LIM;
+    cmd.vwd   = -0.15 * av.roll  / JOYSTICK_CTRL_VAL_LIM;
+    cmd.kappa = -2.5 * av.yaw   / JOYSTICK_CTRL_VAL_LIM;
     pthread_setcanceltype( PTHREAD_CANCEL_ASYNCHRONOUS, &last_tmp );
   }
   return NULL;
@@ -271,7 +271,7 @@ void joystickCtrlSetCamera(void)
   xd = cmd.xd;
   yd = cmd.yd;
   zd = cmd.zd;
-  rkglCALookAt( &cam, xd-15*zd*c, yd-15*zd*s, 2.5*zd, xd, yd, zd, 0, 0, 1 );
+  rkglCALookAt( &cam, xd-20*zd*c, yd-20*zd*s, 4.5*zd, xd, yd, zd, 0, 0, 1 );
 }
 
 void joystickCtrlReshape(void)
@@ -537,7 +537,7 @@ void joystickCtrlUpdatePath(void)
 void joystickCtrlPlay(void)
 {
   joystickCtrlUpdate();
-  joystickCtrlUpdatePath();
+  /* joystickCtrlUpdatePath(); */
   joystickCtrlReshape();
   joystickCtrlDisplay();
   if( opt[OPT_REPLAY].flag ){
@@ -546,7 +546,7 @@ void joystickCtrlPlay(void)
     cmd_fp = fopen( opt[OPT_REPLAY].arg, "r" );
     while( !joystickCtrlReplayIsTerminated() ){
       joystickCtrlUpdate();
-      joystickCtrlUpdatePath();
+      /* joystickCtrlUpdatePath(); */
       joystickCtrlDrawStatusbar();
       joystickCtrlRedisplay();
       joystickCtrlCapture();
@@ -556,7 +556,7 @@ void joystickCtrlPlay(void)
     while( 1 ){
       if( joystickCtrlEvent() < 0 ) return;
       joystickCtrlUpdate();
-      joystickCtrlUpdatePath();
+      /* joystickCtrlUpdatePath(); */
       joystickCtrlDrawStatusbar();
       joystickCtrlRedisplay();
       if( is_logging )

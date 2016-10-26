@@ -65,9 +65,11 @@ static pthread_t thread;
 #define DATALOGFILE "data.log"
 #define SRLOGFILE   "sr.log"
 #define CMDLOGFILE  "cmd.log"
+#define MOTIONFILE  "motion.zvs"
 static FILE *data_fp = NULL;
 static FILE *sr_fp = NULL;
 static FILE *cmd_fp = NULL;
+static FILE *motion_fp = NULL;
 static bool is_logging = false;
 static bool is_recording = false;
 static bool is_cmdlogging = false;
@@ -354,6 +356,8 @@ void joystickCtrlLog(void)
 {
   pdBipedDataFWrite( data_fp, &biped );
   pdStateSRDataFWrite( sr_fp, &state );
+  fprintf( motion_fp, "%f ", atof( opt[OPT_DT].arg ) );
+  zVecFWrite( motion_fp, dis );
 }
 
 void joystickCtrlCommandLog(void)
@@ -378,10 +382,12 @@ int joystickCtrlKeyPress(void)
     if( ( is_logging = 1 - is_logging ) ){
       data_fp = fopen( DATALOGFILE, "w" );
       sr_fp = fopen( SRLOGFILE, "w" );
+      motion_fp = fopen( MOTIONFILE, "w" );
       eprintf( "start logging.\n" );
     } else {
       fclose( data_fp );
       fclose( sr_fp );
+      fclose( motion_fp );
       eprintf( "quit logging.\n" );
     }
     break;

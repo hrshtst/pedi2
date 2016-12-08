@@ -15,6 +15,7 @@ typedef struct{
   bool following;
   bool braking;
   bool rotating;
+  bool warping;
 } pdMode;
 
 __EXPORT void pdModeInit(pdMode *mode);

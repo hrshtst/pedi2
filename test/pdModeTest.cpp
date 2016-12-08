@@ -24,6 +24,7 @@ class pdModeTest : public testing::Test {
     ri.SetRandBool( mode.following );
     ri.SetRandBool( mode.braking );
     ri.SetRandBool( mode.rotating );
+    ri.SetRandBool( mode.warping );
   };
 
   void LFOn() {
@@ -88,6 +89,7 @@ TEST_F(pdModeTest, Init)
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   EXPECT_FALSE( mode.rotating );
+  EXPECT_FALSE( mode.warping );
 }
 
 TEST_F(pdModeTest, Destroy)
@@ -102,6 +104,7 @@ TEST_F(pdModeTest, Destroy)
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   EXPECT_FALSE( mode.rotating );
+  EXPECT_FALSE( mode.warping );
 }
 
 TEST_F(pdModeTest, Update_trymove)
@@ -472,4 +475,20 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_FALSE( mode.sideways );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
+}
+
+TEST_F(pdModeTest, Update_warp)
+{
+  SupportOnBothFeet();
+  pdCmdDefaultInit( &cmd );
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.warping );
+
+  cmd.xdd = 1.0;
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_TRUE( mode.warping );
+
+  cmd.xdd = 0.0;
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.warping );
 }

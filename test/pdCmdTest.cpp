@@ -50,6 +50,9 @@ TEST_F(pdCmdTest, Init)
   EXPECT_EQ( 0, cmd.xd );
   EXPECT_EQ( 0, cmd.yd );
   EXPECT_EQ( 0, cmd.zd );
+  EXPECT_EQ( 0, cmd.xdd );
+  EXPECT_EQ( 0, cmd.ydd );
+  EXPECT_EQ( 0, cmd.zdd );
   EXPECT_EQ( 0, cmd.thetad );
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
@@ -92,6 +95,9 @@ TEST_F(pdCmdTest, Destroy)
   EXPECT_EQ( 0, cmd.xd );
   EXPECT_EQ( 0, cmd.yd );
   EXPECT_EQ( 0, cmd.zd );
+  EXPECT_EQ( 0, cmd.xdd );
+  EXPECT_EQ( 0, cmd.ydd );
+  EXPECT_EQ( 0, cmd.zdd );
   EXPECT_EQ( 0, cmd.thetad );
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
@@ -161,4 +167,13 @@ TEST_F(pdCmdTest, TryWalkSideways)
 
   cmd.vwd = 1;
   EXPECT_TRUE( pdCmdTryWalkSideways( &cmd ) );
+}
+
+TEST_F(pdCmdTest, TryWarp)
+{
+  Stop();
+  EXPECT_FALSE( pdCmdTryWarp( &cmd ) );
+
+  cmd.xdd = 1;
+  EXPECT_TRUE( pdCmdTryWarp( &cmd ) );
 }

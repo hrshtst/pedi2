@@ -55,6 +55,20 @@ bool pdCmdTryWalkSideways(pdCmd *cmd)
   return !zIsTiny( cmd->vwd );
 }
 
+#define PD_CMD_WARP_DIST 0.1
+bool pdCmdTryWarp(pdCmd *cmd)
+{
+  /* return true if user-commanded desired position is more than */
+  /* 'PD_CMD_WARP_DIST' away from the desired position */
+  double dist2;
+
+  dist2 = zSqr( cmd->xd - cmd->xdd ) + zSqr( cmd->yd - cmd->ydd ) + zSqr( cmd->zd - cmd->zdd );
+  if( sqrt( dist2 ) > PD_CMD_WARP_DIST )
+    return true;
+  else
+    return false;
+}
+
 void pdCmdDataFWrite(FILE *fp, pdCmd *cmd)
 {
   register int i;

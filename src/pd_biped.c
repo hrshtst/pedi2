@@ -317,7 +317,7 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
     if( dx > 0.01 )
       dx = zSgn( dx ) * zMax( fabs(dx), 0.05 );
     if( dy > 0.01 )
-      dy = zSgn( dy ) * zMax( fabs(dy), 0.05 );
+      dy = zSgn( dy ) * zMax( fabs(dy), 0.01 );
     zSinCos( pdCZTheta( pdBipedCZPtr( biped ) ), &s, &c );
     pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
     if( biped->mode.stepping ){

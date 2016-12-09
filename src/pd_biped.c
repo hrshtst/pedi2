@@ -335,6 +335,10 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
         pdCZSetDist( pdBipedCZPtr( biped ), ref_dist );
       }
     }
+  } else {
+    biped->cmd->xdd = biped->cmd->xd;
+    biped->cmd->ydd = biped->cmd->yd;
+    biped->cmd->zdd = biped->cmd->zd;
   }
 }
 

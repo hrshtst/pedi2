@@ -47,12 +47,12 @@ static rkglChain gl_chain;
 static rkChain chain_env;
 static rkglChain ge;
 static int env = 0;
-static rkglCamera cam;
+static rkglCamera cam[2];
 static rkglLight light;
 static int path = 0;
 
-static zxWindow win;
-static Window glwin;
+static zxWindow win[2];
+static Window glwin[2];
 
 static pdCmd cmd;
 static pdState state;
@@ -211,25 +211,47 @@ void joystickCtrlInit(void)
 {
   short width, height;
   GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
+  register int i;
 
   width = atoi( opt[OPT_WIDTH].arg );
   height = atoi( opt[OPT_HEIGHT].arg );
-  zxWindowCreate( &win, 0, 0, width+8, height+32 );
-  zxWindowSetTitle( &win, JOYSTICK_CTRL_TITLE );
-  zxWindowOpen( &win );
-  zxWindowSetBG( &win, (char *)"lightgray" );
-  zxWindowSetFG( &win, (char *)"black" );
-  zxWindowClear( &win );
-  zxSetFont( &win, "-misc-fixed-medium-r-normal-*-24-*-*-*-*-*-*-*" );
 
-  glwin = rkglWindowCreateGLX( &win, 4, 4, width, height, NULL );
-  rkglKeyEnableGLX( glwin );
-  rkglMouseEnableGLX( glwin );
-  rkglWindowOpenGLX( glwin );
+  /* operator's view */
+  zxWindowCreate( &win[0], 0, 0, width+8, height+32 );
+  zxWindowSetTitle( &win[0], JOYSTICK_CTRL_TITLE );
+  zxWindowOpen( &win[0] );
+  zxWindowSetBG( &win[0], (char *)"lightgray" );
+  zxWindowSetFG( &win[0], (char *)"black" );
+  zxWindowClear( &win[0] );
+  zxSetFont( &win[0], "-misc-fixed-medium-r-normal-*-24-*-*-*-*-*-*-*" );
 
-  rkglBGSet( &cam, 0.6, 0.6, 0.6 );
-  rkglCALookAt( &cam, 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 );
+  glwin[0] = rkglWindowCreateGLX( &win[0], 4, 4, width, height, NULL );
+  rkglKeyEnableGLX( glwin[0] );
+  rkglMouseEnableGLX( glwin[0] );
+  rkglWindowOpenGLX( glwin[0] );
 
+  rkglBGSet( &cam[0], 0.6, 0.6, 0.6 );
+  rkglCALookAt( &cam[0], 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 );
+
+  /* birdview */
+  zxWindowCreate( &win[1], width, 0, width+8, height+32 );
+  zxWindowSetTitle( &win[1], JOYSTICK_CTRL_TITLE" (birdview)" );
+  zxWindowOpen( &win[1] );
+  zxWindowSetBG( &win[1], (char *)"lightgray" );
+  zxWindowSetFG( &win[1], (char *)"black" );
+  zxWindowClear( &win[1] );
+  zxSetFont( &win[1], "-misc-fixed-medium-r-normal-*-24-*-*-*-*-*-*-*" );
+
+  glwin[1] = rkglWindowCreateGLX( &win[1], 4, 4, width, height, NULL );
+  rkglKeyEnableGLX( glwin[1] );
+  rkglMouseEnableGLX( glwin[1] );
+  rkglWindowOpenGLX( glwin[1] );
+
+  rkglBGSet( &cam[1], 0.6, 0.6, 0.6 );
+  /* rkglCALookAt( &cam[1], 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 ); */
+  rkglCASet( &cam[1], 4.5, 2.0, 19, 0, -80, 0 );
+
+  /* lighting */
   glEnable( GL_LIGHTING );
   rkglLightCreate( &light, 0, 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0, 0, 0, 0 );
   rkglLightSetPos( &light, 10, 0, 4 );
@@ -273,19 +295,22 @@ void joystickCtrlSetCamera(void)
   xd = cmd.xd;
   yd = cmd.yd;
   zd = cmd.zd;
-  rkglCALookAt( &cam, xd-20*zd*c, yd-20*zd*s, 4.5*zd, xd, yd, zd, 0, 0, 1 );
+  rkglCALookAt( &cam[0], xd-20*zd*c, yd-20*zd*s, 4.5*zd, xd, yd, zd, 0, 0, 1 );
 }
 
 void joystickCtrlReshape(void)
 {
   zxRegion reg;
   double wx, wy;
+  register int i;
 
-  zxGetGeometry( glwin, &reg );
-  rkglVPCreate( &cam, 0, 0, reg.width, reg.height );
-  wx = 0.1;
-  wy = wx / rkglVPAspect( &cam );
-  rkglFrustum( &cam, -wx, wx, -wy, wy, 1, 20 );
+  for( i=0; i<2; i++ ){
+    zxGetGeometry( glwin[i], &reg );
+    rkglVPCreate( &cam[i], 0, 0, reg.width, reg.height );
+    wx = 0.1;
+    wy = wx / rkglVPAspect( &cam[i] );
+    rkglFrustum( &cam[i], -wx, wx, -wy, wy, 1, 20 );
+  }
 }
 
 void joystickCtrlDraw(void)
@@ -304,13 +329,17 @@ void joystickCtrlDraw(void)
 
 void joystickCtrlDisplay(void)
 {
-  rkglActivateGLX( glwin );
-  rkglClear();
-  rkglCALoad( &cam );
-  rkglLightPut( &light );
-  joystickCtrlDraw();
-  rkglSwapBuffersGLX( glwin );
-  rkglFlushGLX();
+  register int i;
+
+  for( i=0; i<2; i++ ){
+    rkglActivateGLX( glwin[i] );
+    rkglClear();
+    rkglCALoad( &cam[i] );
+    rkglLightPut( &light );
+    joystickCtrlDraw();
+    rkglSwapBuffersGLX( glwin[i] );
+    rkglFlushGLX();
+  }
 }
 
 void joystickCtrlRedisplay(void)
@@ -334,8 +363,8 @@ void joystickCtrlDrawStatusbar(void)
            "vud:%0.3f vwd:%0.3f kappa:%0.3f",
            cmd.vud, cmd.vwd, cmd.kappa );
   zxTextArea( statusbar, 0, 0, &reg );
-  zxWindowClear( &win );
-  zxDrawString( &win, zxWindowWidth(&win)-reg.width-8, zxWindowHeight(&win)-8, statusbar );
+  zxWindowClear( &win[0] );
+  zxDrawString( &win[0], zxWindowWidth(&win[0])-reg.width-8, zxWindowHeight(&win[0])-8, statusbar );
   zxFlush();
 }
 
@@ -346,8 +375,8 @@ void joystickCtrlCapture(void)
   static int cnt = 0;
 
   sprintf( imgfile, "capture%05d.png", cnt++ );
-  zxImageAllocDefault( &img, zxWindowWidth(&win), zxWindowHeight(&win) );
-  zxImageFromPixmap( &img, zxCanvas(&win), img.width, img.height );
+  zxImageAllocDefault( &img, zxWindowWidth(&win[0]), zxWindowHeight(&win[0]) );
+  zxImageFromPixmap( &img, zxCanvas(&win[0]), img.width, img.height );
   zxImageWritePNGFile( &img, imgfile );
   zxImageDestroy( &img );
 }
@@ -436,7 +465,8 @@ void joystickCtrlUpdate(void)
   rkChainFK( &chain, dis );
   pdBipedUpdateState( &biped, &state );
   pdRobotUpdateState( &robot, &state );
-  liwSleep( (long)atof( opt[OPT_DT].arg ), 0 );
+  /* liwSleep( (long)atof( opt[OPT_DT].arg ), 0 ); */
+  liwSleep( 0, sec2nsec( atof( opt[OPT_DT].arg ) ) );
 }
 
 int _joystickCtrlDrawArc(zVec3D *org, double r, double theta1, double theta2, double w, GLfloat color[])
@@ -586,9 +616,11 @@ void joystickCtrlExit(void)
   pdStateDestroy( &state );
   pdCmdDestroy( &cmd );
   glDeleteLists( env, 1 );
-  rkglWindowDestroyGLX( glwin );
+  rkglWindowDestroyGLX( glwin[0] );
+  rkglWindowDestroyGLX( glwin[1] );
   rkglCloseGLX();
-  zxWindowDestroy( &win );
+  zxWindowDestroy( &win[0] );
+  zxWindowDestroy( &win[1] );
   pthread_cancel( thread );
   pthread_join( thread, NULL );
 }

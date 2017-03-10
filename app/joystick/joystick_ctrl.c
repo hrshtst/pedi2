@@ -211,7 +211,6 @@ void joystickCtrlInit(void)
 {
   short width, height;
   GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
-  register int i;
 
   width = atoi( opt[OPT_WIDTH].arg );
   height = atoi( opt[OPT_HEIGHT].arg );

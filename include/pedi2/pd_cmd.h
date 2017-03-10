@@ -5,7 +5,7 @@
 
 __BEGIN_DECLS
 
-#define PD_CMD_ENTRY_NUM 36
+#define PD_CMD_ENTRY_NUM 39
 typedef union{
   struct{
     double qu1, qu2;
@@ -13,6 +13,7 @@ typedef union{
     double qz1, qz2;
     double kappa, rho, kr;
     double xd, yd, zd;
+    double xdd, ydd, zdd;       /* user-commanded desired position (this should be removed) */
     double thetad;
     double vud, vwd, dist;
     double kx, ky, kz;
@@ -34,6 +35,7 @@ __EXPORT bool pdCmdTryStop(pdCmd *cmd);
 __EXPORT bool pdCmdTryStep(pdCmd *cmd);
 __EXPORT bool pdCmdTryWalk(pdCmd *cmd);
 __EXPORT bool pdCmdTryWalkSideways(pdCmd *cmd);
+__EXPORT bool pdCmdTryWarp(pdCmd *cmd);
 
 __EXPORT void pdCmdDataFWrite(FILE *fp, pdCmd *cmd);
 #define pdCmdDataWrite(c) pdCmdDataFWrite( stdout, c )

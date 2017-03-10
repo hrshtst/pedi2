@@ -10,6 +10,7 @@ void pdModeInit(pdMode *mode)
   mode->following = false;
   mode->braking   = false;
   mode->rotating  = false;
+  mode->warping   = false;
 }
 
 void pdModeDestroy(pdMode *mode)
@@ -52,6 +53,11 @@ void pdModeUpdate(pdMode *mode, pdCmd *cmd, pdState *state)
         mode->braking = true;
     }
   }
+
+  if( pdCmdTryWarp( cmd ) )
+    mode->warping = true;
+  else
+    mode->warping = false;
 }
 
 #define pdModeBool2Str(b) ( b ? "TRUE" : "FALSE" )
@@ -66,5 +72,6 @@ void pdModeFWrite(FILE *fp, pdMode *mode)
   pdModeFWriteElem( fp, mode, following );
   pdModeFWriteElem( fp, mode, braking );
   pdModeFWriteElem( fp, mode, rotating );
+  pdModeFWriteElem( fp, mode, warping );
   fprintf( fp, "\n" );
 }

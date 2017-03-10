@@ -73,6 +73,9 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
   y = zVec3DElem( &state->com_pos, zY );
   biped->cmd->xd = x;
   biped->cmd->yd = y;
+  biped->cmd->xdd = biped->cmd->xd;
+  biped->cmd->ydd = biped->cmd->yd;
+  biped->cmd->zdd = biped->cmd->zd;
 
   zVec3DCopy( &state->com_pos, &v );
   zVec3DSetElem( &v, zZ, com_height );
@@ -274,6 +277,7 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
 {
   zVec3D pd;
   double ref_dist;
+  double s, c, dx, dy;
 
   pdCZSetRho( pdBipedCZPtr(biped), biped->cmd->rho );
   pdCZSetQ2U( pdBipedCZPtr( biped ), biped->cmd->qu2 );
@@ -306,6 +310,36 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
   pdCZAutoUpdateRef( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
   biped->cmd->xd = pd.e[zX];
   biped->cmd->yd = pd.e[zY];
+
+  if( biped->mode.warping ){
+    dx = 0.1 * ( biped->cmd->xdd - biped->cmd->xd );
+    dy = 0.1 * ( biped->cmd->ydd - biped->cmd->yd );
+    if( dx > 0.01 )
+      dx = zSgn( dx ) * zMax( fabs(dx), 0.05 );
+    if( dy > 0.01 )
+      dy = zSgn( dy ) * zMax( fabs(dy), 0.01 );
+    zSinCos( pdCZTheta( pdBipedCZPtr( biped ) ), &s, &c );
+    pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
+    if( biped->mode.stepping ){
+      pdCZSetRefVelU( pdBipedCZPtr( biped ), -s*dx+c*dy );
+      pdCZSetRefVelW( pdBipedCZPtr( biped ), -c*dx-s*dy );
+      if( !zIsTiny( pdCZRefVelW(pdBipedCZPtr(biped)) ) ){
+        if( pdStateBFOff( state, pdCZRefVelW(pdBipedCZPtr(biped)) ) )
+          ref_dist = _pdBipedCalcDesFootDistFollow( biped, state );
+        else if( pdStateFFOff( state, pdCZRefVelW(pdBipedCZPtr(biped)) ) )
+          ref_dist = _pdBipedCalcDesFootDistBrake( biped, state );
+        else if( pdCZVelW( pdBipedCZPtr(biped) ) * pdCZRefVelW(pdBipedCZPtr(biped)) > 0 )
+          ref_dist = _pdBipedCalcDesFootDistFollowToBrake( biped, state );
+        else
+          ref_dist = _pdBipedCalcDesFootDistBrakeToFollow( biped, state );
+        pdCZSetDist( pdBipedCZPtr( biped ), ref_dist );
+      }
+    }
+  } else {
+    biped->cmd->xdd = biped->cmd->xd;
+    biped->cmd->ydd = biped->cmd->yd;
+    biped->cmd->zdd = biped->cmd->zd;
+  }
 }
 
 void pdBipedUpdate(pdBiped *biped, pdState *state)

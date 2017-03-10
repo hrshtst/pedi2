@@ -234,7 +234,7 @@ void joystickCtrlInit(void)
   rkglCALookAt( &cam[0], 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 );
 
   /* birdview */
-  zxWindowCreate( &win[1], width, 0, width+8, height+32 );
+  zxWindowCreate( &win[1], width+80, 0, width+8, height+32 );
   zxWindowSetTitle( &win[1], JOYSTICK_CTRL_TITLE" (birdview)" );
   zxWindowOpen( &win[1] );
   zxWindowSetBG( &win[1], (char *)"lightgray" );

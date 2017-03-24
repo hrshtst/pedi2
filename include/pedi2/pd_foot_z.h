@@ -42,7 +42,9 @@ __EXPORT void pdFootZSetSR(pdFootZ *fz, zVec3D p[], int num);
 
 /* calculation method */
 #define pdFootZCalcZMPPhase(f,d,v,z,pz) pdCZHrzUWCalcZMPPhase( pdFootZCZPtr(f), d, v, z, pz )
-__EXPORT double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zComplex *pz);
+__EXPORT int pdFootZFindIntersection(pdFootZ *f, zVec2D zmp, zVec3D ip[]);
+__EXPORT int pdFootZFindInnerPoint(pdFootZ *f, zVec2D zmp, zVec3D *p);
+__EXPORT double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D delta, zVec2D vel, zVec2D zmp);
 __EXPORT double pdFootZCalcRefZ(pdFootZ *pf, double phase, zComplex *pz);
 
 /* update method */

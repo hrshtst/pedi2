@@ -15,6 +15,7 @@ typedef struct{
   zVec3D _acc;      /* COM acceleration */
   zVec3D _zmp;      /* ZMP position */
   double _fz;       /* vertial reaction force */
+  zVec3D _ef;       /* external force */
   double _theta;    /* rotational angle */
   zVec3DList *_sr;  /* supporting region */
 
@@ -71,6 +72,10 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZZMPY(c)     zVec3DElem( pdCZZMP(c), zY )
 #define pdCZZMPZ(c)     zVec3DElem( pdCZZMP(c), zZ )
 #define pdCZFZ(c)      (c)->_fz
+#define pdCZExtF(c)    ( &(c)->_ef )
+#define pdCZExtFX(c)   zVec3DElem( pdCZExtF(c), zX )
+#define pdCZExtFY(c)   zVec3DElem( pdCZExtF(c), zY )
+#define pdCZExtFZ(c)   zVec3DElem( pdCZExtF(c), zZ )
 #define pdCZTheta(c)   (c)->_theta
 #define pdCZSR(c)      (c)->_sr
 #define pdCZVrtPtr(c)  ( &(c)->_vrt )
@@ -159,6 +164,11 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetZMPY(c,yz)         zVec3DSetElem( pdCZZMP(c), zY, yz )
 #define pdCZSetZMPZ(c,zz)         zVec3DSetElem( pdCZZMP(c), zZ, zz )
 #define pdCZSetFZ(c,fz)           ( (c)->_fz = (fz) )
+#define pdCZSetExtF(c,x,y,z)      zVec3DCreate( pdCZExtF(c), x, y, z )
+#define pdCZSetExtFVec(c,ef)      zVec3DCopy( ef, pdCZExtF(c) )
+#define pdCZSetExtFX(c,x)         zVec3DSetElem( pdCZExtF(c), zX, x )
+#define pdCZSetExtFY(c,y)         zVec3DSetElem( pdCZExtF(c), zY, y )
+#define pdCZSetExtFZ(c,z)         zVec3DSetElem( pdCZExtF(c), zZ, z )
 #define pdCZSetTheta(c,t)         ( (c)->_theta = (t) )
 #define pdCZSetSR(c,sr)           ( (c)->_sr = (sr) )
 #define pdCZSetQ1Z(c,q1)          pdCZVrtSetQ1( pdCZVrtPtr(c), q1 )
@@ -194,11 +204,13 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 
 /* calculation method */
 __EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);
+__EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D refuw, double delta_theta);
 __EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
 
 /* update method */
-__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, double theta, zVec3DList *sr);
-__EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *comd, double *thetad);
+__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zVec3DList *sr);
+__EXPORT void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad);
+__EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
 
 /* output method */
 __EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);

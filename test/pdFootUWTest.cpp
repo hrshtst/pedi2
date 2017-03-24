@@ -155,8 +155,8 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsZero)
   EXPECT_NEAR( 2*sqrt(3)+0.5, refpos[pdW], 1e-12 );
   // right foot
   pdFootUWCalcRefPos( &rf, delta, vel, regzmp, refpos );
-  EXPECT_NEAR( 2.0,       refpos[pdU], 1e-12 );
-  EXPECT_NEAR( 2*sqrt(3)-0.5, refpos[pdW], 1e-12 );
+  EXPECT_NEAR( 2.0, refpos[pdU], 1e-12 );
+  EXPECT_NEAR( 1.0, refpos[pdW], 1e-12 );
 }
 
 TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
@@ -175,8 +175,8 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
   EXPECT_NEAR( 1+1.75*sqrt(3), refpos[pdW], 1e-12 );
   // right foot
   pdFootUWCalcRefPos( &rf, delta, vel, regzmp, refpos );
-  EXPECT_NEAR( 0.75,           refpos[pdU], 1e-12 );
-  EXPECT_NEAR( 1+1.25*sqrt(3), refpos[pdW], 1e-12 );
+  EXPECT_NEAR( 2.0, refpos[pdU], 1e-12 );
+  EXPECT_NEAR( 1.0, refpos[pdW], 1e-12 );
 }
 
 TEST_F(pdFootUWTest, Update)
@@ -195,6 +195,6 @@ TEST_F(pdFootUWTest, Update)
   EXPECT_NEAR( 1+1.75*sqrt(3), pdFootUWRefPosW(&lf), 1e-12 );
   // right foot
   pdFootUWUpdate( &rf, delta, vel );
-  EXPECT_NEAR( 0.75,           pdFootUWRefPosU(&rf), 1e-12 );
-  EXPECT_NEAR( 1+1.25*sqrt(3), pdFootUWRefPosW(&rf), 1e-12 );
+  EXPECT_NEAR( 2.0, pdFootUWRefPosU(&rf), 1e-12 );
+  EXPECT_NEAR( 1.0, pdFootUWRefPosW(&rf), 1e-12 );
 }

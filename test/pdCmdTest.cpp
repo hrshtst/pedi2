@@ -16,6 +16,12 @@ class pdCmdTest : public testing::Test {
       cmd.entry[i] = ri.rand();
   }
 
+  void Stop() {
+    cmd.rho = 0;
+    cmd.vud = 0;
+    cmd.vwd = 0;
+  };
+
   RandomInitializer ri;
   pdCmd cmd;
 };
@@ -44,6 +50,9 @@ TEST_F(pdCmdTest, Init)
   EXPECT_EQ( 0, cmd.xd );
   EXPECT_EQ( 0, cmd.yd );
   EXPECT_EQ( 0, cmd.zd );
+  EXPECT_EQ( 0, cmd.xdd );
+  EXPECT_EQ( 0, cmd.ydd );
+  EXPECT_EQ( 0, cmd.zdd );
   EXPECT_EQ( 0, cmd.thetad );
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
@@ -86,6 +95,9 @@ TEST_F(pdCmdTest, Destroy)
   EXPECT_EQ( 0, cmd.xd );
   EXPECT_EQ( 0, cmd.yd );
   EXPECT_EQ( 0, cmd.zd );
+  EXPECT_EQ( 0, cmd.xdd );
+  EXPECT_EQ( 0, cmd.ydd );
+  EXPECT_EQ( 0, cmd.zdd );
   EXPECT_EQ( 0, cmd.thetad );
   EXPECT_EQ( 0, cmd.vud );
   EXPECT_EQ( 0, cmd.vwd );
@@ -110,4 +122,58 @@ TEST_F(pdCmdTest, Destroy)
   EXPECT_EQ( 0, cmd.rfcz );
   EXPECT_EQ( 0, cmd.lfh );
   EXPECT_EQ( 0, cmd.rfh );
+}
+
+TEST_F(pdCmdTest, TryStop)
+{
+  Stop();
+  EXPECT_TRUE( pdCmdTryStop( &cmd ) );
+
+  Stop();
+  cmd.rho = 1;
+  EXPECT_FALSE( pdCmdTryStop( &cmd ) );
+
+  Stop();
+  cmd.vud = 1;
+  EXPECT_FALSE( pdCmdTryStop( &cmd ) );
+
+  Stop();
+  cmd.vwd = 1;
+  EXPECT_FALSE( pdCmdTryStop( &cmd ) );
+}
+
+TEST_F(pdCmdTest, TryStep)
+{
+  Stop();
+  EXPECT_FALSE( pdCmdTryStep( &cmd ) );
+
+  cmd.rho = 1;
+  EXPECT_TRUE( pdCmdTryStep( &cmd ) );
+}
+
+TEST_F(pdCmdTest, TryWalk)
+{
+  Stop();
+  EXPECT_FALSE( pdCmdTryWalk( &cmd ) );
+
+  cmd.vud = 1;
+  EXPECT_TRUE( pdCmdTryWalk( &cmd ) );
+}
+
+TEST_F(pdCmdTest, TryWalkSideways)
+{
+  Stop();
+  EXPECT_FALSE( pdCmdTryWalkSideways( &cmd ) );
+
+  cmd.vwd = 1;
+  EXPECT_TRUE( pdCmdTryWalkSideways( &cmd ) );
+}
+
+TEST_F(pdCmdTest, TryWarp)
+{
+  Stop();
+  EXPECT_FALSE( pdCmdTryWarp( &cmd ) );
+
+  cmd.xdd = 1;
+  EXPECT_TRUE( pdCmdTryWarp( &cmd ) );
 }

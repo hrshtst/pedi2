@@ -21,6 +21,7 @@ typedef struct{
   zVec3D zmp;       /* actual ZMP position */
   zVec3D deszmp;    /* desired ZMP position */
   double fz;
+  zVec3D ef;        /* external force */
   zVec3DList sr_lf;
   zVec3DList sr_rf;
   zVec3DList sr;
@@ -31,6 +32,19 @@ __EXPORT void pdStateInit(pdState *state);
 __EXPORT void pdStateDestroy(pdState *state);
 
 /* methods to get parameters */
+__EXPORT bool pdStateFootIsOn(pdState *state, zVec3D *p, zVec3DList *sr);
+#define pdStateFootIsOff(s,p,sr) !pdStateFootIsOn( s, p, sr )
+#define pdStateLFIsOn(s)  pdStateFootIsOn( s, &(s)->lf_pos, &(s)->sr_lf )
+#define pdStateLFIsOff(s) pdStateFootIsOff( s, &(s)->lf_pos, &(s)->sr_lf )
+#define pdStateRFIsOn(s)  pdStateFootIsOn( s, &(s)->rf_pos, &(s)->sr_rf )
+#define pdStateRFIsOff(s) pdStateFootIsOff( s, &(s)->rf_pos, &(s)->sr_rf )
+#define pdStateBothFeetOn(s) ( pdStateLFIsOn( s ) && pdStateRFIsOn( s ) )
+#define pdStateEitherFootOn(s) ( pdStateLFIsOn( s ) || pdStateRFIsOn( s ) )
+#define pdStateEitherFootOff(s) ( pdStateLFIsOff( s ) || pdStateRFIsOff( s ) )
+__EXPORT bool pdStateFFOn(pdState *state, double vwd);
+#define pdStateFFOff(s,vwd) !pdStateFFOn( s, vwd )
+__EXPORT bool pdStateBFOn(pdState *state, double vwd);
+#define pdStateBFOff(s,vwd) !pdStateBFOn( s, vwd )
 __EXPORT double pdStateFootDist(pdState *state);
 
 /* output method  */

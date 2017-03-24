@@ -9,6 +9,7 @@ class RandomInitializer {
 
   double rand() { return mt_(); };
   double SetRandScalar(double &s);
+  bool SetRandBool(bool &b);
   zVec3D &SetRandVec3D(zVec3D &v);
   zVec3D *SetRandVec3D(zVec3D *v);
 

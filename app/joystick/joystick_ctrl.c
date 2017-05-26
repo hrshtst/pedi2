@@ -101,8 +101,8 @@ void* joystickCtrlCommand(void *args)
     aviator_action( &av, NULL );
     pthread_setcanceltype( PTHREAD_CANCEL_DEFERRED, &last_tmp );
     cmd.vud   = -0.15 * av.pitch / JOYSTICK_CTRL_VAL_LIM;
-    cmd.vwd   = -0.15 * av.roll  / JOYSTICK_CTRL_VAL_LIM;
-    cmd.kappa = -2.5 * av.yaw   / JOYSTICK_CTRL_VAL_LIM;
+    cmd.vwd   = -0.1  * av.roll  / JOYSTICK_CTRL_VAL_LIM;
+    cmd.kappa = -2.5  * av.yaw   / JOYSTICK_CTRL_VAL_LIM;
     pthread_setcanceltype( PTHREAD_CANCEL_ASYNCHRONOUS, &last_tmp );
   }
   return NULL;

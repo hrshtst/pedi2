@@ -1808,8 +1808,8 @@ shape: backpack
 [link]
 name: left_shoulder_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-90
 mass: 0.1197244
 COM: { -0.006323351846, 0.00254507, -0.04014364695 }
 inertia: {
@@ -1828,8 +1828,8 @@ parent: body
 [link]
 name: left_shoulder_abduction
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min: 0
 mass: 0.10555682
 COM: { -0.002156860001, 0.03633513, 0.00088884 }
 inertia: {
@@ -1848,8 +1848,8 @@ parent: left_shoulder_flexion
 [link]
 name: left_elbow_rotation
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-90
 mass: 0.05282283
 COM: { 1.71799989e-05, -0.0003734, -0.03206036 }
 inertia: {
@@ -1867,8 +1867,8 @@ parent: left_shoulder_abduction
 [link]
 name: left_elbow_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min: 0
 mass: 0.14803517
 COM: { 0.002054120001, 0.03310601, 0.00596994 }
 inertia: {
@@ -1898,8 +1898,8 @@ parent: left_elbow_flexion
 [link]
 name: left_hip_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-30
 mass: 0.08925132
 COM: { -4.987e-05, -0.00503745, -0.02482584 }
 inertia: {
@@ -1917,8 +1917,8 @@ parent: body
 [link]
 name: left_hip_abduction
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-30
 mass: 0.33325766
 COM: { 0.00652699, 0.04284612, 0.01024526 }
 inertia: {
@@ -1937,8 +1937,8 @@ parent: left_hip_flexion
 [link]
 name: left_knee_rotation
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-90
 mass: 0.06166437
 COM: { -4.224e-05, 0.00688923, -0.0366588 }
 inertia: {
@@ -1956,8 +1956,8 @@ parent: left_hip_abduction
 [link]
 name: left_knee_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 100
+min:  0
 mass: 0.34825999
 COM: { -0.00355355, 0.04626382, -0.00208003 }
 inertia: {
@@ -1976,8 +1976,8 @@ parent: left_knee_rotation
 [link]
 name: left_ankle_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-20
 mass: 0.07703362
 COM: { -0.00284314, -0.00039004, 0.00057882 }
 inertia: {
@@ -1995,8 +1995,8 @@ parent: left_knee_flexion
 [link]
 name: left_ankle_abduction
 jointtype: revolute
-max: 120
-min:-120
+max: 20
+min:-90
 mass: 0.30739413
 COM: { 6.21e-06, -0.0350137, 0.02985157 }
 inertia: {
@@ -2026,8 +2026,8 @@ parent: left_ankle_abduction
 [link]
 name: right_shoulder_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-90
 mass: 0.1197244
 COM: { -0.006323351846, 0.00254507, 0.04014364695 }
 inertia: {
@@ -2046,8 +2046,8 @@ parent: body
 [link]
 name: right_shoulder_abduction
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min: 0
 mass: 0.10555682
 COM: { -0.002156860001, 0.03633513, -0.00088884 }
 inertia: {
@@ -2066,8 +2066,8 @@ parent: right_shoulder_flexion
 [link]
 name: right_elbow_rotation
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-90
 mass: 0.05282283
 COM: { 1.71799989e-05, -0.0003734, 0.03206036 }
 inertia: {
@@ -2085,8 +2085,8 @@ parent: right_shoulder_abduction
 [link]
 name: right_elbow_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min: 0
 mass: 0.14803517
 COM: { 0.002054120001, 0.03310601, -0.00596994 }
 inertia: {
@@ -2116,8 +2116,8 @@ parent: right_elbow_flexion
 [link]
 name: right_hip_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-30
 mass: 0.08925132
 COM: { -4.987e-05, -0.00503745, 0.02482584 }
 inertia: {
@@ -2135,8 +2135,8 @@ parent: body
 [link]
 name: right_hip_abduction
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-30
 mass: 0.33325766
 COM: { 0.00652699, 0.04284612, -0.01024526 }
 inertia: {
@@ -2155,8 +2155,8 @@ parent: right_hip_flexion
 [link]
 name: right_knee_rotation
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-90
 mass: 0.06166437
 COM: { -4.224e-05, 0.00688923, 0.0366588 }
 inertia: {
@@ -2174,8 +2174,8 @@ parent: right_hip_abduction
 [link]
 name: right_knee_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 100
+min:   0
 mass: 0.34825999
 COM: { -0.00355355, 0.04626382, 0.00208003 }
 inertia: {
@@ -2194,8 +2194,8 @@ parent: right_knee_rotation
 [link]
 name: right_ankle_flexion
 jointtype: revolute
-max: 120
-min:-120
+max: 90
+min:-20
 mass: 0.07703362
 COM: { -0.00284314, -0.00039004, -0.00057882 }
 inertia: {
@@ -2213,8 +2213,8 @@ parent: right_knee_flexion
 [link]
 name: right_ankle_abduction
 jointtype: revolute
-max: 120
-min:-120
+max: 20
+min:-90
 mass: 0.30739413
 COM: { 6.21e-06, -0.0350137, -0.02985157 }
 inertia: {

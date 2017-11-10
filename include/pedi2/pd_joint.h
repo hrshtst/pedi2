@@ -33,6 +33,7 @@ typedef struct _pdJoint{
   double output;
   bool is_set_vel;
   bool is_set_refvel;
+  int offset;
   void *_prm;
   pdJointMethod *_met;
 } pdJoint;
@@ -46,6 +47,7 @@ typedef struct _pdJoint{
 #define pdJointRefDisOld(j) ( (j)->refdisold )
 #define pdJointRefVelOld(j) ( (j)->refvelold )
 #define pdJointOutput(j)    ( (j)->output )
+#define pdJointOffset(j)    ( (j)->offset )
 
 #define pdJointInit(j) do{\
   zNameSet( j, NULL );\
@@ -60,6 +62,7 @@ typedef struct _pdJoint{
   pdJointOutput(j) = 0;\
   (j)->is_set_vel = false;\
   (j)->is_set_refvel = false;\
+  pdJointSetOffset( j, 0 ); \
   (j)->_prm = NULL;\
   (j)->_met = NULL;\
 } while(0)
@@ -71,6 +74,7 @@ typedef struct _pdJoint{
 #define pdJointRefresh(j,q)   (j)->_met->refresh( j, q )
 #define pdJointUpdate(j,dt)   (j)->_met->update( j, dt )
 #define pdJointDestroy(j)     (j)->_met->destroy( j )
+#define pdJointSetOffset(j,o) ( (j)->offset = (o) )
 
 __EXPORT void pdJointSetDisDefault(pdJoint *joint, double dis);
 __EXPORT void pdJointSetVelDefault(pdJoint *joint, double vel);
@@ -90,6 +94,8 @@ zArrayClass( pdJointArray, pdJoint );
 #define pdJointArrayRefDis(arr,i)   pdJointRefDis( zArrayElem(arr,i) )
 #define pdJointArrayRefVel(arr,i)   pdJointRefVel( zArrayElem(arr,i) )
 #define pdJointArrayOutput(arr,i)   pdJointOutput( zArrayElem(arr,i) )
+#define pdJointArrayOffset(arr,i)   pdJointOffset( zArrayElem(arr,i) )
+#define pdJointArraySetOffset(arr,i,o) pdJointSetOffset( zArrayElem(arr,i), o )
 
 __EXPORT void pdJointArraySetDis(pdJointArray *arr, zVec q);
 __EXPORT void pdJointArraySetVel(pdJointArray *arr, zVec v);
@@ -101,10 +107,11 @@ __EXPORT void pdJointArrayDestroy(pdJointArray *arr);
 
 __EXPORT bool pdJointArrayAlloc(pdJointArray *arr, int n);
 __EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
-__EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr);
-__EXPORT bool pdJointArrayReadFile(pdJointArray *arr, const char *filename);
+__EXPORT bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c);
+__EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c);
+__EXPORT bool pdJointArrayReadFile(pdJointArray *arr, const char *filename, rkChain *c);
 
-__EXPORT zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c);
+__EXPORT zIndex pdJointArrayCreateIndex(pdJointArray *arr);
 __EXPORT void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q);
 __EXPORT void pdJointArraySetVelIndex(pdJointArray *arr, zIndex idx, zVec v);
 __EXPORT void pdJointArraySetRefDisIndex(pdJointArray *arr, zIndex idx, zVec qref);

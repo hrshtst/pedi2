@@ -193,11 +193,15 @@ void pdJointArrayDestroy(pdJointArray *arr)
 
 bool pdJointArrayAlloc(pdJointArray *arr, int n)
 {
+  register int i;
+
   zArrayAlloc( arr, pdJoint, n );
   if( !zArrayBuf(arr) ){
     ZALLOCERROR();
     return false;
   }
+  for( i=0; i<(int)zArrayNum(arr); i++ )
+    pdJointSetOffset( zArrayElem(arr,i), i );
   return true;
 }
 
@@ -223,6 +227,47 @@ pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name)
   return joint;
 }
 
+static rkLink *_rkChainLinkFindName(rkChain *c, const char *name);
+rkLink *_rkChainLinkFindName(rkChain *c, const char *name)
+{
+  rkLink *link;
+
+  zNameFind( rkChainRoot(c), rkChainNum(c), name, link );
+  return link;
+}
+
+zIndex pdJointArrayCreateIndex(pdJointArray *arr)
+{
+  register int i;
+  zIndex index;
+
+  if( !( index = zIndexCreate( zArrayNum(arr) ) ) ){
+    ZALLOCERROR();
+    return NULL;
+  }
+  for( i=0; i<(int)zArrayNum(arr); i++ ){
+    zIndexSetElem( index, i, pdJointArrayOffset( arr, i ) );
+  }
+  return index;
+}
+
+bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c)
+{
+  register int i;
+  rkLink *link;
+
+  for( i=0; i<(int)zArrayNum(arr); i++ ){
+    link = _rkChainLinkFindName(c,zName(zArrayElem(arr,i)));
+    if( !link ){
+      ZRUNERROR( "joint %s cannot be found in robot model",
+                 zName(zArrayElem(arr,i)) );
+      return false;
+    } else
+      pdJointArraySetOffset( arr, i, rkLinkOffset(link) );
+  }
+  return true;
+}
+
 typedef struct{
   pdJointArray *arr;
   int count;
@@ -243,19 +288,53 @@ bool _pdJointArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
   return true;
 }
 
-bool pdJointArrayFRead(FILE *fp, pdJointArray *arr)
+static void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*));
+void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*))
+{
+  register int i, j;
+  uint s;
+  pdJoint *saved, *value;
+
+  s = sizeof(pdJoint);
+  saved = zAlloc( pdJoint, 1 );
+  for( j=1; j<(int)zArrayNum(arr); j++ ){
+    i = j - 1;
+    value = zArrayElem(arr, j);
+    while( i >= 0 && cmp(zArrayElem(arr,i), value) > 0 ) i--;
+    if( ++i == j ) continue;
+    memmove( saved, value, s );
+    memmove( zArrayElem(arr,i+1), zArrayElem(arr,i), s*(j-i) );
+    memmove( zArrayElem(arr,i), saved, s );
+  }
+  zFree( saved );
+}
+
+static int _pdJointOffsetCmp(pdJoint *p, pdJoint *q);
+int _pdJointOffsetCmp(pdJoint *p, pdJoint *q)
+{
+  if( pdJointOffset(p) == pdJointOffset(q) ) return 0;
+  return ( pdJointOffset(p) > pdJointOffset(q) ) ? 1 : -1;
+}
+
+bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c)
 {
   _pdJointArrayParam prm;
+  bool result;
 
   zArrayInit( arr );
   if( !_pdJointFAlloc( fp, arr ) ) return false;
   rewind( fp );
   prm.count = 0;
   prm.arr = arr;
-  return zTagFRead( fp, _pdJointArrayFRead, &prm );
+  result = zTagFRead( fp, _pdJointArrayFRead, &prm );
+  if( c )
+    result &= pdJointArraySetOffsetMapping( arr, c );
+  if( result )
+    _pdJointArrayInsertionSort( arr, _pdJointOffsetCmp );
+  return result;
 }
 
-bool pdJointArrayReadFile(pdJointArray *arr, const char *filename)
+bool pdJointArrayReadFile(pdJointArray *arr, const char *filename, rkChain *c)
 {
   FILE *fp;
   bool result;
@@ -264,41 +343,9 @@ bool pdJointArrayReadFile(pdJointArray *arr, const char *filename)
     ZOPENERROR( filename );
     return false;
   }
-  result = pdJointArrayFRead( fp, arr );
+  result = pdJointArrayFRead( fp, arr, c );
   fclose( fp );
   return result;
-}
-
-static rkLink *_rkChainLinkFindName(rkChain *c, const char *name);
-rkLink *_rkChainLinkFindName(rkChain *c, const char *name)
-{
-  rkLink *link;
-
-  zNameFind( rkChainRoot(c), rkChainNum(c), name, link );
-  return link;
-}
-
-zIndex pdJointArrayCreateDefaultIndex(pdJointArray *arr, rkChain *c)
-{
-  register int i;
-  zIndex index;
-  rkLink *link;
-
-  if( !( index = zIndexCreate( zArrayNum(arr) ) ) ){
-    ZALLOCERROR();
-    return NULL;
-  }
-  for( i=0; i<(int)zArrayNum(arr); i++ ){
-    link = _rkChainLinkFindName(c,zName(zArrayElem(arr,i)));
-    if( !link ){
-      ZRUNERROR( "joint %s cannot be found in robot model",
-                 zName(zArrayElem(arr,i)) );
-      zIndexFree( index );
-      return NULL;
-    } else
-      zIndexSetElem( index, i, rkLinkOffset(link) );
-  }
-  return index;
 }
 
 #define PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH \

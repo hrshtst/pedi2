@@ -39,12 +39,12 @@ pdFilter *pdFilterFReadNone(FILE *fp, pdFilter *filter)
 }
 
 pdFilterMethod pd_filter_none_met = {
-  type: "none",
-  destroy: pdFilterDestroyNone,
-  refresh: pdFilterRefreshNone,
-  update: pdFilterUpdateNone,
-  clone: pdFilterCloneNone,
-  fread: pdFilterFReadNone,
+  "none",
+  pdFilterDestroyNone,
+  pdFilterRefreshNone,
+  pdFilterUpdateNone,
+  pdFilterCloneNone,
+  pdFilterFReadNone,
 };
 
 bool pdFilterCreateNone(pdFilter *filter)

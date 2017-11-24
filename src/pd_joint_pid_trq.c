@@ -66,15 +66,15 @@ pdJoint *pdJointFReadPIDTrq(FILE *fp, pdJoint *joint)
 }
 
 pdJointMethod pd_joint_pid_trq_met = {
-  type: "PIDtrq",
-  setdis: pdJointSetDisDefault,
-  setvel: pdJointSetVelDefault,
-  setrefdis: pdJointSetRefDisDefault,
-  setrefvel: pdJointSetRefVelDefault,
-  refresh: pdJointRefreshDefault,
-  update: pdJointUpdatePIDTrq,
-  destroy: pdJointDestroyPIDTrq,
-  fread: pdJointFReadPIDTrq,
+  "PIDtrq",
+  pdJointSetDisDefault,
+  pdJointSetVelDefault,
+  pdJointSetRefDisDefault,
+  pdJointSetRefVelDefault,
+  pdJointRefreshDefault,
+  pdJointUpdatePIDTrq,
+  pdJointDestroyPIDTrq,
+  pdJointFReadPIDTrq,
 };
 
 bool pdJointCreatePIDTrq(pdJoint *joint, double pgain, double igain, double dgain)

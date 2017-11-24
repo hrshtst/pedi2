@@ -83,12 +83,12 @@ pdFilter *pdFilterFReadBW(FILE *fp, pdFilter *filter)
 }
 
 pdFilterMethod pd_filter_bw_met = {
-  type: "bw",
-  destroy: pdFilterDestroyBW,
-  refresh: pdFilterRefreshBW,
-  update: pdFilterUpdateBW,
-  clone: pdFilterCloneBW,
-  fread: pdFilterFReadBW,
+  "bw",
+  pdFilterDestroyBW,
+  pdFilterRefreshBW,
+  pdFilterUpdateBW,
+  pdFilterCloneBW,
+  pdFilterFReadBW,
 };
 
 bool pdFilterCreateBW(pdFilter *filter, double cf, int dim)

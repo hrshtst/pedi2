@@ -112,11 +112,11 @@ pdSensor *pdSensorFRead6FT(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr)
 }
 
 pdSensorMethod pd_sensor_6ft_met = {
-  type: "6ft",
-  destroy: pdSensorDestroy6FT,
-  process: pdSensorProcess6FT,
-  frameupdate: pdSensorFrameUpdate6FT,
-  fread: pdSensorFRead6FT,
+  "6ft",
+  pdSensorDestroy6FT,
+  pdSensorProcess6FT,
+  pdSensorFrameUpdate6FT,
+  pdSensorFRead6FT,
 };
 
 bool pdSensorCreate6FT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr)

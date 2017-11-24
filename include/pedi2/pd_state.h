@@ -3,6 +3,7 @@
 
 #include <zeo/zeo_vec3d.h>
 #include <zeo/zeo_mat3d.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

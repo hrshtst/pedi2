@@ -2,6 +2,7 @@
 #define __PD_FILTER_H__
 
 #include <dzco/dz_sys.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

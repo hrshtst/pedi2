@@ -2,6 +2,7 @@
 #define __PD_FOOT_Z_H__
 
 #include <pedi2/pd_cz_hrz_uw.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

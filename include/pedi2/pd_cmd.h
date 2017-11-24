@@ -2,6 +2,7 @@
 #define __PD_CMD_H__
 
 #include <zeo/zeo_vec3d.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

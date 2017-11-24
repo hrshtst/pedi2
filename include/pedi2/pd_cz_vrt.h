@@ -3,6 +3,7 @@
 
 #include <roki/rk_g.h>
 #include <zm/zm.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

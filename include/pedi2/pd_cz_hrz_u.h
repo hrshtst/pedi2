@@ -4,6 +4,7 @@
 #include <zm/zm.h>
 #include <zeo/zeo_vec2d.h>
 #include <pedi2/pd_misc.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

@@ -4,6 +4,7 @@
 #include <roki/rk_ik.h>
 #include <pedi2/pd_biped.h>
 #include <pedi2/pd_state.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

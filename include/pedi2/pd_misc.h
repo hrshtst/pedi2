@@ -2,6 +2,7 @@
 #define __PD_MISC_H__
 
 #include <cure/cure.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

@@ -6,6 +6,7 @@
 #include <pedi2/pd_cmd.h>
 #include <pedi2/pd_state.h>
 #include <pedi2/pd_mode.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

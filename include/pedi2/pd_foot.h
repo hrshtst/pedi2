@@ -4,6 +4,7 @@
 #include <pedi2/pd_cz_hrz.h>
 #include <pedi2/pd_foot_uw.h>
 #include <pedi2/pd_foot_z.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

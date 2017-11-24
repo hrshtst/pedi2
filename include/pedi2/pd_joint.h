@@ -3,6 +3,7 @@
 
 #include <zm/zm_vec.h>
 #include <roki/rk_chain.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

@@ -3,6 +3,7 @@
 
 #include <pedi2/pd_filter.h>
 #include <pedi2/pd_sensor.h>
+#include <pedi2/pd_exportdecl.h>
 
 __BEGIN_DECLS
 

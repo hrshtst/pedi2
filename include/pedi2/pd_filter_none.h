@@ -7,7 +7,7 @@ __BEGIN_DECLS
 
 __EXPORT bool pdFilterCreateNone(pdFilter *filter);
 
-extern pdFilterMethod pd_filter_none_met;
+__EXPORT extern pdFilterMethod pd_filter_none_met;
 
 __END_DECLS
 

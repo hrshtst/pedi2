@@ -12,7 +12,7 @@ __EXPORT zVec3D *pdSensor6FTGetT(pdSensor *sensor, zVec3D *tau);
 __EXPORT zVec3D *pdSensor6FTGetWldF(pdSensor *sensor, zVec3D *f);
 __EXPORT zVec3D *pdSensor6FTGetWldT(pdSensor *sensor, zVec3D *tau);
 
-extern pdSensorMethod pd_sensor_6ft_met;
+__EXPORT extern pdSensorMethod pd_sensor_6ft_met;
 
 __END_DECLS
 

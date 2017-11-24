@@ -7,7 +7,7 @@ __BEGIN_DECLS
 
 __EXPORT bool pdFilterCreateBW(pdFilter *filter, double cf, int dim);
 
-extern pdFilterMethod pd_filter_bw_met;
+__EXPORT extern pdFilterMethod pd_filter_bw_met;
 
 __END_DECLS
 

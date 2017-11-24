@@ -12,7 +12,7 @@ __EXPORT void pdJointPIDTrqSetPgain(pdJoint *joint, double pgain);
 __EXPORT void pdJointPIDTrqSetIgain(pdJoint *joint, double igain);
 __EXPORT void pdJointPIDTrqSetDgain(pdJoint *joint, double dgain);
 
-extern pdJointMethod pd_joint_pid_trq_met;
+__EXPORT extern pdJointMethod pd_joint_pid_trq_met;
 
 __END_DECLS
 

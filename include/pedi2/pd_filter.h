@@ -18,7 +18,7 @@ typedef struct{
 } pdFilterMethod;
 
 typedef struct _pdFilter{
-  Z_NAMED_CLASS;
+  Z_NAMED_CLASS
   double input;
   double output;
   void *_prm;

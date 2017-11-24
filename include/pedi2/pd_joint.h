@@ -22,7 +22,7 @@ typedef struct{
 } pdJointMethod;
 
 typedef struct _pdJoint{
-  Z_NAMED_CLASS;
+  Z_NAMED_CLASS
   double dis;
   double vel;
   double disold;

@@ -18,7 +18,7 @@ typedef struct{
 } pdSensorMethod;
 
 typedef struct _pdSensor{
-  Z_NAMED_CLASS;
+  Z_NAMED_CLASS
   int size;
   zVec input;
   zVec output;

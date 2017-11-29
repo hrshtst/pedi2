@@ -196,7 +196,7 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
   }
   return true;
  ERROR:
-  pdRobotDestroy( robot );
+  /* pdRobotDestroy( robot ); */
   return false;
 }
 

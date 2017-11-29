@@ -12,6 +12,7 @@ int main(void)
   pdBiped biped;  /* bipdal locomotion controller */
   pdRobot robot;  /* robot model instance */
   zVec dis;       /* joint displacement vector */
+  char modelfile[BUFSIZ];
   register int i;
 
   /* initialization */
@@ -21,7 +22,12 @@ int main(void)
   pdRobotInit( &robot );
 
   /* load kinematics/dynamics model file (robot.zkc) */
-  if( !pdRobotLoad( &robot, "model/hydra.zkc" ) )
+#ifdef _WIN32
+  sprintf( modelfile, "..\\..\\..\\..\\pedi2\\app\\model\\hydra.zkc" );
+#else
+  sprintf( modelfile, "model/hydra.zkc" );
+#endif
+  if( !pdRobotLoad( &robot, modelfile ) )
     exit( EXIT_FAILURE );
 
   /* prepare joint displacement vector */

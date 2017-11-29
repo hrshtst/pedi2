@@ -69,6 +69,16 @@ struct _pdRobotLookup *_pdRobotLookupCell(rkIKCMat_fp cmat_fp)
 {
   struct _pdRobotLookup *lookup;
 
+  /* This is a stupid workaround for MSVC 2010 */
+  __pd_robot_lookup[0].cmat_fp = rkIKJacobiLinkWldLin;
+  __pd_robot_lookup[1].cmat_fp = rkIKJacobiLinkWldAng;
+  __pd_robot_lookup[2].cmat_fp = rkIKJacobiLinkL2LLin;
+  __pd_robot_lookup[3].cmat_fp = rkIKJacobiLinkL2LAng;
+  __pd_robot_lookup[4].cmat_fp = rkIKJacobiCOM;
+  __pd_robot_lookup[5].cmat_fp = rkIKJacobiAM;
+  __pd_robot_lookup[6].cmat_fp = rkIKJacobiAMCOM;
+  /* ****************************************** */
+
   for( lookup=__pd_robot_lookup; lookup->cmat_fp; lookup++ )
     if( cmat_fp == lookup->cmat_fp ) return lookup;
   ZRUNERROR( "unknown Jacobian matrix" );

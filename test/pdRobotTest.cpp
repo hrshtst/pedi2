@@ -204,6 +204,30 @@ TEST_F(pdRobotTest, FK)
   zVecFree( dis );
 }
 
+TEST_F(pdRobotTest, FK_CheckJointVel)
+{
+  zVec dis, vel;
+
+  LoadAndSolveIK();
+  dis = zVecAlloc( 26 );
+  vel = zVecAlloc( 26 );
+  zVecClear( dis );
+  zVecSetElem( dis,  7, 0.01 );
+  zVecSetElem( dis,  8, 0.02 );
+  zVecSetElem( dis,  9, 0.03 );
+  zVecSetElem( dis, 10, 0.04 );
+  zVecSetElem( dis, 11, 0.05 );
+
+  pdRobotFK( &robot, dis );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotGetJointVelAll( &robot, vel );
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem( vel, i ) );
+  }
+  zVecFree( dis );
+  zVecFree( vel );
+}
+
 TEST_F(pdRobotTest, FK_LargeBodyOffset)
 {
   char model[] = "model/mighty.zkc";

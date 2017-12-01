@@ -254,6 +254,7 @@ void pdRobotFK(pdRobot *robot, zVec dis)
   zVecSetElem( dis, zZ, base - foot );
   rkChainFK( pdRobotChainPtr(robot), dis );
   rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
+  zVecClear( pdRobotJointVel(robot) );
 }
 
 void pdRobotFKIndex(pdRobot *robot, zIndex index, zVec dis)

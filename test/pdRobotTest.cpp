@@ -95,6 +95,8 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
+  EXPECT_EQ( NULL, pdRobotJointVel( &robot ) );
+  EXPECT_EQ( 0, zVecSize( pdRobotJointVel( &robot ) ) );
   EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
@@ -116,6 +118,7 @@ TEST_F(pdRobotTest, Destroy)
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
+  EXPECT_EQ( NULL, pdRobotJointVel( &robot ) );
   EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );

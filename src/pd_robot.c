@@ -4,6 +4,7 @@ void pdRobotInit(pdRobot *robot)
 {
   rkChainInit( pdRobotChainPtr( robot ) );
   pdRobotJointDis( robot ) = NULL;
+  pdRobotJointVel( robot ) = NULL;
   robot->_cell = NULL;
   pdRobotCellNum( robot ) = 0;
   robot->_ref_vec = NULL;
@@ -203,6 +204,7 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
 void pdRobotDestroy(pdRobot *robot)
 {
   zVecFree( pdRobotJointDis( robot ) );
+  zVecFree( pdRobotJointVel( robot ) );
   zFree( robot->_sr_vert );
   zFree( robot->_sr_rf_vert );
   zFree( robot->_sr_lf_vert );

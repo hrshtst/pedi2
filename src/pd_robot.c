@@ -352,6 +352,7 @@ void pdRobotSolveIK(pdRobot *robot, int iter)
     if( pdRobotFlagIsOn( robot, i ) )
       rkIKCellSetRefVec( robot->_cell[i], &robot->_ref_vec[i] );
   rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, iter );
+  zVecCopy( pdRobotIKPtr(robot)->joint_vel, pdRobotJointVel(robot) );
   pdRobotUnsetAllFlags( robot );
 }
 

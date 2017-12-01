@@ -744,6 +744,22 @@ TEST_F(pdRobotTest, SolveIK)
   // EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
 }
 
+TEST_F(pdRobotTest, SolveIKCheckJointVel)
+{
+  zVec vel;
+
+  LoadAndSolveIK();
+  vel = zVecAlloc(26);
+  pdRobotGetJointVelAll( &robot, vel );
+  for(int i=0; i<26; i++){
+    if( fabs(zVecElem(vel,i)) > GTEST_TOL ){
+      SUCCEED();
+      return;
+    }
+  }
+  FAIL();
+}
+
 TEST_F(pdRobotTest, AllFlagsAreFlaseAfterSolveIK)
 {
   LoadAndSolveIK();

@@ -41,7 +41,6 @@ typedef struct{
 
   zVec dis;           /* displacement vector */
   zVec disold;        /* old displacement vector */
-  zVec joint_vel;     /* joint velocity vector */
 } pdRobot;
 
 /* c'tor and d'tor */
@@ -109,10 +108,8 @@ __EXPORT void pdRobotSolveIK(pdRobot *robot, int iter);
 /* methods to get parameters */
 #define pdRobotJointSize(r)  rkChainJointSize( pdRobotChainPtr(r) )
 #define pdRobotJointDis(r)   (r)->dis
-#define pdRobotJointVel(r)   (r)->joint_vel
 #define pdRobotLinkNum(r)    rkChainNum( pdRobotChainPtr(r) )
 #define pdRobotGetJointDisAll(r,v) zVecCopy( pdRobotJointDis(r), v )
-#define pdRobotGetJointVelAll(r,v) zVecCopy( pdRobotJointVel(r), v )
 #define pdRobotRefVec(r,id)  ( &(r)->_ref_vec[id] )
 #define pdRobotRefCOM(r)     pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotRefBaseAtt(r) pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_BASE_ATT )
@@ -132,6 +129,8 @@ __EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotHandAtt(pdRobot *robot, zVec3D *lh, zVec3D *rh);
 __EXPORT void pdRobotSupportRegion(pdRobot *robot, zVec3DList *sr_lf, zVec3DList *sr_rf, zVec3DList *sr);
 __EXPORT void pdRobotUpdateState(pdRobot *robot, pdState *state);
+__EXPORT void pdRobotGetJointDiffAll(pdRobot *robot, zVec v);
+__EXPORT void pdRobotGetJointVelAll(pdRobot *robot, double dt, zVec v);
 
 /* output method */
 __EXPORT void pdRobotFWrite(FILE *fp, pdRobot *robot);

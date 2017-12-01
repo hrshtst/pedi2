@@ -10,6 +10,7 @@ const int MIGHTY_RF_ID = 24;
 const double DT = 0.01;
 #define GTEST_TOL 1e-12
 #define GTEST_TOL_LOOSE 1e-04
+#define DT 0.01
 
 class pdRobotTest : public testing::Test {
  protected:
@@ -97,8 +98,6 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_EQ( NULL, robot.disold );
   EXPECT_EQ( 0, zVecSize( robot.disold ) );
-  EXPECT_EQ( NULL, pdRobotJointVel( &robot ) );
-  EXPECT_EQ( 0, zVecSize( pdRobotJointVel( &robot ) ) );
   EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
@@ -121,7 +120,6 @@ TEST_F(pdRobotTest, Destroy)
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( NULL, robot.disold );
-  EXPECT_EQ( NULL, pdRobotJointVel( &robot ) );
   EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
@@ -154,7 +152,7 @@ TEST_F(pdRobotTest, DefaultBipedInit)
   dis = zVecAlloc( pdRobotJointSize( &robot ) );
   vel = zVecAlloc( pdRobotJointSize( &robot ) );
   pdRobotGetJointDisAll( &robot, dis );
-  pdRobotGetJointVelAll( &robot, vel );
+  pdRobotGetJointVelAll( &robot, DT, vel );
 
   for(int i=0; i<26; i++){
     ASSERT_DOUBLE_EQ( zVecElem(dis,i), zVecElem(robot.disold,i) );
@@ -249,7 +247,7 @@ TEST_F(pdRobotTest, FK_CheckJointVel)
 
   pdRobotFK( &robot, dis );
   pdRobotGetJointDisAll( &robot, dis );
-  pdRobotGetJointVelAll( &robot, vel );
+  pdRobotGetJointVelAll( &robot, DT, vel );
   for(int i=0; i<26; i++){
     ASSERT_DOUBLE_EQ( 0.0, zVecElem( vel, i ) );
   }
@@ -369,7 +367,7 @@ TEST_F(pdRobotTest, ResetPose_CheckVel)
   zVecSetElem( dis, 4, 0 );
   zVecSetElem( dis, 5, 1.57 );
   pdRobotResetPose( &robot, &biped, &state, dis );
-  pdRobotGetJointVelAll( &robot, vel );
+  pdRobotGetJointVelAll( &robot, DT, vel );
   for(int i=0; i<26; i++){
     ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
   }
@@ -418,14 +416,14 @@ TEST_F(pdRobotTest, JointDis)
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
 }
 
-TEST_F(pdRobotTest, JointVel)
+TEST_F(pdRobotTest, JointDisold)
 {
   char model[] = "model/mighty.zkc";
 
   pdRobotLoad( &robot, model );
-  ASSERT_EQ( 26, zVecSize( pdRobotJointVel( &robot ) ) );
+  ASSERT_EQ( 26, zVecSize( robot.disold ) );
   for(int i=0; i<26; i++)
-    EXPECT_DOUBLE_EQ( 0.0, zVecElem( pdRobotJointVel( &robot ), i ) );
+    EXPECT_DOUBLE_EQ( zVecElem(robot.dis,i), zVecElem(robot.disold,i) );
 }
 
 TEST_F(pdRobotTest, Load_CheckCell)
@@ -835,7 +833,7 @@ TEST_F(pdRobotTest, SolveIKCheckJointVel)
 
   LoadAndSolveIK();
   vel = zVecAlloc(26);
-  pdRobotGetJointVelAll( &robot, vel );
+  pdRobotGetJointVelAll( &robot, DT, vel );
   for(int i=0; i<26; i++){
     if( fabs(zVecElem(vel,i)) > GTEST_TOL_LOOSE ){
       SUCCEED();
@@ -1309,3 +1307,42 @@ TEST_F(pdRobotTest, JointUnregIndex)
   zIndexFree( index );
 }
 
+TEST_F(pdRobotTest, GetJointDiffAll)
+{
+  zVec3D com_pos;
+  zVec diff;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &com_pos, 0.0, 0.0, 0.27 );
+  diff = zVecAlloc( pdRobotJointSize(&robot) );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotGetJointDiffAll( &robot, diff );
+  for(int i=0; i<pdRobotJointSize(&robot); ++i){
+    if( fabs(zVecElem(diff,i) > GTEST_TOL_LOOSE ) ){
+      SUCCEED();
+      return;
+    }
+  }
+  FAIL() << "Any element of joint difference should be greater or smaller than zero.";
+}
+
+TEST_F(pdRobotTest, GetJointVelAll)
+{
+  zVec3D com_pos;
+  zVec vel;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &com_pos, 0.0, 0.0, 0.27 );
+  vel = zVecAlloc( pdRobotJointSize(&robot) );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+  for(int i=0; i<pdRobotJointSize(&robot); ++i){
+    if( fabs(zVecElem(vel,i) > GTEST_TOL_LOOSE ) ){
+      SUCCEED();
+      return;
+    }
+  }
+  FAIL() << "Any element of joint velocity should be greater or smaller than zero.";
+}

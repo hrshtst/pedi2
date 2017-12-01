@@ -5,7 +5,6 @@ void pdRobotInit(pdRobot *robot)
   rkChainInit( pdRobotChainPtr( robot ) );
   pdRobotJointDis( robot ) = NULL;
   robot->disold = NULL;
-  pdRobotJointVel( robot ) = NULL;
   robot->_cell = NULL;
   pdRobotCellNum( robot ) = 0;
   robot->_ref_vec = NULL;
@@ -202,12 +201,6 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
     ZRUNERROR( "cannot allocate old joint displacement vector" );
     goto ERROR;
   }
-
-  /* joint velocity vector */
-  if( !( pdRobotJointVel( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) ){
-    ZRUNERROR( "cannot allocate joint velocity vector" );
-    goto ERROR;
-  }
   return true;
  ERROR:
   pdRobotDestroy( robot );
@@ -218,7 +211,6 @@ void pdRobotDestroy(pdRobot *robot)
 {
   zVecFree( pdRobotJointDis( robot ) );
   zVecFree( robot->disold );
-  zVecFree( pdRobotJointVel( robot ) );
   zFree( robot->_sr_vert );
   zFree( robot->_sr_rf_vert );
   zFree( robot->_sr_lf_vert );
@@ -237,7 +229,6 @@ void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state)
   pdRobotSetBipedRefVec( robot, biped );
   pdRobotSolveIK( robot, 0 );
   pdRobotGetJointDisAll( robot, robot->disold );
-  zVecClear( pdRobotJointVel(robot) );
   pdRobotUpdateState( robot, state );
 }
 
@@ -264,7 +255,7 @@ void pdRobotFK(pdRobot *robot, zVec dis)
   zVecSetElem( dis, zZ, base - foot );
   rkChainFK( pdRobotChainPtr(robot), dis );
   rkChainGetJointDisAll( pdRobotChainPtr(robot), pdRobotJointDis(robot) );
-  zVecClear( pdRobotJointVel(robot) );
+  pdRobotGetJointDisAll( robot, robot->disold );
 }
 
 void pdRobotFKIndex(pdRobot *robot, zIndex index, zVec dis)
@@ -358,13 +349,12 @@ void pdRobotSolveIK(pdRobot *robot, int iter)
 {
   register int i;
 
+  pdRobotGetJointDisAll( robot, robot->disold );
   rkIKDeactivate( &robot->_ik );
   for( i=0; i<pdRobotCellNum( robot ); i++ )
     if( pdRobotFlagIsOn( robot, i ) )
       rkIKCellSetRefVec( robot->_cell[i], &robot->_ref_vec[i] );
   rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, iter );
-  
-  zVecCopy( pdRobotIKPtr(robot)->joint_vel, pdRobotJointVel(robot) );
   pdRobotUnsetAllFlags( robot );
 }
 
@@ -453,6 +443,17 @@ void pdRobotUpdateState(pdRobot *robot, pdState *state)
   pdRobotHandPos( robot, &state->lh_pos, &state->rh_pos );
   pdRobotHandAtt( robot, &state->lh_att, &state->rh_att );
   pdRobotSupportRegion( robot, &state->sr_lf, &state->sr_rf, &state->sr );
+}
+
+void pdRobotGetJointDiffAll(pdRobot *robot, zVec v)
+{
+  zVecSub( robot->disold, robot->dis, v );
+}
+
+void pdRobotGetJointVelAll(pdRobot *robot, double dt, zVec v)
+{
+  pdRobotGetJointDiffAll( robot, v );
+  zVecDivDRC( v, dt );
 }
 
 void pdRobotFWrite(FILE *fp, pdRobot *r)

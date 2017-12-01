@@ -333,6 +333,16 @@ TEST_F(pdRobotTest, JointDis)
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
 }
 
+TEST_F(pdRobotTest, JointVel)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  ASSERT_EQ( 26, zVecSize( pdRobotJointVel( &robot ) ) );
+  for(int i=0; i<26; i++)
+    EXPECT_DOUBLE_EQ( 0.0, zVecElem( pdRobotJointVel( &robot ), i ) );
+}
+
 TEST_F(pdRobotTest, Load_CheckCell)
 {
   char model[] = "model/mighty.zkc";

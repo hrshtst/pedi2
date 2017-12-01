@@ -195,6 +195,12 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
     ZRUNERROR( "cannot allocate joint displacement vector" );
     goto ERROR;
   }
+
+  /* joint velocity vector */
+  if( !( pdRobotJointVel( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate joint velocity vector" );
+    goto ERROR;
+  }
   return true;
  ERROR:
   pdRobotDestroy( robot );

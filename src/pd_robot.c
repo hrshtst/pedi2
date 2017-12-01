@@ -4,6 +4,7 @@ void pdRobotInit(pdRobot *robot)
 {
   rkChainInit( pdRobotChainPtr( robot ) );
   pdRobotJointDis( robot ) = NULL;
+  robot->disold = NULL;
   pdRobotJointVel( robot ) = NULL;
   robot->_cell = NULL;
   pdRobotCellNum( robot ) = 0;
@@ -196,6 +197,12 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
     goto ERROR;
   }
 
+  /* old joint displacement vector */
+  if( !( robot->disold = zVecAlloc( pdRobotJointSize( robot ) ) ) ){
+    ZRUNERROR( "cannot allocate old joint displacement vector" );
+    goto ERROR;
+  }
+
   /* joint velocity vector */
   if( !( pdRobotJointVel( robot ) = zVecAlloc( pdRobotJointSize( robot ) ) ) ){
     ZRUNERROR( "cannot allocate joint velocity vector" );
@@ -210,6 +217,7 @@ bool pdRobotLoad(pdRobot *robot, const char model_file[])
 void pdRobotDestroy(pdRobot *robot)
 {
   zVecFree( pdRobotJointDis( robot ) );
+  zVecFree( robot->disold );
   zVecFree( pdRobotJointVel( robot ) );
   zFree( robot->_sr_vert );
   zFree( robot->_sr_rf_vert );
@@ -228,6 +236,8 @@ void pdRobotDefaultBipedInit(pdRobot *robot, pdBiped *biped, pdState *state)
   pdBipedDefaultPoseInit( biped, state );
   pdRobotSetBipedRefVec( robot, biped );
   pdRobotSolveIK( robot, 0 );
+  pdRobotGetJointDisAll( robot, robot->disold );
+  zVecClear( pdRobotJointVel(robot) );
   pdRobotUpdateState( robot, state );
 }
 
@@ -353,6 +363,7 @@ void pdRobotSolveIK(pdRobot *robot, int iter)
     if( pdRobotFlagIsOn( robot, i ) )
       rkIKCellSetRefVec( robot->_cell[i], &robot->_ref_vec[i] );
   rkIKSolve( pdRobotIKPtr(robot), pdRobotJointDis(robot), zTOL, iter );
+  
   zVecCopy( pdRobotIKPtr(robot)->joint_vel, pdRobotJointVel(robot) );
   pdRobotUnsetAllFlags( robot );
 }

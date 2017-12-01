@@ -40,6 +40,7 @@ typedef struct{
   zVec3D *_sr_vert;    /* vertices of supporting region */
 
   zVec dis;           /* displacement vector */
+  zVec disold;        /* old displacement vector */
   zVec joint_vel;     /* joint velocity vector */
 } pdRobot;
 

@@ -327,6 +327,7 @@ TEST_F(pdRobotTest, JointDis)
 
   pdRobotLoad( &robot, model );
   EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
+  EXPECT_EQ( 26, zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 0 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 1 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );

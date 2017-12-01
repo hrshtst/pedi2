@@ -95,6 +95,8 @@ TEST_F(pdRobotTest, Init)
   EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
+  EXPECT_EQ( NULL, pdRobotJointVel( &robot ) );
+  EXPECT_EQ( 0, zVecSize( pdRobotJointVel( &robot ) ) );
   EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
@@ -116,6 +118,7 @@ TEST_F(pdRobotTest, Destroy)
   pdRobotDestroy( &robot );
   EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
+  EXPECT_EQ( NULL, pdRobotJointVel( &robot ) );
   EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
   EXPECT_EQ( NULL, robot._cell );
   EXPECT_EQ( NULL, robot._ref_vec );
@@ -199,6 +202,30 @@ TEST_F(pdRobotTest, FK)
   EXPECT_DOUBLE_EQ( 0.04, zVecElem( dis, 10 ) );
   EXPECT_DOUBLE_EQ( 0.05, zVecElem( dis, 11 ) );
   zVecFree( dis );
+}
+
+TEST_F(pdRobotTest, FK_CheckJointVel)
+{
+  zVec dis, vel;
+
+  LoadAndSolveIK();
+  dis = zVecAlloc( 26 );
+  vel = zVecAlloc( 26 );
+  zVecClear( dis );
+  zVecSetElem( dis,  7, 0.01 );
+  zVecSetElem( dis,  8, 0.02 );
+  zVecSetElem( dis,  9, 0.03 );
+  zVecSetElem( dis, 10, 0.04 );
+  zVecSetElem( dis, 11, 0.05 );
+
+  pdRobotFK( &robot, dis );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotGetJointVelAll( &robot, vel );
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem( vel, i ) );
+  }
+  zVecFree( dis );
+  zVecFree( vel );
 }
 
 TEST_F(pdRobotTest, FK_LargeBodyOffset)
@@ -324,9 +351,20 @@ TEST_F(pdRobotTest, JointDis)
 
   pdRobotLoad( &robot, model );
   EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
+  EXPECT_EQ( 26, zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 0 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 1 ), GTEST_TOL );
   EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
+}
+
+TEST_F(pdRobotTest, JointVel)
+{
+  char model[] = "model/mighty.zkc";
+
+  pdRobotLoad( &robot, model );
+  ASSERT_EQ( 26, zVecSize( pdRobotJointVel( &robot ) ) );
+  for(int i=0; i<26; i++)
+    EXPECT_DOUBLE_EQ( 0.0, zVecElem( pdRobotJointVel( &robot ), i ) );
 }
 
 TEST_F(pdRobotTest, Load_CheckCell)
@@ -728,6 +766,22 @@ TEST_F(pdRobotTest, SolveIK)
   // EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL_LOOSE );
   // EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL_LOOSE );
   // EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, SolveIKCheckJointVel)
+{
+  zVec vel;
+
+  LoadAndSolveIK();
+  vel = zVecAlloc(26);
+  pdRobotGetJointVelAll( &robot, vel );
+  for(int i=0; i<26; i++){
+    if( fabs(zVecElem(vel,i)) > GTEST_TOL ){
+      SUCCEED();
+      return;
+    }
+  }
+  FAIL();
 }
 
 TEST_F(pdRobotTest, AllFlagsAreFlaseAfterSolveIK)

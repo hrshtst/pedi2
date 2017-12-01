@@ -41,6 +41,7 @@ typedef struct{
   zVec3D *_sr_vert;    /* vertices of supporting region */
 
   zVec dis;           /* displacement vector */
+  zVec joint_vel;     /* joint velocity vector */
 } pdRobot;
 
 /* c'tor and d'tor */
@@ -108,8 +109,10 @@ __EXPORT void pdRobotSolveIK(pdRobot *robot, int iter);
 /* methods to get parameters */
 #define pdRobotJointSize(r)  rkChainJointSize( pdRobotChainPtr(r) )
 #define pdRobotJointDis(r)   (r)->dis
+#define pdRobotJointVel(r)   (r)->joint_vel
 #define pdRobotLinkNum(r)    rkChainNum( pdRobotChainPtr(r) )
 #define pdRobotGetJointDisAll(r,v) zVecCopy( pdRobotJointDis(r), v )
+#define pdRobotGetJointVelAll(r,v) zVecCopy( pdRobotJointVel(r), v )
 #define pdRobotRefVec(r,id)  ( &(r)->_ref_vec[id] )
 #define pdRobotRefCOM(r)     pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_COM )
 #define pdRobotRefBaseAtt(r) pdRobotRefVec( r, PD_ROBOT_IKCELL_ID_BASE_ATT )

@@ -32,6 +32,7 @@ typedef struct{
     double _k[3];
     double _c[3];
     double _old[3];
+    double _refv[3];
   } _sol;             /* for second-order lag system */
 
   zVec3D refp;        /* referential foot position */
@@ -119,12 +120,15 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 #define pdFootSetTrXK(f,k)        ( (f)->_sol._k[0] = (k) )
 #define pdFootSetTrXC(f,c)        ( (f)->_sol._c[0] = (c) )
 #define pdFootSetTrXOld(f,old)    ( (f)->_sol._old[0] = (old) )
+#define pdFootSetTrXRefV(f,v)     ( (f)->_sol._refv[0] = (v) )
 #define pdFootSetTrYK(f,k)        ( (f)->_sol._k[1] = (k) )
 #define pdFootSetTrYC(f,c)        ( (f)->_sol._c[1] = (c) )
 #define pdFootSetTrYOld(f,old)    ( (f)->_sol._old[1] = (old) )
+#define pdFootSetTrYRefV(f,v)     ( (f)->_sol._refv[1] = (v) )
 #define pdFootSetTrZK(f,k)        ( (f)->_sol._k[2] = (k) )
 #define pdFootSetTrZC(f,c)        ( (f)->_sol._c[2] = (c) )
 #define pdFootSetTrZOld(f,old)    ( (f)->_sol._old[2] = (old) )
+#define pdFootSetTrZRefV(f,v)     ( (f)->_sol._refv[2] = (v) )
 #define pdFootSetTrK(f,x,y,z) do{ \
   pdFootSetTrXK( f, x ); \
   pdFootSetTrYK( f, y ); \
@@ -144,6 +148,11 @@ __EXPORT void pdFootDestroy(pdFoot *f);
   pdFootSetTrXOld( f, zVec3DElem( v, zX ) ); \
   pdFootSetTrYOld( f, zVec3DElem( v, zY ) ); \
   pdFootSetTrZOld( f, zVec3DElem( v, zZ ) ); \
+} while(0)
+#define pdFootSetTrRefV(f,x,y,z) do{ \
+  pdFootSetTrXRefV( f, x ); \
+  pdFootSetTrYRefV( f, y ); \
+  pdFootSetTrZRefV( f, z ); \
 } while(0)
 
 /* calculation method */

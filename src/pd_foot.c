@@ -15,12 +15,15 @@ void pdFootInit(pdFoot *f, pdCZHrz *cz, byte dir, double dt)
   pdFootSetTrXK( f, 0 );
   pdFootSetTrXC( f, 0 );
   pdFootSetTrXOld( f, 0 );
+  pdFootSetTrXRefV( f, 0 );
   pdFootSetTrYK( f, 0 );
   pdFootSetTrYC( f, 0 );
   pdFootSetTrYOld( f, 0 );
+  pdFootSetTrYRefV( f, 0 );
   pdFootSetTrZK( f, 0 );
   pdFootSetTrZC( f, 0 );
   pdFootSetTrZOld( f, 0 );
+  pdFootSetTrZRefV( f, 0 );
   pdFootRefPosX( f ) = 0;
   pdFootRefPosY( f ) = 0;
   pdFootRefPosZ( f ) = 0;
@@ -57,12 +60,15 @@ void pdFootDestroy(pdFoot *f)
   pdFootSetTrXK( f, 0 );
   pdFootSetTrXC( f, 0 );
   pdFootSetTrXOld( f, 0 );
+  pdFootSetTrXRefV( f, 0 );
   pdFootSetTrYK( f, 0 );
   pdFootSetTrYC( f, 0 );
   pdFootSetTrYOld( f, 0 );
+  pdFootSetTrYRefV( f, 0 );
   pdFootSetTrZK( f, 0 );
   pdFootSetTrZC( f, 0 );
   pdFootSetTrZOld( f, 0 );
+  pdFootSetTrZRefV( f, 0 );
   pdFootRefPosX( f ) = 0;
   pdFootRefPosY( f ) = 0;
   pdFootRefPosZ( f ) = 0;
@@ -141,9 +147,12 @@ void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
 static void _pdFootUpdateSOL(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp, zAxis i, double dt);
 void _pdFootUpdateSOL(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp, zAxis i, double dt)
 {
-  refp->e[i] =
-      ( f->_sol._k[i]*dt*dt * pd->e[i] + ( f->_sol._c[i]*dt+2 ) * p->e[i] - f->_sol._old[i] ) / ( 1 + f->_sol._c[i]*dt + f->_sol._k[i]*dt*dt );
-  f->_sol._old[i] = p->e[i];
+  refp->e[i] = refp->e[i] + f->_sol._refv[i] * dt;
+  f->_sol._refv[i] = f->_sol._refv[i] + ( f->_sol._k[i]*( pd->e[i] - p->e[i] ) - f->_sol._c[i]*f->_sol._refv[i] ) * dt;
+
+  /* refp->e[i] = */
+  /*     ( f->_sol._k[i]*dt*dt * pd->e[i] + ( f->_sol._c[i]*dt+2 ) * p->e[i] - f->_sol._old[i] ) / ( 1 + f->_sol._c[i]*dt + f->_sol._k[i]*dt*dt ); */
+  /* f->_sol._old[i] = p->e[i]; */
 }
 
 void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp)

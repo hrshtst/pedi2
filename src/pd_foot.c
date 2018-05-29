@@ -43,6 +43,13 @@ void pdFootInit(pdFoot *f, pdCZHrz *cz, byte dir, double dt)
   }
   zVec3DClear( pdFootPivotPos( f ) );
   zVec3DClear( pdFootPivotAtt( f ) );
+
+  /* vertical controller */
+  f->_vert._m = 1;
+  f->_vert._k = 0;
+  f->_vert._c = 0;
+  f->_vert._z0_p = f->_vert._z0_pp = 0;
+  f->_vert._ez_int = f->_vert._ef_int = 0;
 }
 
 void pdFootDestroy(pdFoot *f)

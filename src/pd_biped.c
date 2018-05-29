@@ -88,17 +88,21 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
 
   zVec3DCreate( &v, x-d*c, y-d*s, 0 );
   zVec3DCopy( &v, pdBipedRefLFPos( biped ) );
+  zVec3DCopy( &v, pdFootRefPos( pdBipedLFPtr( biped ) ) );
 
   zVec3DCopy( &state->lf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
   zVec3DCopy( &v, pdBipedRefLFAtt( biped ) );
+  zVec3DCopy( &v, pdFootRefAtt( pdBipedLFPtr( biped ) ) );
 
   zVec3DCreate( &v, x+d*c, y+d*s, 0 );
   zVec3DCopy( &v, pdBipedRefRFPos( biped ) );
+  zVec3DCopy( &v, pdFootRefPos( pdBipedRFPtr( biped ) ) );
 
   zVec3DCopy( &state->rf_att, &v );
   zVec3DSetElem( &v, zX, theta + offset );
   zVec3DCopy( &v, pdBipedRefRFAtt( biped ) );
+  zVec3DCopy( &v, pdFootRefAtt( pdBipedRFPtr( biped ) ) );
 }
 
 bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state)

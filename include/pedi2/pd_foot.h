@@ -35,6 +35,21 @@ typedef struct{
     double _refv[3];
   } _sol;             /* for second-order lag system */
 
+  struct{
+    double _m;
+    double _k;
+    double _c;
+    double _z0_p;
+    double _z0_pp;
+    double _z_p;
+    double _z_pp;
+    double _kz_int;
+    double _kf_int;
+    double _kf;
+    double _ez_int;
+    double _ef_int;
+  } _vert;
+
   zVec3D refp;        /* referential foot position */
   zVec3D refa;        /* referential foot attitude (ZYX Euler angle) */
 } pdFoot;

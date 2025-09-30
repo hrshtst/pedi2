@@ -1,7 +1,7 @@
 #ifndef __PD_MISC_H__
 #define __PD_MISC_H__
 
-#include <cure/cure.h>
+#include <zeda/zeda.h>
 
 __BEGIN_DECLS
 

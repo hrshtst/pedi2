@@ -2,6 +2,7 @@
 #define __PD_CZ_H__
 
 #include <zm/zm_ode.h>
+#include <zeo/zeo_vec3d.h>
 #include <pedi2/pd_cz_vrt.h>
 #include <pedi2/pd_cz_hrz.h>
 
@@ -203,9 +204,9 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetErrCompBZ(c,dz)   ( (c)->_errcomp._b[2] = (dz) )
 
 /* calculation method */
-__EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);
-__EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D refuw, double delta_theta);
-__EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
+__EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw);
+__EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta);
+__EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd);
 
 /* update method */
 __EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zVec3DList *sr);

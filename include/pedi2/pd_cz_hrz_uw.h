@@ -2,7 +2,7 @@
 #define __PD_CZ_HRZ_UW_H__
 
 #include <zm/zm.h>
-#include <zeo/zeo_bv.h>
+#include <zeo/zeo_vec3d.h>
 #include <zm/zm_complex.h>
 #include <pedi2/pd_cz_vrt.h>
 #include <pedi2/pd_cz_hrz_u.h>
@@ -43,10 +43,10 @@ __EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
 #define pdCZHrzUWZeta(h)    pdCZVrtZeta( (h)->_vrt )
 #define pdCZHrzUWSR(h)      ( &(h)->_sr )
 #define pdCZHrzUWSRVert(h)  (h)->_sr_vert
-#define pdCZHrzUWZMP(h)     (h)->zmp
+#define pdCZHrzUWZMP(h)     ( &(h)->zmp )
 #define pdCZHrzUWZMPU(h)    ( pdCZHrzUWZMP(h)[pdU] )
 #define pdCZHrzUWZMPW(h)    ( pdCZHrzUWZMP(h)[pdW] )
-#define pdCZHrzUWAcc(h)     (h)->acc
+#define pdCZHrzUWAcc(h)     ( &(h)->acc )
 #define pdCZHrzUWAccU(h)    ( pdCZHrzUWAcc(h)[pdU] )
 #define pdCZHrzUWAccW(h)    ( pdCZHrzUWAcc(h)[pdW] )
 
@@ -78,14 +78,14 @@ __EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
   pdCZHrzUCalcRegZMP( pdCZHrzUPtr(h), d, v )
 #define pdCZHrzUWCalcRegZMPW(h,d,v) \
   pdCZHrzWCalcRegZMP( pdCZHrzWPtr(h), d, v )
-__EXPORT void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel, zVec2D zmp);
+__EXPORT void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp);
 #define pdCZHrzUWCalcRegZMP(h,d,v,z) \
   zVec2DCreate( z, pdCZHrzUWCalcRegZMPU( h, d, v ), pdCZHrzUWCalcRegZMPW( h, d, v ) )
-__EXPORT void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D zmp, zVec2D acc);
-__EXPORT void pdCZHrzUWCalcZMPPhase(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel, zVec2D zmp, zComplex *pz);
+__EXPORT void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D *zmp, zVec2D *acc);
+__EXPORT void pdCZHrzUWCalcZMPPhase(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp, zComplex *pz);
 
 /* update method */
-__EXPORT void pdCZHrzUWUpdate(pdCZHrzUW *hrz, zVec2D delta, zVec2D vel);
+__EXPORT void pdCZHrzUWUpdate(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel);
 
 /* for debug */
 __EXPORT void pdCZHrzUWFWrite(FILE *fp, pdCZHrzUW *hrz);

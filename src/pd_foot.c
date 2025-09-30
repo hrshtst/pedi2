@@ -131,7 +131,7 @@ void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
     zListForEach( sr, cp ){
       zVec2DCreate( xy, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
       pdFootXformXYtoUW( f, xy, uw );
-      zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
+      zVec3DCreate( pp++, uw.e[pdU], uw.e[pdW], zVec3DElem(cp->data,zZ) );
     }
     pdFootZSetSR( pdFootZPtr(f), p, zListNum(sr) );
     zFree( p );
@@ -167,7 +167,7 @@ void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
   zVec3DCreate( refa, ( theta + zPI_2 ) + phi, 0, 0 );
 }
 
-void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3DList *pfsr)
+void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3DList *pfsr)
 {
   zVec2D xy;
   zVec2D zmpxy, zmpuw;
@@ -262,7 +262,7 @@ void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zVec3DList *sr)
   }
 }
 
-void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr)
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr)
 {
   pdFootUpdateState( lf, lfp, lfa, lfsr );
   pdFootUpdateState( rf, rfp, rfa, rfsr );

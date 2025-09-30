@@ -49,8 +49,8 @@ __EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
 } while(0)
 
 /* calculation methods */
-__EXPORT double pdCZHrzWCalcSimZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel);
-__EXPORT double pdCZHrzWCalcRegZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel);
+__EXPORT double pdCZHrzWCalcSimZMP(pdCZHrzW *w, zVec2D *delta, zVec2D *vel);
+__EXPORT double pdCZHrzWCalcRegZMP(pdCZHrzW *w, zVec2D *delta, zVec2D *vel);
 
 
 __END_DECLS

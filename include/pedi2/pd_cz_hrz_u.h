@@ -37,8 +37,8 @@ __EXPORT void pdCZHrzUDestroy(pdCZHrzU *u);
 } while(0)
 
 /* calculation methods */
-__EXPORT double pdCZHrzUCalcSimZMP(pdCZHrzU *u, zVec2D delta, zVec2D vel);
-__EXPORT double pdCZHrzUCalcRegZMP(pdCZHrzU *u, zVec2D delta, zVec2D vel);
+__EXPORT double pdCZHrzUCalcSimZMP(pdCZHrzU *u, zVec2D *delta, zVec2D *vel);
+__EXPORT double pdCZHrzUCalcRegZMP(pdCZHrzU *u, zVec2D *delta, zVec2D *vel);
 
 
 __END_DECLS

@@ -179,7 +179,7 @@ __EXPORT void pdFootCalcCOMRefPos(pdFoot *lf, pdFoot *rf, zVec3D *lf_pos, zVec3D
 
 /* update */
 __EXPORT void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zVec3DList *sr);
-__EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr);
+__EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr);
 
 /* output */
 __EXPORT void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);

@@ -3,6 +3,7 @@
 
 #include <zm/zm.h>
 #include <zeo/zeo_vec3d.h>
+#include <zeo/zeo_bv2d.h>
 #include <zm/zm_complex.h>
 #include <pedi2/pd_cz_vrt.h>
 #include <pedi2/pd_cz_hrz_u.h>
@@ -11,13 +12,13 @@
 __BEGIN_DECLS
 
 typedef struct{
-  pdCZHrzU _u;     /* desired ZMP calculator for tangential dir. */
-  pdCZHrzW _w;     /* desired ZMP calculator for radial dir. */
-  double _kappa;   /* curvature of the referential orbit */
-  pdCZVrt *_vrt;   /* controller for vertical motion */
-  zVec3DList _sr;  /* supporting region */
-  zVec3D *_sr_vert; /* vertices of supporting retion */
-  int _vert_num;    /* number of vertices */
+  pdCZHrzU _u;         /* desired ZMP calculator for tangential direction */
+  pdCZHrzW _w;         /* desired ZMP calculator for radial direction */
+  double _kappa;       /* curvature of the referential orbit */
+  pdCZVrt *_vrt;       /* controller for vertical motion */
+  zLoop3D _sr;         /* supporting region */
+  zVec3DData _sr_vert; /* vertices of supporting region */
+  int _vert_num;       /* number of vertices */
 
   zVec2D zmp;   /* referential ZMP position */
   zVec2D acc;   /* referential COM acceleration */
@@ -42,13 +43,13 @@ __EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
 #define pdCZHrzUWKappa(h)   (h)->_kappa
 #define pdCZHrzUWZeta(h)    pdCZVrtZeta( (h)->_vrt )
 #define pdCZHrzUWSR(h)      ( &(h)->_sr )
-#define pdCZHrzUWSRVert(h)  (h)->_sr_vert
+#define pdCZHrzUWSRVert(h)  ( &(h)->_sr_vert )
 #define pdCZHrzUWZMP(h)     ( &(h)->zmp )
-#define pdCZHrzUWZMPU(h)    ( pdCZHrzUWZMP(h)[pdU] )
-#define pdCZHrzUWZMPW(h)    ( pdCZHrzUWZMP(h)[pdW] )
+#define pdCZHrzUWZMPU(h)    ( pdCZHrzUWZMP(h)->e[pdU] )
+#define pdCZHrzUWZMPW(h)    ( pdCZHrzUWZMP(h)->e[pdW] )
 #define pdCZHrzUWAcc(h)     ( &(h)->acc )
-#define pdCZHrzUWAccU(h)    ( pdCZHrzUWAcc(h)[pdU] )
-#define pdCZHrzUWAccW(h)    ( pdCZHrzUWAcc(h)[pdW] )
+#define pdCZHrzUWAccU(h)    ( pdCZHrzUWAcc(h)->e[pdU] )
+#define pdCZHrzUWAccW(h)    ( pdCZHrzUWAcc(h)->e[pdW] )
 
 /* methods to set parameters */
 #define pdCZHrzUWSetRefVelU(h,vd) pdCZHrzUSetRefVel( pdCZHrzUPtr(h), vd )
@@ -67,7 +68,7 @@ __EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
   pdCZHrzUWSetKappa( h, kappa );\
 } while(0)
 __EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
-#define pdCZHrzUWIsSRSet(h) ( zListNum( pdCZHrzUWSR(h) ) ? true : false )
+#define pdCZHrzUWIsSRSet(h) ( zListSize( pdCZHrzUWSR(h) ) ? true : false )
 
 /* calculation methods */
 #define pdCZHrzUWCalcSimZMPU(h,d,v) \

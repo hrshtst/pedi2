@@ -8,9 +8,8 @@ void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt)
   pdCZHrzUWSetKappa( hrz, 0 );
   zListInit( pdCZHrzUWSR(hrz) );
   hrz->_vert_num = 0;
-  zVec2DClear( pdCZHrzUWZMP(hrz) );
-  zVec2DClear( pdCZHrzUWAcc(hrz) );
-  hrz->_sr_vert = NULL;
+  zVec2DZero( pdCZHrzUWZMP(hrz) );
+  zVec2DZero( pdCZHrzUWAcc(hrz) );
 }
 
 void pdCZHrzUWDestroy(pdCZHrzUW *hrz)
@@ -19,38 +18,33 @@ void pdCZHrzUWDestroy(pdCZHrzUW *hrz)
   pdCZHrzWDestroy( &hrz->_w );
   hrz->_vrt = NULL;
   pdCZHrzUWSetKappa( hrz, 0 );
-  zVec3DListDestroy( pdCZHrzUWSR(hrz), false );
-  zFree( pdCZHrzUWSRVert( hrz ) );
+  zLoop3DDestroy( pdCZHrzUWSR(hrz) );
+  if( zArrayBuf( &pdCZHrzUWSRVert(hrz)->data.array ) )
+    zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
   hrz->_vert_num = 0;
-  zVec2DClear( pdCZHrzUWZMP(hrz) );
-  zVec2DClear( pdCZHrzUWAcc(hrz) );
+  zVec2DZero( pdCZHrzUWZMP(hrz) );
+  zVec2DZero( pdCZHrzUWAcc(hrz) );
 }
 
 void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num)
 {
   register int i;
-  zVec3D *traversep;
 
   if( num == 0 || !p ){
-    zFree( pdCZHrzUWSRVert(hrz) );
-    zVec3DListDestroy( pdCZHrzUWSR(hrz), false );
+    if( zArrayBuf( &pdCZHrzUWSRVert(hrz)->data.array ) )
+      zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
+    zLoop3DDestroy( pdCZHrzUWSR(hrz) );
     zListInit( pdCZHrzUWSR(hrz) );
   } else if( num != hrz->_vert_num ){
-    zFree( pdCZHrzUWSRVert(hrz) );
-    if( !( pdCZHrzUWSRVert(hrz) = zAlloc( zVec3D, num ) ) ){
-      ZALLOCERROR();
-      zFree( pdCZHrzUWSRVert(hrz) );
-      exit( EXIT_FAILURE );
-    }
+    if( zArrayBuf( &pdCZHrzUWSRVert(hrz)->data.array ) )
+      zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
+    zVec3DDataInitArray( pdCZHrzUWSRVert(hrz), num );
   }
   if( num > 0 && p ){
-    traversep = pdCZHrzUWSRVert(hrz);
+    zVec3DDataRewind( pdCZHrzUWSRVert(hrz) );
     for( i=0; i<num; i++ )
-      zVec3DCreate( traversep++,
-                    zVec3DElem(&p[i],zX),
-                    zVec3DElem(&p[i],zY),
-                    zVec3DElem(&p[i],zZ) );
-    zCH2D( pdCZHrzUWSR(hrz), pdCZHrzUWSRVert(hrz), num );
+      zVec3DDataAdd( pdCZHrzUWSRVert(hrz), &p[i] );
+    zVec3DDataConvexHull2D( pdCZHrzUWSRVert(hrz), pdCZHrzUWSR(hrz) );
   }
   hrz->_vert_num = num;
 }
@@ -64,10 +58,10 @@ void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp)
                 pdCZHrzUWCalcSimZMPW( hrz, delta, vel ),
                 pdCZVrtCalcZMP( hrz->_vrt ) );
   if( pdCZHrzUWIsSRSet( hrz ) ){
-    zCH2DClosest( &hrz->_sr, &p, &cp );
-    zVec2DCreate( zmp, zVec3DElem( &cp, zX ), zVec3DElem( &cp, zY ) );
+    zConvexHull2DClosest( pdCZHrzUWSR(hrz), &p, &cp );
+    zVec2DCreate( zmp, cp.c.x, cp.c.y );
   } else {
-    zVec2DCreate( zmp, zVec3DElem( &p, zX ), zVec3DElem( &p, zY ) );
+    zVec2DCreate( zmp, p.c.x, p.c.y );
   }
 }
 

@@ -6,9 +6,8 @@ void pdFootZInit(pdFootZ *f, pdCZHrzUW *czuw)
   pdFootZSetMaxHeight( f, 0 );
   zListInit( pdFootZSR( f ) );
   f->_vert_num = 0;
-  f->_sr_vert = NULL;
   pdFootZSign( f ) = 0;
-  zComplexClear( pdFootZZMPPhase( f ) );
+  zComplexZero( pdFootZZMPPhase( f ) );
   pdFootZFootPhase( f ) = 0;
   pdFootZRefZ( f ) = 0;
 }
@@ -17,11 +16,12 @@ void pdFootZDestroy(pdFootZ *f)
 {
   pdFootZCZPtr( f ) = NULL;
   pdFootZSetMaxHeight( f, 0 );
-  zVec3DListDestroy( pdFootZSR( f ), false );
-  zFree( pdFootZSRVert( f ) );
+  zLoop3DDestroy( pdFootZSR( f ) );
+  if( zArrayBuf( &pdFootZSRVert(f)->data.array ) )
+    zVec3DDataDestroy( pdFootZSRVert(f) );
   f->_vert_num = 0;
   pdFootZSign( f ) = 0;
-  zComplexClear( pdFootZZMPPhase( f ) );
+  zComplexZero( pdFootZZMPPhase( f ) );
   pdFootZFootPhase( f ) = 0;
   pdFootZRefZ( f ) = 0;
 }
@@ -29,45 +29,39 @@ void pdFootZDestroy(pdFootZ *f)
 void pdFootZSetSR(pdFootZ *f, zVec3D p[], int num)
 {
   register int i;
-  zVec3D *traversep;
 
   if( num == 0 || !p ){
-    zFree( pdFootZSRVert( f ) );
-    zVec3DListDestroy( pdFootZSR( f ), false );
+    if( zArrayBuf( &pdFootZSRVert( f )->data.array ) )
+      zVec3DDataDestroy( pdFootZSRVert( f ) );
+    zLoop3DDestroy( pdFootZSR( f ) );
     zListInit( pdFootZSR( f ) );
   } else if( num != f->_vert_num ){
-    zFree( pdFootZSRVert( f ) );
-    if( !( pdFootZSRVert( f ) = zAlloc( zVec3D, num ) ) ){
-      ZALLOCERROR();
-      zFree( pdFootZSRVert( f ) );
-      exit( EXIT_FAILURE );
-    }
+    if( zArrayBuf( &pdFootZSRVert( f )->data.array ) )
+      zVec3DDataDestroy( pdFootZSRVert( f ) );
+    zVec3DDataInitArray( pdFootZSRVert( f ), num );
   }
   if( num > 0 && p ){
-    traversep = pdFootZSRVert( f );
+    zVec3DDataRewind( pdFootZSRVert( f ) );
     for( i=0; i<num; i++ )
-      zVec3DCreate( traversep++,
-                    zVec3DElem(&p[i],zX),
-                    zVec3DElem(&p[i],zY),
-                    zVec3DElem(&p[i],zZ) );
-    zCH2D( pdFootZSR( f ), pdFootZSRVert( f ), num );
+      zVec3DDataAdd( pdFootZSRVert( f ), &p[i] );
+    zVec3DDataConvexHull2D( pdFootZSRVert( f ), pdFootZSR( f ) );
   }
   f->_vert_num = num;
 }
 
 int pdFootZFindIntersection(pdFootZ *f, zVec2D *zmp, zVec3D ip[])
 {
-  zVec3DList *ch;
-  zVec3DListCell *vc, *vcp;
+  zLoop3D *ch;
+  zLoop3DCell *vc, *vcp;
   int n;
   double k;
   zVec3D v;
 
   ch = pdFootZSR( f );
-  if( zListNum( ch ) == 0 ) return 0;
+  if( zListSize( ch ) == 0 ) return 0;
   vcp = zListHead( ch );
-  if( zListNum( ch ) == 1 &&
-      zIsTiny( zVec3DElem( vcp->data, pdU ) - zmp->e[pdU] )){
+  if( zListSize( ch ) == 1 &&
+      zIsTiny( vcp->data->e[pdU] - zmp->e[pdU] ) ){
     zVec3DCopy( vcp->data, &ip[0] );
     zVec3DCopy( vcp->data, &ip[1] );
     return 1;
@@ -75,11 +69,11 @@ int pdFootZFindIntersection(pdFootZ *f, zVec2D *zmp, zVec3D ip[])
   n = 0;
   zListForEach( ch, vc ){
     if( n > 1 ) break;
-    if( zIsTiny( zVec3DElem( vc->data,  pdU ) - zmp->e[pdU] ) ){
+    if( zIsTiny( vc->data->e[pdU] - zmp->e[pdU] ) ){
       /* intersect on a vertex */
       zVec3DCopy( vc->data, &ip[n++] );
-    } else if( ( zVec3DElem( vc->data,  pdU ) - zmp->e[pdU] ) *
-               ( zVec3DElem( vcp->data, pdU ) - zmp->e[pdU] ) < 0 &&
+    } else if( (  vc->data->e[pdU] - zmp->e[pdU] ) *
+               ( vcp->data->e[pdU] - zmp->e[pdU] ) < 0 &&
                !zIsTiny( vcp->data->e[0] - vc->data->e[0] ) ){
       /* intersect on an edge */
       k = ( zmp->e[pdU] - vc->data->e[0] ) / ( vcp->data->e[0] - vc->data->e[0] );
@@ -101,7 +95,7 @@ int pdFootZFindInnerPoint(pdFootZ *f, zVec2D *zmp, zVec3D *p)
   if( n_ip == 1 )
     zVec3DCopy( &ip[0], p );
   else {
-    if( pdFootZSign(f) * ( ip[1].e[pdW] - ip[0].e[pdW] ) > 0 )
+    if( pdFootZSign( f ) * ( ip[1].e[pdW] - ip[0].e[pdW] ) > 0 )
       zVec3DCopy( &ip[0], p );
     else
       zVec3DCopy( &ip[1], p );
@@ -122,7 +116,7 @@ double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D *delta, zVec2D *vel, zVec2D *zmp
   pdFootZCalcZMPPhase( pf, delta, vel, zmp, &pf->pz );
   r2 = zComplexSqrAbs( &pf->pz );
   r  = sqrt( r2 );
-  dr = zVec3DElem( &inner_p, pdW ) - delta->e[pdW];
+  dr = inner_p.e[pdW] - delta->e[pdW];
   da = acos( fabs(dr) / r );
   if( ( d = r2 - zSqr(dr) ) > 0 ){
     zComplexCreate( &p_in, dr, -pdFootZSign(pf)*sqrt(d) );
@@ -144,7 +138,7 @@ double pdFootZCalcRefZ(pdFootZ *kf, double phase, zComplex *pz)
 
   d = 0.5 * pdFootZDist( kf );
   dh = zComplexAbs(pz) / d * _sigma( pdFootZRho(kf) );
-  return zCycloidY( 0, pdFootZMaxHeight(kf) * dh, phase );
+  return pdFootZMaxHeight(kf) * dh * zCycloidY( phase );
 }
 
 void pdFootZUpdate(pdFootZ *pf, pdFootZ *kf, zVec2D *delta, zVec2D *vel, zVec2D *zmp)
@@ -159,6 +153,6 @@ void pdFootZFWrite(FILE *fp, pdFootZ *f)
   fprintf( fp, "--\n" );
   fprintf( fp, "sign:%g, h:%g, rho:%g, dist:%g\n",
            pdFootZSign(f), pdFootZMaxHeight(f), pdFootZRho(f), pdFootZDist(f) );
-  fprintf( fp, "pz:" );zComplexFWrite( fp, pdFootZZMPPhase(f) );
+  fprintf( fp, "pz:" );zComplexFPrint( fp, pdFootZZMPPhase(f) );
   fprintf( fp, ", phase:%g, refz:%g\n", pdFootZFootPhase(f), pdFootZRefZ(f) );
 }

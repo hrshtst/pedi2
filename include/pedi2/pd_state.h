@@ -2,6 +2,7 @@
 #define __PD_STATE_H__
 
 #include <zeo/zeo_vec3d.h>
+#include <zeo/zeo_bv3d.h>
 #include <zeo/zeo_mat3d.h>
 
 __BEGIN_DECLS
@@ -22,9 +23,9 @@ typedef struct{
   zVec3D deszmp;    /* desired ZMP position */
   double fz;
   zVec3D ef;        /* external force */
-  zVec3DList sr_lf;
-  zVec3DList sr_rf;
-  zVec3DList sr;
+  zLoop3D sr_lf;
+  zLoop3D sr_rf;
+  zLoop3D sr;
 } pdState;
 
 /* c'tor and d'tor */
@@ -32,7 +33,7 @@ __EXPORT void pdStateInit(pdState *state);
 __EXPORT void pdStateDestroy(pdState *state);
 
 /* methods to get parameters */
-__EXPORT bool pdStateFootIsOn(pdState *state, zVec3D *p, zVec3DList *sr);
+__EXPORT bool pdStateFootIsOn(pdState *state, zVec3D *p, zLoop3D *sr);
 #define pdStateFootIsOff(s,p,sr) !pdStateFootIsOn( s, p, sr )
 #define pdStateLFIsOn(s)  pdStateFootIsOn( s, &(s)->lf_pos, &(s)->sr_lf )
 #define pdStateLFIsOff(s) pdStateFootIsOff( s, &(s)->lf_pos, &(s)->sr_lf )

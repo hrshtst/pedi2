@@ -77,6 +77,7 @@ TEST_F(pdCZHrzUWTest, Init)
   EXPECT_EQ( &uw._kappa, uw._u._kappa );
   EXPECT_EQ( &uw._kappa, uw._w._kappa );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, uw._vert_num );
   EXPECT_EQ( 0, pdCZHrzUWZMPU( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWZMPW( &uw ) );

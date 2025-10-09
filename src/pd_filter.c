@@ -1,102 +1,88 @@
 #include <pedi2/pd_filter.h>
 
-void pdFilterDestroyDefault(pdFilter *filter)
+void pdFilterDefaultDestroy(pdFilter *filter)
 {
-  zNameDestroy( filter );
-  zFree( filter->_prm );
+  zNameFree( filter );
+  zFree( filter->prp );
   pdFilterInit( filter );
 }
 
-void pdFilterRefreshDefault(pdFilter *filter)
-{}
+void pdFilterDefaultRefresh(pdFilter *filter){}
 
-static pdFilterMethod *_pdFilterMethodByStr(char str[]);
-
-pdFilterMethod *_pdFilterMethodByStr(char str[])
+static pdFilter *_pdFilterAssignByStr(pdFilter *filter, const char *str)
 {
-  static pdFilterMethod *met_array[] = {
-    &pd_filter_none_met, &pd_filter_bw_met,
-    NULL,
-  };
+  PD_FILTER_COM_ARRAY;
   register int i;
 
-  for( i=0; met_array[i]; i++ ){
-    if( strcmp( met_array[i]->type, str ) == 0 ) return met_array[i];
+  for( i=0; pd_filter_com[i]; i++ ){
+    if( strcmp( pd_filter_com[i]->typestr, str ) == 0 ){
+      filter->com = pd_filter_com[i];
+      return filter;
+    }
   }
   ZRUNERROR( "cannot find a filter type %s", str );
   return NULL;
 }
 
-typedef struct{
-  pdFilterMethod *met;
-  char name[BUFSIZ];
-} _pdFilterParam;
+static void *_pdFilterNameFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return zNameSet( (pdFilter*)obj, ZTKVal(ztk) ) ? obj : NULL;
+}
+static void *_pdFilterTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return _pdFilterAssignByStr( (pdFilter*)obj, ZTKVal(ztk) ) ? obj : NULL;
+}
 
-bool _pdFilterFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  if( strcmp( buf, "type" ) == 0 ){
-    if( !( ((_pdFilterParam *)instance)->met = _pdFilterMethodByStr( zFToken(fp,buf,BUFSIZ) ) ) )
-      *success = false;
-  } else
-  if( strcmp( buf, "name" ) == 0 ){
-    if( !zFToken( fp, ((_pdFilterParam *)instance)->name, BUFSIZ ) )
-      *success = false;
-  } else
-    return false;
+static bool _pdFilterNameFPrintZTK(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", zName((pdFilter*)obj) );
+  return true;
+}
+static bool _pdFilterTypeFPrintZTK(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", ((pdFilter*)obj)->com ? ((pdFilter*)obj)->com->typestr : "unknown" );
   return true;
 }
 
-pdFilter *pdFilterFRead(FILE *fp, pdFilter *filter)
-{
-  _pdFilterParam prm;
-  int cur;
+static const ZTKPrp __ztk_prp_pdfilter[] = {
+  { ZTK_KEY_PEDI2_FILTER_NAME, 1, _pdFilterNameFromZTK, _pdFilterNameFPrintZTK },
+  { ZTK_KEY_PEDI2_FILTER_TYPE, 1, _pdFilterTypeFromZTK, _pdFilterTypeFPrintZTK },
+};
 
-  prm.met = NULL;
-  prm.name[0] = '\0';
-  cur = ftell( fp );
-  zFieldFRead( fp, _pdFilterFRead, &prm );
-  if( !prm.met ){
-    ZRUNERROR( "type not specified" );
+pdFilter *pdFilterFromZTK(pdFilter *filter, ZTK *ztk)
+{
+  char *name;
+  if( !_ZTKEvalKey( filter, NULL, ztk, __ztk_prp_pdfilter ) ) return NULL;
+  name = zNamePtr(filter);
+  if( !filter->com || !filter->com->_fromZTK( filter, ztk ) ) return NULL;
+  zNameSet( filter, name );
+  return filter;
+}
+
+void pdFilterFPrintZTK(FILE *fp, pdFilter *filter)
+{
+  _ZTKPrpKeyFPrint( fp, filter, __ztk_prp_pdfilter );
+  if( filter->com )
+    filter->com->_fprintZTK( fp, filter );
+}
+
+pdFilterArray *pdFilterArrayAlloc(pdFilterArray *arr, int size)
+{
+  register int i;
+
+  zArrayAlloc( arr, pdFilter, size );
+  if( !zArrayBuf(arr) || zArraySize(arr) != size ){
+    ZALLOCERROR();
     return NULL;
   }
-  fseek( fp, cur, SEEK_SET );
-  if( prm.met->fread( fp, filter ) ){
-    if( !zNameSet( filter, prm.name ) ){
-      ZALLOCERROR();
-      return NULL;
-    }
-    return filter;
-  }
-  return NULL;
-}
-
-static bool _pdFilterFAlloc(FILE *fp, pdFilterArray *arr);
-
-bool pdFilterArrayAlloc(pdFilterArray *arr, int n)
-{
-  zArrayAlloc( arr, pdFilter, n );
-  if( !zArrayBuf(arr) ){
-    ZALLOCERROR();
-    return false;
-  }
-  return true;
+  for( i=0; i<size; i++ )
+    pdFilterInit( zArrayElemNC(arr, i) );
+  return arr;
 }
 
 void pdFilterArrayDestroy(pdFilterArray *arr)
 {
-  register uint i;
+  register int i;
 
-  for( i=0; i<zArrayNum(arr); i++ )
-    pdFilterDestroy( zArrayElem(arr,i) );
+  for( i=0; i<zArraySize(arr); i++ )
+    pdFilterDestroy( zArrayElemNC(arr,i) );
   zArrayFree( arr );
-}
-
-bool _pdFilterFAlloc(FILE *fp, pdFilterArray *arr)
-{
-  int n;
-
-  n = zFCountTag( fp, PD_FILTER_TAG );
-  return pdFilterArrayAlloc( arr, n );
 }
 
 pdFilter *pdFilterArrayNameFind(pdFilterArray *arr, const char *name)
@@ -113,40 +99,63 @@ pdFilter *pdFilterArrayNameFind(pdFilterArray *arr, const char *name)
 
 void pdFilterArrayUpdate(pdFilterArray *arr, double dt)
 {
-  register uint i;
+  register int i;
 
-  for( i=0; i<zArrayNum(arr); i++ )
+  for( i=0; i<zArraySize(arr); i++ )
     pdFilterUpdate( zArrayElem(arr,i), dt );
 }
 
-typedef struct{
-  pdFilterArray *arr;
-  int count;
-} _pdFilterArrayParam;
-
-bool _pdFilterArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  _pdFilterArrayParam *prm;
-
-  prm = instance;
-  if( strcmp( buf, PD_FILTER_TAG ) == 0 ){
-    if( !pdFilterFRead( fp, zArrayElem(prm->arr,prm->count++) ) ){
-      *success = false;
-      return false;
-    }
-  } else
-    return false;
-  return true;
+static void *_pdFilterArrayFilterFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return pdFilterFromZTK( zArrayElemNC((pdFilterArray*)obj,i), ztk ) ? obj : NULL;
 }
 
-bool pdFilterArrayFRead(FILE *fp, pdFilterArray *arr)
-{
-  _pdFilterArrayParam prm;
+static const ZTKPrp __ztk_prp_tag_pedi2_filter[] = {
+  { ZTK_TAG_PEDI2_FILTER, -1, _pdFilterArrayFilterFromZTK, NULL },
+};
 
+pdFilterArray *pdFilterArrayFromZTK(pdFilterArray *arr, ZTK *ztk)
+{
+  int num;
+
+  if( ( num = ZTKCountTag( ztk, ZTK_TAG_PEDI2_FILTER ) ) == 0 ){
+    ZRUNWARN( "empty array of filters specified." );
+    return NULL;
+  }
+  if( !pdFilterArrayAlloc( arr, num ) ) return NULL;
+  _ZTKEvalTag( arr, NULL, ztk, __ztk_prp_tag_pedi2_filter );
+  return arr;
+}
+
+void pdFilterArrayFPrintZTK(FILE *fp, pdFilterArray *arr)
+{
+  int i;
+
+  for( i=0; i<zArraySize(arr); i++ ){
+    fprintf( fp, "[%s]\n", ZTK_TAG_PEDI2_FILTER );
+    pdFilterFPrintZTK( fp, zArrayElemNC(arr,i) );
+    fprintf( fp, "\n" );
+  }
+  _ZTKPrpTagFPrint( fp, arr, __ztk_prp_tag_pedi2_filter );
+}
+
+pdFilterArray *pdFilterArrayReadZTK(pdFilterArray *arr, char filename[])
+{
+  ZTK ztk;
+
+  ZTKInit( &ztk );
   zArrayInit( arr );
-  if( !_pdFilterFAlloc( fp, arr ) ) return false;
-  rewind( fp );
-  prm.count = 0;
-  prm.arr = arr;
-  return zTagFRead( fp, _pdFilterArrayFRead, &prm );
+  if( ZTKParse( &ztk, filename ) )
+    arr = pdFilterArrayFromZTK( arr, &ztk );
+  ZTKDestroy( &ztk );
+  return arr;
+}
+
+bool pdFilterArrayWriteZTK(pdFilterArray *arr, char filename[])
+{
+  FILE *fp;
+
+  if( !( fp = zOpenZTKFile( filename, "w" ) ) ) return false;
+  pdFilterArrayFPrintZTK( fp, arr );
+  fclose(fp);
+  return true;
 }

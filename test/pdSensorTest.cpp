@@ -2,19 +2,15 @@
 #include "utility/random_initializer.h"
 #include <pedi2/pd_sensor.h>
 
-bool zMat3DMatch(zMat3D *m1, zMat3D *m2){
-  return m1->c[0] == m2->c[0] &&
-         m1->c[1] == m2->c[1] &&
-         m1->c[2] == m2->c[2] &&
-         m1->c[3] == m2->c[3] &&
-         m1->c[4] == m2->c[4] &&
-         m1->c[5] == m2->c[5] &&
-         m1->c[6] == m2->c[6] &&
-         m1->c[7] == m2->c[7] &&
-         m1->c[8] == m2->c[8];
-};
-
 const double TIME_STEP = 0.01;
+
+// These definitions should be removed by using CPP version library
+const zVec3D zVec3D::zvec3Dzero = { { 0, 0, 0 } };
+const zMat3D zMat3D::zmat3Dident = { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } };
+const zFrame3D zFrame3D::zframe3Dident = {
+  { { 0, 0, 0 } },
+  { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } }
+};
 
 class pdSensorTest : public testing::Test {
 protected:
@@ -30,81 +26,81 @@ TEST_F(pdSensorTest, Init)
   pdSensorInit( &sensor );
   EXPECT_EQ( NULL, zNamePtr( &sensor ) );
   EXPECT_EQ( 0, pdSensorSize( &sensor ) );
-  EXPECT_EQ( NULL, pdSensorInput( &sensor ) );
-  EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
-  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorPos(&sensor) ) );
-  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorAtt(&sensor) ) );
+  EXPECT_EQ( NULL, pdSensorRawData( &sensor ) );
+  EXPECT_EQ( NULL, pdSensorData( &sensor ) );
+  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorLinkPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorLinkAtt(&sensor) ) );
   EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorWldPos(&sensor) ) );
   EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorWldAtt(&sensor) ) );
-  EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
-  EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
+  EXPECT_EQ( 0, zArraySize( pdSensorFilters( &sensor ) ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdSensorFilters( &sensor ) ) );
   EXPECT_STREQ( "", pdSensorLinkName( &sensor ) );
-  EXPECT_EQ( NULL, sensor._prm );
-  EXPECT_EQ( NULL, sensor._met );
+  EXPECT_EQ( NULL, sensor.prp );
+  EXPECT_EQ( NULL, sensor.com );
 }
 
-TEST_F(pdSensorTest, DestroyDefault)
+TEST_F(pdSensorTest, DefaultDestroy)
 {
   pdSensorInit( &sensor );
-  zNameSet( &sensor, (char*)ZNONAME );
+  zNameSet( &sensor, ZNONAME );
   pdSensorSize( &sensor ) = 3;
-  pdSensorInput( &sensor ) = zVecAlloc( 3 );
-  pdSensorOutput( &sensor ) = zVecAlloc( 3 );
-  zArrayAlloc( &sensor.arr, pdFilter, 2 );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
-  pdFilterCreateBW( zArrayElem(&sensor.arr,1), 0.5, 2 );
-  zNameSet( zArrayElem(&sensor.arr,0), (char*)"none01" );
-  zNameSet( zArrayElem(&sensor.arr,1), (char*)"bw01" );
-  zNameSet( &sensor, (char*)ZNONAME );
-  pdSensorDestroyDefault( &sensor );
+  pdSensorRawData( &sensor ) = zVecAlloc( 3 );
+  pdSensorData( &sensor ) = zVecAlloc( 3 );
+  zArrayAlloc( pdSensorFilters(&sensor), pdFilter, 2 );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
+  pdFilterBWCreate( zArrayElem(pdSensorFilters(&sensor),1), 0.5, 2 );
+  zNameSet( zArrayElem(pdSensorFilters(&sensor),0), "none01" );
+  zNameSet( zArrayElem(pdSensorFilters(&sensor),1), "bw01" );
+  zNameSet( &sensor, ZNONAME );
+  pdSensorDefaultDestroy( &sensor );
   EXPECT_EQ( NULL, zNamePtr( &sensor ) );
   EXPECT_EQ( 0, pdSensorSize( &sensor ) );
-  EXPECT_EQ( NULL, pdSensorInput( &sensor ) );
-  EXPECT_EQ( NULL, pdSensorOutput( &sensor ) );
-  EXPECT_EQ( 0, zArrayNum( pdSensorFilterArray( &sensor ) ) );
-  EXPECT_EQ( NULL, zArrayBuf( pdSensorFilterArray( &sensor ) ) );
-  EXPECT_EQ( NULL, sensor._prm );
-  EXPECT_EQ( NULL, sensor._met );
+  EXPECT_EQ( NULL, pdSensorRawData( &sensor ) );
+  EXPECT_EQ( NULL, pdSensorData( &sensor ) );
+  EXPECT_EQ( 0, zArraySize( pdSensorFilters( &sensor ) ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdSensorFilters( &sensor ) ) );
+  EXPECT_EQ( NULL, sensor.prp );
+  EXPECT_EQ( NULL, sensor.com );
 }
 
-TEST_F(pdSensorTest, ProcessDefault)
+TEST_F(pdSensorTest, DefaultProcess)
 {
-  zVec input, output;
+  zVec raw, data;
 
-  input = zVecCreateList( 3, 1.0, 2.0, 3.0 );
-  output = zVecAlloc( 3 );
+  raw = zVecCreateList( 3, 1.0, 2.0, 3.0 );
+  data = zVecAlloc( 3 );
   pdSensorInit( &sensor );
   pdSensorSize( &sensor ) = 3;
-  pdSensorInput( &sensor ) = zVecAlloc( 3 );
-  pdSensorOutput( &sensor ) = zVecAlloc( 3 );
-  pdFilterArrayAlloc( &sensor.arr, 3 );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,1) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,2) );
-  zNameSet( zArrayElem(&sensor.arr,0), (char*)"none00" );
-  zNameSet( zArrayElem(&sensor.arr,1), (char*)"none01" );
-  zNameSet( zArrayElem(&sensor.arr,2), (char*)"none02" );
-  zNameSet( &sensor, (char*)ZNONAME );
+  pdSensorRawData( &sensor ) = zVecAlloc( 3 );
+  pdSensorData( &sensor ) = zVecAlloc( 3 );
+  pdFilterArrayAlloc( pdSensorFilters(&sensor), 3 );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),1) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),2) );
+  zNameSet( zArrayElem(pdSensorFilters(&sensor),0), "none00" );
+  zNameSet( zArrayElem(pdSensorFilters(&sensor),1), "none01" );
+  zNameSet( zArrayElem(pdSensorFilters(&sensor),2), "none02" );
+  zNameSet( &sensor, ZNONAME );
   // methods to testify
-  pdSensorSetInput( &sensor, input );
-  pdSensorProcessDefault( &sensor, TIME_STEP );
-  pdSensorGetOutput( &sensor, output );
+  pdSensorSetRawData( &sensor, raw );
+  pdSensorDefaultProcess( &sensor, TIME_STEP );
+  pdSensorGetData( &sensor, data );
   // test
-  EXPECT_EQ( 1.0, pdSensorInputVal(&sensor,0) );
-  EXPECT_EQ( 2.0, pdSensorInputVal(&sensor,1) );
-  EXPECT_EQ( 3.0, pdSensorInputVal(&sensor,2) );
-  EXPECT_EQ( 1.0, pdSensorOutputVal(&sensor,0) );
-  EXPECT_EQ( 2.0, pdSensorOutputVal(&sensor,1) );
-  EXPECT_EQ( 3.0, pdSensorOutputVal(&sensor,2) );
-  EXPECT_EQ( 1.0, zVecElem(output,0) );
-  EXPECT_EQ( 2.0, zVecElem(output,1) );
-  EXPECT_EQ( 3.0, zVecElem(output,2) );
-  pdSensorDestroyDefault( &sensor );
-  zVecFree( input );
-  zVecFree( output );
+  EXPECT_EQ( 1.0, pdSensorRawDataVal(&sensor,0) );
+  EXPECT_EQ( 2.0, pdSensorRawDataVal(&sensor,1) );
+  EXPECT_EQ( 3.0, pdSensorRawDataVal(&sensor,2) );
+  EXPECT_EQ( 1.0, pdSensorDataVal(&sensor,0) );
+  EXPECT_EQ( 2.0, pdSensorDataVal(&sensor,1) );
+  EXPECT_EQ( 3.0, pdSensorDataVal(&sensor,2) );
+  EXPECT_EQ( 1.0, zVecElem(data,0) );
+  EXPECT_EQ( 2.0, zVecElem(data,1) );
+  EXPECT_EQ( 3.0, zVecElem(data,2) );
+  pdSensorDefaultDestroy( &sensor );
+  zVecFree( raw );
+  zVecFree( data );
 }
 
-TEST_F(pdSensorTest, FrameUpdateDefault)
+TEST_F(pdSensorTest, DefaultFrameUpdate)
 {
   zVec3D v;
   zMat3D m;
@@ -118,41 +114,41 @@ TEST_F(pdSensorTest, FrameUpdateDefault)
   zMat3DCreate( &m, 0, 1, 0, -1, 0, 0, 0, 0, 1 );
   zFrame3DCreate( &frame, &v, &m );
   // methods to testify
-  pdSensorFrameUpdateDefault( &sensor, &frame );
+  pdSensorDefaultFrameUpdate( &sensor, &frame );
   zVec3DCopy( pdSensorWldPos(&sensor), &v );
   zMat3DCopy( pdSensorWldAtt(&sensor), &m );
-  EXPECT_EQ( 0,  zVec3DElem(&v,zX) );
-  EXPECT_EQ( 0,  zVec3DElem(&v,zY) );
-  EXPECT_EQ( -1, zVec3DElem(&v,zZ) );
-  EXPECT_EQ( 0,  zMat3DElem9(&m,0) );
-  EXPECT_EQ( -1, zMat3DElem9(&m,1) );
-  EXPECT_EQ( 0,  zMat3DElem9(&m,2) );
-  EXPECT_EQ( 1,  zMat3DElem9(&m,3) );
-  EXPECT_EQ( 0,  zMat3DElem9(&m,4) );
-  EXPECT_EQ( 0,  zMat3DElem9(&m,5) );
-  EXPECT_EQ( 0,  zMat3DElem9(&m,6) );
-  EXPECT_EQ( 0,  zMat3DElem9(&m,7) );
-  EXPECT_EQ( 1,  zMat3DElem9(&m,8) );
   // test
-  pdSensorDestroyDefault( &sensor );
+  EXPECT_EQ( 0,  v.c.x );
+  EXPECT_EQ( 0,  v.c.y );
+  EXPECT_EQ( -1, v.c.z );
+  EXPECT_EQ( 0,  m.e[0][0] );
+  EXPECT_EQ( -1, m.e[0][1] );
+  EXPECT_EQ( 0,  m.e[0][2] );
+  EXPECT_EQ( 1,  m.e[1][0] );
+  EXPECT_EQ( 0,  m.e[1][1] );
+  EXPECT_EQ( 0,  m.e[1][2] );
+  EXPECT_EQ( 0,  m.e[2][0] );
+  EXPECT_EQ( 0,  m.e[2][1] );
+  EXPECT_EQ( 1,  m.e[2][2] );
+  pdSensorDefaultDestroy( &sensor );
 }
 
 
 class pdSensor6FTTest : public testing::Test {
 protected:
   virtual void SetUp() {
-    pdFilterArrayAlloc( &srcfarr, 2 );
-    pdFilterCreateNone( zArrayElem(&srcfarr,0) );
-    pdFilterCreateBW( zArrayElem(&srcfarr,1), 0.5, 2 );
-    zNameSet( zArrayElem(&srcfarr,0), (char*)"none01" );
-    zNameSet( zArrayElem(&srcfarr,1), (char*)"bw01" );
+    pdFilterArrayAlloc( &filterarray, 2 );
+    pdFilterNoneCreate( zArrayElem(&filterarray,0) );
+    pdFilterBWCreate( zArrayElem(&filterarray,1), 0.5, 2 );
+    zNameSet( zArrayElem(&filterarray,0), "none01" );
+    zNameSet( zArrayElem(&filterarray,1), "bw01" );
   };
   virtual void TearDown() {
-    pdFilterArrayDestroy( &srcfarr );
+    pdFilterArrayDestroy( &filterarray );
   };
 
   pdSensor sensor;
-  pdFilterArray srcfarr;
+  pdFilterArray filterarray;
   RandomInitializer ri;
 };
 
@@ -163,40 +159,41 @@ TEST_F(pdSensor6FTTest, Create)
 
   zFrame3DIdent( &frame );
   pdFilterArrayAlloc( &arr, 6 );
-  EXPECT_TRUE( pdSensorCreate6FT( &sensor, &frame, &arr ) );
+  pdSensor6FTCreate( &sensor, "foot", &frame, &arr );
   EXPECT_EQ( NULL, zNamePtr( &sensor ) );
   EXPECT_EQ( 6, pdSensorSize( &sensor ) );
-  EXPECT_EQ( 6, zVecSize( pdSensorInput( &sensor ) ) );
-  EXPECT_EQ( 6, zVecSize( pdSensorOutput( &sensor ) ) );
-  EXPECT_EQ( 6, zArrayNum( pdSensorFilterArray( &sensor ) ) );
-  EXPECT_EQ( zArrayBuf(&arr), zArrayBuf(pdSensorFilterArray(&sensor)) );
-  EXPECT_EQ( &pd_sensor_6ft_met, sensor._met );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,1) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,2) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,3) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,4) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,5) );
+  EXPECT_EQ( 6, zVecSize( pdSensorRawData( &sensor ) ) );
+  EXPECT_EQ( 6, zVecSize( pdSensorData( &sensor ) ) );
+  EXPECT_EQ( 6, zArraySize( pdSensorFilters( &sensor ) ) );
+  EXPECT_EQ( zArrayBuf(&arr), zArrayBuf(pdSensorFilters(&sensor)) );
+  EXPECT_EQ( &pd_sensor_6ft_com, sensor.com );
+  EXPECT_STREQ( "6ft", sensor.com->typestr );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),1) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),2) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),3) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),4) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),5) );
   pdSensorDestroy( &sensor );
 }
 
-TEST_F(pdSensor6FTTest, FRead)
+TEST_F(pdSensor6FTTest, FromZTK)
 {
-  char filename[] = "model/sensor_6ft.conf";
+  char filename[] = "model/sensor_6ft.ztk";
+  ZTK ztk;
   zVec3D v;
   zMat3D m;
-  FILE *fp;
 
   zVec3DCreate( &v, 1.0, 2.0, 3.0 );
   zMat3DCreate( &m,
                 1.0, 0.0, 0.0,
                 0.0, 2.0, 0.0,
                 0.0, 0.0, 3.0 );
-  fp = fopen( filename, "r" );
-  pdSensorFRead( fp, &sensor, &srcfarr );
+  ZTKParse( &ztk, filename );
+  pdSensorFromZTK( &sensor, &filterarray, &ztk );
   EXPECT_STREQ( "lf_FT01", zNamePtr( &sensor ) );
-  EXPECT_TRUE( zVec3DMatch( &v, pdSensorPos(&sensor) ) );
-  EXPECT_TRUE( zMat3DMatch( &m, pdSensorAtt(&sensor) ) );
+  EXPECT_TRUE( zVec3DMatch( &v, pdSensorLinkPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( &m, pdSensorLinkAtt(&sensor) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,0) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,1) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,2) ) );
@@ -204,20 +201,21 @@ TEST_F(pdSensor6FTTest, FRead)
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,4) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,5) ) );
   EXPECT_STREQ( "left_foot", pdSensorLinkName( &sensor ) );
+  EXPECT_STREQ( "6ft", sensor.com->typestr );
   pdSensorDestroy( &sensor );
-  fclose( fp );
+  ZTKDestroy( &ztk );
 }
 
-TEST_F(pdSensor6FTTest, FRead2)
+TEST_F(pdSensor6FTTest, FromZTK2)
 {
-  char filename[] = "model/sensor_6ft2.conf";
-  FILE *fp;
+  char filename[] = "model/sensor_6ft2.ztk";
+  ZTK ztk;
 
-  fp = fopen( filename, "r" );
-  pdSensorFRead( fp, &sensor, &srcfarr );
+  ZTKParse( &ztk, filename );
+  pdSensorFromZTK( &sensor, &filterarray, &ztk );
   EXPECT_STREQ( "lf_FT02", zNamePtr( &sensor ) );
-  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorPos(&sensor) ) );
-  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorAtt(&sensor) ) );
+  EXPECT_TRUE( zVec3DMatch( ZVEC3DZERO, pdSensorLinkPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorLinkAtt(&sensor) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,0) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,1) ) );
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,2) ) );
@@ -225,6 +223,42 @@ TEST_F(pdSensor6FTTest, FRead2)
   EXPECT_STREQ( "none01", zNamePtr( pdSensorFilterElem(&sensor,4) ) );
   EXPECT_STREQ( "bw01",   zNamePtr( pdSensorFilterElem(&sensor,5) ) );
   EXPECT_STREQ( "left_foot", pdSensorLinkName( &sensor ) );
+  EXPECT_STREQ( "6ft", sensor.com->typestr );
+  pdSensorDestroy( &sensor );
+  ZTKDestroy( &ztk );
+}
+
+TEST_F(pdSensor6FTTest, FPrintZTK)
+{
+  char buf[BUFSIZ];
+  char expected[BUFSIZ];
+  zFrame3D frame;
+  pdFilterArray arr;
+  char linkname[] = "left_foot";
+  char name[] = "lf_FT01";
+  FILE *fp;
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  zFrame3DIdent( &frame );
+  pdFilterArrayAlloc( &arr, 6 );
+  pdSensor6FTCreate( &sensor, linkname, &frame, &arr );
+  zNameSet( &sensor, name );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(pdSensorFilters(&sensor),0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(pdSensorFilters(&sensor),1) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(pdSensorFilters(&sensor),2) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(pdSensorFilters(&sensor),3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(pdSensorFilters(&sensor),4) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(pdSensorFilters(&sensor),5) );
+  sprintf( expected,
+           "name: %s\ntype: 6ft\nlink: %s\nframe: {\n 1, 0, 0, 0\n 0, 1, 0, 0\n 0, 0, 1, 0\n}\n"
+           "filterfx: bw01\nfilterfy: none01\nfilterfz: bw01\n"
+           "filtertx: none01\nfilterty: bw01\nfiltertz: none01\n",
+           name, linkname );
+
+  pdSensorFPrintZTK( fp, &sensor );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
+
   pdSensorDestroy( &sensor );
   fclose( fp );
 }
@@ -240,25 +274,25 @@ TEST_F(pdSensor6FTTest, GetFT)
   v = zVecCreateList( 6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 );
   zFrame3DIdent( &frame );
   pdFilterArrayAlloc( &arr, 6 );
-  pdSensorCreate6FT( &sensor, &frame, &arr );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,1) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,2) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,3) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,4) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,5) );
+  pdSensor6FTCreate( &sensor, "foot", &frame, &arr );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),1) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),2) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),3) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),4) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),5) );
   // method to testify
-  pdSensorSetInput( &sensor, v );
+  pdSensorSetRawData( &sensor, v );
   pdSensorProcess( &sensor, TIME_STEP );
   pdSensor6FTGetF( &sensor, &f );
   pdSensor6FTGetT( &sensor, &tau );
   // check
-  EXPECT_EQ( 1.0, zVec3DElem( &f, zX ) );
-  EXPECT_EQ( 2.0, zVec3DElem( &f, zY ) );
-  EXPECT_EQ( 3.0, zVec3DElem( &f, zZ ) );
-  EXPECT_EQ( 4.0, zVec3DElem( &tau, zX ) );
-  EXPECT_EQ( 5.0, zVec3DElem( &tau, zY ) );
-  EXPECT_EQ( 6.0, zVec3DElem( &tau, zZ ) );
+  EXPECT_EQ( 1.0, f.c.x );
+  EXPECT_EQ( 2.0, f.c.y );
+  EXPECT_EQ( 3.0, f.c.z );
+  EXPECT_EQ( 4.0, tau.c.x );
+  EXPECT_EQ( 5.0, tau.c.y );
+  EXPECT_EQ( 6.0, tau.c.z );
   pdSensorDestroy( &sensor );
 }
 
@@ -277,26 +311,26 @@ TEST_F(pdSensor6FTTest, GetWldFT)
   v = zVecCreateList( 6, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0 );
   zFrame3DIdent( &sframe );
   pdFilterArrayAlloc( &arr, 6 );
-  pdSensorCreate6FT( &sensor, &sframe, &arr );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,0) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,1) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,2) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,3) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,4) );
-  pdFilterCreateNone( zArrayElem(&sensor.arr,5) );
+  pdSensor6FTCreate( &sensor, "foot", &sframe, &arr );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),1) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),2) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),3) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),4) );
+  pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),5) );
   // method to testify
-  pdSensorSetInput( &sensor, v );
+  pdSensorSetRawData( &sensor, v );
   pdSensorProcess( &sensor, TIME_STEP );
   pdSensorFrameUpdate( &sensor, &lframe );
   pdSensor6FTGetWldF( &sensor, &f );
   pdSensor6FTGetWldT( &sensor, &tau );
   // check
-  EXPECT_EQ( 1.0,  zVec3DElem( &f, zX ) );
-  EXPECT_EQ( 0.0,  zVec3DElem( &f, zY ) );
-  EXPECT_EQ( 1.0,  zVec3DElem( &f, zZ ) );
-  EXPECT_EQ( 0.0,  zVec3DElem( &tau, zX ) );
-  EXPECT_EQ( -1.0, zVec3DElem( &tau, zY ) );
-  EXPECT_EQ( 0.0,  zVec3DElem( &tau, zZ ) );
+  EXPECT_EQ( 1.0,  f.c.x );
+  EXPECT_EQ( 0.0,  f.c.y );
+  EXPECT_EQ( 1.0,  f.c.z );
+  EXPECT_EQ( 0.0,  tau.c.x );
+  EXPECT_EQ( -1.0, tau.c.y );
+  EXPECT_EQ( 0.0,  tau.c.z );
   pdSensorDestroy( &sensor );
 }
 
@@ -304,50 +338,202 @@ TEST_F(pdSensor6FTTest, GetWldFT)
 class pdSensorArrayTest : public testing::Test {
 protected:
   virtual void SetUp() {
-    pdFilterArrayAlloc( &srcfarr, 6 );
-    pdFilterCreateNone( zArrayElem(&srcfarr,0) );
-    pdFilterCreateBW(   zArrayElem(&srcfarr,1), 0.5, 2 );
-    pdFilterCreateNone( zArrayElem(&srcfarr,2) );
-    pdFilterCreateBW(   zArrayElem(&srcfarr,3), 1.0, 2 );
-    pdFilterCreateNone( zArrayElem(&srcfarr,4) );
-    pdFilterCreateBW(   zArrayElem(&srcfarr,5), 1.5, 3 );
-    zNameSet( zArrayElem(&srcfarr,0), (char*)"none01" );
-    zNameSet( zArrayElem(&srcfarr,1), (char*)"bw01" );
-    zNameSet( zArrayElem(&srcfarr,2), (char*)"none02" );
-    zNameSet( zArrayElem(&srcfarr,3), (char*)"bw02" );
-    zNameSet( zArrayElem(&srcfarr,4), (char*)"none03" );
-    zNameSet( zArrayElem(&srcfarr,5), (char*)"bw03" );
+    pdFilterArrayAlloc( &filterarray, 2 );
+    pdFilterNoneCreate( zArrayElem(&filterarray,0) );
+    pdFilterBWCreate(   zArrayElem(&filterarray,1), 0.5, 2 );
+    zNameSet( zArrayElem(&filterarray,0), "none01" );
+    zNameSet( zArrayElem(&filterarray,1), "bw01" );
   };
   virtual void TearDown() {
-    pdFilterArrayDestroy( &srcfarr );
+    pdFilterArrayDestroy( &filterarray );
   };
 
   pdSensorArray arr;
-  pdFilterArray srcfarr;
+  pdFilterArray filterarray;
   RandomInitializer ri;
 };
 
 TEST_F(pdSensorArrayTest, NameFind)
 {
+  pdFilterArray lf_filters, rf_filters;
+
+  pdFilterArrayAlloc( &lf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,5) );
+
   pdSensorArrayAlloc( &arr, 2 );
-  pdSensorCreate6FT( zArrayElem(&arr,0), ZFRAME3DIDENT, &srcfarr );
-  pdSensorCreate6FT( zArrayElem(&arr,1), ZFRAME3DIDENT, &srcfarr );
-  zNameSet( zArrayElem(&arr,0), (char*)"lf_FT01" );
-  zNameSet( zArrayElem(&arr,1), (char*)"rf_FT01" );
+  pdSensor6FTCreate( zArrayElem(&arr,0), "left_foot", ZFRAME3DIDENT, &lf_filters );
+  zNameSet( zArrayElem(&arr,0), "lf_FT01" );
   EXPECT_EQ( zArrayElem(&arr,0), pdSensorArrayNameFind(&arr,"lf_FT01") );
+
+  pdFilterArrayAlloc( &rf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,5) );
+
+  pdSensor6FTCreate( zArrayElem(&arr,1), "right_foot", ZFRAME3DIDENT, &rf_filters );
+  zNameSet( zArrayElem(&arr,1), "rf_FT01" );
   EXPECT_EQ( zArrayElem(&arr,1), pdSensorArrayNameFind(&arr,"rf_FT01") );
-  // pdSensorArrayDestroy( &arr );
+
+  pdSensorArrayDestroy( &arr );
 }
 
-TEST_F(pdSensorArrayTest, FRead)
+TEST_F(pdSensorArrayTest, FromZTK)
 {
-  char filename[] = "model/sensor.conf";
-  FILE *fp;
+  char filename[] = "model/sensor.ztk";
+  pdFilterArray filterarray;
+  ZTK ztk;
+  pdSensor *sensor;
+  zVec3D v;
 
-  fp = fopen( filename, "r" );
-  pdSensorArrayFRead( fp, &arr, &srcfarr );
-  EXPECT_STREQ( "lf_FT01", zNamePtr( zArrayElem(&arr,0) ) );
+  ZTKParse( &ztk, filename );
+  pdFilterArrayFromZTK( &filterarray, &ztk );
+  pdSensorArrayFromZTK( &arr, &filterarray, &ztk );
+
+  // sensor 1
+  sensor = zArrayElem( &arr, 0 );
+  EXPECT_STREQ( "lf_FT01", zNamePtr( sensor ) );
+  zVec3DCreate( &v, 1, 0, 0 );
+  EXPECT_TRUE( zVec3DMatch( &v, pdSensorLinkPos(sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorLinkAtt(sensor) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,0) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,1) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,2) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,3) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,4) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,5) ) );
+  EXPECT_STREQ( "left_foot", pdSensorLinkName( sensor ) );
+  EXPECT_STREQ( "6ft", sensor->com->typestr );
+
+  // sensor 2
+  sensor = zArrayElem( &arr, 1 );
   EXPECT_STREQ( "rf_FT01", zNamePtr( zArrayElem(&arr,1) ) );
+  zVec3DCreate( &v, -1, 0, 0 );
+  EXPECT_TRUE( zVec3DMatch( &v, pdSensorLinkPos(sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorLinkAtt(sensor) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,0) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,1) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,2) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,3) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,4) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,5) ) );
+  EXPECT_STREQ( "right_foot", pdSensorLinkName( sensor ) );
+  EXPECT_STREQ( "6ft", sensor->com->typestr );
+
+  pdSensorArrayDestroy( &arr );
+  pdFilterArrayDestroy( &filterarray );
+  ZTKDestroy( &ztk );
+}
+
+TEST_F(pdSensorArrayTest, FPrintZTK)
+{
+  char buf[BUFSIZ];
+  char expected[BUFSIZ];
+  FILE *fp;
+  pdSensor *sensor;
+  pdFilterArray lf_filters ,rf_filters;
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  zArrayAlloc( &arr, pdSensor, 2 );
+
+  // sensor 1
+  pdFilterArrayAlloc( &lf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,5) );
+
+  sensor = zArrayElem( &arr, 0 );
+  pdSensor6FTCreate( sensor, "left_foot", ZFRAME3DIDENT, &lf_filters );
+  zNameSet( sensor, "lf_FT01" );
+
+  // sensor 2
+  pdFilterArrayAlloc( &rf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,5) );
+
+  sensor = zArrayElem( &arr, 1 );
+  pdSensor6FTCreate( zArrayElem(&arr,1), "right_foot", ZFRAME3DIDENT, &rf_filters  );
+  zNameSet( zArrayElem(&arr,1), "rf_FT01" );
+
+  sprintf( expected,
+           "[pedi2::sensor]\n"
+           "name: lf_FT01\ntype: 6ft\nlink: left_foot\nframe: {\n 1, 0, 0, 0\n 0, 1, 0, 0\n 0, 0, 1, 0\n}\n"
+           "filterfx: none01\nfilterfy: none01\nfilterfz: none01\n"
+           "filtertx: bw01\nfilterty: bw01\nfiltertz: bw01\n\n"
+           "[pedi2::sensor]\n"
+           "name: rf_FT01\ntype: 6ft\nlink: right_foot\nframe: {\n 1, 0, 0, 0\n 0, 1, 0, 0\n 0, 0, 1, 0\n}\n"
+           "filterfx: bw01\nfilterfy: none01\nfilterfz: none01\n"
+           "filtertx: none01\nfilterty: bw01\nfiltertz: bw01\n\n"
+           );
+
+  pdSensorArrayFPrintZTK( fp, &arr );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
+
   pdSensorArrayDestroy( &arr );
   fclose( fp );
+}
+
+TEST_F(pdSensorArrayTest, ReadZTK)
+{
+  char filename[] = "model/sensor.ztk";
+  pdFilterArray filterarray;
+  pdSensor *sensor;
+  zVec3D v;
+
+  pdFilterArrayReadZTK( &filterarray, filename );
+  pdSensorArrayReadZTK( &arr, &filterarray, filename );
+  ASSERT_TRUE( zArrayBuf(&arr) );
+
+  // sensor 1
+  sensor = zArrayElem( &arr, 0 );
+  EXPECT_STREQ( "lf_FT01", zNamePtr( sensor ) );
+  zVec3DCreate( &v, 1, 0, 0 );
+  EXPECT_TRUE( zVec3DMatch( &v, pdSensorLinkPos(sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorLinkAtt(sensor) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,0) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,1) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,2) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,3) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,4) ) );
+  EXPECT_STREQ( "bw01", zNamePtr( pdSensorFilterElem(sensor,5) ) );
+  EXPECT_STREQ( "left_foot", pdSensorLinkName( sensor ) );
+  EXPECT_STREQ( "6ft", sensor->com->typestr );
+
+  // sensor 2
+  sensor = zArrayElem( &arr, 1 );
+  EXPECT_STREQ( "rf_FT01", zNamePtr( zArrayElem(&arr,1) ) );
+  zVec3DCreate( &v, -1, 0, 0 );
+  EXPECT_TRUE( zVec3DMatch( &v, pdSensorLinkPos(sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( ZMAT3DIDENT, pdSensorLinkAtt(sensor) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,0) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,1) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,2) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,3) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,4) ) );
+  EXPECT_STREQ( "bw02", zNamePtr( pdSensorFilterElem(sensor,5) ) );
+  EXPECT_STREQ( "right_foot", pdSensorLinkName( sensor ) );
+  EXPECT_STREQ( "6ft", sensor->com->typestr );
+
+  pdSensorArrayDestroy( &arr );
+  pdFilterArrayDestroy( &filterarray );
+}
+
+TEST_F(pdSensorArrayTest, WriteZTK)
+{
+  // Same as FPrintZTK
 }

@@ -5,14 +5,14 @@
 
 __BEGIN_DECLS
 
-__EXPORT bool pdSensorCreate6FT(pdSensor *sensor, zFrame3D *frame, pdFilterArray *arr);
+__EXPORT pdSensor *pdSensor6FTCreate(pdSensor *sensor, const char linkname[], zFrame3D *linkframe, pdFilterArray *farray);
 
 __EXPORT zVec3D *pdSensor6FTGetF(pdSensor *sensor, zVec3D *f);
 __EXPORT zVec3D *pdSensor6FTGetT(pdSensor *sensor, zVec3D *tau);
 __EXPORT zVec3D *pdSensor6FTGetWldF(pdSensor *sensor, zVec3D *f);
 __EXPORT zVec3D *pdSensor6FTGetWldT(pdSensor *sensor, zVec3D *tau);
 
-extern pdSensorMethod pd_sensor_6ft_met;
+extern pdSensorCom pd_sensor_6ft_com;
 
 __END_DECLS
 

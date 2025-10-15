@@ -110,13 +110,15 @@ __EXPORT bool pdSensorArrayWriteZTK(pdSensorArray *arr, char filename[]);
 
 __END_DECLS
 
-#include <pedi2/pd_sensor_6ft.h> /* six-axis force/torque sensor */
+#include <pedi2/pd_sensor_dummy.h> /* dummy sensor */
+#include <pedi2/pd_sensor_6ft.h>   /* six-axis force/torque sensor */
 
 __BEGIN_DECLS
 
 /* add a handle to the following list when you create a new sensor class. */
 #define PD_SENSOR_COM_ARRAY \
 pdSensorCom *pd_sensor_com[] = { \
+  &pd_sensor_dummy_com, \
   &pd_sensor_6ft_com, \
   NULL, \
 }

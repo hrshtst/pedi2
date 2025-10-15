@@ -134,6 +134,80 @@ TEST_F(pdSensorTest, DefaultFrameUpdate)
 }
 
 
+class pdSensorDummyTest : public testing::Test {
+protected:
+  virtual void SetUp() {};
+  virtual void TearDown() {};
+
+  pdSensor sensor;
+  RandomInitializer ri;
+};
+
+TEST_F(pdSensorDummyTest, Create)
+{
+  zFrame3D frame;
+
+  zFrame3DIdent( &frame );
+  pdSensorDummyCreate( &sensor, "foot", &frame );
+  EXPECT_EQ( NULL, zNamePtr( &sensor ) );
+  EXPECT_EQ( 0, pdSensorSize( &sensor ) );
+  EXPECT_EQ( 0, zVecSize( pdSensorRawData( &sensor ) ) );
+  EXPECT_EQ( 0, zVecSize( pdSensorData( &sensor ) ) );
+  EXPECT_EQ( &pd_sensor_dummy_com, sensor.com );
+  EXPECT_STREQ( "dummy", sensor.com->typestr );
+  pdSensorDestroy( &sensor );
+}
+
+TEST_F(pdSensorDummyTest, FromZTK)
+{
+  char filename[] = "model/sensor_dummy.ztk";
+  ZTK ztk;
+  zVec3D v;
+  zMat3D m;
+
+  zVec3DCreate( &v, 1.0, 2.0, 3.0 );
+  zMat3DCreate( &m,
+                1.0, 0.0, 0.0,
+                0.0, 2.0, 0.0,
+                0.0, 0.0, 3.0 );
+  ZTKParse( &ztk, filename );
+  pdSensorFromZTK( &sensor, NULL, &ztk );
+  EXPECT_STREQ( "dummy01", zNamePtr( &sensor ) );
+  EXPECT_TRUE( zVec3DMatch( &v, pdSensorLinkPos(&sensor) ) );
+  EXPECT_TRUE( zMat3DMatch( &m, pdSensorLinkAtt(&sensor) ) );
+  EXPECT_STREQ( "dummy", sensor.com->typestr );
+  pdSensorDestroy( &sensor );
+  ZTKDestroy( &ztk );
+}
+
+TEST_F(pdSensorDummyTest, FPrintZTK)
+{
+  char buf[BUFSIZ];
+  char expected[BUFSIZ];
+  zFrame3D frame;
+  pdFilterArray arr;
+  char linkname[] = "foot";
+  char name[] = "dummy01";
+  FILE *fp;
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  zFrame3DIdent( &frame );
+  pdFilterArrayAlloc( &arr, 6 );
+  pdSensorDummyCreate( &sensor, linkname, &frame );
+  zNameSet( &sensor, name );
+  sprintf( expected,
+           "name: %s\ntype: dummy\nlink: %s\nframe: {\n 1, 0, 0, 0\n 0, 1, 0, 0\n 0, 0, 1, 0\n}\n",
+           name, linkname );
+
+  pdSensorFPrintZTK( fp, &sensor );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
+
+  pdSensorDestroy( &sensor );
+  fclose( fp );
+}
+
+
 class pdSensor6FTTest : public testing::Test {
 protected:
   virtual void SetUp() {

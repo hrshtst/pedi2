@@ -1,66 +1,88 @@
 #include <pedi2/pd_est_zmp.h>
 
-void pdEstZMPInit(pdEstZMP *e)
+void pdEstZmpInit(pdEstZmp *e)
 {
-  zArrayInit( &e->_lfsensor );
-  zArrayInit( &e->_rfsensor );
-  zVec3DClear( &e->estforce );
-  zVec3DClear( &e->estzmp );
+  zListInit( &e->_lfsensor );
+  zListInit( &e->_rfsensor );
+  zVec3DZero( &e->estforce );
+  zVec3DZero( &e->estzmp );
 }
 
-void pdEstZMPDestroy(pdEstZMP *e)
+void pdEstZmpDestroy(pdEstZmp *e)
 {
-  zArrayFree( &e->_lfsensor );
-  zArrayFree( &e->_rfsensor );
-  zVec3DClear( &e->estforce );
-  zVec3DClear( &e->estzmp );
-  pdFilterArrayDestroy( pdEstZMPFilterArray( e ) );
+  pdSensorListDestroy( &e->_lfsensor );
+  pdSensorListDestroy( &e->_rfsensor );
+  zVec3DZero( &e->estforce );
+  zVec3DZero( &e->estzmp );
+  pdFilterArrayDestroy( pdEstZmpFilterArray( e ) );
 }
 
-pdSensor *pdEstZMPNameFindSensor(pdEstZMP *e, const char *name)
+pdSensorListCell *pdSensorListPush(pdSensorList *list, pdSensor *sensor)
 {
-  return pdSensorArrayNameFind( pdEstZMPSensorArray(e), name );
+  pdSensorListCell *cp;
+
+  if( !( cp = zAlloc( pdSensorListCell, 1 ) ) ) return NULL;
+  pdSensorListCellSetSensor( cp, sensor );
+  zListInsertTail( list, cp );
+  return cp;
 }
 
-void pdEstZMPSetData(pdEstZMP *e, const char *name, zVec data)
+pdSensor *pdSensorListPop(pdSensorList *list)
 {
-  pdSensorSetInput( pdEstZMPNameFindSensor(e, name), data );
+  pdSensorListCell *cp;
+  pdSensor *sensor;
+
+  if( zListIsEmpty(list) ) return NULL;
+  zListDeleteTail( list, &cp );
+  sensor = pdSensorListCellSensor( cp );
+  zFree( cp );
+  return sensor;
 }
 
-zVec3D *pdEstZMPCalcFootForce(pdEstZMP *e, pdSensorPtrArray *s, zVec3D *f)
+pdSensor *pdEstZmpNameFindSensor(pdEstZmp *e, const char *name)
 {
-  register uint i;
+  return pdSensorArrayNameFind( pdEstZmpSensorArray(e), name );
+}
+
+void pdEstZmpSetData(pdEstZmp *e, const char *name, zVec data)
+{
+  pdSensorSetRawData( pdEstZmpNameFindSensor(e, name), data );
+}
+
+zVec3D *pdEstZmpCalcFootForce(pdEstZmp *e, pdSensorList *s, zVec3D *f)
+{
+  pdSensorListCell *sp;
   zVec3D v;
 
-  zVec3DClear( f );
-  for( i=0; i<zArrayNum(s); i++ ){
-    pdSensor6FTGetWldF( zArrayBuf(s)[i], &v );
+  zVec3DZero( f );
+  zListForEach( s, sp ){
+    pdSensor6FTGetWldF( sp->data, &v );
     zVec3DAddDRC( f, &v );
   }
   return f;
 }
 
-zVec3D *pdEstZMPCalcForce(pdEstZMP *e, zVec3D *f)
+zVec3D *pdEstZmpCalcForce(pdEstZmp *e, zVec3D *f)
 {
   zVec3D lff, rff;
 
-  pdEstZMPCalcFootForce( e, &e->_lfsensor, &lff );
-  pdEstZMPCalcFootForce( e, &e->_rfsensor, &rff );
+  pdEstZmpCalcFootForce( e, &e->_lfsensor, &lff );
+  pdEstZmpCalcFootForce( e, &e->_rfsensor, &rff );
   return zVec3DAdd( &lff, &rff, f );
 }
 
-zVec3D *pdEstZMPCalcFootZMP(pdEstZMP *e, pdSensorPtrArray *s, double pz, zVec3D *zmp, double *fz)
+zVec3D *pdEstZmpCalcFootZMP(pdEstZmp *e, pdSensorList *s, double pz, zVec3D *zmp, double *fz)
 {
-  register uint i;
+  pdSensorListCell *sp;
   zVec3D p, f, t;
   double px, py;
 
   px = py = 0;
   *fz = 0;
-  for( i=0; i<zArrayNum(s); i++ ){
-    zVec3DCopy( pdSensorWldPos(zArrayBuf(s)[i]), &p );
-    pdSensor6FTGetWldF( zArrayBuf(s)[i], &f );
-    pdSensor6FTGetWldT( zArrayBuf(s)[i], &t );
+  zListForEach( s, sp ){
+    zVec3DCopy( pdSensorWldPos( sp->data ), &p );
+    pdSensor6FTGetWldF( sp->data, &f );
+    pdSensor6FTGetWldT( sp->data, &t );
     px += -t.e[zY] - (p.e[zZ]-pz)*f.e[zX] + p.e[zX]*f.e[zZ];
     py +=  t.e[zX] - (p.e[zZ]-pz)*f.e[zY] + p.e[zY]*f.e[zZ];
     *fz += f.e[zZ];
@@ -73,14 +95,14 @@ zVec3D *pdEstZMPCalcFootZMP(pdEstZMP *e, pdSensorPtrArray *s, double pz, zVec3D 
   return zVec3DCreate( zmp, px, py, pz );
 }
 
-zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp)
+zVec3D *pdEstZmpCalcZMP(pdEstZmp *e, double pz, zVec3D *zmp)
 {
   zVec3D lfzmp, rfzmp;
   double lffz, rffz;
   double px, py, fz;
 
-  pdEstZMPCalcFootZMP( e, &e->_lfsensor, pz, &lfzmp, &lffz );
-  pdEstZMPCalcFootZMP( e, &e->_rfsensor, pz, &rfzmp, &rffz );
+  pdEstZmpCalcFootZMP( e, &e->_lfsensor, pz, &lfzmp, &lffz );
+  pdEstZmpCalcFootZMP( e, &e->_rfsensor, pz, &rfzmp, &rffz );
   px = lfzmp.e[zX]*lffz + rfzmp.e[zX]*rffz;
   py = lfzmp.e[zY]*lffz + rfzmp.e[zY]*rffz;
   fz = lffz + rffz;
@@ -92,163 +114,152 @@ zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp)
   return zVec3DCreate( zmp, px, py, pz );
 }
 
-void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt)
+void pdEstZmpUpdate(pdEstZmp *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt)
 {
-  register uint i;
+  pdSensorListCell *sp;
 
-  pdSensorArrayProcess( pdEstZMPSensorArray(e), dt );
-  for( i=0; i<zArrayNum(&e->_lfsensor); i++ )
-    pdSensorFrameUpdate( zArrayBuf(&e->_lfsensor)[i], lfframe );
-  for( i=0; i<zArrayNum(&e->_rfsensor); i++ )
-    pdSensorFrameUpdate( zArrayBuf(&e->_rfsensor)[i], rfframe );
-  pdEstZMPCalcForce( e, pdEstZMPEstForce(e) );
-  pdEstZMPCalcZMP( e, pz, pdEstZMPEstZMP(e) );
+  pdSensorArrayProcess( pdEstZmpSensorArray(e), dt );
+
+  zListForEach( &e->_lfsensor, sp )
+    pdSensorFrameUpdate( sp->data, lfframe );
+  zListForEach( &e->_rfsensor, sp )
+    pdSensorFrameUpdate( sp->data, rfframe );
+  pdEstZmpCalcForce( e, pdEstZmpEstForce(e) );
+  pdEstZmpCalcZMP( e, pz, pdEstZmpEstZMP(e) );
 }
 
-void pdEstZMPFWrite(FILE *fp, pdEstZMP *e)
+const pdEstZmp *pdEstZmpValueFPrint(FILE *fp, const pdEstZmp *e)
 {
-  fprintf( fp, "Force: ");
-  zVec3DFWrite( fp, pdEstZMPEstForce(e) );
-  fprintf( fp, "ZMP: ");
-  zVec3DFWrite( fp, pdEstZMPEstZMP(e) );
-}
-
-void pdEstZMPDataFWrite(FILE *fp, pdEstZMP *e)
-{
-  fprintf( fp, "%g %g %g %g %g %g\n",
-           pdEstZMPEstForceX(e), pdEstZMPEstForceY(e), pdEstZMPEstForceZ(e),
-           pdEstZMPEstZMPX(e), pdEstZMPEstZMPY(e), pdEstZMPEstZMPZ(e));
-}
-
-
-typedef struct {
-  pdSensorArray *sarray;
-  pdSensor **lfsensor;
-  pdSensor **rfsensor;
-  int lfsensor_num;
-  int rfsensor_num;
-} _pdEstZMPParam;
-
-int _pdEstZMPCountSensorName(FILE *fp, pdSensorArray *sarray)
-{
-  pdSensor *sp;
-  char buf[BUFSIZ];
-  int cur, cnt;
-
-  cnt = 0;
-  cur = ftell( fp );
-  while( !feof(fp) ){
-    if( !zFSkipDefaultComment( fp ) ) break;
-    if( !zFToken( fp, buf, BUFSIZ ) ) break;
-    zArrayFindName( sarray, buf, sp );
-    if( !sp ) break;
-    cnt++;
-  }
-  fseek( fp, cur, SEEK_SET );
-  return cnt;
-}
-
-void _pdEstZMPConnectSensor(FILE *fp, pdSensor **sensor, int num, pdSensorArray *sarray)
-{
-  register int i;
-  char buf[BUFSIZ];
-
-  for( i=0; i<num; i++ ){
-    if( !zFSkipDefaultComment( fp ) ) break;
-    if( !zFToken( fp, buf, BUFSIZ ) ) break;
-    sensor[i] = pdSensorArrayNameFind( sarray, buf );
-  }
-}
-
-bool _pdEstZMPFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  _pdEstZMPParam *prm;
-
-  prm = instance;
-  if( strcmp( buf, "type" ) == 0 ){
-    if( !zFToken( fp, buf, BUFSIZ ) )
-      *success = false;
-    if( strcmp( buf, "zmp" ) != 0 ){
-      ZRUNERROR( "invalid estimator type %s", buf );
-      *success = false;
-    }
-  } else
-  if( strcmp( buf, "leftfoot" ) == 0 ){
-    prm->lfsensor_num = _pdEstZMPCountSensorName( fp, prm->sarray );
-    prm->lfsensor = zAlloc( pdSensor*, prm->lfsensor_num );
-    if( !prm->lfsensor ){
-      ZRUNERROR( "no sensors attatched to left foot" );
-      *success = false;
-    }
-    _pdEstZMPConnectSensor( fp, prm->lfsensor, prm->lfsensor_num, prm->sarray );
-  } else
-  if( strcmp( buf, "rightfoot" ) == 0 ){
-    prm->rfsensor_num = _pdEstZMPCountSensorName( fp, prm->sarray );
-    prm->rfsensor = zAlloc( pdSensor*, prm->rfsensor_num );
-    if( !prm->rfsensor ){
-      ZRUNERROR( "no sensors attatched to right foot" );
-      *success = false;
-    }
-    _pdEstZMPConnectSensor( fp, prm->rfsensor, prm->rfsensor_num, prm->sarray );
-  } else
-    return false;
-  return true;
-}
-
-pdEstZMP *pdEstZMPFRead(FILE *fp, pdEstZMP *e)
-{
-  _pdEstZMPParam prm;
-
-  prm.sarray = pdEstZMPSensorArray( e );
-  prm.lfsensor = NULL;
-  prm.rfsensor = NULL;
-  prm.lfsensor_num = 0;
-  prm.rfsensor_num = 0;
-  if( !zFieldFRead( fp, _pdEstZMPFRead, &prm ) )
-    return NULL;
-  zArraySetNum( &e->_lfsensor, prm.lfsensor_num );
-  zArraySetNum( &e->_rfsensor, prm.rfsensor_num );
-  zArraySetBuf( &e->_lfsensor, prm.lfsensor );
-  zArraySetBuf( &e->_rfsensor, prm.rfsensor );
+  if( !e ) return NULL;
+  fprintf( fp, "%.10g %.10g %.10g %.10g %.10g %.10g",
+           pdEstZmpEstForceX(e), pdEstZmpEstForceY(e), pdEstZmpEstForceZ(e),
+           pdEstZmpEstZMPX(e), pdEstZmpEstZMPY(e), pdEstZmpEstZMPZ(e));
   return e;
 }
 
-bool _pdEstZMPConfFRead(FILE *fp, void *instance, char *buf, bool *success)
+const pdEstZmp *pdEstZmpValueNLFPrint(FILE *fp, const pdEstZmp *e)
 {
-  if( strcmp( buf, "estimator" ) == 0 ) {
-    if( !pdEstZMPFRead( fp, instance ) )
-      return ( *success = false );
+  if( !pdEstZmpValueFPrint( fp, e ) ) return NULL;
+  fprintf( fp, "\n" );
+  return e;
+}
+
+const pdEstZmp *pdEstZmpFPrint(FILE *fp, const pdEstZmp *e)
+{
+  if( !e )
+    fprintf( fp, "Invalid estimator\n" );
+  else{
+    fprintf( fp, "Force: ");
+    zVec3DFPrint( fp, pdEstZmpEstForce(e) );
+    fprintf( fp, "ZMP: ");
+    zVec3DFPrint( fp, pdEstZmpEstZMP(e) );
+  }
+  return e;
+}
+
+
+static void *_pdEstZmpTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  if( strcmp( ZTKVal(ztk), "zmp" ) != 0 ){
+    ZRUNERROR( "invalid estimator type %s", ZTKVal(ztk) );
+    return NULL;
+  }
+  return obj;
+}
+static void *_pdEstZmpLeftFootFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  pdSensor *s;
+  do{
+    zArrayFindName( pdEstZmpSensorArray((pdEstZmp*)obj), ZTKVal(ztk), s );
+    if( !s ){
+      ZRUNERROR( "%s: unknown sensor", ZTKVal(ztk) );
+      return NULL;
+    }
+    if( !pdEstZmpSensorListPush( (pdEstZmp*)obj, lf, s ) ) return NULL;
+  } while( ZTKValNext( ztk ) );
+  return obj;
+}
+static void *_pdEstZmpRightFootFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  pdSensor *s;
+  do{
+    zArrayFindName( pdEstZmpSensorArray((pdEstZmp*)obj), ZTKVal(ztk), s );
+    if( !s ){
+      ZRUNERROR( "%s: unknown sensor", ZTKVal(ztk) );
+      return NULL;
+    }
+    if( !pdEstZmpSensorListPush( (pdEstZmp*)obj, rf, s ) ) return NULL;
+  } while( ZTKValNext( ztk ) );
+  return obj;
+}
+
+static bool _pdEstZmpTypeFPrintZTK(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", "zmp" );
+  return true;
+}
+
+static const ZTKPrp __ztk_prp_pdestzmp[] = {
+  { ZTK_KEY_PEDI2_ESTIMATOR_TYPE,      1, _pdEstZmpTypeFromZTK,      _pdEstZmpTypeFPrintZTK },
+  { ZTK_KEY_PEDI2_ESTIMATOR_LEFTFOOT,  1, _pdEstZmpLeftFootFromZTK,  NULL },
+  { ZTK_KEY_PEDI2_ESTIMATOR_RIGHTFOOT, 1, _pdEstZmpRightFootFromZTK, NULL },
+};
+
+static void *_pdEstZmpFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return _ZTKEvalKey( (pdEstZmp*)obj, arg, ztk, __ztk_prp_pdestzmp ) ? obj : NULL;
+}
+
+static bool _pdEstZmpFPrintZTK(FILE *fp, int i, void *obj){
+  pdSensorList *list;
+  pdSensorListCell *cp;
+
+  _ZTKPrpKeyFPrint( fp, (pdEstZmp*)obj, __ztk_prp_pdestzmp );
+  list = &((pdEstZmp*)obj)->_lfsensor;
+  if( !zListIsEmpty(list) ){
+    fprintf( fp, "%s:", ZTK_KEY_PEDI2_ESTIMATOR_LEFTFOOT );
+    zListForEachRew( list, cp )
+      fprintf( fp, " %s", zName(pdSensorListCellSensor(cp) ) );
+    fprintf( fp, "\n" );
+  }
+  list = &((pdEstZmp*)obj)->_rfsensor;
+  if( !zListIsEmpty(list) ){
+    fprintf( fp, "%s:", ZTK_KEY_PEDI2_ESTIMATOR_RIGHTFOOT );
+    zListForEachRew( list, cp )
+      fprintf( fp, " %s", zName(pdSensorListCellSensor(cp) ) );
+    fprintf( fp, "\n" );
   }
   return true;
 }
 
-bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e)
-{
-  pdEstZMPInit( e );
-  if( !pdFilterArrayFRead( fp, pdEstZMPFilterArray(e) ) ){
-    ZRUNERROR( "failed to allocate filter array" );
-    return false;
-  }
-  rewind( fp );
-  if( !pdSensorArrayFRead( fp, pdEstZMPSensorArray(e), pdEstZMPFilterArray(e) ) ){
-    ZRUNERROR( "failed to allocate sensor array" );
-    return false;
-  }
-  rewind( fp );
-  zTagFRead( fp, _pdEstZMPConfFRead, e );
-  return true;
+static const ZTKPrp __ztk_prp_tag_pedi2_estimator[] = {
+  { ZTK_TAG_PEDI2_ESTIMATOR, 1, _pdEstZmpFromZTK, _pdEstZmpFPrintZTK },
+};
+
+pdEstZmp *pdEstZmpFromZTK(pdEstZmp *e, ZTK *ztk){
+  pdEstZmpInit( e );
+  if( !pdFilterArrayFromZTK( pdEstZmpFilterArray(e), ztk ) ) return NULL;
+  if( !pdSensorArrayFromZTK( pdEstZmpSensorArray(e), pdEstZmpFilterArray(e), ztk ) ) return NULL;
+  if( !_ZTKEvalTag( e, NULL, ztk, __ztk_prp_tag_pedi2_estimator ) ) return NULL;
+  return e;
 }
 
-bool pdEstZMPConfReadFile(pdEstZMP *e, const char *filename)
-{
+void pdEstZmpFPrintZTK(FILE *fp, pdEstZmp *e){
+  pdFilterArrayFPrintZTK( fp, pdEstZmpFilterArray(e) );
+  pdSensorArrayFPrintZTK( fp, pdEstZmpSensorArray(e) );
+  _ZTKPrpTagFPrint( fp, e, __ztk_prp_tag_pedi2_estimator );
+}
+
+pdEstZmp *pdEstZmpReadZTK(pdEstZmp *e, const char filename[]){
+  ZTK ztk;
+
+  ZTKInit( &ztk );
+  if( ZTKParse( &ztk, filename ) )
+    e = pdEstZmpFromZTK( e, &ztk );
+  ZTKDestroy( &ztk );
+  return e;
+}
+
+bool pdEstZmpWriteZTK(pdEstZmp *e, const char filename[]){
   FILE *fp;
-  bool result;
 
-  if( !( fp = fopen( filename, "r" ) ) ){
-    ZOPENERROR( filename );
-    return false;
-  }
-  result = pdEstZMPConfFRead( fp, e );
-  fclose( fp );
-  return result;
+  if( !( fp = zOpenZTKFile( filename, "w" ) ) ) return false;
+  pdEstZmpFPrintZTK( fp, e );
+  fclose(fp);
+  return true;
 }

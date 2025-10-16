@@ -6,53 +6,76 @@
 
 __BEGIN_DECLS
 
-zArrayClass( pdSensorPtrArray, pdSensor* );
+zListClass( pdSensorList, pdSensorListCell, pdSensor* );
 
 typedef struct{
   pdFilterArray _farray;
   pdSensorArray _sarray;
 
-  pdSensorPtrArray _lfsensor;
-  pdSensorPtrArray _rfsensor;
+  pdSensorList _lfsensor;
+  pdSensorList _rfsensor;
 
   zVec3D estforce;
   zVec3D estzmp;
-} pdEstZMP;
+} pdEstZmp;
 
 /* c'tor and d'tor */
-__EXPORT void pdEstZMPInit(pdEstZMP *e);
-__EXPORT void pdEstZMPDestroy(pdEstZMP *e);
+__EXPORT void pdEstZmpInit(pdEstZmp *e);
+__EXPORT void pdEstZmpDestroy(pdEstZmp *e);
 
 /* methods to get parameters */
-#define pdEstZMPFilterArray(e) ( &(e)->_farray )
-#define pdEstZMPSensorArray(e) ( &(e)->_sarray )
-#define pdEstZMPEstZMP(e)   ( &(e)->estzmp )
-#define pdEstZMPEstZMPX(e)     zVec3DElem( pdEstZMPEstZMP(e), zX )
-#define pdEstZMPEstZMPY(e)     zVec3DElem( pdEstZMPEstZMP(e), zY )
-#define pdEstZMPEstZMPZ(e)     zVec3DElem( pdEstZMPEstZMP(e), zZ )
-#define pdEstZMPEstForce(e) ( &(e)->estforce )
-#define pdEstZMPEstForceX(e)   zVec3DElem( pdEstZMPEstForce(e), zX )
-#define pdEstZMPEstForceY(e)   zVec3DElem( pdEstZMPEstForce(e), zY )
-#define pdEstZMPEstForceZ(e)   zVec3DElem( pdEstZMPEstForce(e), zZ )
+#define pdEstZmpFilterArray(e) ( &(e)->_farray )
+#define pdEstZmpSensorArray(e) ( &(e)->_sarray )
+#define pdEstZmpEstZMP(e)      ( &(e)->estzmp )
+#define pdEstZmpEstZMPX(e)     pdEstZmpEstZMP(e)->c.x
+#define pdEstZmpEstZMPY(e)     pdEstZmpEstZMP(e)->c.y
+#define pdEstZmpEstZMPZ(e)     pdEstZmpEstZMP(e)->c.z
+#define pdEstZmpEstForce(e)    ( &(e)->estforce )
+#define pdEstZmpEstForceX(e)   pdEstZmpEstForce(e)->c.x
+#define pdEstZmpEstForceY(e)   pdEstZmpEstForce(e)->c.y
+#define pdEstZmpEstForceZ(e)   pdEstZmpEstForce(e)->c.z
+
+#define pdSensorListCellSensor(c)      (c)->data
+#define pdSensorListCellSetSensor(c,s) ( pdSensorListCellSensor(c) = (s) )
+#define pdSensorListCellInit(c) do{\
+  zListCellInit( c );\
+  pdSensorListCellSetSensor( c, NULL );\
+} while(0)
+__EXPORT pdSensorListCell *pdSensorListPush(pdSensorList *list, pdSensor *sensor);
+__EXPORT pdSensor *pdSensorListPop(pdSensorList *list);
+#define pdSensorListDestroy(list) zListDestroy( pdSensorListCell, list )
+
+#define pdEstZmpSensorListPush(e,foot,s) pdSensorListPush( &(e)->_##foot##sensor, s )
 
 /* methods to set parameters */
-__EXPORT pdSensor *pdEstZMPNameFindSensor(pdEstZMP *e, const char *name);
-__EXPORT void pdEstZMPSetData(pdEstZMP *e, const char *name, zVec data);
+__EXPORT pdSensor *pdEstZmpNameFindSensor(pdEstZmp *e, const char *name);
+__EXPORT void pdEstZmpSetData(pdEstZmp *e, const char *name, zVec data);
 
-__EXPORT zVec3D *pdEstZMPCalcFootForce(pdEstZMP *e, pdSensorPtrArray *s, zVec3D *f);
-__EXPORT zVec3D *pdEstZMPCalcForce(pdEstZMP *e, zVec3D *f);
-__EXPORT zVec3D *pdEstZMPCalcFootZMP(pdEstZMP *e, pdSensorPtrArray *s, double pz, zVec3D *zmp, double *fz);
-__EXPORT zVec3D *pdEstZMPCalcZMP(pdEstZMP *e, double pz, zVec3D *zmp);
+__EXPORT zVec3D *pdEstZmpCalcFootForce(pdEstZmp *e, pdSensorList *s, zVec3D *f);
+__EXPORT zVec3D *pdEstZmpCalcForce(pdEstZmp *e, zVec3D *f);
+__EXPORT zVec3D *pdEstZmpCalcFootZMP(pdEstZmp *e, pdSensorList *s, double pz, zVec3D *zmp, double *fz);
+__EXPORT zVec3D *pdEstZmpCalcZMP(pdEstZmp *e, double pz, zVec3D *zmp);
 
-__EXPORT void pdEstZMPUpdate(pdEstZMP *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt);
+__EXPORT void pdEstZmpUpdate(pdEstZmp *e, zFrame3D *lfframe, zFrame3D *rfframe, double pz, double dt);
 
-__EXPORT void pdEstZMPFWrite(FILE *fp, pdEstZMP *e);
-#define pdEstZMPWrite(e) pdEstZMPFWrite( stdout, e )
-__EXPORT void pdEstZMPDataFWrite(FILE *fp, pdEstZMP *e);
-#define pdEstZMPDataWrite(e) pdEstZMPDataFWrite( stdout, e )
+__EXPORT const pdEstZmp *pdEstZmpValueFPrint(FILE *fp, const pdEstZmp *e);
+#define pdEstZmpDataPrint(e) pdEstZmpValueFPrint( stdout, e )
+__EXPORT const pdEstZmp *pdEstZmpValueNLFPrint(FILE *fp, const pdEstZmp *e);
+#define pdEstZmpValueNLPrint(e) pdEstZmpValueNLFPrint( stdout, e )
+__EXPORT const pdEstZmp *pdEstZmpFPrint(FILE *fp, const pdEstZmp *e);
+#define pdEstZmpPrint(e) pdEstZmpFPrint( stdout, e )
 
-__EXPORT bool pdEstZMPConfFRead(FILE *fp, pdEstZMP *e);
-__EXPORT bool pdEstZMPConfReadFile(pdEstZMP *e, const char *filename);
+#define ZTK_TAG_PEDI2_ESTIMATOR           "pedi2::estimator"
+
+#define ZTK_KEY_PEDI2_ESTIMATOR_TYPE      "type"
+#define ZTK_KEY_PEDI2_ESTIMATOR_LEFTFOOT  "leftfoot"
+#define ZTK_KEY_PEDI2_ESTIMATOR_RIGHTFOOT "rightfoot"
+
+__EXPORT pdEstZmp *pdEstZmpFromZTK(pdEstZmp *e, ZTK *ztk);
+__EXPORT void pdEstZmpFPrintZTK(FILE *fp, pdEstZmp *e);
+
+__EXPORT pdEstZmp *pdEstZmpReadZTK(pdEstZmp *e, const char filename[]);
+__EXPORT bool pdEstZmpWriteZTK(pdEstZmp *e, const char filename[]);
 
 __END_DECLS
 

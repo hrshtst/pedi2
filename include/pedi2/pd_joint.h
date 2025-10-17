@@ -9,16 +9,17 @@ __BEGIN_DECLS
 struct _pdJoint;
 
 typedef struct{
-  const char *type;
-  void (*setdis)(struct _pdJoint*, double);
-  void (*setvel)(struct _pdJoint*, double);
-  void (*setrefdis)(struct _pdJoint*, double);
-  void (*setrefvel)(struct _pdJoint*, double);
-  void (*refresh)(struct _pdJoint*, double);
-  void (*update)(struct _pdJoint*, double);
-  void (*destroy)(struct _pdJoint*);
-  struct _pdJoint *(*fread)(FILE *fp, struct _pdJoint*);
-} pdJointMethod;
+  const char *typestr;
+  void (* _setdis)(struct _pdJoint*, double);
+  void (* _setvel)(struct _pdJoint*, double);
+  void (* _setrefdis)(struct _pdJoint*, double);
+  void (* _setrefvel)(struct _pdJoint*, double);
+  void (* _refresh)(struct _pdJoint*, double);
+  void (* _update)(struct _pdJoint*, double);
+  void (* _destroy)(struct _pdJoint*);
+  struct _pdJoint *(* _fromZTK)(struct _pdJoint*, ZTK*);
+  void (* _fprintZTK)(FILE*, struct _pdJoint*);
+} pdJointCom;
 
 typedef struct _pdJoint{
   Z_NAMED_CLASS;
@@ -34,8 +35,8 @@ typedef struct _pdJoint{
   bool is_set_vel;
   bool is_set_refvel;
   int offset;
-  void *_prm;
-  pdJointMethod *_met;
+  void *prp;
+  pdJointCom *com;
 } pdJoint;
 
 #define pdJointDis(j)       ( (j)->dis )
@@ -63,38 +64,48 @@ typedef struct _pdJoint{
   (j)->is_set_vel = false;\
   (j)->is_set_refvel = false;\
   pdJointSetOffset( j, 0 ); \
-  (j)->_prm = NULL;\
-  (j)->_met = NULL;\
+  (j)->prp = NULL;\
+  (j)->com = NULL;\
 } while(0)
 
-#define pdJointSetDis(j,q)    (j)->_met->setdis( j, q )
-#define pdJointSetVel(j,v)    (j)->_met->setvel( j, v )
-#define pdJointSetRefDis(j,q) (j)->_met->setrefdis( j, q )
-#define pdJointSetRefVel(j,q) (j)->_met->setrefvel( j, q )
-#define pdJointRefresh(j,q)   (j)->_met->refresh( j, q )
-#define pdJointUpdate(j,dt)   (j)->_met->update( j, dt )
-#define pdJointDestroy(j)     (j)->_met->destroy( j )
+#define pdJointSetDis(j,q)    (j)->com->_setdis( j, q )
+#define pdJointSetVel(j,v)    (j)->com->_setvel( j, v )
+#define pdJointSetRefDis(j,q) (j)->com->_setrefdis( j, q )
+#define pdJointSetRefVel(j,q) (j)->com->_setrefvel( j, q )
+#define pdJointRefresh(j,q)   (j)->com->_refresh( j, q )
+#define pdJointUpdate(j,dt)   (j)->com->_update( j, dt )
+#define pdJointDestroy(j)     (j)->com->_destroy( j )
 #define pdJointSetOffset(j,o) ( (j)->offset = (o) )
 
-__EXPORT void pdJointSetDisDefault(pdJoint *joint, double dis);
-__EXPORT void pdJointSetVelDefault(pdJoint *joint, double vel);
-__EXPORT void pdJointSetRefDisDefault(pdJoint *joint, double refdis);
-__EXPORT void pdJointSetRefVelDefault(pdJoint *joint, double refvel);
-__EXPORT void pdJointRefreshDefault(pdJoint *joint, double dis);
-__EXPORT void pdJointUpdateDefault(pdJoint *joint, double dt);
-__EXPORT void pdJointDestroyDefault(pdJoint *joint);
+__EXPORT void pdJointDefaultSetDis(pdJoint *joint, double dis);
+__EXPORT void pdJointDefaultSetVel(pdJoint *joint, double vel);
+__EXPORT void pdJointDefaultSetRefDis(pdJoint *joint, double refdis);
+__EXPORT void pdJointDefaultSetRefVel(pdJoint *joint, double refvel);
+__EXPORT void pdJointDefaultRefresh(pdJoint *joint, double dis);
+__EXPORT void pdJointDefaultUpdate(pdJoint *joint, double dt);
+__EXPORT void pdJointDefaultDestroy(pdJoint *joint);
 
-#define PD_JOINT_TAG "joint"
-__EXPORT pdJoint *pdJointFRead(FILE *fp, pdJoint *joint);
+#define ZTK_TAG_PEDI2_JOINT       "pedi2::joint"
+
+#define ZTK_KEY_PEDI2_JOINT_NAME  "name"
+#define ZTK_KEY_PEDI2_JOINT_TYPE  "type"
+#define ZTK_KEY_PEDI2_JOINT_PGAIN "pgain"
+#define ZTK_KEY_PEDI2_JOINT_IGAIN "igain"
+#define ZTK_KEY_PEDI2_JOINT_DGAIN "dgain"
+#define ZTK_KEY_PEDI2_JOINT_MIN   "min"
+#define ZTK_KEY_PEDI2_JOINT_MAX   "max"
+
+__EXPORT pdJoint *pdJointFromZTK(pdJoint *joint, ZTK *ztk);
+__EXPORT void pdJointFPrintZTK(FILE *fp, pdJoint *joint);
 
 zArrayClass( pdJointArray, pdJoint );
 
-#define pdJointArrayDis(arr,i)      pdJointDis( zArrayElem(arr,i) )
-#define pdJointArrayVel(arr,i)      pdJointVel( zArrayElem(arr,i) )
-#define pdJointArrayRefDis(arr,i)   pdJointRefDis( zArrayElem(arr,i) )
-#define pdJointArrayRefVel(arr,i)   pdJointRefVel( zArrayElem(arr,i) )
-#define pdJointArrayOutput(arr,i)   pdJointOutput( zArrayElem(arr,i) )
-#define pdJointArrayOffset(arr,i)   pdJointOffset( zArrayElem(arr,i) )
+#define pdJointArrayDis(arr,i)         pdJointDis( zArrayElem(arr,i) )
+#define pdJointArrayVel(arr,i)         pdJointVel( zArrayElem(arr,i) )
+#define pdJointArrayRefDis(arr,i)      pdJointRefDis( zArrayElem(arr,i) )
+#define pdJointArrayRefVel(arr,i)      pdJointRefVel( zArrayElem(arr,i) )
+#define pdJointArrayOutput(arr,i)      pdJointOutput( zArrayElem(arr,i) )
+#define pdJointArrayOffset(arr,i)      pdJointOffset( zArrayElem(arr,i) )
 #define pdJointArraySetOffset(arr,i,o) pdJointSetOffset( zArrayElem(arr,i), o )
 
 __EXPORT void pdJointArraySetDis(pdJointArray *arr, zVec q);
@@ -105,11 +116,15 @@ __EXPORT void pdJointArrayRefresh(pdJointArray *arr, zVec q);
 __EXPORT void pdJointArrayUpdate(pdJointArray *arr, double dt);
 __EXPORT void pdJointArrayDestroy(pdJointArray *arr);
 
-__EXPORT bool pdJointArrayAlloc(pdJointArray *arr, int n);
+__EXPORT pdJointArray *pdJointArrayAlloc(pdJointArray *arr, int size);
 __EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
 __EXPORT bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c);
-__EXPORT bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c);
-__EXPORT bool pdJointArrayReadFile(pdJointArray *arr, const char *filename, rkChain *c);
+
+__EXPORT pdJointArray *pdJointArrayFromZTK(pdJointArray *arr, rkChain *c, ZTK *ztk);
+__EXPORT void pdJointArrayFPrintZTK(FILE *fp, pdJointArray *arr);
+
+__EXPORT pdJointArray *pdJointArrayReadZTK(pdJointArray *arr, rkChain *c, char filename[]);
+__EXPORT bool pdJointArrayWriteZTK(pdJointArray *arr, char filename[]);
 
 __EXPORT zIndex pdJointArrayCreateIndex(pdJointArray *arr);
 __EXPORT void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q);
@@ -122,5 +137,17 @@ __END_DECLS
 
 #include <pedi2/pd_joint_pd_trq.h>   /* Torque PD control */
 #include <pedi2/pd_joint_pid_trq.h>  /* Torque PID control */
+
+__BEGIN_DECLS
+
+/* add a handle to the following list when you create a new joint class. */
+#define PD_JOINT_COM_ARRAY \
+pdJointCom *pd_joint_com[] = { \
+  &pd_joint_pd_trq_com, \
+  &pd_joint_pid_trq_com, \
+  NULL, \
+}
+
+__END_DECLS
 
 #endif /* __PD_JOINT_H__ */

@@ -5,13 +5,13 @@
 
 __BEGIN_DECLS
 
-__EXPORT bool pdJointCreatePDTrq(pdJoint *joint, double pgain, double dgain);
+__EXPORT pdJoint *pdJointPDTrqCreate(pdJoint *joint, double pgain, double dgain);
 
-__EXPORT void pdJointPDTrqSetLim(pdJoint *joint, double min, double max);
-__EXPORT void pdJointPDTrqSetPgain(pdJoint *joint, double pgain);
-__EXPORT void pdJointPDTrqSetDgain(pdJoint *joint, double dgain);
+__EXPORT pdJoint *pdJointPDTrqSetLim(pdJoint *joint, double min, double max);
+__EXPORT pdJoint *pdJointPDTrqSetPgain(pdJoint *joint, double pgain);
+__EXPORT pdJoint *pdJointPDTrqSetDgain(pdJoint *joint, double dgain);
 
-extern pdJointMethod pd_joint_pd_trq_met;
+extern pdJointCom pd_joint_pd_trq_com;
 
 __END_DECLS
 

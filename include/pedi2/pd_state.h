@@ -13,10 +13,10 @@ typedef struct{
   zVec3D com_acc;
   zVec3D lf_pos, rf_pos;
   zVec3D lh_pos, rh_pos;
-  /* zMat3D base_att; */
+  /* zMat3D torso_att; */
   /* zMat3D lf_att, rf_att; */
   /* zMat3D lh_att, rh_att; */
-  zVec3D base_att;
+  zVec3D torso_att;
   zVec3D lf_att, rf_att;
   zVec3D lh_att, rh_att;
   zVec3D zmp;       /* actual ZMP position */

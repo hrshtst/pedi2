@@ -9,12 +9,12 @@ void pdStateInit(pdState *state)
   zVec3DZero( &state->rf_pos );
   zVec3DZero( &state->lh_pos );
   zVec3DZero( &state->rh_pos );
-  /* zMat3DZero( &state->base_att ); */
+  /* zMat3DZero( &state->torso_att ); */
   /* zMat3DZero( &state->lf_att ); */
   /* zMat3DZero( &state->rf_att ); */
   /* zMat3DZero( &state->lh_att ); */
   /* zMat3DZero( &state->rh_att ); */
-  zVec3DZero( &state->base_att );
+  zVec3DZero( &state->torso_att );
   zVec3DZero( &state->lf_att );
   zVec3DZero( &state->rf_att );
   zVec3DZero( &state->lh_att );

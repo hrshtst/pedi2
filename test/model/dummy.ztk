@@ -1,7 +1,7 @@
-[chain]
+[roki::chain]
 name : dummy
 
-[link]
+[roki::link]
 name: base
 jointtype: float
 mass: 2

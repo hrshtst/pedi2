@@ -9,8 +9,16 @@ const int MIGHTY_RH_ID = 17;
 const int MIGHTY_RF_ID = 24;
 const double DT = 0.01;
 #define GTEST_TOL 1e-12
-#define GTEST_TOL_LOOSE 1e-04
-#define DT 0.01
+#define GTEST_TOL_LOOSE 1e-03
+
+// These definitions should be removed by using CPP version library
+const zVec3D zVec3D::zvec3Dzero = { { 0, 0, 0 } };
+const zMat3D zMat3D::zmat3Dzero  = { { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } };
+const zMat3D zMat3D::zmat3Dident = { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } };
+const zFrame3D zFrame3D::zframe3Dident = {
+  { { 0, 0, 0 } },
+  { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } }
+};
 
 class pdRobotTest : public testing::Test {
  protected:
@@ -23,52 +31,42 @@ class pdRobotTest : public testing::Test {
       pdRobotDestroy( &robot );
   };
 
-  void SetVacuousPrm(){
-    pdRobotChainPtr( &robot )->mass = 10000;
-    rkChainReadFile( &robot._chain, (char *)"model/dummy.zkc" );
-    rkIKCreate( &robot._ik, &robot._chain );
-    pdRobotCellNum( &robot ) = 100;
-  };
-
   void SetRandomValues() {
-    pdRobotChainPtr( &robot )->mass = ri.rand();
-    rkChainReadFile( &robot._chain, (char *)"model/dummy.zkc" );
-    rkIKCreate( &robot._ik, &robot._chain );
-    pdRobotCellNum( &robot ) = (int)ri.rand();
+    rkChainReadZTK( pdRobotChain( &robot ), "model/dummy.ztk" );
   };
 
   void LoadAndSolveIK() {
-    char model[] = "model/mighty.zkc";
+    char model[] = "model/mighty.ztk";
     zVec3D com_pos, lf_pos, rf_pos, lh_pos, rh_pos;
-    zVec3D base_att, lf_att, rf_att, lh_att, rh_att;
+    zVec3D torso_att, lf_att, rf_att, lh_att, rh_att;
 
     pdRobotLoad( &robot, model );
-    zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
-    zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
-    zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
-    zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
-    zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
-    zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
-    zVec3DCreate(   &lh_pos, 0.0, 0.13, 0.25 );
-    zVec3DCreate(   &lh_att, 0.0, 0.0, 0.0 );
-    zVec3DCreate(   &rh_pos, 0.0, -0.13, 0.25 );
-    zVec3DCreate(   &rh_att, 0.0, 0.0, 0.0 );
+    zVec3DCreate( &com_pos,   0.0, 0.0,    0.26  );
+    zVec3DCreate( &torso_att, 0.0, 0.0,    0.0   );
+    zVec3DCreate( &lf_pos,    0.0, 0.042,  0.0   );
+    zVec3DCreate( &lf_att,    0.0, 0.0,    0.0   );
+    zVec3DCreate( &rf_pos,    0.0, -0.042, 0.0   );
+    zVec3DCreate( &rf_att,    0.0, 0.0,    0.0   );
+    zVec3DCreate( &lh_pos,    0.0, 0.13,   0.25  );
+    zVec3DCreate( &lh_att,    1.3, -0.01, -0.373 );
+    zVec3DCreate( &rh_pos,    0.0, -0.13,  0.25  );
+    zVec3DCreate( &rh_att,   -1.3, -0.005, 0.373 );
     pdRobotSetRefCOM( &robot, &com_pos );
-    pdRobotSetRefBaseAtt( &robot, &base_att );
+    pdRobotSetRefTorsoZYX( &robot, &torso_att );
     pdRobotSetRefLFPos( &robot, &lf_pos );
-    pdRobotSetRefLFAtt( &robot, &lf_att );
+    pdRobotSetRefLFZYX( &robot, &lf_att );
     pdRobotSetRefRFPos( &robot, &rf_pos );
-    pdRobotSetRefRFAtt( &robot, &rf_att );
+    pdRobotSetRefRFZYX( &robot, &rf_att );
     pdRobotSetRefLHPos( &robot, &lh_pos );
     pdRobotSetRefRHPos( &robot, &rh_pos );
-    // pdRobotSetRefLHAtt( &robot, &lh_att );
-    // pdRobotSetRefRHAtt( &robot, &rh_att );
-    pdRobotSolveIK( &robot, 0 );
+    pdRobotSetRefLHZYX( &robot, &lh_att );
+    pdRobotSetRefRHZYX( &robot, &rh_att );
+    pdRobotSolveIK( &robot, 100 );
   };
 
   void SetRandomState() {
     ri.SetRandVec3D( state.com_pos );
-    ri.SetRandVec3D( state.base_att );
+    ri.SetRandVec3D( state.torso_att );
     ri.SetRandVec3D( state.lf_pos );
     ri.SetRandVec3D( state.lf_att );
     ri.SetRandVec3D( state.rf_pos );
@@ -89,84 +87,535 @@ class pdRobotTest : public testing::Test {
 
 TEST_F(pdRobotTest, Init)
 {
-  // SetVacuousPrm();
+  zVec3DList *list;
   SetRandomValues();
   pdRobotInit( &robot );
-  EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
-  EXPECT_EQ( pdRobotChainPtr( &robot ), pdRobotIKPtr( &robot )->chain );
+  EXPECT_EQ( NULL, rkChainRoot( pdRobotChain( &robot ) ) );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( 0, zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_EQ( NULL, robot.disold );
   EXPECT_EQ( 0, zVecSize( robot.disold ) );
-  EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
-  EXPECT_EQ( NULL, robot._cell );
-  EXPECT_EQ( NULL, robot._ref_vec );
-  EXPECT_EQ( NULL, robot._ref_set_flag );
-  EXPECT_EQ( -1, pdRobotBaseID( &robot ) );
+  EXPECT_EQ( -1, pdRobotTorsoID( &robot ) );
   EXPECT_EQ( -1, pdRobotLFID( &robot ) );
   EXPECT_EQ( -1, pdRobotRFID( &robot ) );
   EXPECT_EQ( -1, pdRobotLHID( &robot ) );
   EXPECT_EQ( -1, pdRobotRHID( &robot ) );
-  EXPECT_EQ( NULL, robot._sr_lf_vert );
-  EXPECT_EQ( NULL, robot._sr_rf_vert );
-  EXPECT_EQ( NULL, robot._sr_vert );
+  list = &pdRobotSRLFVert( &robot )->data.list;
+  EXPECT_EQ( 0, zListSize( list ) );
+  EXPECT_EQ( zListTail( list ), pdRobotSRLFVert( &robot )->pointer.cp );
+  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
+  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
+  list = &pdRobotSRRFVert( &robot )->data.list;
+  EXPECT_EQ( 0, zListSize( list ) );
+  EXPECT_EQ( zListTail( list ), pdRobotSRRFVert( &robot )->pointer.cp );
+  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
+  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
+  list = &pdRobotSRVert( &robot )->data.list;
+  EXPECT_EQ( 0, zListSize( list ) );
+  EXPECT_EQ( zListTail( list ), pdRobotSRVert( &robot )->pointer.cp );
+  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
+  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
 }
 
 TEST_F(pdRobotTest, Destroy)
 {
-  // SetVacuousPrm();
+  zVec3DList *list;
   SetRandomValues();
   pdRobotDestroy( &robot );
-  EXPECT_EQ( 0, pdRobotChainPtr( &robot )->mass );
+  EXPECT_EQ( NULL, rkChainRoot( pdRobotChain( &robot ) ) );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( NULL, robot.disold );
-  EXPECT_EQ( 0, pdRobotCellNum( &robot ) );
-  EXPECT_EQ( NULL, robot._cell );
-  EXPECT_EQ( NULL, robot._ref_vec );
-  EXPECT_EQ( NULL, robot._ref_set_flag );
-  EXPECT_EQ( NULL, robot._sr_lf_vert );
-  EXPECT_EQ( NULL, robot._sr_rf_vert );
-  EXPECT_EQ( NULL, robot._sr_vert );
+  list = &pdRobotSRLFVert( &robot )->data.list;
+  EXPECT_EQ( 0, zListSize( list ) );
+  EXPECT_EQ( zListTail( list ), pdRobotSRLFVert( &robot )->pointer.cp );
+  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
+  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
+  list = &pdRobotSRRFVert( &robot )->data.list;
+  EXPECT_EQ( 0, zListSize( list ) );
+  EXPECT_EQ( zListTail( list ), pdRobotSRRFVert( &robot )->pointer.cp );
+  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
+  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
+  list = &pdRobotSRVert( &robot )->data.list;
+  EXPECT_EQ( 0, zListSize( list ) );
+  EXPECT_EQ( zListTail( list ), pdRobotSRVert( &robot )->pointer.cp );
+  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
+  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
   destroy_flag = true;
 }
 
 TEST_F(pdRobotTest, Load)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
 
   pdRobotLoad( &robot, model );
-  EXPECT_EQ( 25, (int)rkChainNum( pdRobotChainPtr( &robot ) ) );
+  EXPECT_EQ( 25, pdRobotLinkNum( &robot ) );
+  EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
+  EXPECT_EQ( pdRobotJointSize( &robot ), zVecSize( pdRobotJointDis( &robot ) ) );
+  EXPECT_EQ( pdRobotJointSize( &robot ), zVecSize( robot.disold ) );
 }
 
-TEST_F(pdRobotTest, DefaultBipedInit)
+TEST_F(pdRobotTest, JointDis)
 {
-  char model[] = "model/mighty.zkc";
-  zVec dis, vel;
+  char model[] = "model/mighty.ztk";
 
-  pdCmdDefaultInit( &cmd );
-  pdStateInit( &state );
-  pdBipedInit( &biped, &cmd, DT );
-  pdRobotInit( &robot );
   pdRobotLoad( &robot, model );
-  pdRobotDefaultBipedInit( &robot, &biped, &state );
-  dis = zVecAlloc( pdRobotJointSize( &robot ) );
-  vel = zVecAlloc( pdRobotJointSize( &robot ) );
-  pdRobotGetJointDisAll( &robot, dis );
-  pdRobotGetJointVelAll( &robot, DT, vel );
+  EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
+  EXPECT_EQ( 26, zVecSize( pdRobotJointDis( &robot ) ) );
+  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 0 ), GTEST_TOL );
+  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 1 ), GTEST_TOL );
+  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
+}
 
-  for(int i=0; i<26; i++){
-    ASSERT_DOUBLE_EQ( zVecElem(dis,i), zVecElem(robot.disold,i) );
+TEST_F(pdRobotTest, JointDisold)
+{
+  char model[] = "model/mighty.ztk";
+
+  pdRobotLoad( &robot, model );
+  ASSERT_EQ( 26, zVecSize( robot.disold ) );
+  for(int i=0; i<26; i++)
+    EXPECT_DOUBLE_EQ( zVecElem(robot.dis,i), zVecElem(robot.disold,i) );
+}
+
+TEST_F(pdRobotTest, Load_CheckConstraints)
+{
+  char model[] = "model/mighty.ztk";
+  rkIKCell *cp;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  ASSERT_EQ( 10, pdRobotIKCellListSize( &robot ) );
+
+  // IK cells are stored in priority order (highest to lowest)
+  cp = zListTail( pdRobotIKCellList( &robot ) ); // 0
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LF_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LF_POS, cp->data.priority );
+  cp = zListCellNext( cp );     // 2
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RF_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RF_POS, cp->data.priority );
+
+  cp = zListCellNext( cp );     // 1
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LF_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LF_ATT, cp->data.priority );
+  cp = zListCellNext( cp );     // 3
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RF_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RF_ATT, cp->data.priority );
+
+  cp = zListCellNext( cp );     // 8
+  EXPECT_STREQ( "com", cp->data.constraint->typestr );
+  EXPECT_EQ( 0, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_COM, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_COM, cp->data.priority );
+
+  cp = zListCellNext( cp );     // 9
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_BODY_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_TORSO_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_TORSO_ATT, cp->data.priority );
+
+  cp = zListCellNext( cp );     // 4
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LH_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LH_POS, cp->data.priority );
+  cp = zListCellNext( cp );     // 6
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RH_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RH_POS, cp->data.priority );
+  cp = zListCellNext( cp );     // 5
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LH_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LH_ATT, cp->data.priority );
+  cp = zListCellNext( cp );     // 7
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RH_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RH_ATT, cp->data.priority );
+}
+
+TEST_F(pdRobotTest, Load_CheckJointWeights_NoHandConstraints)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  ASSERT_EQ( 6, pdRobotIKCellListSize( &robot ) );
+
+  int fixed_joint_id_list[] = { 1, 2, 3, 4, 5, 13, 14, 15, 16, 17, -1 };
+  for( const int *idp=fixed_joint_id_list; *idp >= 0; idp++ ){
+    int id = *idp;
+    EXPECT_FALSE( pdRobotIKSolver(&robot)->joint_is_enabled[id] );
+    EXPECT_EQ( 0.0, pdRobotIKSolver(&robot)->joint_weight[id] );
   }
-  for(int i=0; i<26; i++){
-    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
+}
+
+TEST_F(pdRobotTest, Load_EnsureIKDisabled)
+{
+  char model[] = "model/mighty.ztk";
+  rkIKCell *cp;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  zListForEach( pdRobotIKCellList(&robot), cp )
+    EXPECT_FALSE( rkIKCellIsEnabled(cp) );
+}
+
+TEST_F(pdRobotTest, Load_CheckID)
+{
+  char model[] = "model/mighty.ztk";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ( MIGHTY_BODY_ID, pdRobotTorsoID( &robot ) );
+  EXPECT_EQ( MIGHTY_LF_ID,   pdRobotLFID( &robot ) );
+  EXPECT_EQ( MIGHTY_RF_ID,   pdRobotRFID( &robot ) );
+  EXPECT_EQ( MIGHTY_LH_ID,   pdRobotLHID( &robot ) );
+  EXPECT_EQ( MIGHTY_RH_ID,   pdRobotRHID( &robot ) );
+}
+
+TEST_F(pdRobotTest, Load_CheckID_NoHandConstraints)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_EQ( MIGHTY_BODY_ID, pdRobotTorsoID( &robot ) );
+  EXPECT_EQ( MIGHTY_LF_ID,   pdRobotLFID( &robot ) );
+  EXPECT_EQ( MIGHTY_RF_ID,   pdRobotRFID( &robot ) );
+  EXPECT_EQ( -1,             pdRobotLHID( &robot ) );
+  EXPECT_EQ( -1,             pdRobotRHID( &robot ) );
+}
+
+TEST_F(pdRobotTest, Load_FileError)
+{
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE( pdRobotLoad( &robot, "non_exist.ztk" ) );
+  std::string msg = testing::internal::GetCapturedStderr();
+  std::string expected = \
+    "run-time error: cannot open file: non_exist.ztk (zOpenFile).\n"\
+    "run-time error: cannot load model file: non_exist.ztk (pdRobotLoad).\n";
+  EXPECT_EQ( expected, msg );
+}
+
+TEST_F(pdRobotTest, Load_NoIKConfig)
+{
+  char model[] = "model/mighty_no_ik_config.ztk";
+  rkIK *ik;
+  rkIKCell *cp;
+  int i;
+
+  pdRobotLoad( &robot, model );
+  // All joints are registered by default.
+  ik = pdRobotIKSolver( &robot );
+  for( i=0; i<rkChainLinkNum( pdRobotChain(&robot) ); i++ ){
+    if( rkChainLinkJointDOF(pdRobotChain(&robot),i) > 0 ){
+      EXPECT_TRUE( ik->joint_is_enabled[i] );
+      EXPECT_EQ( 0.001, ik->joint_weight[i] );
+    }
   }
-  zVecFree( dis );
-  zVecFree( vel );
+  // Constraint on COM is only created at this moment.
+  ASSERT_EQ( 1, pdRobotIKCellListSize( &robot ) );
+  cp = zListTail( pdRobotIKCellList( &robot ) );
+  EXPECT_STREQ( "com", cp->data.constraint->typestr );
+  EXPECT_EQ( 0, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_COM, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_COM, cp->data.priority );
+  // Ensure IK cells are disabled
+  zListForEach( pdRobotIKCellList(&robot), cp )
+    EXPECT_FALSE( rkIKCellIsEnabled(cp) );
+}
+
+TEST_F(pdRobotTest, BindTorso)
+{
+  char model[] = "model/mighty_no_ik_config.ztk";
+  rkIKCell *cp;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  pdRobotBindTorso( &robot, "body" );
+
+  ASSERT_EQ( 2, pdRobotIKCellListSize( &robot ) );
+
+  cp = zListTail( pdRobotIKCellList( &robot ) );
+  EXPECT_STREQ( "com", cp->data.constraint->typestr );
+  EXPECT_EQ( 0, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_COM, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_COM, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_BODY_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_TORSO_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_TORSO_ATT, cp->data.priority );
+
+  // Ensure IK cells are disabled
+  zListForEach( pdRobotIKCellList(&robot), cp )
+    EXPECT_FALSE( rkIKCellIsEnabled(cp) );
+  EXPECT_EQ( MIGHTY_BODY_ID, pdRobotTorsoID( &robot ) );
+}
+
+TEST_F(pdRobotTest, BindTorso_NotFoundError)
+{
+  char model[] = "model/mighty_no_ik_config.ztk";
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  testing::internal::CaptureStderr();
+  ASSERT_FALSE( pdRobotBindTorso( &robot, "torso" ) );
+  std::string msg = testing::internal::GetCapturedStderr();
+  std::string expected = \
+    "run-time error: torso: unknown link (rkChainFindLink).\n";
+  EXPECT_EQ( expected, msg );
+}
+
+TEST_F(pdRobotTest, BindFeet)
+{
+  char model[] = "model/mighty_no_ik_config.ztk";
+  rkIKCell *cp;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  pdRobotBindFeet( &robot, "left_foot", "right_foot" );
+
+  ASSERT_EQ( 5, pdRobotIKCellListSize( &robot ) );
+
+  cp = zListTail( pdRobotIKCellList( &robot ) );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LF_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LF_POS, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RF_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RF_POS, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LF_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LF_ATT, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RF_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RF_ATT, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "com", cp->data.constraint->typestr );
+  EXPECT_EQ( 0, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_COM, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_COM, cp->data.priority );
+
+  // Ensure IK cells are disabled
+  zListForEach( pdRobotIKCellList(&robot), cp )
+    EXPECT_FALSE( rkIKCellIsEnabled(cp) );
+  EXPECT_EQ( MIGHTY_LF_ID, pdRobotLFID( &robot ) );
+  EXPECT_EQ( MIGHTY_RF_ID, pdRobotRFID( &robot ) );
+}
+
+TEST_F(pdRobotTest, BindFeet_AllocSR)
+{
+  char model[] = "model/mighty_no_ik_config.ztk";
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  pdRobotBindFeet( &robot, "left_foot", "right_foot" );
+  EXPECT_EQ( 8, zArraySize( &pdRobotSRLFVert(&robot)->data.array ) );
+  EXPECT_EQ( 8, zArraySize( &pdRobotSRRFVert(&robot)->data.array ) );
+  EXPECT_EQ( 16, zArraySize( &pdRobotSRVert(&robot)->data.array ) );
+}
+
+TEST_F(pdRobotTest, BindHands)
+{
+  char model[] = "model/mighty_no_ik_config.ztk";
+  rkIKCell *cp;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  pdRobotBindHands( &robot, "left_hand", "right_hand" );
+
+  ASSERT_EQ( 5, pdRobotIKCellListSize( &robot ) );
+
+  cp = zListTail( pdRobotIKCellList( &robot ) );
+  EXPECT_STREQ( "com", cp->data.constraint->typestr );
+  EXPECT_EQ( 0, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_COM, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_COM, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LH_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LH_POS, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RH_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RH_POS, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LH_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LH_ATT, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RH_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RH_ATT, cp->data.priority );
+
+  // Ensure IK cells are disabled
+  zListForEach( pdRobotIKCellList(&robot), cp )
+    EXPECT_FALSE( rkIKCellIsEnabled(cp) );
+  EXPECT_EQ( MIGHTY_LH_ID, pdRobotLHID( &robot ) );
+  EXPECT_EQ( MIGHTY_RH_ID, pdRobotRHID( &robot ) );
+}
+
+TEST_F(pdRobotTest, BindTorsoLimb)
+{
+  char model[] = "model/mighty_no_ik_config.ztk";
+  rkIKCell *cp;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  pdRobotBindTorsoLimb( &robot, "body", "left_foot", "right_foot", "left_hand", "right_hand" );
+
+  ASSERT_EQ( 10, pdRobotIKCellListSize( &robot ) );
+
+  cp = zListTail( pdRobotIKCellList( &robot ) );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LF_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LF_POS, cp->data.priority );
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RF_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RF_POS, cp->data.priority );
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LF_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LF_ATT, cp->data.priority );
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RF_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RF_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RF_ATT, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "com", cp->data.constraint->typestr );
+  EXPECT_EQ( 0, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_COM, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_COM, cp->data.priority );
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_BODY_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_TORSO_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_TORSO_ATT, cp->data.priority );
+
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LH_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LH_POS, cp->data.priority );
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_pos", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RH_POS, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RH_POS, cp->data.priority );
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_LH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_LH_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_LH_ATT, cp->data.priority );
+  cp = zListCellNext( cp );
+  EXPECT_STREQ( "world_att", cp->data.constraint->typestr );
+  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
+  EXPECT_STREQ( PD_ROBOT_IKCELL_NAME_RH_ATT, zName(&cp->data) );
+  EXPECT_EQ( PD_ROBOT_DEFAULT_PRIORITY_RH_ATT, cp->data.priority );
+
+  // Ensure IK cells are disabled
+  zListForEach( pdRobotIKCellList(&robot), cp )
+    EXPECT_FALSE( rkIKCellIsEnabled(cp) );
+  EXPECT_EQ( MIGHTY_LF_ID, pdRobotLFID( &robot ) );
+  EXPECT_EQ( MIGHTY_RF_ID, pdRobotRFID( &robot ) );
+  EXPECT_EQ( MIGHTY_LH_ID, pdRobotLHID( &robot ) );
+  EXPECT_EQ( MIGHTY_RH_ID, pdRobotRHID( &robot ) );
+  EXPECT_EQ( MIGHTY_BODY_ID, pdRobotTorsoID( &robot ) );
+}
+
+TEST_F(pdRobotTest, FindIKCellByName)
+{
+  char model[] = "model/mighty.ztk";
+  rkIKCell *expected, *actual;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  expected = zListHead( pdRobotIKCellList( &robot ) ); // rh_att
+  actual = pdRobotFindIKCellByName( &robot, "right_hand_att" );
+  EXPECT_EQ( expected, actual );
+}
+
+TEST_F(pdRobotTest, FindIKCellByName_ReturnNull)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+  rkIKCell *actual;
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  actual = pdRobotFindIKCellByName( &robot, "left_hand_pos" );
+  EXPECT_EQ( NULL, actual );
+}
+
+TEST_F(pdRobotTest, FindLinkIDByIKCellName)
+{
+  char model[] = "model/mighty.ztk";
+  const char *torso_names[] = {
+    PD_ROBOT_IKCELL_NAME_TORSO_ATT,
+    NULL,
+  };
+  const char *left_foot_names[] = {
+    PD_ROBOT_IKCELL_NAME_LF_POS,
+    PD_ROBOT_IKCELL_NAME_LF_ATT,
+    NULL,
+  };
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  EXPECT_EQ( MIGHTY_BODY_ID, pdRobotFindLinkIDByIKCellName( &robot, torso_names ) );
+  EXPECT_EQ( MIGHTY_LF_ID, pdRobotFindLinkIDByIKCellName( &robot, left_foot_names ) );
+}
+
+TEST_F(pdRobotTest, FindLinkIDByIKCellName_ReturnInvalid)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+  const char *left_hand_names[] = {
+    PD_ROBOT_IKCELL_NAME_LH_POS,
+    PD_ROBOT_IKCELL_NAME_LH_ATT,
+    NULL,
+  };
+
+  pdRobotLoad( &robot, model );
+  ASSERT_TRUE( pdRobotIKSolver( &robot ) );
+  EXPECT_EQ( -1, pdRobotFindLinkIDByIKCellName( &robot, left_hand_names ) );
 }
 
 TEST_F(pdRobotTest, LinkSetJointDis)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec dis;
   double d[1];
 
@@ -174,11 +623,11 @@ TEST_F(pdRobotTest, LinkSetJointDis)
   dis = zVecAlloc( 26 );
 
   d[0] = 0.02;
-  pdRobotLinkSetJointDis( &robot, 1, d );
+  pdRobotLinkJointSetDis( &robot, 1, d );
   pdRobotGetJointDisAll( &robot, dis );
   EXPECT_EQ( 0.02, zVecElem( dis, 6 ) );
   d[0] = 0.04;
-  pdRobotLinkSetJointDis( &robot, 3, d );
+  pdRobotLinkJointSetDis( &robot, 3, d );
   pdRobotGetJointDisAll( &robot, dis );
   EXPECT_EQ( 0.04, zVecElem( dis, 8 ) );
   zVecFree( dis );
@@ -186,7 +635,7 @@ TEST_F(pdRobotTest, LinkSetJointDis)
 
 TEST_F(pdRobotTest, SetJointDis)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec dis, setdis;
   zIndex index;
 
@@ -207,14 +656,58 @@ TEST_F(pdRobotTest, SetJointDis)
   zVecFree( dis );
 }
 
+TEST_F(pdRobotTest, GetJointDiffAll)
+{
+  zVec3D com_pos;
+  zVec diff;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &com_pos, 0.0, 0.0, 0.27 );
+  diff = zVecAlloc( pdRobotJointSize(&robot) );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  rkIKCellEnable( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) );
+  rkIKCellEnable( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotGetJointDiffAll( &robot, diff );
+  for(int i=0; i<pdRobotJointSize(&robot); ++i){
+    if( fabs(zVecElem(diff,i) > GTEST_TOL_LOOSE ) ){
+      SUCCEED();
+      return;
+    }
+  }
+  FAIL() << "Any element of joint difference should be greater or smaller than zero.";
+}
+
+TEST_F(pdRobotTest, GetJointVelAll)
+{
+  zVec3D com_pos;
+  zVec vel;
+
+  LoadAndSolveIK();
+  zVec3DCreate( &com_pos, 0.0, 0.0, 0.27 );
+  vel = zVecAlloc( pdRobotJointSize(&robot) );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  rkIKCellEnable( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) );
+  rkIKCellEnable( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+  for(int i=0; i<pdRobotJointSize(&robot); ++i){
+    if( fabs(zVecElem(vel,i) > GTEST_TOL_LOOSE ) ){
+      SUCCEED();
+      return;
+    }
+  }
+  FAIL() << "Any element of joint velocity should be greater or smaller than zero.";
+}
+
 TEST_F(pdRobotTest, FK)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec dis;
 
   pdRobotLoad( &robot, model );
   dis = zVecAlloc( 26 );
-  zVecClear( dis );
+  zVecZero( dis );
   zVecSetElem( dis,  7, 0.01 );
   zVecSetElem( dis,  8, 0.02 );
   zVecSetElem( dis,  9, 0.03 );
@@ -238,7 +731,7 @@ TEST_F(pdRobotTest, FK_CheckJointVel)
   LoadAndSolveIK();
   dis = zVecAlloc( 26 );
   vel = zVecAlloc( 26 );
-  zVecClear( dis );
+  zVecZero( dis );
   zVecSetElem( dis,  7, 0.01 );
   zVecSetElem( dis,  8, 0.02 );
   zVecSetElem( dis,  9, 0.03 );
@@ -257,12 +750,12 @@ TEST_F(pdRobotTest, FK_CheckJointVel)
 
 TEST_F(pdRobotTest, FK_LargeBodyOffset)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec dis;
 
   pdRobotLoad( &robot, model );
   dis = zVecAlloc( 26 );
-  zVecClear( dis );
+  zVecZero( dis );
   zVecSetElem( dis, 0, 10 );
   zVecSetElem( dis, 1, 10 );
   zVecSetElem( dis, 2, 10 );
@@ -272,8 +765,8 @@ TEST_F(pdRobotTest, FK_LargeBodyOffset)
 
   pdRobotFK( &robot, dis );
   double lf, rf;
-  lf = zVec3DElem( rkChainLinkWldPos(pdRobotChainPtr(&robot), pdRobotLFID(&robot)), zZ );
-  rf = zVec3DElem( rkChainLinkWldPos(pdRobotChainPtr(&robot), pdRobotRFID(&robot)), zZ );
+  lf = rkChainLinkWldPos(pdRobotChain(&robot), pdRobotLFID(&robot))->c.z;
+  rf = rkChainLinkWldPos(pdRobotChain(&robot), pdRobotRFID(&robot))->c.z;
   EXPECT_NEAR( 0, lf, 1e-06 );
   EXPECT_NEAR( 0, rf, 1e-06 );
   zVecFree( dis );
@@ -281,7 +774,7 @@ TEST_F(pdRobotTest, FK_LargeBodyOffset)
 
 TEST_F(pdRobotTest, FKIndex)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec dis;
   zIndex index;
   zVec3D com;
@@ -293,12 +786,12 @@ TEST_F(pdRobotTest, FKIndex)
   pdRobotCOMPos( &robot, &com );
   EXPECT_EQ( 1.57, zVecElem( pdRobotJointDis(&robot), 7 ) );
   EXPECT_EQ( 1.57, zVecElem( pdRobotJointDis(&robot), 19 ) );
-  EXPECT_NEAR( 0.2996089431, zVec3DElem( &com, zZ ), 1e-06 );
+  EXPECT_NEAR( 0.2996089431, com.c.z, 1e-06 );
 }
 
 TEST_F(pdRobotTest, ResetJointDis)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
 
   pdRobotLoad( &robot, model );
   pdRobotResetJointDis( &robot );
@@ -310,479 +803,412 @@ TEST_F(pdRobotTest, ResetJointDis)
   }
 }
 
-TEST_F(pdRobotTest, ResetPose)
+TEST_F(pdRobotTest, SetRef)
 {
-  char model[] = "model/mighty.zkc";
-  zVec dis;
-
-  pdCmdDefaultInit( &cmd );
-  pdStateInit( &state );
-  pdBipedInit( &biped, &cmd, DT );
-  pdRobotInit( &robot );
-  pdRobotLoad( &robot, model );
-  pdRobotDefaultBipedInit( &robot, &biped, &state );
-  dis = zVecAlloc( pdRobotJointSize( &robot ) );
-  pdRobotGetJointDisAll( &robot, dis );
-  pdRobotUpdateState( &robot, &state );
-
-  // method to testify
-  zVecSetElem( dis, 0, -1 );
-  zVecSetElem( dis, 1, 1 );
-  zVecSetElem( dis, 2, 0.34 );
-  zVecSetElem( dis, 3, 0 );
-  zVecSetElem( dis, 4, 0 );
-  zVecSetElem( dis, 5, 1.57 );
-  pdRobotResetPose( &robot, &biped, &state, dis );
-  pdRobotGetJointDisAll( &robot, dis );
-  EXPECT_DOUBLE_EQ( -1, zVecElem(dis,0) );
-  EXPECT_DOUBLE_EQ( 1,  zVecElem(dis,1) );
-  EXPECT_NEAR( 0.347, zVecElem(dis,2), 1e03 );
-  EXPECT_DOUBLE_EQ( 0, zVecElem(dis,3) );
-  EXPECT_DOUBLE_EQ( 0, zVecElem(dis,4) );
-  EXPECT_DOUBLE_EQ( 1.57, zVecElem(dis,5) );
-  zVecFree( dis );
-}
-
-TEST_F(pdRobotTest, ResetPose_CheckVel)
-{
-  char model[] = "model/mighty.zkc";
-  zVec dis, vel;
-
-  pdCmdDefaultInit( &cmd );
-  pdStateInit( &state );
-  pdBipedInit( &biped, &cmd, DT );
-  pdRobotInit( &robot );
-  pdRobotLoad( &robot, model );
-  pdRobotDefaultBipedInit( &robot, &biped, &state );
-  dis = zVecAlloc( pdRobotJointSize( &robot ) );
-  vel = zVecAlloc( pdRobotJointSize( &robot ) );
-  pdRobotGetJointDisAll( &robot, dis );
-  pdRobotUpdateState( &robot, &state );
-
-  // method to testify
-  zVecSetElem( dis, 0, -1 );
-  zVecSetElem( dis, 1, 1 );
-  zVecSetElem( dis, 2, 0.34 );
-  zVecSetElem( dis, 3, 0 );
-  zVecSetElem( dis, 4, 0 );
-  zVecSetElem( dis, 5, 1.57 );
-  pdRobotResetPose( &robot, &biped, &state, dis );
-  pdRobotGetJointVelAll( &robot, DT, vel );
-  for(int i=0; i<26; i++){
-    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
-  }
-  zVecFree( dis );
-  zVecFree( vel );
-}
-
-TEST_F(pdRobotTest, Load_UnsetAllFlag)
-{
-  char model[] = "model/mighty.zkc";
-  int i;
-
-  pdRobotLoad( &robot, model );
-  for( i=0; i<pdRobotCellNum( &robot ); i++ )
-    robot._ref_set_flag[i] = true;
-  pdRobotUnsetAllFlags( &robot );
-  EXPECT_FALSE( robot._ref_set_flag[0] );
-  EXPECT_FALSE( robot._ref_set_flag[1] );
-  EXPECT_FALSE( robot._ref_set_flag[2] );
-  EXPECT_FALSE( robot._ref_set_flag[3] );
-  EXPECT_FALSE( robot._ref_set_flag[4] );
-  EXPECT_FALSE( robot._ref_set_flag[5] );
-  EXPECT_FALSE( robot._ref_set_flag[6] );
-  EXPECT_FALSE( robot._ref_set_flag[7] );
-  EXPECT_FALSE( robot._ref_set_flag[8] );
-  EXPECT_FALSE( robot._ref_set_flag[9] );
-}
-
-TEST_F(pdRobotTest, JointSize)
-{
-  char model[] = "model/mighty.zkc";
-
-  pdRobotLoad( &robot, model );
-  EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
-}
-
-TEST_F(pdRobotTest, JointDis)
-{
-  char model[] = "model/mighty.zkc";
-
-  pdRobotLoad( &robot, model );
-  EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
-  EXPECT_EQ( 26, zVecSize( pdRobotJointDis( &robot ) ) );
-  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 0 ), GTEST_TOL );
-  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 1 ), GTEST_TOL );
-  EXPECT_NEAR( 0.0, zVecElem( pdRobotJointDis( &robot ), 2 ), GTEST_TOL );
-}
-
-TEST_F(pdRobotTest, JointDisold)
-{
-  char model[] = "model/mighty.zkc";
-
-  pdRobotLoad( &robot, model );
-  ASSERT_EQ( 26, zVecSize( robot.disold ) );
-  for(int i=0; i<26; i++)
-    EXPECT_DOUBLE_EQ( zVecElem(robot.dis,i), zVecElem(robot.disold,i) );
-}
-
-TEST_F(pdRobotTest, Load_CheckCell)
-{
-  char model[] = "model/mighty.zkc";
-  rkIKCell *cp;
-
-  pdRobotLoad( &robot, model );
-  EXPECT_EQ( 10, pdRobotCellNum( &robot ) );
-  cp = zListTail( &pdRobotIKPtr(&robot)->clist ); // 0
-  EXPECT_EQ( rkIKJacobiCOM, cp->data._cmat_fp );
-  EXPECT_EQ( 0, cp->data.id );
-  EXPECT_EQ( 0, cp->data.attr.id );
-  cp = zListCellNext( cp );     // 1
-  EXPECT_EQ( rkIKJacobiLinkWldAng, cp->data._cmat_fp );
-  EXPECT_EQ( 1, cp->data.id );
-  EXPECT_EQ( MIGHTY_BODY_ID, cp->data.attr.id );
-  cp = zListCellNext( cp );     // 2
-  EXPECT_EQ( rkIKJacobiLinkWldLin, cp->data._cmat_fp );
-  EXPECT_EQ( 2, cp->data.id );
-  EXPECT_EQ( MIGHTY_LF_ID, cp->data.attr.id );
-  cp = zListCellNext( cp );     // 3
-  cp = zListCellNext( cp );     // 4
-  cp = zListCellNext( cp );     // 5
-  cp = zListCellNext( cp );     // 6
-  cp = zListCellNext( cp );     // 7
-  cp = zListCellNext( cp );     // 8
-  EXPECT_EQ( rkIKJacobiLinkWldLin, cp->data._cmat_fp );
-  EXPECT_EQ( 8, cp->data.id );
-  EXPECT_EQ( MIGHTY_RH_ID, cp->data.attr.id );
-}
-
-TEST_F(pdRobotTest, Load_AllocCellPtr)
-{
-  char model[] = "model/mighty.zkc";
-  rkIKCell *cp;
-
-  pdRobotLoad( &robot, model );
-  cp = zListTail( &pdRobotIKPtr(&robot)->clist ); // 0
-  EXPECT_EQ( cp, robot._cell[0] );
-  cp = zListCellNext( cp );     // 1
-  EXPECT_EQ( cp, robot._cell[1] );
-  cp = zListCellNext( cp );     // 2
-  EXPECT_EQ( cp, robot._cell[2] );
-  cp = zListCellNext( cp );     // 3
-  cp = zListCellNext( cp );     // 4
-  cp = zListCellNext( cp );     // 5
-  cp = zListCellNext( cp );     // 6
-  cp = zListCellNext( cp );     // 7
-  cp = zListCellNext( cp );     // 8
-  cp = zListCellNext( cp );     // 9
-  EXPECT_EQ( cp, robot._cell[9] );
-}
-
-TEST_F(pdRobotTest, Load_CheckID)
-{
-  char model[] = "model/mighty.zkc";
-
-  pdRobotLoad( &robot, model );
-  EXPECT_EQ(  0, pdRobotBaseID( &robot ) );
-  EXPECT_EQ( 12, pdRobotLFID( &robot ) );
-  EXPECT_EQ( 24, pdRobotRFID( &robot ) );
-  EXPECT_EQ(  5, pdRobotLHID( &robot ) );
-  EXPECT_EQ( 17, pdRobotRHID( &robot ) );
-}
-
-TEST_F(pdRobotTest, Load_InitRefVec)
-{
-  char model[] = "model/mighty.zkc";
-  zVec3D *v;
-
-  pdRobotLoad( &robot, model );
-  v = robot._ref_vec;
-  // COM pos
-  EXPECT_NEAR( 0.02961612673, zVec3DElem( &v[0], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0003066383315, zVec3DElem( &v[0], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.2928640259, zVec3DElem( &v[0], zZ ), GTEST_TOL_LOOSE );
-  // base att
-  EXPECT_NEAR( 0, zVec3DElem( &v[1], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[1], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[1], zZ ), GTEST_TOL_LOOSE );
-  // left foot pos
-  EXPECT_NEAR( 0.034, zVec3DElem( &v[2], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.042, zVec3DElem( &v[2], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[2], zZ ), GTEST_TOL_LOOSE );
-  // left foot att
-  EXPECT_NEAR( 0, zVec3DElem( &v[3], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[3], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[3], zZ ), GTEST_TOL_LOOSE );
-  // right foot pos
-  EXPECT_NEAR( 0.034, zVec3DElem( &v[4], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.042, zVec3DElem( &v[4], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[4], zZ ), GTEST_TOL_LOOSE );
-  // right foot att
-  EXPECT_NEAR( 0, zVec3DElem( &v[5], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[5], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[5], zZ ), GTEST_TOL_LOOSE );
-  // left hand pos
-  EXPECT_NEAR( 0.039, zVec3DElem( &v[6], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.13019468, zVec3DElem( &v[6], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.28642462, zVec3DElem( &v[6], zZ ), GTEST_TOL_LOOSE );
-  // left hand att
-  EXPECT_NEAR( 0, zVec3DElem( &v[7], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[7], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[7], zZ ), GTEST_TOL_LOOSE );
-  // right hand pos
-  EXPECT_NEAR( 0.039, zVec3DElem( &v[8], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.13019468, zVec3DElem( &v[8], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.28642462, zVec3DElem( &v[8], zZ ), GTEST_TOL_LOOSE );
-  // right hand att
-  EXPECT_NEAR( 0, zVec3DElem( &v[9], zX ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[9], zY ), GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0, zVec3DElem( &v[9], zZ ), GTEST_TOL_LOOSE );
-}
-
-TEST_F(pdRobotTest, Load_FileError)
-{
-  zEchoOff();
-  rkIKCreate( pdRobotIKPtr( &robot ), pdRobotChainPtr( &robot ) );
-  EXPECT_FALSE( pdRobotLoad( &robot, "hoge.zkc" ) );
-  destroy_flag = true;
-  zEchoOn();
-}
-
-TEST_F(pdRobotTest, Load_NotEnoughConstraintsError)
-{
-  zEchoOff();
-  EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty2.zkc" ) );
-  destroy_flag = true;
-  zEchoOn();
-}
-
-TEST_F(pdRobotTest, Load_LinkIDMismatchError)
-{
-  zEchoOff();
-  EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty3.zkc" ) );
-  destroy_flag = true;
-  zEchoOn();
-}
-
-TEST_F(pdRobotTest, Load_NotImplementedError)
-{
-  zEchoOff();
-  EXPECT_FALSE( pdRobotLoad( &robot, "model/mighty4.zkc" ) );
-  destroy_flag = true;
-  zEchoOn();
-}
-
-TEST_F(pdRobotTest, SetRefVec_Error)
-{
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
-
-  zEchoOff();
-  pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0, 0, 0.26 );
-  EXPECT_FALSE( pdRobotSetRefVec( &robot, &v, 10 ) );
-  zEchoOn();
-}
-
-TEST_F(pdRobotTest, SetExtraRefVec)
-{
-  char model[] = "model/mighty6.zkc";
+  char model[] = "model/mighty.ztk";
   zVec3D v;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0, 0, -zPI_2 );
-  pdRobotSetExtraRefVec( &robot, &v, 0 );
-  EXPECT_EQ( 11, pdRobotCellNum( &robot ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[10], zX ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[10], zY ) );
-  EXPECT_DOUBLE_EQ( -zPI_2, zVec3DElem( &robot._ref_vec[10], zZ ) );
-  EXPECT_TRUE( pdRobotExtraFlagIsOn( &robot, 0 ) );
+  EXPECT_TRUE( pdRobotSetRef( &robot, "com", 0.1, 0.2, 0.3 ) );
+  pdRobotGetRefPos( &robot, "com", &v );
+  EXPECT_DOUBLE_EQ( 0.1, v.c.x );
+  EXPECT_DOUBLE_EQ( 0.2, v.c.y );
+  EXPECT_DOUBLE_EQ( 0.3, v.c.z );
+}
+
+TEST_F(pdRobotTest, SetRefVec)
+{
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v1, 0.1, 0.2, 0.3 );
+  EXPECT_TRUE( pdRobotSetRefVec( &robot, "com", &v1 ) );
+  pdRobotGetRefPos( &robot, "com", &v2 );
+  EXPECT_DOUBLE_EQ( 0.1, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.2, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.3, v2.c.z );
+}
+
+TEST_F(pdRobotTest, SetRefAtt)
+{
+  char model[] = "model/mighty.ztk";
+  zMat3D m1, m2;
+
+  pdRobotLoad( &robot, model );
+  zMat3DCreate( &m1, 0.1, 0.2, 0.3, 0.2, 0.3, 0.1, 0.3, 0.1, 0.2 );
+  EXPECT_TRUE( pdRobotSetRefAtt( &robot, "torso_att", &m1 ) );
+  pdRobotGetRefAtt( &robot, "torso_att", &m2 );
+  EXPECT_DOUBLE_EQ( 0.1, m2.e[0][0] );
+  EXPECT_DOUBLE_EQ( 0.2, m2.e[0][1] );
+  EXPECT_DOUBLE_EQ( 0.3, m2.e[0][2] );
+  EXPECT_DOUBLE_EQ( 0.2, m2.e[1][0] );
+  EXPECT_DOUBLE_EQ( 0.3, m2.e[1][1] );
+  EXPECT_DOUBLE_EQ( 0.1, m2.e[1][2] );
+  EXPECT_DOUBLE_EQ( 0.3, m2.e[2][0] );
+  EXPECT_DOUBLE_EQ( 0.1, m2.e[2][1] );
+  EXPECT_DOUBLE_EQ( 0.2, m2.e[2][2] );
+}
+
+TEST_F(pdRobotTest, SetRef_NotFoundCell)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+
+  pdRobotLoad( &robot, model );
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE( pdRobotSetRef( &robot, "left_hand_pos", 0.1, 0.2, 0.3 ) );
+  std::string msg = testing::internal::GetCapturedStderr();
+  std::string expected = \
+    "run-time error: constraint 'left_hand_pos' is not bound (pdRobotSetRef).\n";
+  EXPECT_EQ( expected, msg );
 }
 
 TEST_F(pdRobotTest, SetRefCOM)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0, 0, 0.26 );
-  pdRobotSetRefCOM( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[0], zX ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[0], zY ) );
-  EXPECT_DOUBLE_EQ( 0.26, zVec3DElem( &robot._ref_vec[0], zZ ) );
-  EXPECT_TRUE( pdRobotCOMFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0, 0, 0.26 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_COM ) ) );
+  ASSERT_TRUE( pdRobotSetRefCOM( &robot, &v1 ) );
+  pdRobotGetRefCOM( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.26, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_COM ) ) );
 }
 
-TEST_F(pdRobotTest, SetRefBaseAtt)
+TEST_F(pdRobotTest, SetRefTorsoZYX)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0.1*zPI_2, 0, 0 );
-  pdRobotSetRefBaseAtt( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0.1*zPI_2, zVec3DElem( &robot._ref_vec[1], zX ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[1], zY ) );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[1], zZ ) );
-  EXPECT_TRUE( pdRobotBaseAttFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0.1*zPI_2, 0.0, 0.0 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_TORSO_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefTorsoZYX( &robot, &v1 ) );
+  pdRobotGetRefTorsoZYX( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0.1*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_TORSO_ATT ) ) );
+}
+
+TEST_F(pdRobotTest, SetRefTorsoAtt)
+{
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+  zMat3D m1, m2;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v1, 0.1*zPI_2, 0.0, 0.0 );
+  zMat3DFromZYX( &m1, v1.c.x, v1.c.y, v1.c.z );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_TORSO_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefTorsoAtt( &robot, &m1 ) );
+  pdRobotGetRefTorsoAtt( &robot, &m2 );
+  zMat3DToZYX( &m2, &v2 );
+  EXPECT_DOUBLE_EQ( 0.1*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_TORSO_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefLFPos)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0, 0.042, 0.0 );
-  pdRobotSetRefLFPos( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[2], zX ) );
-  EXPECT_DOUBLE_EQ( 0.042, zVec3DElem( &robot._ref_vec[2], zY ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[2], zZ ) );
-  EXPECT_TRUE( pdRobotLFPosFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0.0, 0.042, 0.0 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+  ASSERT_TRUE( pdRobotSetRefLFPos( &robot, &v1 ) );
+  pdRobotGetRefLFPos( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.042, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+}
+
+TEST_F(pdRobotTest, SetRefLFZYX)
+{
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v1, 0.2*zPI_2, 0.0, 0.0 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefLFZYX( &robot, &v1 ) );
+  pdRobotGetRefLFZYX( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0.2*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefLFAtt)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+  zMat3D m1, m2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0.2*zPI_2, 0.0, 0.0 );
-  pdRobotSetRefLFAtt( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0.2*zPI_2, zVec3DElem( &robot._ref_vec[3], zX ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[3], zY ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[3], zZ ) );
-  EXPECT_TRUE( pdRobotLFAttFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0.2*zPI_2, 0.0, 0.0 );
+  zMat3DFromZYX( &m1, v1.c.x, v1.c.y, v1.c.z );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefLFAtt( &robot, &m1 ) );
+  pdRobotGetRefLFAtt( &robot, &m2 );
+  zMat3DToZYX( &m2, &v2 );
+  EXPECT_DOUBLE_EQ( 0.2*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefRFPos)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0, -0.042, 0.0 );
-  pdRobotSetRefRFPos( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[4], zX ) );
-  EXPECT_DOUBLE_EQ( -0.042, zVec3DElem( &robot._ref_vec[4], zY ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[4], zZ ) );
-  EXPECT_TRUE( pdRobotRFPosFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0, -0.042, 0.0 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+  ASSERT_TRUE( pdRobotSetRefRFPos( &robot, &v1 ) );
+  pdRobotGetRefRFPos( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0, v2.c.x );
+  EXPECT_DOUBLE_EQ( -0.042, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+}
+
+TEST_F(pdRobotTest, SetRefRFZYX)
+{
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v1, 0.3*zPI_2, 0.0, 0.0 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefRFZYX( &robot, &v1 ) );
+  pdRobotGetRefRFZYX( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0.3*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefRFAtt)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+  zMat3D m1, m2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0.3*zPI_2, 0.0, 0.0 );
-  pdRobotSetRefRFAtt( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0.3*zPI_2, zVec3DElem( &robot._ref_vec[5], zX ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[5], zY ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[5], zZ ) );
-  EXPECT_TRUE( pdRobotRFAttFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0.3*zPI_2, 0.0, 0.0 );
+  zMat3DFromZYX( &m1, v1.c.x, v1.c.y, v1.c.z );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefRFAtt( &robot, &m1 ) );
+  pdRobotGetRefRFAtt( &robot, &m2 );
+  zMat3DToZYX( &m2, &v2 );
+  EXPECT_DOUBLE_EQ( 0.3*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefLHPos)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0, 0.05, 0.27 );
-  pdRobotSetRefLHPos( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[6], zX ) );
-  EXPECT_DOUBLE_EQ( 0.05, zVec3DElem( &robot._ref_vec[6], zY ) );
-  EXPECT_DOUBLE_EQ( 0.27, zVec3DElem( &robot._ref_vec[6], zZ ) );
-  EXPECT_TRUE( pdRobotLHPosFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0, 0.05, 0.27 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LH_POS ) ) );
+  ASSERT_TRUE( pdRobotSetRefLHPos( &robot, &v1 ) );
+  pdRobotGetRefLHPos( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.05, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.27, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LH_POS ) ) );
+}
+
+TEST_F(pdRobotTest, SetRefLHZYX)
+{
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v1, 0.4*zPI_2, 0.0, 0.0 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LH_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefLHZYX( &robot, &v1 ) );
+  pdRobotGetRefLHZYX( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0.4*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LH_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefLHAtt)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+  zMat3D m1, m2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0.4*zPI_2, 0.0, 0.0 );
-  pdRobotSetRefLHAtt( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0.4*zPI_2, zVec3DElem( &robot._ref_vec[7], zX ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[7], zY ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[7], zZ ) );
-  EXPECT_TRUE( pdRobotLHAttFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0.4*zPI_2, 0.0, 0.0 );
+  zMat3DFromZYX( &m1, v1.c.x, v1.c.y, v1.c.z );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LH_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefLHAtt( &robot, &m1 ) );
+  pdRobotGetRefLHAtt( &robot, &m2 );
+  zMat3DToZYX( &m2, &v2 );
+  EXPECT_DOUBLE_EQ( 0.4*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LH_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefRHPos)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0, -0.05, 0.27 );
-  pdRobotSetRefRHPos( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0, zVec3DElem( &robot._ref_vec[8], zX ) );
-  EXPECT_DOUBLE_EQ( -0.05, zVec3DElem( &robot._ref_vec[8], zY ) );
-  EXPECT_DOUBLE_EQ( 0.27, zVec3DElem( &robot._ref_vec[8], zZ ) );
-  EXPECT_TRUE( pdRobotRHPosFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0, -0.05, 0.27 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RH_POS ) ) );
+  ASSERT_TRUE( pdRobotSetRefRHPos( &robot, &v1 ) );
+  pdRobotGetRefRHPos( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0, v2.c.x );
+  EXPECT_DOUBLE_EQ( -0.05, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.27, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RH_POS ) ) );
+}
+
+TEST_F(pdRobotTest, SetRefRHZYX)
+{
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate( &v1, 0.5*zPI_2, 0.0, 0.0 );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RH_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefRHZYX( &robot, &v1 ) );
+  pdRobotGetRefRHZYX( &robot, &v2 );
+  EXPECT_DOUBLE_EQ( 0.5*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RH_ATT ) ) );
 }
 
 TEST_F(pdRobotTest, SetRefRHAtt)
 {
-  char model[] = "model/mighty.zkc";
-  zVec3D v;
+  char model[] = "model/mighty.ztk";
+  zVec3D v1, v2;
+  zMat3D m1, m2;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate( &v, 0.5*zPI_2, 0.0, 0.0 );
-  pdRobotSetRefRHAtt( &robot, &v );
-  EXPECT_DOUBLE_EQ( 0.5*zPI_2, zVec3DElem( &robot._ref_vec[9], zX ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zY ) );
-  EXPECT_DOUBLE_EQ( 0.0, zVec3DElem( &robot._ref_vec[9], zZ ) );
-  EXPECT_TRUE( pdRobotRHAttFlagIsOn( &robot ) );
+  zVec3DCreate( &v1, 0.5*zPI_2, 0.0, 0.0 );
+  zMat3DFromZYX( &m1, v1.c.x, v1.c.y, v1.c.z );
+  ASSERT_FALSE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RH_ATT ) ) );
+  ASSERT_TRUE( pdRobotSetRefRHAtt( &robot, &m1 ) );
+  pdRobotGetRefRHAtt( &robot, &m2 );
+  zMat3DToZYX( &m2, &v2 );
+  EXPECT_DOUBLE_EQ( 0.5*zPI_2, v2.c.x );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, v2.c.z );
+  EXPECT_TRUE( rkIKCellIsEnabled( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RH_ATT ) ) );
 }
 
-TEST_F(pdRobotTest, SetBipedRefVec)
+TEST_F(pdRobotTest, RegisterIKJointID)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+  rkIK *ik;
 
   pdRobotLoad( &robot, model );
-  // set random values to testified vectors
-  for(int i=0; i<PD_ROBOT_REQUIRED_CONST_NUM; i++)
-    ri.SetRandVec3D( pdRobotRefVec( &robot, i ) );
-  // set random values to referential vectors
-  ri.SetRandVec3D( pdBipedRefCOMPos(&biped) );
-  ri.SetRandVec3D( pdBipedRefBaseAtt(&biped) );
-  ri.SetRandVec3D( pdBipedRefLFPos(&biped) );
-  ri.SetRandVec3D( pdBipedRefLFAtt(&biped) );
-  ri.SetRandVec3D( pdBipedRefRFPos(&biped) );
-  ri.SetRandVec3D( pdBipedRefRFAtt(&biped) );
+  ik = pdRobotIKSolver( &robot );
 
-  // call method to testify
-  pdRobotSetBipedRefVec( &robot, &biped );
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  EXPECT_FALSE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
 
-  zVec3D *alias;
-  alias = pdRobotRefCOM( &robot );
-  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosX(&biped), zVec3DElem(alias,zX) );
-  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosY(&biped), zVec3DElem(alias,zY) );
-  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosZ(&biped), zVec3DElem(alias,zZ) );
-  alias = pdRobotRefBaseAtt( &robot );
-  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttX(&biped), zVec3DElem(alias,zX) );
-  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttY(&biped), zVec3DElem(alias,zY) );
-  EXPECT_DOUBLE_EQ( pdBipedRefBaseAttZ(&biped), zVec3DElem(alias,zZ) );
-  alias = pdRobotRefLFPos( &robot );
-  EXPECT_DOUBLE_EQ( pdBipedRefLFPosX(&biped), zVec3DElem(alias,zX) );
-  EXPECT_DOUBLE_EQ( pdBipedRefLFPosY(&biped), zVec3DElem(alias,zY) );
-  EXPECT_DOUBLE_EQ( pdBipedRefLFPosZ(&biped), zVec3DElem(alias,zZ) );
-  alias = pdRobotRefLFAtt( &robot );
-  EXPECT_DOUBLE_EQ( pdBipedRefLFAttX(&biped), zVec3DElem(alias,zX) );
-  EXPECT_DOUBLE_EQ( pdBipedRefLFAttY(&biped), zVec3DElem(alias,zY) );
-  EXPECT_DOUBLE_EQ( pdBipedRefLFAttZ(&biped), zVec3DElem(alias,zZ) );
-  alias = pdRobotRefRFPos( &robot );
-  EXPECT_DOUBLE_EQ( pdBipedRefRFPosX(&biped), zVec3DElem(alias,zX) );
-  EXPECT_DOUBLE_EQ( pdBipedRefRFPosY(&biped), zVec3DElem(alias,zY) );
-  EXPECT_DOUBLE_EQ( pdBipedRefRFPosZ(&biped), zVec3DElem(alias,zZ) );
-  alias = pdRobotRefRFAtt( &robot );
-  EXPECT_DOUBLE_EQ( pdBipedRefRFAttX(&biped), zVec3DElem(alias,zX) );
-  EXPECT_DOUBLE_EQ( pdBipedRefRFAttY(&biped), zVec3DElem(alias,zY) );
-  EXPECT_DOUBLE_EQ( pdBipedRefRFAttZ(&biped), zVec3DElem(alias,zZ) );
+  // method to testify
+  pdRobotRegisterIKJointID( &robot, CHECK_ID, 0.01 );
+  EXPECT_TRUE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_EQ( 0.01, ik->joint_weight[CHECK_ID] );
+}
+
+TEST_F(pdRobotTest, RegisterIKJointIDAll)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+  rkChain *c;
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  c = pdRobotChain( &robot );
+  ik = pdRobotIKSolver( &robot );
+
+  // method to testify
+  pdRobotRegisterIKJointAll( &robot, 0.02 );
+  for( int i=0; i<pdRobotLinkNum(&robot); i++ )
+    if( rkChainLinkJoint(c,i)->com != &rk_joint_fixed ){
+      EXPECT_TRUE( ik->joint_is_enabled[i] );
+      EXPECT_EQ( 0.02, ik->joint_weight[i] );
+    }
+}
+
+TEST_F(pdRobotTest, UnregisterIKJointID)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKSolver( &robot );
+
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  pdRobotRegisterIKJointID( &robot, CHECK_ID, 0.01 );
+  EXPECT_TRUE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_LT( 0.0, ik->joint_weight[CHECK_ID] );
+
+  // method to testify
+  pdRobotUnregisterIKJointID( &robot, CHECK_ID );
+  EXPECT_FALSE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
+}
+
+TEST_F(pdRobotTest, RegisterIKJoint)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKSolver( &robot );
+
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  EXPECT_FALSE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
+
+  // method to testify
+  pdRobotRegisterIKJoint( &robot, "left_shoulder_flexion", 0.01 );
+  EXPECT_TRUE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_EQ( 0.01, ik->joint_weight[CHECK_ID] );
+}
+
+TEST_F(pdRobotTest, UnregisterIKJoint)
+{
+  char model[] = "model/mighty_no_hand_constraint.ztk";
+  rkIK *ik;
+
+  pdRobotLoad( &robot, model );
+  ik = pdRobotIKSolver( &robot );
+
+  const int CHECK_ID = 1;        // left_shoulder_flexion
+  pdRobotRegisterIKJoint( &robot, "left_shoulder_flexion", 0.01 );
+  EXPECT_TRUE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_LT( 0.0, ik->joint_weight[CHECK_ID] );
+
+  // method to testify
+  pdRobotUnregisterIKJoint( &robot, "left_shoulder_flexion" );
+  EXPECT_FALSE( ik->joint_is_enabled[CHECK_ID] );
+  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
 }
 
 TEST_F(pdRobotTest, SolveIK)
@@ -790,44 +1216,44 @@ TEST_F(pdRobotTest, SolveIK)
   zVec3D v;
 
   LoadAndSolveIK();
-  EXPECT_NEAR( 0.0,    rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,    rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.26,   rkChainWldCOM( pdRobotChainPtr( &robot ) )->e[2], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LF_ID )->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.042,  rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LF_ID )->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LF_ID )->e[2], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RF_ID )->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.042, rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RF_ID )->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RF_ID )->e[2], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LH_ID )->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.13,   rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LH_ID )->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.25,   rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_LH_ID )->e[2], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RH_ID )->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.13,  rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RH_ID )->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.25,   rkChainLinkWldPos( pdRobotChainPtr( &robot ), MIGHTY_RH_ID )->e[2], GTEST_TOL_LOOSE );
-  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_BODY_ID ), &v);
+  EXPECT_NEAR( 0.0,    rkChainWldCOM( pdRobotChain( &robot ) )->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rkChainWldCOM( pdRobotChain( &robot ) )->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.26,   rkChainWldCOM( pdRobotChain( &robot ) )->e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_LF_ID )->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.042,  rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_LF_ID )->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_LF_ID )->e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_RF_ID )->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.042, rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_RF_ID )->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_RF_ID )->e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_LH_ID )->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.13,   rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_LH_ID )->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.25,   rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_LH_ID )->e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0,    rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_RH_ID )->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.13,  rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_RH_ID )->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.25,   rkChainLinkWldPos( pdRobotChain( &robot ), MIGHTY_RH_ID )->e[2], GTEST_TOL_LOOSE );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChain( &robot ), MIGHTY_BODY_ID ), &v);
   EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
-  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_LF_ID ), &v);
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChain( &robot ), MIGHTY_LF_ID ), &v);
   EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
-  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_RF_ID ), &v);
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChain( &robot ), MIGHTY_RF_ID ), &v);
   EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
-  // zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_LH_ID ), &v);
-  // EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
-  // zMat3DToZYX( rkChainLinkWldAtt( pdRobotChainPtr( &robot ), MIGHTY_RH_ID ), &v);
-  // EXPECT_NEAR( 0.0, v.e[0], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, v.e[1], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, v.e[2], GTEST_TOL_LOOSE );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChain( &robot ), MIGHTY_LH_ID ), &v);
+  EXPECT_NEAR( 1.3,    v.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.01,  v.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.373, v.e[2], GTEST_TOL_LOOSE );
+  zMat3DToZYX( rkChainLinkWldAtt( pdRobotChain( &robot ), MIGHTY_RH_ID ), &v);
+  EXPECT_NEAR( -1.3,   v.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.005, v.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.373,  v.e[2], GTEST_TOL_LOOSE );
 }
 
-TEST_F(pdRobotTest, SolveIKCheckJointVel)
+TEST_F(pdRobotTest, SolveIK_CheckJointVel)
 {
   zVec vel;
 
@@ -843,19 +1269,13 @@ TEST_F(pdRobotTest, SolveIKCheckJointVel)
   FAIL() << "Any element of velocity should be greater or smaller than zero.";
 }
 
-TEST_F(pdRobotTest, AllFlagsAreFlaseAfterSolveIK)
+TEST_F(pdRobotTest, Load_EnsureIKDisabledAfterSolveIK)
 {
+  rkIKCell *cp;
+
   LoadAndSolveIK();
-  EXPECT_FALSE( pdRobotCOMFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotBaseAttFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotLFPosFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotLFAttFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotRFPosFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotRFAttFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotLHPosFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotLHAttFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotRHPosFlagIsOn( &robot ) );
-  EXPECT_FALSE( pdRobotRHAttFlagIsOn( &robot ) );
+  zListForEach( pdRobotIKCellList(&robot), cp )
+    EXPECT_FALSE( rkIKCellIsEnabled(cp) );
 }
 
 TEST_F(pdRobotTest, COMPos)
@@ -870,16 +1290,34 @@ TEST_F(pdRobotTest, COMPos)
   EXPECT_NEAR( 0.26, com.e[2], GTEST_TOL_LOOSE );
 }
 
-TEST_F(pdRobotTest, BaseAtt)
+TEST_F(pdRobotTest, TorsoZYX)
 {
   zVec3D att;
 
   LoadAndSolveIK();
   zVec3DCreate( &att, 1, 2, 3 );
-  pdRobotBaseAtt( &robot, &att );
-  EXPECT_NEAR( 0.0,  att.e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,  att.e[1], GTEST_TOL_LOOSE );
+  pdRobotTorsoZYX( &robot, &att );
+  EXPECT_NEAR( 0.0, att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, att.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, TorsoAtt)
+{
+  zMat3D att;
+
+  LoadAndSolveIK();
+  zMat3DCreate( &att, 1, 2, 3, 4, 5, 6, 7, 8, 9 );
+  pdRobotTorsoAtt( &robot, &att );
+  EXPECT_NEAR( 1.0, att.e[0][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[0][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[0][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[1][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.0, att.e[1][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[1][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[2][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, att.e[2][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.0, att.e[2][2], GTEST_TOL_LOOSE );
 }
 
 TEST_F(pdRobotTest, FootPos)
@@ -898,20 +1336,48 @@ TEST_F(pdRobotTest, FootPos)
   EXPECT_NEAR( 0.0,    rf.e[2], GTEST_TOL_LOOSE );
 }
 
-TEST_F(pdRobotTest, FootAtt)
+TEST_F(pdRobotTest, FootZYX)
 {
   zVec3D lf, rf;
 
   LoadAndSolveIK();
   zVec3DCreate( &lf, 1, 2, 3 );
   zVec3DCreate( &rf, 4, 5, 6 );
-  pdRobotFootAtt( &robot, &lf, &rf );
+  pdRobotFootZYX( &robot, &lf, &rf );
   EXPECT_NEAR( 0.0, lf.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, lf.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, lf.e[2], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, rf.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, rf.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, rf.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, FootAtt)
+{
+  zMat3D lf, rf;
+
+  LoadAndSolveIK();
+  zMat3DCreate( &lf, 1, 2, 3, 4, 5, 6, 7, 8, 9 );
+  zMat3DCreate( &rf, 1, 2, 3, 4, 5, 6, 7, 8, 9 );
+  pdRobotFootAtt( &robot, &lf, &rf );
+  EXPECT_NEAR( 1.0, lf.e[0][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[0][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[0][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[1][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.0, lf.e[1][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[1][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[2][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, lf.e[2][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.0, lf.e[2][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.0, rf.e[0][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[0][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[0][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[1][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.0, rf.e[1][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[1][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[2][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, rf.e[2][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.0, rf.e[2][2], GTEST_TOL_LOOSE );
 }
 
 TEST_F(pdRobotTest, HandPos)
@@ -930,48 +1396,230 @@ TEST_F(pdRobotTest, HandPos)
   EXPECT_NEAR(  0.25, rh.e[2], GTEST_TOL_LOOSE );
 }
 
-TEST_F(pdRobotTest, HandAtt)
+TEST_F(pdRobotTest, HandZYX)
 {
   zVec3D lh, rh;
 
   LoadAndSolveIK();
   zVec3DCreate( &lh, 1, 2, 3 );
   zVec3DCreate( &rh, 4, 5, 6 );
+  pdRobotHandZYX( &robot, &lh, &rh );
+  EXPECT_NEAR( 1.3, lh.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.01, lh.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.373, lh.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -1.3, rh.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.005, rh.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.373, rh.e[2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, HandAtt)
+{
+  zMat3D lh, rh;
+  zMat3D expected_att;
+
+  LoadAndSolveIK();
+  zMat3DCreate( &lh, 1, 2, 3, 4, 5, 6, 7, 8, 9 );
+  zMat3DCreate( &rh, 1, 2, 3, 4, 5, 6, 7, 8, 9 );
   pdRobotHandAtt( &robot, &lh, &rh );
-  // EXPECT_NEAR( 0.0, lh.e[0], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, lh.e[1], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, lh.e[2], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, rh.e[0], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, rh.e[1], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0, rh.e[2], GTEST_TOL_LOOSE );
+
+  zMat3DFromZYX( &expected_att, 1.3, -0.01, -0.373 );
+  EXPECT_NEAR( expected_att.e[0][0], lh.e[0][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[0][1], lh.e[0][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[0][2], lh.e[0][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[1][0], lh.e[1][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[1][1], lh.e[1][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[1][2], lh.e[1][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[2][0], lh.e[2][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[2][1], lh.e[2][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[2][2], lh.e[2][2], GTEST_TOL_LOOSE );
+
+  zMat3DFromZYX( &expected_att, -1.3, -0.005, 0.373 );
+  EXPECT_NEAR( expected_att.e[0][0], rh.e[0][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[0][1], rh.e[0][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[0][2], rh.e[0][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[1][0], rh.e[1][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[1][1], rh.e[1][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[1][2], rh.e[1][2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[2][0], rh.e[2][0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[2][1], rh.e[2][1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( expected_att.e[2][2], rh.e[2][2], GTEST_TOL_LOOSE );
+}
+
+TEST_F(pdRobotTest, BipedDefaultInit)
+{
+  char model[] = "model/mighty.ztk";
+  zVec dis, vel;
+
+  pdCmdDefaultInit( &cmd );
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  pdRobotBipedDefaultInit( &robot, &biped, &state );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  vel = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( zVecElem(dis,i), zVecElem(robot.disold,i) );
+  }
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
+  }
+  zVecFree( dis );
+  zVecFree( vel );
+}
+
+TEST_F(pdRobotTest, BipedResetPose)
+{
+  char model[] = "model/mighty.ztk";
+  zVec dis;
+
+  pdCmdDefaultInit( &cmd );
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  pdRobotBipedDefaultInit( &robot, &biped, &state );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotUpdateState( &robot, &state );
+
+  // method to testify
+  zVecSetElem( dis, 0, -1 );
+  zVecSetElem( dis, 1, 1 );
+  zVecSetElem( dis, 2, 0.34 );
+  zVecSetElem( dis, 3, 0 );
+  zVecSetElem( dis, 4, 0 );
+  zVecSetElem( dis, 5, 1.57 );
+  pdRobotBipedResetPose( &robot, &biped, &state, dis );
+  pdRobotGetJointDisAll( &robot, dis );
+  EXPECT_DOUBLE_EQ( -1, zVecElem(dis,0) );
+  EXPECT_DOUBLE_EQ( 1,  zVecElem(dis,1) );
+  EXPECT_NEAR( 0.347, zVecElem(dis,2), GTEST_TOL_LOOSE );
+  EXPECT_DOUBLE_EQ( 0, zVecElem(dis,3) );
+  EXPECT_DOUBLE_EQ( 0, zVecElem(dis,4) );
+  EXPECT_DOUBLE_EQ( 1.57, zVecElem(dis,5) );
+  zVecFree( dis );
+}
+
+TEST_F(pdRobotTest, BipedResetPose_CheckVel)
+{
+  char model[] = "model/mighty.ztk";
+  zVec dis, vel;
+
+  pdCmdDefaultInit( &cmd );
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  pdRobotBipedDefaultInit( &robot, &biped, &state );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  vel = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotUpdateState( &robot, &state );
+
+  // method to testify
+  zVecSetElem( dis, 0, -1 );
+  zVecSetElem( dis, 1, 1 );
+  zVecSetElem( dis, 2, 0.34 );
+  zVecSetElem( dis, 3, 0 );
+  zVecSetElem( dis, 4, 0 );
+  zVecSetElem( dis, 5, 1.57 );
+  pdRobotBipedResetPose( &robot, &biped, &state, dis );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
+  }
+  zVecFree( dis );
+  zVecFree( vel );
+}
+
+TEST_F(pdRobotTest, BipedSetRefVec)
+{
+  char model[] = "model/mighty.ztk";
+
+  pdRobotLoad( &robot, model );
+  // set random values to referential vectors
+  ri.SetRandVec3D( pdBipedRefCOMPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefTorsoAtt(&biped) );
+  ri.SetRandVec3D( pdBipedRefLFPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefLFAtt(&biped) );
+  ri.SetRandVec3D( pdBipedRefRFPos(&biped) );
+  ri.SetRandVec3D( pdBipedRefRFAtt(&biped) );
+
+  // call method to testify
+  pdRobotBipedSetRefVec( &robot, &biped );
+
+  zVec3D v, e;
+  zMat3D m;
+  pdRobotGetRefCOM( &robot, &v );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosX(&biped), v.c.x );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosY(&biped), v.c.y );
+  EXPECT_DOUBLE_EQ( pdBipedRefCOMPosZ(&biped), v.c.z );
+
+  pdRobotGetRefTorsoZYX( &robot, &v );
+  zMat3DFromZYX( &m, pdBipedRefTorsoAtt(&biped)->c.x,
+                 pdBipedRefTorsoAtt(&biped)->c.y, pdBipedRefTorsoAtt(&biped)->c.z );
+  zMat3DToZYX( &m, &e );
+  EXPECT_DOUBLE_EQ( e.c.x, v.c.x );
+  EXPECT_DOUBLE_EQ( e.c.y, v.c.y );
+  EXPECT_DOUBLE_EQ( e.c.z, v.c.z );
+
+  pdRobotGetRefLFPos( &robot, &v );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosX(&biped), v.c.x );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosY(&biped), v.c.y );
+  EXPECT_DOUBLE_EQ( pdBipedRefLFPosZ(&biped), v.c.z );
+
+  pdRobotGetRefLFZYX( &robot, &v );
+  zMat3DFromZYX( &m, pdBipedRefLFAtt(&biped)->c.x,
+                 pdBipedRefLFAtt(&biped)->c.y, pdBipedRefLFAtt(&biped)->c.z );
+  zMat3DToZYX( &m, &e );
+  EXPECT_DOUBLE_EQ( e.c.x, v.c.x );
+  EXPECT_DOUBLE_EQ( e.c.y, v.c.y );
+  EXPECT_DOUBLE_EQ( e.c.z, v.c.z );
+
+  pdRobotGetRefRFPos( &robot, &v );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosX(&biped), v.c.x );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosY(&biped), v.c.y );
+  EXPECT_DOUBLE_EQ( pdBipedRefRFPosZ(&biped), v.c.z );
+
+  pdRobotGetRefRFZYX( &robot, &v );
+  zMat3DFromZYX( &m, pdBipedRefRFAtt(&biped)->c.x,
+                 pdBipedRefRFAtt(&biped)->c.y, pdBipedRefRFAtt(&biped)->c.z );
+  zMat3DToZYX( &m, &e );
+  EXPECT_DOUBLE_EQ( e.c.x, v.c.x );
+  EXPECT_DOUBLE_EQ( e.c.y, v.c.y );
+  EXPECT_DOUBLE_EQ( e.c.z, v.c.z );
 }
 
 TEST_F(pdRobotTest, SupportRegion_Double)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec3D com_pos, lf_pos, rf_pos;
-  zVec3D base_att, lf_att, rf_att;
-  zVec3DList sr_lf, sr_rf, sr;
-  zVec3DListCell *cp;
+  zVec3D torso_att, lf_att, rf_att;
+  zLoop3D sr_lf, sr_rf, sr;
+  zLoop3DCell *cp;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
-  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
-  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
-  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(    &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate(    &rf_pos, 0.0, -0.042, 0.0 );
+  zVec3DCreate( &torso_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &rf_att, 0.0, 0.0, 0.0 );
   pdRobotSetRefCOM( &robot, &com_pos );
   pdRobotSetRefLFPos( &robot, &lf_pos );
   pdRobotSetRefRFPos( &robot, &rf_pos );
-  pdRobotSetRefBaseAtt( &robot, &base_att );
-  pdRobotSetRefLFAtt( &robot, &lf_att );
-  pdRobotSetRefRFAtt( &robot, &rf_att );
+  pdRobotSetRefTorsoZYX( &robot, &torso_att );
+  pdRobotSetRefLFZYX( &robot, &lf_att );
+  pdRobotSetRefRFZYX( &robot, &rf_att );
   pdRobotSolveIK( &robot, 0 );
-
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
-  // sr_lf
+  // Left foot
+  ASSERT_EQ( 4, zListSize( &sr_lf ));
   cp = zListTail( &sr_lf );
   EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
@@ -989,7 +1637,8 @@ TEST_F(pdRobotTest, SupportRegion_Double)
   EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
 
-  // sr_rf
+  // Right foot
+  ASSERT_EQ( 4, zListSize( &sr_rf ));
   cp = zListTail( &sr_rf );
   EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
@@ -1007,59 +1656,52 @@ TEST_F(pdRobotTest, SupportRegion_Double)
   EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
 
-  // sr
-  cp = zListTail( &sr );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  // Support region
+  zVec3D p[4];
+  zVec3DCreate( &p[0],  0.0564,  0.078, 0.0 );
+  zVec3DCreate( &p[1],  0.0564, -0.078, 0.0 );
+  zVec3DCreate( &p[2], -0.0426, -0.078, 0.0 );
+  zVec3DCreate( &p[3], -0.0426,  0.078, 0.0 );
+  ASSERT_GE( zListSize( &sr ), 4 );
+  bool found = false;
+  for( int i=0; i<4; i++ ){
+    found = false;
+    zListForEach( &sr, cp )
+      if( zVec3DEqual( &p[i], cp->data ) ) found = true;
+    EXPECT_TRUE( found ) << "Expected point was not found: ("
+                         << p[i].e[0] << ", "
+                         << p[i].e[1] << ", "
+                         << p[i].e[2] << ")";
+  }
 }
 
 TEST_F(pdRobotTest, SupportRegion_Single_Left)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec3D com_pos, lf_pos, rf_pos;
-  zVec3D base_att, lf_att, rf_att;
-  zVec3DList sr_lf, sr_rf, sr;
-  zVec3DListCell *cp;
+  zVec3D torso_att, lf_att, rf_att;
+  zLoop3D sr_lf, sr_rf, sr;
+  zLoop3DCell *cp;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
-  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.0 );
-  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.01 );
-  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(    &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate(    &rf_pos, 0.0, -0.042, 0.01 );
+  zVec3DCreate( &torso_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &rf_att, 0.0, 0.0, 0.0 );
   pdRobotSetRefCOM( &robot, &com_pos );
   pdRobotSetRefLFPos( &robot, &lf_pos );
   pdRobotSetRefRFPos( &robot, &rf_pos );
-  pdRobotSetRefBaseAtt( &robot, &base_att );
-  pdRobotSetRefLFAtt( &robot, &lf_att );
-  pdRobotSetRefRFAtt( &robot, &rf_att );
+  pdRobotSetRefTorsoZYX( &robot, &torso_att );
+  pdRobotSetRefLFZYX( &robot, &lf_att );
+  pdRobotSetRefRFZYX( &robot, &rf_att );
   pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
-  // sr_lf
+  // Left foot
+  ASSERT_EQ( 4, zListSize( &sr_lf ));
   cp = zListTail( &sr_lf );
   EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
@@ -1077,10 +1719,11 @@ TEST_F(pdRobotTest, SupportRegion_Single_Left)
   EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
 
-  // sr_rf
-  EXPECT_EQ( 0, zListNum( &sr_rf ) );
+  // Right foot
+  ASSERT_EQ( 0, zListSize( &sr_rf ) );
 
-  // sr
+  // Support region
+  ASSERT_EQ( 4, zListSize( &sr ));
   cp = zListTail( &sr );
   EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
@@ -1101,33 +1744,34 @@ TEST_F(pdRobotTest, SupportRegion_Single_Left)
 
 TEST_F(pdRobotTest, SupportRegion_Single_Right)
 {
-  char model[] = "model/mighty.zkc";
+  char model[] = "model/mighty.ztk";
   zVec3D com_pos, lf_pos, rf_pos;
-  zVec3D base_att, lf_att, rf_att;
-  zVec3DList sr_lf, sr_rf, sr;
-  zVec3DListCell *cp;
+  zVec3D torso_att, lf_att, rf_att;
+  zLoop3D sr_lf, sr_rf, sr;
+  zLoop3DCell *cp;
 
   pdRobotLoad( &robot, model );
-  zVec3DCreate(  &com_pos, 0.0, 0.0, 0.26 );
-  zVec3DCreate(   &lf_pos, 0.0, 0.042, 0.01 );
-  zVec3DCreate(   &rf_pos, 0.0, -0.042, 0.0 );
-  zVec3DCreate( &base_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &lf_att, 0.0, 0.0, 0.0 );
-  zVec3DCreate(   &rf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(   &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(    &lf_pos, 0.0, 0.042, 0.01 );
+  zVec3DCreate(    &rf_pos, 0.0, -0.042, 0.0 );
+  zVec3DCreate( &torso_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &rf_att, 0.0, 0.0, 0.0 );
   pdRobotSetRefCOM( &robot, &com_pos );
   pdRobotSetRefLFPos( &robot, &lf_pos );
   pdRobotSetRefRFPos( &robot, &rf_pos );
-  pdRobotSetRefBaseAtt( &robot, &base_att );
-  pdRobotSetRefLFAtt( &robot, &lf_att );
-  pdRobotSetRefRFAtt( &robot, &rf_att );
+  pdRobotSetRefTorsoZYX( &robot, &torso_att );
+  pdRobotSetRefLFZYX( &robot, &lf_att );
+  pdRobotSetRefRFZYX( &robot, &rf_att );
   pdRobotSolveIK( &robot, 0 );
 
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
-  // sr_lf
-  EXPECT_EQ( 0, zListNum( &sr_lf ) );
+  // Left foot
+  ASSERT_EQ( 0, zListSize( &sr_lf ));
 
-  // sr_rf
+  // Right foot
+  ASSERT_EQ( 4, zListSize( &sr_rf ));
   cp = zListTail( &sr_rf );
   EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
@@ -1145,7 +1789,8 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
 
-  // sr
+  // Support region
+  ASSERT_EQ( 4, zListSize( &sr ));
   cp = zListTail( &sr_rf );
   EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
@@ -1164,6 +1809,251 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
 }
 
+TEST_F(pdRobotTest, SupportRegion_SingleToDouble)
+{
+  char model[] = "model/mighty.ztk";
+  zVec3D com_pos, lf_pos, rf_pos;
+  zVec3D torso_att, lf_att, rf_att;
+  zLoop3D sr_lf, sr_rf, sr;
+  zLoop3DCell *cp;
+
+  pdRobotLoad( &robot, model );
+  zVec3DCreate(   &com_pos, 0.0, 0.0, 0.26 );
+  zVec3DCreate(    &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate(    &rf_pos, 0.0, -0.042, 0.0 );
+  zVec3DCreate( &torso_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &lf_att, 0.0, 0.0, 0.0 );
+  zVec3DCreate(    &rf_att, 0.0, 0.0, 0.0 );
+
+  // Single support phase on left foot
+  zVec3DCreate( &lf_pos, 0.0,  0.042, 0.0 );
+  zVec3DCreate( &rf_pos, 0.0, -0.042, 0.01 );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSetRefLFPos( &robot, &lf_pos );
+  pdRobotSetRefRFPos( &robot, &rf_pos );
+  pdRobotSetRefTorsoZYX( &robot, &torso_att );
+  pdRobotSetRefLFZYX( &robot, &lf_att );
+  pdRobotSetRefRFZYX( &robot, &rf_att );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
+  // Left foot
+  ASSERT_EQ( 4, zListSize( &sr_lf ));
+  cp = zListTail( &sr_lf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  // Right foot
+  ASSERT_EQ( 0, zListSize( &sr_rf ));
+  // Support region
+  ASSERT_EQ( 4, zListSize( &sr ));
+  cp = zListTail( &sr );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+
+  // Double support phase (1st)
+  zVec3DCreate( &lf_pos, 0.0,  0.042, 0.0 );
+  zVec3DCreate( &rf_pos, 0.0, -0.042, 0.0 );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSetRefLFPos( &robot, &lf_pos );
+  pdRobotSetRefRFPos( &robot, &rf_pos );
+  pdRobotSetRefTorsoZYX( &robot, &torso_att );
+  pdRobotSetRefLFZYX( &robot, &lf_att );
+  pdRobotSetRefRFZYX( &robot, &rf_att );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
+  // Left foot
+  ASSERT_EQ( 4, zListSize( &sr_lf ));
+  cp = zListTail( &sr_lf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  // Right foot
+  ASSERT_EQ( 4, zListSize( &sr_rf ));
+  cp = zListTail( &sr_rf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  // Support region
+  zVec3D p[4];
+  zVec3DCreate( &p[0],  0.0564,  0.078, 0.0 );
+  zVec3DCreate( &p[1],  0.0564, -0.078, 0.0 );
+  zVec3DCreate( &p[2], -0.0426, -0.078, 0.0 );
+  zVec3DCreate( &p[3], -0.0426,  0.078, 0.0 );
+  ASSERT_GE( zListSize( &sr ), 4 );
+  bool found = false;
+  for( int i=0; i<4; i++ ){
+    found = false;
+    zListForEach( &sr, cp )
+      if( zVec3DEqual( &p[i], cp->data ) ) found = true;
+    EXPECT_TRUE( found ) << "Expected point was not found: ("
+                         << p[i].e[0] << ", "
+                         << p[i].e[1] << ", "
+                         << p[i].e[2] << ")";
+  }
+
+  // Single support phase on right foot
+  zVec3DCreate( &lf_pos, 0.0,  0.042, 0.01 );
+  zVec3DCreate( &rf_pos, 0.0, -0.042, 0.0 );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSetRefLFPos( &robot, &lf_pos );
+  pdRobotSetRefRFPos( &robot, &rf_pos );
+  pdRobotSetRefTorsoZYX( &robot, &torso_att );
+  pdRobotSetRefLFZYX( &robot, &lf_att );
+  pdRobotSetRefRFZYX( &robot, &rf_att );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
+  // Left foot
+  ASSERT_EQ( 0, zListSize( &sr_lf ));
+  // Right foot
+  ASSERT_EQ( 4, zListSize( &sr_rf ));
+  cp = zListTail( &sr_rf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  // Support region
+  ASSERT_EQ( 4, zListSize( &sr ));
+  cp = zListTail( &sr_rf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+
+  // Double support phase (2nd)
+  zVec3DCreate( &lf_pos, 0.0,  0.042, 0.0 );
+  zVec3DCreate( &rf_pos, 0.0, -0.042, 0.0 );
+  pdRobotSetRefCOM( &robot, &com_pos );
+  pdRobotSetRefLFPos( &robot, &lf_pos );
+  pdRobotSetRefRFPos( &robot, &rf_pos );
+  pdRobotSetRefTorsoZYX( &robot, &torso_att );
+  pdRobotSetRefLFZYX( &robot, &lf_att );
+  pdRobotSetRefRFZYX( &robot, &rf_att );
+  pdRobotSolveIK( &robot, 0 );
+  pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
+  // Left foot
+  ASSERT_EQ( 4, zListSize( &sr_lf ));
+  cp = zListTail( &sr_lf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  // Right foot
+  ASSERT_EQ( 4, zListSize( &sr_rf ));
+  cp = zListTail( &sr_rf );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  cp = zListCellNext( cp );
+  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  // Support region
+  zVec3DCreate( &p[0],  0.0564,  0.078, 0.0 );
+  zVec3DCreate( &p[1],  0.0564, -0.078, 0.0 );
+  zVec3DCreate( &p[2], -0.0426, -0.078, 0.0 );
+  zVec3DCreate( &p[3], -0.0426,  0.078, 0.0 );
+  ASSERT_GE( zListSize( &sr ), 4 );
+  for( int i=0; i<4; i++ ){
+    found = false;
+    zListForEach( &sr, cp )
+      if( zVec3DEqual( &p[i], cp->data ) ) found = true;
+    EXPECT_TRUE( found ) << "Expected point was not found: ("
+                         << p[i].e[0] << ", "
+                         << p[i].e[1] << ", "
+                         << p[i].e[2] << ")";
+  }
+}
+
 TEST_F(pdRobotTest, UpdateState)
 {
   LoadAndSolveIK();
@@ -1174,9 +2064,9 @@ TEST_F(pdRobotTest, UpdateState)
   EXPECT_NEAR( 0.0,   state.com_pos.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0,   state.com_pos.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.26,  state.com_pos.e[2], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,  state.base_att.e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,  state.base_att.e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0,  state.base_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, state.torso_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, state.torso_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, state.torso_att.e[2], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0,    state.lf_pos.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.042,  state.lf_pos.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.0,    state.lf_pos.e[2], GTEST_TOL_LOOSE );
@@ -1195,154 +2085,100 @@ TEST_F(pdRobotTest, UpdateState)
   EXPECT_NEAR( 0.0,    state.rh_pos.e[0], GTEST_TOL_LOOSE );
   EXPECT_NEAR( -0.13,  state.rh_pos.e[1], GTEST_TOL_LOOSE );
   EXPECT_NEAR( 0.25,   state.rh_pos.e[2], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0,    state.lh_att.e[0], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0,    state.lh_att.e[1], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0,    state.lh_att.e[2], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0,    state.rh_att.e[0], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0,    state.rh_att.e[1], GTEST_TOL_LOOSE );
-  // EXPECT_NEAR( 0.0,    state.rh_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 1.3,    state.lh_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.01,  state.lh_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.373, state.lh_att.e[2], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -1.3,   state.rh_att.e[0], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( -0.005, state.rh_att.e[1], GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.373,  state.rh_att.e[2], GTEST_TOL_LOOSE );
 }
 
-TEST_F(pdRobotTest, JointReg)
+TEST_F(pdRobotTest, Print)
 {
-  char model[] = "model/mighty5.zkc";
-  rkIK *ik;
+  char model[] = "model/mighty_no_hand_constraint.ztk";
 
   pdRobotLoad( &robot, model );
-  ik = pdRobotIKPtr( &robot );
 
-  const int CHECK_ID = 1;        // left_shoulder_flexion
-  EXPECT_FALSE( ik->joint_sw[CHECK_ID] );
-  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
-
-  // method to testify
-  pdRobotJointReg( &robot, CHECK_ID, 0.01 );
-  EXPECT_TRUE( ik->joint_sw[CHECK_ID] );
-  EXPECT_EQ( 0.01, ik->joint_weight[CHECK_ID] );
-}
-
-TEST_F(pdRobotTest, JointRegAll)
-{
-  char model[] = "model/mighty5.zkc";
-  rkChain *c;
-  rkIK *ik;
-
-  pdRobotLoad( &robot, model );
-  c = pdRobotChainPtr( &robot );
-  ik = pdRobotIKPtr( &robot );
-
-  // method to testify
-  pdRobotJointRegAll( &robot, 0.02 );
-  for( uint i=0; i<pdRobotLinkNum(&robot); i++ )
-    if( rkChainLinkJointType(c,i) != RK_JOINT_FIXED ){
-      EXPECT_TRUE( ik->joint_sw[i] );
-      EXPECT_EQ( 0.02, ik->joint_weight[i] );
-    }
-}
-
-TEST_F(pdRobotTest, JointUnreg)
-{
-  char model[] = "model/mighty5.zkc";
-  rkIK *ik;
-
-  pdRobotLoad( &robot, model );
-  ik = pdRobotIKPtr( &robot );
-
-  const int CHECK_ID = 1;        // left_shoulder_flexion
-  pdRobotJointReg( &robot, CHECK_ID, 0.01 );
-  EXPECT_TRUE( ik->joint_sw[CHECK_ID] );
-  EXPECT_LT( 0.0, ik->joint_weight[CHECK_ID] );
-
-  // method to testify
-  pdRobotJointUnreg( &robot, CHECK_ID );
-  EXPECT_FALSE( ik->joint_sw[CHECK_ID] );
-  EXPECT_EQ( 0, ik->joint_weight[CHECK_ID] );
-}
-
-TEST_F(pdRobotTest, JointRegIndex)
-{
-  char model[] = "model/mighty5.zkc";
-  zIndex index;
-  rkIK *ik;
-
-  pdRobotLoad( &robot, model );
-  ik = pdRobotIKPtr( &robot );
-  index = zIndexCreateList( 4, 1, 2, 3, 4 );
-  // check
-  for( int i=1; i<=4; i++ ){
-    EXPECT_FALSE( ik->joint_sw[i] );
-    EXPECT_EQ( 0, ik->joint_weight[i] );
-  }
-
-  // method to testify
-  pdRobotJointRegIndex( &robot, index, 0.02 );
-  for( int i=1; i<=4; i++ ){
-    EXPECT_TRUE( ik->joint_sw[i] );
-    EXPECT_EQ( 0.02, ik->joint_weight[i] );
-  }
-  zIndexFree( index );
-}
-
-TEST_F(pdRobotTest, JointUnregIndex)
-{
-  char model[] = "model/mighty5.zkc";
-  zIndex index;
-  rkIK *ik;
-
-  pdRobotLoad( &robot, model );
-  ik = pdRobotIKPtr( &robot );
-  index = zIndexCreateList( 6, 5, 6, 7, 8, 9, 10 );
-  // check
-  for( int i=6; i<=10; i++ ){
-    EXPECT_TRUE( ik->joint_sw[i] );
-    EXPECT_LT( 0, ik->joint_weight[i] );
-  }
-
-  // method to testify
-  pdRobotJointUnregIndex( &robot, index );
-  for( int i=6; i<=10; i++ ){
-    EXPECT_FALSE( ik->joint_sw[i] );
-    EXPECT_EQ( 0, ik->joint_weight[i] );
-  }
-  zIndexFree( index );
-}
-
-TEST_F(pdRobotTest, GetJointDiffAll)
-{
-  zVec3D com_pos;
-  zVec diff;
-
-  LoadAndSolveIK();
-  zVec3DCreate( &com_pos, 0.0, 0.0, 0.27 );
-  diff = zVecAlloc( pdRobotJointSize(&robot) );
-  pdRobotSetRefCOM( &robot, &com_pos );
-  pdRobotSolveIK( &robot, 0 );
-  pdRobotGetJointDiffAll( &robot, diff );
-  for(int i=0; i<pdRobotJointSize(&robot); ++i){
-    if( fabs(zVecElem(diff,i) > GTEST_TOL_LOOSE ) ){
-      SUCCEED();
-      return;
-    }
-  }
-  FAIL() << "Any element of joint difference should be greater or smaller than zero.";
-}
-
-TEST_F(pdRobotTest, GetJointVelAll)
-{
-  zVec3D com_pos;
-  zVec vel;
-
-  LoadAndSolveIK();
-  zVec3DCreate( &com_pos, 0.0, 0.0, 0.27 );
-  vel = zVecAlloc( pdRobotJointSize(&robot) );
-  pdRobotSetRefCOM( &robot, &com_pos );
-  pdRobotSolveIK( &robot, 0 );
-  pdRobotGetJointVelAll( &robot, DT, vel );
-  for(int i=0; i<pdRobotJointSize(&robot); ++i){
-    if( fabs(zVecElem(vel,i) > GTEST_TOL_LOOSE ) ){
-      SUCCEED();
-      return;
-    }
-  }
-  FAIL() << "Any element of joint velocity should be greater or smaller than zero.";
+  testing::internal::CaptureStdout();
+  pdRobotPrint( &robot );
+  std::string msg = testing::internal::GetCapturedStdout();
+  std::string expected = \
+    "==========\n" \
+    "          Torso ID: 0\n" \
+    "Left/Right foot ID: 12/24\n" \
+    "Left/Right hand ID: -1/-1\n" \
+    "IK cell size: 6\n" \
+    "----------\n" \
+    "IK Cell Name: left_foot_pos (world_pos)\n" \
+    " Ref (position): ( 0, 0, 0 )\n" \
+    "Link ID(Sub ID): 12 (0)\n" \
+    "Attention Point: ( 0, 0, 0 )\n" \
+    "         Weight: ( 1, 1, 1 )\n" \
+    " Attribute Mask: 0x01\n" \
+    "       Priority: 5\n" \
+    "      Cell Mode: 0x07\n" \
+    "       Enabled?: false\n" \
+    "----------\n" \
+    "IK Cell Name: right_foot_pos (world_pos)\n" \
+    " Ref (position): ( 0, 0, 0 )\n" \
+    "Link ID(Sub ID): 24 (0)\n" \
+    "Attention Point: ( 0, 0, 0 )\n" \
+    "         Weight: ( 1, 1, 1 )\n" \
+    " Attribute Mask: 0x01\n" \
+    "       Priority: 5\n" \
+    "      Cell Mode: 0x07\n" \
+    "       Enabled?: false\n" \
+    "----------\n" \
+    "IK Cell Name: left_foot_att (world_att)\n" \
+    " Ref (attitude): {\n" \
+    " 0, 0, 0\n" \
+    " 0, 0, 0\n" \
+    " 0, 0, 0\n" \
+    "}\n" \
+    "Link ID(Sub ID): 12 (0)\n" \
+    "Attention Point: ( 0, 0, 0 )\n" \
+    "         Weight: ( 1, 1, 1 )\n" \
+    " Attribute Mask: 0x01\n" \
+    "       Priority: 4\n" \
+    "      Cell Mode: 0x07\n" \
+    "       Enabled?: false\n" \
+    "----------\n" \
+    "IK Cell Name: right_foot_att (world_att)\n" \
+    " Ref (attitude): {\n" \
+    " 0, 0, 0\n" \
+    " 0, 0, 0\n" \
+    " 0, 0, 0\n" \
+    "}\n" \
+    "Link ID(Sub ID): 24 (0)\n" \
+    "Attention Point: ( 0, 0, 0 )\n" \
+    "         Weight: ( 1, 1, 1 )\n" \
+    " Attribute Mask: 0x01\n" \
+    "       Priority: 4\n" \
+    "      Cell Mode: 0x07\n" \
+    "       Enabled?: false\n" \
+    "----------\n" \
+    "IK Cell Name: com (com)\n" \
+    " Ref (position): ( 0, 0, 0 )\n" \
+    "Link ID(Sub ID): 0 (0)\n" \
+    "Attention Point: ( 0, 0, 0 )\n" \
+    "         Weight: ( 1, 1, 1 )\n" \
+    " Attribute Mask: 0000\n" \
+    "       Priority: 3\n" \
+    "      Cell Mode: 0x07\n" \
+    "       Enabled?: false\n" \
+    "----------\n" \
+    "IK Cell Name: torso_att (world_att)\n" \
+    " Ref (attitude): {\n" \
+    " 0, 0, 0\n" \
+    " 0, 0, 0\n" \
+    " 0, 0, 0\n" \
+    "}\n" \
+    "Link ID(Sub ID): 0 (0)\n" \
+    "Attention Point: ( 0, 0, 0 )\n" \
+    "         Weight: ( 1, 1, 1 )\n" \
+    " Attribute Mask: 0x01\n" \
+    "       Priority: 2\n" \
+    "      Cell Mode: 0x07\n" \
+    "       Enabled?: false\n";
+  EXPECT_EQ( expected, msg );
 }

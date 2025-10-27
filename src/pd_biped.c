@@ -19,7 +19,7 @@ void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt)
   biped->cmd = cmd;
   pdModeInit( &biped->mode );
   zVec3DZero( pdBipedRefCOMPos( biped ) );
-  zVec3DZero( pdBipedRefBaseAtt( biped ) );
+  zVec3DZero( pdBipedRefTorsoAtt( biped ) );
   zVec3DZero( pdBipedRefLFPos( biped ) );
   zVec3DZero( pdBipedRefLFAtt( biped ) );
   zVec3DZero( pdBipedRefRFPos( biped ) );
@@ -80,9 +80,9 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
   zVec3DCopy( &v, pdBipedRefCOMPos( biped ) );
   zVec3DCopy( &v, pdCZRefCOM( pdBipedCZPtr( biped ) ) );
 
-  zVec3DCopy( &state->base_att, &v );
+  zVec3DCopy( &state->torso_att, &v );
   v.c.x = theta + offset;
-  zVec3DCopy( &v, pdBipedRefBaseAtt( biped ) );
+  zVec3DCopy( &v, pdBipedRefTorsoAtt( biped ) );
 
   zVec3DCreate( &v, x-d*c, y-d*s, 0 );
   zVec3DCopy( &v, pdBipedRefLFPos( biped ) );
@@ -194,7 +194,7 @@ void _pdBipedUpdateCZ(pdBiped *biped, pdState *state)
               &state->zmp,
               state->fz,
               &state->ef,
-              state->base_att.e[0] - offset,
+              state->torso_att.e[0] - offset,
               &state->sr );
 }
 
@@ -223,7 +223,7 @@ void _pdBipedUpdateRef(pdBiped *biped, pdState *state)
 
   zVec3DCreate( &v, pdCZCmdTheta( pdBipedCZPtr(biped) ), 0, 0 );
   v.c.x += offset;
-  zVec3DCopy( &v, pdBipedRefBaseAtt(biped) );
+  zVec3DCopy( &v, pdBipedRefTorsoAtt(biped) );
 
   zVec3DCopy( pdFootRefPos( pdBipedLFPtr(biped) ), pdBipedRefLFPos(biped) );
   zVec3DCopy( pdFootRefAtt( pdBipedLFPtr(biped) ), pdBipedRefLFAtt(biped) );
@@ -356,7 +356,7 @@ void pdBipedUpdateState(pdBiped *biped, pdState *state)
   zVec3DCopy( pdBipedRefCOMPos(biped), &state->com_pos );
   zVec3DCopy( pdCZRefVel( pdBipedCZPtr(biped) ), &state->com_vel );
   zVec3DCopy( pdCZRefAcc( pdBipedCZPtr(biped) ), &state->com_acc );
-  zVec3DCopy( pdBipedRefBaseAtt(biped), &state->base_att );
+  zVec3DCopy( pdBipedRefTorsoAtt(biped), &state->torso_att );
   zVec3DCopy( pdBipedRefLFPos(biped), &state->lf_pos );
   zVec3DCopy( pdBipedRefLFAtt(biped), &state->lf_att );
   zVec3DCopy( pdBipedRefRFPos(biped), &state->rf_pos );

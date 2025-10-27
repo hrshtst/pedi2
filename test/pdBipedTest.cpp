@@ -19,7 +19,7 @@ class pdBipedTest : public testing::Test {
 
   void SetRandomValues() {
     ri.SetRandVec3D( biped.ref_com_pos );
-    ri.SetRandVec3D( biped.ref_base_att );
+    ri.SetRandVec3D( biped.ref_torso_att );
     ri.SetRandVec3D( biped.ref_lf_pos );
     ri.SetRandVec3D( biped.ref_lf_att );
     ri.SetRandVec3D( biped.ref_rf_pos );
@@ -71,9 +71,9 @@ TEST_F(pdBipedTest, Init)
   EXPECT_EQ( 0, pdBipedRefCOMPosX( &biped ) );
   EXPECT_EQ( 0, pdBipedRefCOMPosY( &biped ) );
   EXPECT_EQ( 0, pdBipedRefCOMPosZ( &biped ) );
-  EXPECT_EQ( 0, pdBipedRefBaseAttX( &biped ) );
-  EXPECT_EQ( 0, pdBipedRefBaseAttY( &biped ) );
-  EXPECT_EQ( 0, pdBipedRefBaseAttZ( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefTorsoAttX( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefTorsoAttY( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefTorsoAttZ( &biped ) );
   EXPECT_EQ( 0, pdBipedRefLFPosX( &biped ) );
   EXPECT_EQ( 0, pdBipedRefLFPosY( &biped ) );
   EXPECT_EQ( 0, pdBipedRefLFPosZ( &biped ) );
@@ -159,7 +159,7 @@ TEST_F(pdBipedTest, IncrTime_Update)
 TEST_F(pdBipedTest, RefVec)
 {
   EXPECT_EQ( &biped.ref_com_pos, pdBipedRefCOMPos( &biped ) );
-  EXPECT_EQ( &biped.ref_base_att, pdBipedRefBaseAtt( &biped ) );
+  EXPECT_EQ( &biped.ref_torso_att, pdBipedRefTorsoAtt( &biped ) );
   EXPECT_EQ( &biped.ref_lf_pos, pdBipedRefLFPos( &biped ) );
   EXPECT_EQ( &biped.ref_lf_att, pdBipedRefLFAtt( &biped ) );
   EXPECT_EQ( &biped.ref_rf_pos, pdBipedRefRFPos( &biped ) );
@@ -192,9 +192,9 @@ TEST_F(pdBipedTest, DefaultPoseInit)
   EXPECT_DOUBLE_EQ( 0.01, pdBipedRefCOMPosX( &biped ) );
   EXPECT_DOUBLE_EQ( 0, pdBipedRefCOMPosY( &biped ) );
   EXPECT_DOUBLE_EQ( 0.95*0.2, pdBipedRefCOMPosZ( &biped ) );
-  EXPECT_DOUBLE_EQ( 0, pdBipedRefBaseAttX( &biped ) );
-  EXPECT_DOUBLE_EQ( 0, pdBipedRefBaseAttY( &biped ) );
-  EXPECT_DOUBLE_EQ( 0, pdBipedRefBaseAttZ( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefTorsoAttX( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefTorsoAttY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefTorsoAttZ( &biped ) );
   EXPECT_DOUBLE_EQ( 0.01, pdBipedRefLFPosX( &biped ) );
   EXPECT_DOUBLE_EQ( 0.1, pdBipedRefLFPosY( &biped ) );
   EXPECT_DOUBLE_EQ( 0, pdBipedRefLFPosZ( &biped ) );
@@ -281,9 +281,9 @@ TEST_F(pdBipedTest, UpdateState)
   EXPECT_EQ( pdBipedRefCOMPosX(&biped), s->com_pos.c.x );
   EXPECT_EQ( pdBipedRefCOMPosY(&biped), s->com_pos.c.y );
   EXPECT_EQ( pdBipedRefCOMPosZ(&biped), s->com_pos.c.z );
-  EXPECT_EQ( pdBipedRefBaseAttX(&biped), s->base_att.c.x );
-  EXPECT_EQ( pdBipedRefBaseAttY(&biped), s->base_att.c.y );
-  EXPECT_EQ( pdBipedRefBaseAttZ(&biped), s->base_att.c.z );
+  EXPECT_EQ( pdBipedRefTorsoAttX(&biped), s->torso_att.c.x );
+  EXPECT_EQ( pdBipedRefTorsoAttY(&biped), s->torso_att.c.y );
+  EXPECT_EQ( pdBipedRefTorsoAttZ(&biped), s->torso_att.c.z );
   EXPECT_EQ( pdBipedRefLFPosX(&biped), s->lf_pos.c.x );
   EXPECT_EQ( pdBipedRefLFPosY(&biped), s->lf_pos.c.y );
   EXPECT_EQ( pdBipedRefLFPosZ(&biped), s->lf_pos.c.z );

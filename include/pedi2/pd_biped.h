@@ -18,7 +18,7 @@ typedef struct{
   pdMode mode;
 
   zVec3D ref_com_pos;
-  zVec3D ref_base_att;
+  zVec3D ref_torso_att;
   zVec3D ref_lf_pos;
   zVec3D ref_lf_att;
   zVec3D ref_rf_pos;
@@ -41,30 +41,30 @@ __EXPORT void pdBipedDestroy(pdBiped *biped);
 #define pdBipedFFPtr(b)       pdFootFFPtr( &(b)->lf, &(b)->rf, (b)->cmd->vwd )
 #define pdBipedBFPtr(b)       pdFootBFPtr( &(b)->lf, &(b)->rf, (b)->cmd->vwd )
 
-#define pdBipedRefCOMPos(b)   ( &(b)->ref_com_pos )
-#define pdBipedRefCOMPosX(b)  pdBipedRefCOMPos(b)->c.x
-#define pdBipedRefCOMPosY(b)  pdBipedRefCOMPos(b)->c.y
-#define pdBipedRefCOMPosZ(b)  pdBipedRefCOMPos(b)->c.z
-#define pdBipedRefBaseAtt(b)  ( &(b)->ref_base_att )
-#define pdBipedRefBaseAttX(b) pdBipedRefBaseAtt(b)->c.x
-#define pdBipedRefBaseAttY(b) pdBipedRefBaseAtt(b)->c.y
-#define pdBipedRefBaseAttZ(b) pdBipedRefBaseAtt(b)->c.z
-#define pdBipedRefLFPos(b)    ( &(b)->ref_lf_pos )
-#define pdBipedRefLFPosX(b)   pdBipedRefLFPos(b)->c.x
-#define pdBipedRefLFPosY(b)   pdBipedRefLFPos(b)->c.y
-#define pdBipedRefLFPosZ(b)   pdBipedRefLFPos(b)->c.z
-#define pdBipedRefLFAtt(b)    ( &(b)->ref_lf_att )
-#define pdBipedRefLFAttX(b)   pdBipedRefLFAtt(b)->c.x
-#define pdBipedRefLFAttY(b)   pdBipedRefLFAtt(b)->c.y
-#define pdBipedRefLFAttZ(b)   pdBipedRefLFAtt(b)->c.z
-#define pdBipedRefRFPos(b)    ( &(b)->ref_rf_pos )
-#define pdBipedRefRFPosX(b)   pdBipedRefRFPos(b)->c.x
-#define pdBipedRefRFPosY(b)   pdBipedRefRFPos(b)->c.y
-#define pdBipedRefRFPosZ(b)   pdBipedRefRFPos(b)->c.z
-#define pdBipedRefRFAtt(b)    ( &(b)->ref_rf_att )
-#define pdBipedRefRFAttX(b)   pdBipedRefRFAtt(b)->c.x
-#define pdBipedRefRFAttY(b)   pdBipedRefRFAtt(b)->c.y
-#define pdBipedRefRFAttZ(b)   pdBipedRefRFAtt(b)->c.z
+#define pdBipedRefCOMPos(b)    ( &(b)->ref_com_pos )
+#define pdBipedRefCOMPosX(b)   pdBipedRefCOMPos(b)->c.x
+#define pdBipedRefCOMPosY(b)   pdBipedRefCOMPos(b)->c.y
+#define pdBipedRefCOMPosZ(b)   pdBipedRefCOMPos(b)->c.z
+#define pdBipedRefTorsoAtt(b)  ( &(b)->ref_torso_att )
+#define pdBipedRefTorsoAttX(b) pdBipedRefTorsoAtt(b)->c.x
+#define pdBipedRefTorsoAttY(b) pdBipedRefTorsoAtt(b)->c.y
+#define pdBipedRefTorsoAttZ(b) pdBipedRefTorsoAtt(b)->c.z
+#define pdBipedRefLFPos(b)     ( &(b)->ref_lf_pos )
+#define pdBipedRefLFPosX(b)    pdBipedRefLFPos(b)->c.x
+#define pdBipedRefLFPosY(b)    pdBipedRefLFPos(b)->c.y
+#define pdBipedRefLFPosZ(b)    pdBipedRefLFPos(b)->c.z
+#define pdBipedRefLFAtt(b)     ( &(b)->ref_lf_att )
+#define pdBipedRefLFAttX(b)    pdBipedRefLFAtt(b)->c.x
+#define pdBipedRefLFAttY(b)    pdBipedRefLFAtt(b)->c.y
+#define pdBipedRefLFAttZ(b)    pdBipedRefLFAtt(b)->c.z
+#define pdBipedRefRFPos(b)     ( &(b)->ref_rf_pos )
+#define pdBipedRefRFPosX(b)    pdBipedRefRFPos(b)->c.x
+#define pdBipedRefRFPosY(b)    pdBipedRefRFPos(b)->c.y
+#define pdBipedRefRFPosZ(b)    pdBipedRefRFPos(b)->c.z
+#define pdBipedRefRFAtt(b)     ( &(b)->ref_rf_att )
+#define pdBipedRefRFAttX(b)    pdBipedRefRFAtt(b)->c.x
+#define pdBipedRefRFAttY(b)    pdBipedRefRFAtt(b)->c.y
+#define pdBipedRefRFAttZ(b)    pdBipedRefRFAtt(b)->c.z
 
 /* methods to set parameters */
 #define pdBipedSetTime(b,t) do{ \

@@ -181,7 +181,19 @@ void _pdCZODE2Update(pdCZ *cz, zVec p, zVec v, double dt)
 {
   double acc[3], vel[3];
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+#endif
   zRawVecCopy( zVecBuf(v), vel, 3 );
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#endif
   acc[0] = pdCZHrzAccX( pdCZHrzPtr(cz) ) + pdCZAlphaX(cz) + pdCZExtFX(cz);
   acc[1] = pdCZHrzAccY( pdCZHrzPtr(cz) ) + pdCZAlphaY(cz) + pdCZExtFY(cz);
   acc[2] =  pdCZVrtAcc( pdCZVrtPtr(cz) ) + pdCZAlphaZ(cz) + pdCZExtFZ(cz);

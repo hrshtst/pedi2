@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import numpy as np
 
 
-class Data(object):
-
+class Data:
     def __init__(self, datapath, labellist):
         self._datapath = datapath
         self._labellist = labellist
@@ -10,26 +11,25 @@ class Data(object):
         self._data = self.make_data(self._rawdata, self._labellist)
 
     def __getattribute__(self, name):
-        if name == '_data':
+        if name == "_data":
             try:
                 return object.__getattribute__(self, name)
             except AttributeError:
                 return {}
-        if name in self._data.keys():
+        if name in list(self._data.keys()):
             return self._data[name]
-        else:
-            return object.__getattribute__(self, name)
+        return object.__getattribute__(self, name)
 
     @staticmethod
     def make_data(rawdata, labellist):
-        data = {}
+        data: dict = {}
         rawdata = np.atleast_2d(rawdata)
         if len(labellist) != rawdata.shape[1]:
-            msg = 'num of data entries does not match with that of labels'
+            msg = "num of data entries does not match with that of labels"
             raise UserWarning(msg)
         for i, l in enumerate(labellist):
-            if l in data.keys():
-                msg = 'label [%s] already exists' % l
+            if l in list(data.keys()):
+                msg = f"label [{l}] already exists"
                 raise UserWarning(msg)
             data[l] = rawdata[:, i]
         return data

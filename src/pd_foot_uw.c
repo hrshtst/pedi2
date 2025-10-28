@@ -22,11 +22,23 @@ void pdFootUWDestroy(pdFootUW *fuw)
   pdFootUWRefPosW( fuw ) = 0;
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter" /* unused parameter ‘vel’ [-Wunused-parameter] */
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
 double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp)
 {
   return atan2( pdFootUWKappa(fuw)*regzmp->e[pdU],
                 1.0+pdFootUWKappa(fuw)*(delta->e[pdW]-regzmp->e[pdW]));
 }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp, zVec2D *refpos)
 {

@@ -14852,7 +14852,7 @@ frame : {
  0, 0, 1, 0
 }
 
-[ik]
+[roki::chain::ik]
 joint: waist_base   0.0001
 joint: waist_p      0 0
 joint: waist_r      0 0
@@ -14885,13 +14885,13 @@ joint: relbow_p     0 -15
 joint: rwrist_y     0 0
 joint: rwrist_r     0 15
 joint: rwrist_p     0 0
-constraint: com
-constraint: world_att waist_base
-constraint: world_pos left_foot
-constraint: world_att left_foot
-constraint: world_pos right_foot
-constraint: world_att right_foot
-constraint: world_pos left_hand
-constraint: world_att left_hand
-constraint: world_pos right_hand
-constraint: world_att right_hand
+constraint: 3 com com
+constraint: 2 torso_att world_att waist_base
+constraint: 5 left_foot_pos  world_pos left_foot
+constraint: 4 left_foot_att  world_att left_foot
+constraint: 5 right_foot_pos world_pos right_foot
+constraint: 4 right_foot_att world_att right_foot
+constraint: 1 left_hand_pos  world_pos left_hand
+constraint: 0 left_hand_att  world_att left_hand
+constraint: 1 right_hand_pos world_pos right_hand
+constraint: 0 right_hand_att world_att right_hand

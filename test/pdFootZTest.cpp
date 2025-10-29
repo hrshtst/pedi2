@@ -49,6 +49,7 @@ TEST_F(pdFootZTest, Init)
   EXPECT_EQ( &czuw, pdFootZCZPtr( &lf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &lf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&lf)->data.array ) );
   EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&lf)->data.array ) );
   EXPECT_EQ( 0, lf._vert_num );
   EXPECT_EQ( 0, pdFootZSign( &lf ) );
@@ -61,6 +62,7 @@ TEST_F(pdFootZTest, Init)
   EXPECT_EQ( &czuw, pdFootZCZPtr( &rf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &rf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &rf ) );
+  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&rf)->data.array ) );
   EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&rf)->data.array ) );
   EXPECT_EQ( 0, rf._vert_num );
   EXPECT_EQ( 0, pdFootZSign( &rf ) );
@@ -78,6 +80,7 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( NULL, pdFootZCZPtr( &lf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &lf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&lf)->data.array ) );
   EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&lf)->data.array ) );
   EXPECT_EQ( 0, lf._vert_num );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->re );
@@ -90,6 +93,7 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( NULL, pdFootZCZPtr( &rf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &rf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &rf ) );
+  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&rf)->data.array ) );
   EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&rf)->data.array ) );
   EXPECT_EQ( 0, rf._vert_num );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->re );
@@ -182,6 +186,7 @@ TEST_F(pdFootZTest, SetSR_chk_memory)
   zVec3DCreate( &v3[2], 1, 1, 0 );
   zVec3DCreate( &v3[3], 1, 0, 0 );
 
+  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&lf)->data.array ) );
   EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&lf)->data.array ) );
   pdFootZSetSR( &lf, v1, 3 );
   p1 = zArrayBuf( &pdFootZSRVert(&lf)->data.array );

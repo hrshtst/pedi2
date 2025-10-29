@@ -7,6 +7,7 @@ void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt)
   hrz->_vrt = vrt;
   pdCZHrzUWSetKappa( hrz, 0 );
   zListInit( pdCZHrzUWSR(hrz) );
+  zArrayInit( &pdCZHrzUWSRVert(hrz)->data.array );
   hrz->_vert_num = 0;
   zVec2DZero( pdCZHrzUWZMP(hrz) );
   zVec2DZero( pdCZHrzUWAcc(hrz) );

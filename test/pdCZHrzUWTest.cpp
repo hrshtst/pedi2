@@ -77,6 +77,7 @@ TEST_F(pdCZHrzUWTest, Init)
   EXPECT_EQ( &uw._kappa, uw._u._kappa );
   EXPECT_EQ( &uw._kappa, uw._w._kappa );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, uw._vert_num );
   EXPECT_EQ( 0, pdCZHrzUWZMPU( &uw ) );
@@ -106,7 +107,8 @@ TEST_F(pdCZHrzUWTest, Destroy)
   EXPECT_EQ( NULL, uw._u._kappa );
   EXPECT_EQ( NULL, uw._w._kappa );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert( &uw )->data.array ) );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, uw._vert_num );
 }
 
@@ -242,6 +244,7 @@ TEST_F(pdCZHrzUWTest, SetSR_chk_memory)
   zVec3DCreate( &v3[2], 1, 1, 0 );
   zVec3DCreate( &v3[3], 1, 0, 0 );
 
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
   pdCZHrzUWSetSR( &uw, v1, 3 );
   p1 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );

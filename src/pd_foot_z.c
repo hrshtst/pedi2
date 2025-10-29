@@ -5,6 +5,7 @@ void pdFootZInit(pdFootZ *f, pdCZHrzUW *czuw)
   pdFootZCZPtr( f ) = czuw;
   pdFootZSetMaxHeight( f, 0 );
   zListInit( pdFootZSR( f ) );
+  zArrayInit( &pdFootZSRVert( f )->data.array );
   f->_vert_num = 0;
   pdFootZSign( f ) = 0;
   zComplexZero( pdFootZZMPPhase( f ) );

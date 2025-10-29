@@ -9,7 +9,7 @@
 void init_mighty(pdRobot *robot, pdCmd *cmd)
 {
   /* load mighty */
-  if( !pdRobotLoad( robot, "model/mighty.zkc" ) )
+  if( !pdRobotLoad( robot, "model/mighty.ztk" ) )
     exit( EXIT_FAILURE );
   /* set referential values */
   cmd->zd = 0.26;
@@ -19,13 +19,13 @@ void init_mighty(pdRobot *robot, pdCmd *cmd)
   cmd->vud = 0.0;
   cmd->kappa = 0.0;
   /* visualize the motion by executing the following command */
-  /*   rk_anim model/mighty.zkc motion.zvs -pan -- -90 -x 0.4 -y -- -6 -z 0.3 */
+  /*   rk_anim model/mighty.ztk motion.zvs -pan -- -90 -x 0.4 -y -- -6 -z 0.3 */
 }
 
 void init_hydra(pdRobot *robot, pdCmd *cmd)
 {
   /* load hydra */
-  if( !pdRobotLoad( robot, "model/hydra.zkc" ) )
+  if( !pdRobotLoad( robot, "model/hydra.ztk" ) )
     exit( EXIT_FAILURE );
   /* set referential values */
   cmd->zd = 0.95;
@@ -35,7 +35,7 @@ void init_hydra(pdRobot *robot, pdCmd *cmd)
   cmd->vud = 0.0;
   cmd->kappa = 0.0;
   /* visualize the motion by executing the following command */
-  /*   $ rk_anim model/hydra.zkc motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
+  /*   $ rk_anim model/hydra.ztk motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
 }
 
 #define DT   0.01
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
   pdBiped biped;
   pdRobot robot;
   zVec dis;
-  FILE *fp;
+  FILE *data_fp, *sr_fp;
   register int i;
 
   /* initialization */
@@ -73,10 +73,11 @@ int main(int argc, char *argv[])
   dis = zVecAlloc( pdRobotJointSize(&robot) );
 
   /* initialize robot state */
-  pdRobotDefaultBipedInit( &robot, &biped, &state );
+  pdRobotBipedDefaultInit( &robot, &biped, &state );
 
   /* output data for plotting */
-  fp = fopen( "data.log", "w" );
+  data_fp = fopen( "data.log", "w" );
+  sr_fp = fopen( "sr.log", "w" );
 
   /* main loop */
   for( i=0; i<STEP; i++ ){
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
 
     /* update */
     pdBipedUpdate( &biped, &state );
-    pdRobotSetBipedRefVec( &robot, &biped );
+    pdRobotBipedSetRefVec( &robot, &biped );
     pdRobotSolveIK( &robot, 0 );
 
 #ifdef DEBUG_MODE
@@ -101,10 +102,11 @@ int main(int argc, char *argv[])
     /* output */
     zVecCopy( pdRobotJointDis( &robot ), dis );
 #ifndef DEBUG_MODE
-    printf( "%f ", DT );zVecWrite( dis );
+    printf( "%f ", DT );zVecPrint( dis );
 #endif
 #ifdef OUTPUT_PLOT_DATA
-    pdBipedDataFWrite( fp, &biped );
+    pdBipedDataFWrite( data_fp, &biped );
+    pdStateSRDataFWrite( sr_fp, &state );
 #endif
 
     /* update state */
@@ -113,7 +115,8 @@ int main(int argc, char *argv[])
   }
 
   /* destroy */
-  fclose( fp );
+  fclose( data_fp );
+  fclose( sr_fp );
   pdRobotDestroy( &robot );
   pdBipedDestroy( &biped );
   pdStateDestroy( &state );

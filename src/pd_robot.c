@@ -544,9 +544,9 @@ bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3
     }
   }
   /* supporting region */
-  zLoop3DDestroy( sr_lf );
-  zLoop3DDestroy( sr_rf );
-  zLoop3DDestroy( sr );
+  zLoop3DDestroy( sr_lf ); zListInit( sr_lf );
+  zLoop3DDestroy( sr_rf ); zListInit( sr_rf );
+  zLoop3DDestroy( sr ); zListInit( sr );
   if( zVec3DDataSize( &robot->_sr_lf_vert ) > 0 ){
     if( !zVec3DDataConvexHull2D( &robot->_sr_lf_vert, sr_lf ) ) return false;
   }

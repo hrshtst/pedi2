@@ -141,9 +141,9 @@ __EXPORT void pdFootDestroy(pdFoot *f);
   pdFootSetTrZOld( f, z ); \
 } while(0)
 #define pdFootSetTrOldVec(f,v) do{ \
-  pdFootSetTrXOld( f, v->c.x ); \
-  pdFootSetTrYOld( f, v->c.y ); \
-  pdFootSetTrZOld( f, v->c.z ); \
+  pdFootSetTrXOld( f, (v)->c.x ); \
+  pdFootSetTrYOld( f, (v)->c.y ); \
+  pdFootSetTrZOld( f, (v)->c.z ); \
 } while(0)
 
 /* calculation method */

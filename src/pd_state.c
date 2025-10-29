@@ -74,7 +74,7 @@ void _pdStateSRDataFWrite(FILE *fp, zLoop3D *sr)
   if( !sr ){ fprintf( fp, " 0" ); return; }
   fprintf( fp, " %d", zListSize( sr ) );
   zListForEach( sr, cp ){
-    zVec3DValueFPrint( fp, cp->data );
+    fprintf( fp, " %.10g %.10g %.10g", cp->data->c.x, cp->data->c.y, cp->data->c.z );
   }
 }
 

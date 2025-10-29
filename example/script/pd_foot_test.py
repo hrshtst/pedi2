@@ -85,7 +85,7 @@ def plotFootX(data):
     fig.plot(data.t, data.rfpx, label="rf pos")
     fig.plot(data.t, data.lfpdx, label="desired lf pos")
     fig.plot(data.t, data.rfpdx, label="desired rf pos")
-    fig.setTitleLabels(xlabel="time [s]", ylabel="position [m]")
+    fig.setTitleLabels(xlabel="time [s]", ylabel="x position [m]")
     fig.legend()
 
 
@@ -95,7 +95,7 @@ def plotFootY(data):
     fig.plot(data.t, data.rfpy, label="rf pos")
     fig.plot(data.t, data.lfpdy, label="desired lf pos")
     fig.plot(data.t, data.rfpdy, label="desired rf pos")
-    fig.setTitleLabels(xlabel="time [s]", ylabel="position [m]")
+    fig.setTitleLabels(xlabel="time [s]", ylabel="y position [m]")
     fig.legend()
 
 
@@ -105,7 +105,18 @@ def plotFootZ(data):
     fig.plot(data.t, data.rfpz, label="rf pos")
     fig.plot(data.t, data.lfpdz, label="desired lf pos")
     fig.plot(data.t, data.rfpdz, label="desired rf pos")
-    fig.setTitleLabels(xlabel="time [s]", ylabel="position [m]")
+    fig.setTitleLabels(xlabel="time [s]", ylabel="z position [m]")
+    fig.legend()
+
+
+def plotFootXY(data):
+    fig = FigureCreator()
+    fig.plot(data.lfpx, data.lfpy, label="lf pos")
+    fig.plot(data.rfpx, data.rfpy, label="rf pos")
+    fig.plot(data.lfpdx, data.lfpdy, label="desired lf pos")
+    fig.plot(data.rfpdx, data.rfpdy, label="desired rf pos")
+    fig.setTitleLabels(xlabel="x position [m]", ylabel="y position [m]")
+    fig.makeAspectEqual()
     fig.legend()
 
 
@@ -138,6 +149,7 @@ def main():
     plotFootX(data)
     plotFootY(data)
     plotFootZ(data)
+    plotFootXY(data)
 
     if showflag:
         plt.show()

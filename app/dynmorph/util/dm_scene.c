@@ -6,29 +6,34 @@ static rkglChain dm_gl_robot;
 static int dm_gl_gauge;
 static zOpticalInfo dm_gl_sr_oi;
 static int dm_lf_id, dm_rf_id;
-static zVec3DList dm_sr_lf, dm_sr_rf, dm_sr;
+static zLoop3D dm_sr_lf, dm_sr_rf, dm_sr;
 
 void dmSceneInit(dmScene *scene, zxWindow *parent)
 {
   scene->canvas = rkglWindowCreateGLX( parent, 0, 0, 1, 1, NULL );
+  rkglWindowKeyEnableGLX( scene->canvas );
+  rkglWindowMouseEnableGLX( scene->canvas );
   rkglWindowOpenGLX( scene->canvas );
 
-  rkglBGSet( &scene->cam, 0.6, 0.6, 0.6 );
-  rkglCALookAt( &scene->cam, 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 );
+  rkglCameraInit( &scene->cam );
+  rkglCameraSetBackground( &scene->cam, 0.6, 0.6, 0.6 );
+  rkglCameraLookAt( &scene->cam, 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 );
+  rkglSetDefaultCamera( &scene->cam );
 
   glEnable( GL_LIGHTING );
-  rkglLightCreate( &scene->light, 0, 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0, 0, 0, 0 );
-  rkglLightSetPos( &scene->light, 10, 0, 4 );
+  rkglLightCreate( &scene->light, 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0, 0, 0 );
+  rkglLightMove( &scene->light, 10, 0, 4 );
 }
 
 void dmSceneExit(dmScene *scene)
 {
+  rkglWindowCloseGLX( scene->canvas );
   rkglWindowDestroyGLX( scene->canvas );
 }
 
 void dmSceneLookAt(dmScene *scene, double cx, double cy, double cz, double fx, double fy, double fz)
 {
-  rkglCALookAt( &scene->cam, cx, cy, cz, fx, fy, fz, 0, 0, 1 );
+  rkglCameraLookAt( &scene->cam, cx, cy, cz, fx, fy, fz, 0, 0, 1 );
 }
 
 void dmSceneResize(dmScene *scene, int x, int y, int w, int h)
@@ -39,39 +44,41 @@ void dmSceneResize(dmScene *scene, int x, int y, int w, int h)
   wx = 0.1;
   XMoveWindow( zxdisplay, scene->canvas, scene->reg.x, scene->reg.y );
   XResizeWindow( zxdisplay, scene->canvas, scene->reg.width, scene->reg.height );
-  rkglVPCreate( &scene->cam, 0, 0, scene->reg.width, scene->reg.height );
-  wy = wx / rkglVPAspect(&scene->cam);
-  rkglFrustum( &scene->cam, -wx, wx, -wy, wy, 1, 20 );
+  rkglCameraSetViewport( &scene->cam, 0, 0, scene->reg.width, scene->reg.height );
+  wy = wx / rkglCameraViewportAspectRatio(&scene->cam);
+  rkglCameraSetFrustum( &scene->cam, -wx, wx, -wy, wy, 1, 20 );
 }
 
 void dmSceneDraw(dmScene *scene, zVec dis, zVec3D *force)
 {
   rkChainFK( &dm_robot, dis );
-  rkglActivateGLX( scene->canvas );
+  rkglWindowActivateGLX( scene->canvas );
   rkglClear();
-  rkglCALoad( &scene->cam );
-  dmGLGauge();
   rkglLightPut( &scene->light );
+  rkglCameraPut( &scene->cam );
+
+  dmGLGauge();
   dmGLRobot();
   dmGLSupportRegion();
   if( !zVec3DIsTiny( force ) ){
     GLfloat color[4] = { 0.1, 0.3, 0.8, 0.5 };
-    rkglArrow( rkChainWldCOM(&dm_robot), force, 0.3, color );
+    glColor4fv( color );
+    rkglArrow( rkChainWldCOM(&dm_robot), force, 0.3 );
   }
-  rkglSwapBuffersGLX( scene->canvas );
+
+  rkglWindowSwapBuffersGLX( scene->canvas );
   rkglFlushGLX();
 }
 
-void dmGLInit(const char* model_file)
+void dmGLInit(const char* model_file, rkglLight *light)
 {
-  GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
   register int i;
 
   /* load robot model file */
   if( !rkChainReadFile( &dm_robot, (char *)model_file ) )
     exit( EXIT_FAILURE );
 
-  for( i=0; i<rkChainNum(&dm_robot); i++ ){
+  for( i=0; i<rkChainLinkNum(&dm_robot); i++ ){
     if( !strcmp( "left_foot", rkChainLinkName(&dm_robot,i) ) )
       dm_lf_id = i;
     if( !strcmp( "right_foot", rkChainLinkName(&dm_robot,i) ) )
@@ -82,11 +89,15 @@ void dmGLInit(const char* model_file)
   zListInit( &dm_sr );
 
   /* scene stuff */
-  if( !rkglChainLoad( &dm_gl_robot, &dm_robot, NULL ) ){
+  if( !rkglChainLoad( &dm_gl_robot, &dm_robot, NULL, light ) ){
     ZRUNERROR( "unable to load robot model" );
     exit( EXIT_FAILURE );
   }
-  dm_gl_gauge = rkglGauge( zX, 6.0, zY, 6.0, 1.0, 0.2, white );
+  dm_gl_gauge = rkglBeginList();
+  rkglRGBByStr( "white" );
+  glLineWidth( 0.5 );
+  rkglGauge( zX, 6.0, zY, 6.0, 0.2 );
+  glEndList();
   zOpticalInfoCreateSimple( &dm_gl_sr_oi, 1.0, 0.4, 0.8, NULL );
 }
 
@@ -98,9 +109,7 @@ void dmGLExit(void)
 
 void dmGLGauge(void)
 {
-  glDisable( GL_LIGHTING );
   glCallList( dm_gl_gauge );
-  glEnable( GL_LIGHTING );
 }
 
 void dmGLRobot(void)
@@ -111,52 +120,57 @@ void dmGLRobot(void)
 #define DM_TOL (1.0e-3)
 static void _dmSupportRegion(void)
 {
-  int i, nl, nr, n;
+  int i;
   rkLink *foot;
   zShape3D *sole;
   zVec3D v;
-  zVec3D sr_lf_vert[4], sr_rf_vert[4], sr_vert[8];
+  zVec3DData sr_lf_vert, sr_rf_vert, sr_vert;
 
-  nl = nr = n = 0;
+  zVec3DDataInitArray( &sr_lf_vert, 4 );
+  zVec3DDataInitArray( &sr_rf_vert, 4 );
+  zVec3DDataInitArray( &sr_vert, 8 );
   /* left foot */
   foot = rkChainLink( &dm_robot, dm_lf_id );
   sole = zListHead( rkLinkShapeList(foot) )->data;
   for( i=0; i<4; i++ ){
-    zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
-    if( zVec3DElem(&v,zZ) < DM_TOL ){
-      zVec3DCopy( &v, &sr_lf_vert[nl++] );
-      zVec3DCopy( &v, &sr_vert[n++] );
+    zXform3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
+    if( v.c.z < DM_TOL ){
+      zVec3DDataAdd( &sr_lf_vert, &v );
+      zVec3DDataAdd( &sr_vert, &v );
     }
   }
   /* right foot */
   foot = rkChainLink( &dm_robot, dm_rf_id );
   sole = zListHead( rkLinkShapeList(foot) )->data;
   for( i=0; i<4; i++ ){
-    zXfer3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
-    if( zVec3DElem(&v,zZ) < DM_TOL ){
-      zVec3DCopy( &v, &sr_rf_vert[nr++] );
-      zVec3DCopy( &v, &sr_vert[n++] );
+    zXform3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
+    if( v.c.z < DM_TOL ){
+      zVec3DDataAdd( &sr_rf_vert, &v );
+      zVec3DDataAdd( &sr_vert, &v );
     }
   }
   /* supporting region */
-  zVec3DListDestroy( &dm_sr_lf, false );
-  zVec3DListDestroy( &dm_sr_rf, false );
-  zVec3DListDestroy( &dm_sr, false );
-  if( nl > 0 ) zCH2D( &dm_sr_lf, sr_lf_vert, nl );
-  if( nr > 0 ) zCH2D( &dm_sr_rf, sr_rf_vert, nr );
-  if( n  > 0 ) zCH2D( &dm_sr, sr_vert, n );
+  zLoop3DDestroy( &dm_sr_lf );
+  zLoop3DDestroy( &dm_sr_rf );
+  zLoop3DDestroy( &dm_sr );
+  if( zVec3DDataSize( &sr_lf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_lf_vert, &dm_sr_lf );
+  if( zVec3DDataSize( &sr_rf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_rf_vert, &dm_sr_rf );
+  if( zVec3DDataSize( &sr_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_vert, &dm_sr );
+  zVec3DDataDestroy( &sr_lf_vert );
+  zVec3DDataDestroy( &sr_rf_vert );
+  zVec3DDataDestroy( &sr_vert );
 }
 
 void dmGLSupportRegion(void)
 {
-  zVec3DListCell *vc;
+  zLoop3DCell *cp;
 
   _dmSupportRegion();
   glBegin( GL_POLYGON );
     glShadeModel( GL_FLAT );
     rkglMaterial( &dm_gl_sr_oi );
     rkglNormal( ZVEC3DZ );
-    zListForEachRew( &dm_sr, vc )
-      rkglVertex( vc->data );
+    zListForEachRew( &dm_sr, cp )
+      rkglVertex( cp->data );
   glEnd();
 }

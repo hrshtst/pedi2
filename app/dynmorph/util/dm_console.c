@@ -45,7 +45,7 @@ void dmConsoleEvalDraw(dmConsoleEval *ce, zxWindow *win)
 
 void dmConsoleEvalButtonPress(dmConsoleEval *ce)
 {
-  zxwNobTryGrab( &ce->gauge, zxMouseX, zxMouseY );
+  zxwKnobTryGrab( &ce->gauge, zxMouseX, zxMouseY );
 }
 
 void dmConsoleEvalButtonRelease(dmConsoleEval *ce)

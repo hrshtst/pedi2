@@ -87,7 +87,7 @@ void capture(zxWindow *win)
   zxImage img;
 
   sprintf( str, "dynmorph%05d.bmp", count++ );
-  zxImageFromPixmap( &img, zxCanvas(win), zxWindowWidth(win), zxWindowHeight(win) );
+  zxImageFromPixmap( &img, zxWindowCanvas(win), zxWindowWidth(win), zxWindowHeight(win) );
   zxImageWriteBMPFile( &img, str );
   zxImageDestroy( &img );
 }
@@ -126,9 +126,9 @@ void frame_one(zxWindow *win, pdRobot *robot, pdBiped *biped, pdState *state, dm
   /* zVec3DCreate( &force, core->adx, core->ady, 0 ); */
   if( !flag->pause || flag->frame ){
     if( flag->frame ) flag->frame = false;
-    /* udpate controller */
+    /* update controller */
     pdBipedUpdate( biped, state );
-    pdRobotSetBipedRefVec( robot, biped );
+    pdRobotBipedSetRefVec( robot, biped );
     pdRobotSolveIK( robot, 0 );
     /* update state */
     pdBipedUpdateState( biped, state );
@@ -136,7 +136,7 @@ void frame_one(zxWindow *win, pdRobot *robot, pdBiped *biped, pdState *state, dm
     if( fp )
       pdBipedDataFWrite( fp, biped );
   }
-  theta = zVec3DElem( &state->base_att, 0 );
+  theta = state->torso_att.c.x;
   zSinCos( theta, &s, &c );
   xd = biped->cmd->xd;
   yd = biped->cmd->yd;
@@ -172,7 +172,7 @@ void mainloop(zxWindow *win, pdRobot *robot, pdBiped *biped, pdState *state, dmC
       resize( win, con, sx, sy );
       break;
     case ClientMessage:
-      if( zxDeleteWindowEvent() ) return;
+      if( zxWindowIsReceivedDeleteMsg( win ) ) return;
       break;
     case ButtonPress:
       dmConsoleButtonPress( con );
@@ -244,10 +244,10 @@ int main(int argc, char *argv[])
 
   rkglInitGLX();
   zxWindowCreate( &mainwin, 0, 0, WIDTH, HEIGHT );
-  zxWindowSetBG( &mainwin, (char *)"lightgray" );
+  zxWindowSetBGColorByName( &mainwin, (char *)"lightgray" );
   zxWindowClear( &mainwin );
-  zxKeyEnable( &mainwin );
-  zxMouseEnable( &mainwin );
+  zxWindowKeyEnable( &mainwin );
+  zxWindowMouseEnable( &mainwin );
   zxWindowSetTitle( &mainwin, (char *)"dynamics morphing" );
   zxWindowOpen( &mainwin );
   zxWidgetInit( &mainwin );
@@ -260,20 +260,20 @@ int main(int argc, char *argv[])
   pdBipedInit( &biped, &cmd, DT );
   pdRobotInit( &robot );
   if( model == DM_MODEL_MIGHTY ){
-    if( !pdRobotLoad( &robot, "../model/mighty.zkc" ) )
+    if( !pdRobotLoad( &robot, "../model/mighty.ztk" ) )
       exit( EXIT_FAILURE );
-    dmGLInit( "../model/mighty.zkc" );
+    dmGLInit( "../model/mighty.ztk", &sx.light );
   } else if ( model == DM_MODEL_HYDRA ) {
-    if( !pdRobotLoad( &robot, "../model/hydra.zkc" ) )
+    if( !pdRobotLoad( &robot, "../model/hydra.ztk" ) )
       exit( EXIT_FAILURE );
-    dmGLInit( "../model/hydra.zkc" );
+    dmGLInit( "../model/hydra.ztk", &sx.light );
   } else {
     ZRUNERROR( "invalid model" );
     exit( EXIT_FAILURE );
   }
   pdRobotUpdateState( &robot, &state );
   pdBipedDefaultPoseInit( &biped, &state );
-  pdRobotSetBipedRefVec( &robot, &biped );
+  pdRobotBipedSetRefVec( &robot, &biped );
   pdRobotSolveIK( &robot, 0 );
   pdRobotUpdateState( &robot, &state );
 
@@ -289,6 +289,6 @@ int main(int argc, char *argv[])
   dmSceneExit( &sx );
   dmSceneExit( &sy );
 
-  rkglCloseGLX();
+  rkglExitGLX();
   return 0;
 }

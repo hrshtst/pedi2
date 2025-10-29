@@ -28,7 +28,7 @@ void alloc_data(FILE *fp, zVecList *data)
   v = zVecAlloc( DATA_SIZE );
   while( fgets( line, sizeof(line), fp ) != NULL ){
     read_line( v, DATA_SIZE, line, delim );
-    zVecListInsertHead( data, v, true );
+    zVecListInsertHead( data, v );
   }
   zVecFree( v );
 }
@@ -46,9 +46,9 @@ void split_vec(zVec v, zVec v1, zVec v2)
     exit( 1 );
   }
   for( i=0; i<n1; i++ )
-    zVecElem( v1, i ) = zVecElem( v, i );
+    zVecElemNC( v1, i ) = zVecElem( v, i );
   for( i=0; i<n2; i++ )
-    zVecElem( v2, i ) = zVecElem( v, n1 + i );
+    zVecElemNC( v2, i ) = zVecElem( v, n1 + i );
 }
 
 #define DT 0.002
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   zVec lfsensor, rfsensor;
   zVecList data;
   zVecListCell *vp;
-  pdEstZMP e;
+  pdEstZmp e;
   zFrame3D lf, rf;
   zVec3D v;
   FILE *fp;
@@ -72,16 +72,16 @@ int main(int argc, char *argv[])
   fp = fopen( "data/hydra_step.dat", "r" );
   alloc_data( fp, &data );
   /* create estimator */
-  pdEstZMPConfReadFile( &e, "model/hydra_sensor.conf" );
+  pdEstZmpReadZTK( &e, "model/hydra_sensor.ztk" );
   zListForEach( &data, vp ){
     split_vec( vp->data, lfsensor, rfsensor );
-    pdEstZMPSetData( &e, "lfsensor", lfsensor );
-    pdEstZMPSetData( &e, "rfsensor", rfsensor );
-    pdEstZMPUpdate( &e, &lf, &rf, 0, DT );
-    pdEstZMPDataWrite( &e );
+    pdEstZmpSetData( &e, "lfsensor", lfsensor );
+    pdEstZmpSetData( &e, "rfsensor", rfsensor );
+    pdEstZmpUpdate( &e, &lf, &rf, 0, DT );
+    pdEstZmpValueNLPrint( &e );
   }
-  pdEstZMPDestroy( &e );
-  zVecListDestroy( &data, true );
+  pdEstZmpDestroy( &e );
+  zVecListDestroy( &data );
   zVecFree( lfsensor );
   zVecFree( rfsensor );
   fclose( fp );

@@ -83,10 +83,10 @@ def main():
 
     # plot
     data = Data(datafile, LABEL_LIST)
-    # plotFX(data)
-    # plotFY(data)
-    # plotFZ(data)
-    # plotXZ(data)
+    plotFX(data)
+    plotFY(data)
+    plotFZ(data)
+    plotXZ(data)
     plotYZ(data)
 
     if showflag:

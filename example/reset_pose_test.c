@@ -12,12 +12,12 @@ void init(pdCmd *cmd, pdBiped *biped, pdState *state, pdRobot *robot)
   pdBipedInit( biped, cmd, DT );
   pdRobotInit( robot );
 
-  /* load kinematics/dynamics model file (robot.zkc) */
-  if( !pdRobotLoad( robot, "model/hydra.zkc" ) )
+  /* load kinematics/dynamics model file (robot.ztk) */
+  if( !pdRobotLoad( robot, "model/hydra.ztk" ) )
     exit( EXIT_FAILURE );
 
   /* initialize robot state */
-  pdRobotDefaultBipedInit( robot, biped, state );
+  pdRobotBipedDefaultInit( robot, biped, state );
 }
 
 void default_cmd(pdCmd *cmd)
@@ -40,7 +40,7 @@ void update_cmd_walk(pdCmd *cmd, int step)
 void update_controller(pdBiped *biped, pdState *state, pdRobot *robot)
 {
   pdBipedUpdate( biped, state );
-  pdRobotSetBipedRefVec( robot, biped );
+  pdRobotBipedSetRefVec( robot, biped );
   pdRobotSolveIK( robot, 0 );
 }
 
@@ -63,7 +63,7 @@ int main(void)
 {
   pdCmd cmd;      /* user-defined command values */
   pdState state;  /* robot state */
-  pdBiped biped;  /* bipdal locomotion controller */
+  pdBiped biped;  /* bipedal locomotion controller */
   pdRobot robot;  /* robot model instance */
   zVec dis;       /* joint displacement vector */
   register int i;
@@ -85,15 +85,25 @@ int main(void)
     /* output */
     zVecCopy( pdRobotJointDis( &robot ), dis );
     /* you can visualize the motion by executing the following command, e.g. */
-    /*   $ rk_anim model/hydra.zkc motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
-    printf( "%f ", DT );zVecWrite( dis );
+    /*   $ rk_anim model/hydra.ztk motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
+    printf( "%f ", DT );zVecPrint( dis );
     /* update state */
     update_state( &biped, &state, &robot );
   }
 
   zVec v;
-  v = zVecReadFile( "data/init.pose.zv" );
-  pdRobotResetPose( &robot, &biped, &state, v );
+  FILE *fp;
+  const char init_pose_file[] = "data/init.pose.zv";
+  if( !( fp = fopen( init_pose_file, "r" ) ) ){
+    ZOPENERROR( init_pose_file );
+    return EXIT_FAILURE;
+  }
+  if( !( v = zVecFScan( fp ) ) ){
+    ZALLOCERROR();
+    return EXIT_FAILURE;
+  }
+  if( fp ) fclose( fp );
+  pdRobotBipedResetPose( &robot, &biped, &state, v );
   zVecFree( v );
 
   for( i=0; i<STEP; i++ ){
@@ -104,8 +114,8 @@ int main(void)
     /* output */
     zVecCopy( pdRobotJointDis( &robot ), dis );
     /* you can visualize the motion by executing the following command, e.g. */
-    /*   $ rk_anim model/hydra.zkc motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
-    printf( "%f ", DT );zVecWrite( dis );
+    /*   $ rk_anim model/hydra.ztk motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
+    printf( "%f ", DT );zVecPrint( dis );
     /* update state */
     update_state( &biped, &state, &robot );
   }

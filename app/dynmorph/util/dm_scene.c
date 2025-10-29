@@ -56,7 +56,6 @@ void dmSceneDraw(dmScene *scene, zVec dis, zVec3D *force)
   rkglClear();
   rkglLightPut( &scene->light );
   rkglCameraPut( &scene->cam );
-
   dmGLGauge();
   dmGLRobot();
   dmGLSupportRegion();
@@ -65,7 +64,6 @@ void dmSceneDraw(dmScene *scene, zVec dis, zVec3D *force)
     glColor4fv( color );
     rkglArrow( rkChainWldCOM(&dm_robot), force, 0.3 );
   }
-
   rkglWindowSwapBuffersGLX( scene->canvas );
   rkglFlushGLX();
 }
@@ -126,13 +124,13 @@ static void _dmSupportRegion(void)
   zVec3D v;
   zVec3DData sr_lf_vert, sr_rf_vert, sr_vert;
 
-  zVec3DDataInitArray( &sr_lf_vert, 4 );
-  zVec3DDataInitArray( &sr_rf_vert, 4 );
-  zVec3DDataInitArray( &sr_vert, 8 );
+  zVec3DDataInitList( &sr_lf_vert );
+  zVec3DDataInitList( &sr_rf_vert );
+  zVec3DDataInitList( &sr_vert );
   /* left foot */
   foot = rkChainLink( &dm_robot, dm_lf_id );
   sole = zListHead( rkLinkShapeList(foot) )->data;
-  for( i=0; i<4; i++ ){
+  for( i=0; i<zShape3DVertNum(sole); i++ ){
     zXform3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
     if( v.c.z < DM_TOL ){
       zVec3DDataAdd( &sr_lf_vert, &v );
@@ -142,7 +140,7 @@ static void _dmSupportRegion(void)
   /* right foot */
   foot = rkChainLink( &dm_robot, dm_rf_id );
   sole = zListHead( rkLinkShapeList(foot) )->data;
-  for( i=0; i<4; i++ ){
+  for( i=0; i<zShape3DVertNum(sole); i++ ){
     zXform3D( rkLinkWldFrame(foot), zShape3DVert(sole,i), &v );
     if( v.c.z < DM_TOL ){
       zVec3DDataAdd( &sr_rf_vert, &v );
@@ -150,9 +148,9 @@ static void _dmSupportRegion(void)
     }
   }
   /* supporting region */
-  zLoop3DDestroy( &dm_sr_lf );
-  zLoop3DDestroy( &dm_sr_rf );
-  zLoop3DDestroy( &dm_sr );
+  zLoop3DDestroy( &dm_sr_lf ); zListInit( &dm_sr_lf );
+  zLoop3DDestroy( &dm_sr_rf ); zListInit( &dm_sr_rf );
+  zLoop3DDestroy( &dm_sr ); zListInit( &dm_sr );
   if( zVec3DDataSize( &sr_lf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_lf_vert, &dm_sr_lf );
   if( zVec3DDataSize( &sr_rf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_rf_vert, &dm_sr_rf );
   if( zVec3DDataSize( &sr_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_vert, &dm_sr );

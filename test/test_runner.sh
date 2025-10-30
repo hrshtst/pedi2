@@ -2,7 +2,7 @@
 
 # find all executable files (excluding script files etc.)
 # make sure only tests in the working directory
-FOUND_BINS=`find . -maxdepth 1 -type f -executable -exec file -i '{}' \; | grep 'x-executable; charset=binary' | sed -e "s/:.*$//g"`
+FOUND_BINS=`find . -maxdepth 1 -type f -executable -exec file -i '{}' \; | grep -E 'x-(pie-)?executable; charset=binary' | sed -e "s/:.*$//g"`
 
 # run all tests
 SUM_RET=0

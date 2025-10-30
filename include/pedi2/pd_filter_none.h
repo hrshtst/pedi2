@@ -5,9 +5,9 @@
 
 __BEGIN_DECLS
 
-__EXPORT bool pdFilterCreateNone(pdFilter *filter);
+__PEDI2_EXPORT pdFilter *pdFilterNoneCreate(pdFilter *filter);
 
-extern pdFilterMethod pd_filter_none_met;
+extern pdFilterCom pd_filter_none_com;
 
 __END_DECLS
 

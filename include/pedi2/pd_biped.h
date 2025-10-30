@@ -18,99 +18,99 @@ typedef struct{
   pdMode mode;
 
   zVec3D ref_com_pos;
-  zVec3D ref_base_att;
+  zVec3D ref_torso_att;
   zVec3D ref_lf_pos;
   zVec3D ref_lf_att;
   zVec3D ref_rf_pos;
   zVec3D ref_rf_att;
 } pdBiped;
 
-__EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt);
-__EXPORT bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state);
-__EXPORT void pdBipedDestroy(pdBiped *biped);
+__PEDI2_EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt);
+__PEDI2_EXPORT bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state);
+__PEDI2_EXPORT void pdBipedDestroy(pdBiped *biped);
 
 /* methods to get parameters */
-#define pdBipedTime(c)      (c)->_t
-#define pdBipedTimeStep(c)  (c)->_dt
-#define pdBipedCZPtr(c)     ( &(c)->cz )
-#define pdBipedLFPtr(c)     ( &(c)->lf )
-#define pdBipedRFPtr(c)     ( &(c)->rf )
-#define pdBipedCmd(c)       ( (c)->cmd )
+#define pdBipedTime(b)        (b)->_t
+#define pdBipedTimeStep(b)    (b)->_dt
+#define pdBipedCZPtr(b)       ( &(b)->cz )
+#define pdBipedLFPtr(b)       ( &(b)->lf )
+#define pdBipedRFPtr(b)       ( &(b)->rf )
+#define pdBipedCmd(b)         ( (b)->cmd )
 
-#define pdBipedKFPtr(c)     pdFootKFPtr( &(c)->lf, &(c)->rf )
-#define pdBipedFFPtr(c)     pdFootFFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
-#define pdBipedBFPtr(c)     pdFootBFPtr( &(c)->lf, &(c)->rf, (c)->cmd->vwd )
+#define pdBipedKFPtr(b)       pdFootKFPtr( &(b)->lf, &(b)->rf )
+#define pdBipedFFPtr(b)       pdFootFFPtr( &(b)->lf, &(b)->rf, (b)->cmd->vwd )
+#define pdBipedBFPtr(b)       pdFootBFPtr( &(b)->lf, &(b)->rf, (b)->cmd->vwd )
 
-#define pdBipedRefCOMPos(c)   ( &(c)->ref_com_pos )
-#define pdBipedRefCOMPosX(c)  zVec3DElem( pdBipedRefCOMPos(c), zX )
-#define pdBipedRefCOMPosY(c)  zVec3DElem( pdBipedRefCOMPos(c), zY )
-#define pdBipedRefCOMPosZ(c)  zVec3DElem( pdBipedRefCOMPos(c), zZ )
-#define pdBipedRefBaseAtt(c)  ( &(c)->ref_base_att )
-#define pdBipedRefBaseAttX(c) zVec3DElem( pdBipedRefBaseAtt(c), zX )
-#define pdBipedRefBaseAttY(c) zVec3DElem( pdBipedRefBaseAtt(c), zY )
-#define pdBipedRefBaseAttZ(c) zVec3DElem( pdBipedRefBaseAtt(c), zZ )
-#define pdBipedRefLFPos(c)    ( &(c)->ref_lf_pos )
-#define pdBipedRefLFPosX(c)   zVec3DElem( pdBipedRefLFPos(c), zX )
-#define pdBipedRefLFPosY(c)   zVec3DElem( pdBipedRefLFPos(c), zY )
-#define pdBipedRefLFPosZ(c)   zVec3DElem( pdBipedRefLFPos(c), zZ )
-#define pdBipedRefLFAtt(c)    ( &(c)->ref_lf_att )
-#define pdBipedRefLFAttX(c)   zVec3DElem( pdBipedRefLFAtt(c), zX )
-#define pdBipedRefLFAttY(c)   zVec3DElem( pdBipedRefLFAtt(c), zY )
-#define pdBipedRefLFAttZ(c)   zVec3DElem( pdBipedRefLFAtt(c), zZ )
-#define pdBipedRefRFPos(c)    ( &(c)->ref_rf_pos )
-#define pdBipedRefRFPosX(c)   zVec3DElem( pdBipedRefRFPos(c), zX )
-#define pdBipedRefRFPosY(c)   zVec3DElem( pdBipedRefRFPos(c), zY )
-#define pdBipedRefRFPosZ(c)   zVec3DElem( pdBipedRefRFPos(c), zZ )
-#define pdBipedRefRFAtt(c)    ( &(c)->ref_rf_att )
-#define pdBipedRefRFAttX(c)   zVec3DElem( pdBipedRefRFAtt(c), zX )
-#define pdBipedRefRFAttY(c)   zVec3DElem( pdBipedRefRFAtt(c), zY )
-#define pdBipedRefRFAttZ(c)   zVec3DElem( pdBipedRefRFAtt(c), zZ )
+#define pdBipedRefCOMPos(b)    ( &(b)->ref_com_pos )
+#define pdBipedRefCOMPosX(b)   pdBipedRefCOMPos(b)->c.x
+#define pdBipedRefCOMPosY(b)   pdBipedRefCOMPos(b)->c.y
+#define pdBipedRefCOMPosZ(b)   pdBipedRefCOMPos(b)->c.z
+#define pdBipedRefTorsoAtt(b)  ( &(b)->ref_torso_att )
+#define pdBipedRefTorsoAttX(b) pdBipedRefTorsoAtt(b)->c.x
+#define pdBipedRefTorsoAttY(b) pdBipedRefTorsoAtt(b)->c.y
+#define pdBipedRefTorsoAttZ(b) pdBipedRefTorsoAtt(b)->c.z
+#define pdBipedRefLFPos(b)     ( &(b)->ref_lf_pos )
+#define pdBipedRefLFPosX(b)    pdBipedRefLFPos(b)->c.x
+#define pdBipedRefLFPosY(b)    pdBipedRefLFPos(b)->c.y
+#define pdBipedRefLFPosZ(b)    pdBipedRefLFPos(b)->c.z
+#define pdBipedRefLFAtt(b)     ( &(b)->ref_lf_att )
+#define pdBipedRefLFAttX(b)    pdBipedRefLFAtt(b)->c.x
+#define pdBipedRefLFAttY(b)    pdBipedRefLFAtt(b)->c.y
+#define pdBipedRefLFAttZ(b)    pdBipedRefLFAtt(b)->c.z
+#define pdBipedRefRFPos(b)     ( &(b)->ref_rf_pos )
+#define pdBipedRefRFPosX(b)    pdBipedRefRFPos(b)->c.x
+#define pdBipedRefRFPosY(b)    pdBipedRefRFPos(b)->c.y
+#define pdBipedRefRFPosZ(b)    pdBipedRefRFPos(b)->c.z
+#define pdBipedRefRFAtt(b)     ( &(b)->ref_rf_att )
+#define pdBipedRefRFAttX(b)    pdBipedRefRFAtt(b)->c.x
+#define pdBipedRefRFAttY(b)    pdBipedRefRFAtt(b)->c.y
+#define pdBipedRefRFAttZ(b)    pdBipedRefRFAtt(b)->c.z
 
 /* methods to set parameters */
-#define pdBipedSetTime(c,t) do{ \
-  (c)->_t = (t); \
-  pdCZSetTime( pdBipedCZPtr( c ), t ); \
-  pdFootSetTime( pdBipedLFPtr( c ), t ); \
-  pdFootSetTime( pdBipedRFPtr( c ), t ); \
+#define pdBipedSetTime(b,t) do{ \
+  (b)->_t = (t); \
+  pdCZSetTime( pdBipedCZPtr(b), t ); \
+  pdFootSetTime( pdBipedLFPtr(b), t ); \
+  pdFootSetTime( pdBipedRFPtr(b), t ); \
 } while(0)
-#define pdBipedResetTime(c) do{ \
-  pdBipedSetTime( c, 0 ); \
-  pdCZResetTime( pdBipedCZPtr( c ) ); \
-  pdFootResetTime( pdBipedLFPtr( c ) ); \
-  pdFootResetTime( pdBipedRFPtr( c ) ); \
+#define pdBipedResetTime(b) do{ \
+  pdBipedSetTime( b, 0 ); \
+  pdCZResetTime( pdBipedCZPtr(b) ); \
+  pdFootResetTime( pdBipedLFPtr(b) ); \
+  pdFootResetTime( pdBipedRFPtr(b) ); \
 } while(0)
-#define pdBipedSetTimeStep(c,dt) do{ \
-  (c)->_dt = (dt); \
-  pdCZSetTimeStep( pdBipedCZPtr( c ), dt ); \
-  pdFootSetTimeStep( pdBipedLFPtr( c ), dt ); \
-  pdFootSetTimeStep( pdBipedRFPtr( c ), dt ); \
+#define pdBipedSetTimeStep(b,dt) do{ \
+  (b)->_dt = (dt); \
+  pdCZSetTimeStep( pdBipedCZPtr(b), dt ); \
+  pdFootSetTimeStep( pdBipedLFPtr(b), dt ); \
+  pdFootSetTimeStep( pdBipedRFPtr(b), dt ); \
 } while(0)
-#define pdBipedIncrTime(c) pdBipedTime( c ) += pdBipedTimeStep( c )
+#define pdBipedIncrTime(b) pdBipedTime(b) += pdBipedTimeStep(b)
 
 bool pdBipedDoesIntendToStand(pdBiped *biped);
 bool pdBipedDoesIntendToStep(pdBiped *biped);
 bool pdBipedDoesIntendToWalk(pdBiped *biped);
 bool pdBipedDoesIntendToSidewalk(pdBiped *biped);
 
-#define pdBipedIsBothFeetOn(c) pdFootIsBothOn( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsEitherFootOn(c) pdFootIsEitherOn( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsEitherFootOff(c) pdFootIsEitherOff( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsBothFeetOnNext(c) pdFootIsBothOnNext( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsEitherFootOnNext(c) pdFootIsEitherOnNext( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsEitherFootOffNext(c) pdFootIsEitherOffNext( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsBothFeetOnAttempt(c) pdFootIsBothOnAttempt( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsEitherFootOnAttempt(c) pdFootIsEitherOnAttempt( pdBipedLFPtr(c), pdBipedRFPtr(c) )
-#define pdBipedIsEitherFootOffAttempt(c) pdFootIsEitherOffAttempt( pdBipedLFPtr(c), pdBipedRFPtr(c) )
+#define pdBipedIsBothFeetOn(b) pdFootIsBothOn( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsEitherFootOn(b) pdFootIsEitherOn( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsEitherFootOff(b) pdFootIsEitherOff( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsBothFeetOnNext(b) pdFootIsBothOnNext( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsEitherFootOnNext(b) pdFootIsEitherOnNext( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsEitherFootOffNext(b) pdFootIsEitherOffNext( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsBothFeetOnAttempt(b) pdFootIsBothOnAttempt( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsEitherFootOnAttempt(b) pdFootIsEitherOnAttempt( pdBipedLFPtr(b), pdBipedRFPtr(b) )
+#define pdBipedIsEitherFootOffAttempt(b) pdFootIsEitherOffAttempt( pdBipedLFPtr(b), pdBipedRFPtr(b) )
 
 /* update method */
-__EXPORT void pdBipedUpdate(pdBiped *biped, pdState *state);
-__EXPORT void pdBipedUpdateState(pdBiped *biped, pdState *state);
+__PEDI2_EXPORT void pdBipedUpdate(pdBiped *biped, pdState *state);
+__PEDI2_EXPORT void pdBipedUpdateState(pdBiped *biped, pdState *state);
 
 /* output method */
-__EXPORT void pdBipedFWrite(FILE *fp, pdBiped *biped);
-#define pdBipedWrite(c) pdBipedFWrite( stdout, c )
-__EXPORT void pdBipedDataFWrite(FILE *fp, pdBiped *biped);
-#define pdBipedDataWrite(c) pdBipedDataFWrite( stdout, c )
+__PEDI2_EXPORT void pdBipedFWrite(FILE *fp, pdBiped *biped);
+#define pdBipedWrite(b) pdBipedFWrite( stdout, c )
+__PEDI2_EXPORT void pdBipedDataFWrite(FILE *fp, pdBiped *biped);
+#define pdBipedDataWrite(b) pdBipedDataFWrite( stdout, c )
 
 __END_DECLS
 

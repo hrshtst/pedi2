@@ -1,4 +1,4 @@
-[joint]
+[pedi2::joint]
 name: rhip_y
 type: PIDtrq
 pgain: 8000
@@ -7,7 +7,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rhip_p
 type: PIDtrq
 pgain: 8000
@@ -16,7 +16,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rhip_r
 type: PIDtrq
 pgain: 8000
@@ -25,7 +25,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rknee_p
 type: PIDtrq
 pgain: 8000
@@ -34,7 +34,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rankle_r
 type: PIDtrq
 pgain: 8000
@@ -43,7 +43,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rankle_p
 type: PIDtrq
 pgain: 8000
@@ -52,7 +52,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lhip_y
 type: PIDtrq
 pgain: 8000
@@ -61,7 +61,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lhip_p
 type: PIDtrq
 pgain: 8000
@@ -70,7 +70,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lhip_r
 type: PIDtrq
 pgain: 8000
@@ -79,7 +79,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lknee_p
 type: PIDtrq
 pgain: 8000
@@ -88,7 +88,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lankle_r
 type: PIDtrq
 pgain: 8000
@@ -97,7 +97,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lankle_p
 type: PIDtrq
 pgain: 8000
@@ -106,7 +106,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: waist_p
 type: PIDtrq
 pgain: 8000
@@ -115,7 +115,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: waist_r
 type: PIDtrq
 pgain: 8000
@@ -124,7 +124,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: neck_p
 type: PIDtrq
 pgain: 8000
@@ -133,7 +133,16 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
+name: neck_y
+type: PIDtrq
+pgain: 8000
+dgain: 100
+igain: 1000
+max: 5000
+min: -5000
+
+[pedi2::joint]
 name: rscaplae_y
 type: PIDtrq
 pgain: 8000
@@ -142,7 +151,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rshoulder_p
 type: PIDtrq
 pgain: 8000
@@ -151,7 +160,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rshoulder_r
 type: PIDtrq
 pgain: 8000
@@ -160,7 +169,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rshoulder_y
 type: PIDtrq
 pgain: 8000
@@ -169,7 +178,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: relbow_p
 type: PIDtrq
 pgain: 8000
@@ -178,7 +187,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rwrist_y
 type: PIDtrq
 pgain: 8000
@@ -187,7 +196,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rwrist_r
 type: PIDtrq
 pgain: 8000
@@ -196,7 +205,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: rwrist_p
 type: PIDtrq
 pgain: 8000
@@ -205,7 +214,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lscaplae_y
 type: PIDtrq
 pgain: 8000
@@ -214,7 +223,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lshoulder_p
 type: PIDtrq
 pgain: 8000
@@ -223,7 +232,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lshoulder_r
 type: PIDtrq
 pgain: 8000
@@ -232,7 +241,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lshoulder_y
 type: PIDtrq
 pgain: 8000
@@ -241,7 +250,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lelbow_p
 type: PIDtrq
 pgain: 8000
@@ -250,7 +259,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lwrist_y
 type: PIDtrq
 pgain: 8000
@@ -259,7 +268,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lwrist_r
 type: PIDtrq
 pgain: 8000
@@ -268,7 +277,7 @@ igain: 1000
 max: 5000
 min: -5000
 
-[joint]
+[pedi2::joint]
 name: lwrist_p
 type: PIDtrq
 pgain: 8000

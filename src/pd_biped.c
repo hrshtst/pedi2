@@ -18,21 +18,19 @@ void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt)
               PD_FOOT_RIGHT, pdBipedTimeStep( biped ) );
   biped->cmd = cmd;
   pdModeInit( &biped->mode );
-  zVec3DClear( pdBipedRefCOMPos( biped ) );
-  zVec3DClear( pdBipedRefBaseAtt( biped ) );
-  zVec3DClear( pdBipedRefLFPos( biped ) );
-  zVec3DClear( pdBipedRefLFAtt( biped ) );
-  zVec3DClear( pdBipedRefRFPos( biped ) );
-  zVec3DClear( pdBipedRefRFAtt( biped ) );
+  zVec3DZero( pdBipedRefCOMPos( biped ) );
+  zVec3DZero( pdBipedRefTorsoAtt( biped ) );
+  zVec3DZero( pdBipedRefLFPos( biped ) );
+  zVec3DZero( pdBipedRefLFAtt( biped ) );
+  zVec3DZero( pdBipedRefRFPos( biped ) );
+  zVec3DZero( pdBipedRefRFAtt( biped ) );
 }
 
 bool _pdBipedIsStateValid(pdBiped *biped, pdState *state)
 {
   /* NOTE: This validation checking is insufficient */
-  if( zIsTiny( zVec3DElem( &state->lf_pos, zZ ) -
-               zVec3DElem( &state->com_pos, zZ ) ) ||
-      zIsTiny( zVec3DElem( &state->rf_pos, zZ ) -
-               zVec3DElem( &state->com_pos, zZ ) ) ){
+  if( zIsTiny( state->lf_pos.c.z - state->com_pos.c.z ) ||
+      zIsTiny( state->rf_pos.c.z - state->com_pos.c.z ) ){
     ZRUNERROR( "could not determine the height of COM" );
     return false;
   }
@@ -61,7 +59,7 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
   if( biped->cmd->zd > 0 )
     com_height = biped->cmd->zd;
   else {
-    com_height = zVec3DElem(&state->com_pos,zZ) - zVec3DElem(&state->lf_pos,zZ);
+    com_height = state->com_pos.c.z - state->lf_pos.c.z;
     com_height = 0.95 * com_height;
     biped->cmd->zd = com_height;
   }
@@ -69,8 +67,8 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
   theta = biped->cmd->thetad;
   zSinCos( theta, &s, &c );
   d = 0.5 * foot_dist;
-  x = zVec3DElem( &state->com_pos, zX );
-  y = zVec3DElem( &state->com_pos, zY );
+  x = state->com_pos.c.x;
+  y = state->com_pos.c.y;
   biped->cmd->xd = x;
   biped->cmd->yd = y;
   biped->cmd->xdd = biped->cmd->xd;
@@ -78,26 +76,26 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
   biped->cmd->zdd = biped->cmd->zd;
 
   zVec3DCopy( &state->com_pos, &v );
-  zVec3DSetElem( &v, zZ, com_height );
+  v.c.z = com_height;
   zVec3DCopy( &v, pdBipedRefCOMPos( biped ) );
   zVec3DCopy( &v, pdCZRefCOM( pdBipedCZPtr( biped ) ) );
 
-  zVec3DCopy( &state->base_att, &v );
-  zVec3DSetElem( &v, zX, theta + offset );
-  zVec3DCopy( &v, pdBipedRefBaseAtt( biped ) );
+  zVec3DCopy( &state->torso_att, &v );
+  v.c.x = theta + offset;
+  zVec3DCopy( &v, pdBipedRefTorsoAtt( biped ) );
 
   zVec3DCreate( &v, x-d*c, y-d*s, 0 );
   zVec3DCopy( &v, pdBipedRefLFPos( biped ) );
 
   zVec3DCopy( &state->lf_att, &v );
-  zVec3DSetElem( &v, zX, theta + offset );
+  v.c.x = theta + offset;
   zVec3DCopy( &v, pdBipedRefLFAtt( biped ) );
 
   zVec3DCreate( &v, x+d*c, y+d*s, 0 );
   zVec3DCopy( &v, pdBipedRefRFPos( biped ) );
 
   zVec3DCopy( &state->rf_att, &v );
-  zVec3DSetElem( &v, zX, theta + offset );
+  v.c.x = theta + offset;
   zVec3DCopy( &v, pdBipedRefRFAtt( biped ) );
 }
 
@@ -196,7 +194,7 @@ void _pdBipedUpdateCZ(pdBiped *biped, pdState *state)
               &state->zmp,
               state->fz,
               &state->ef,
-              state->base_att.e[0] - offset,
+              state->torso_att.e[0] - offset,
               &state->sr );
 }
 
@@ -224,8 +222,8 @@ void _pdBipedUpdateRef(pdBiped *biped, pdState *state)
   zVec3DCopy( pdCZRefCOM( pdBipedCZPtr(biped) ), pdBipedRefCOMPos(biped) );
 
   zVec3DCreate( &v, pdCZCmdTheta( pdBipedCZPtr(biped) ), 0, 0 );
-  zVec3DElem( &v, zX ) += offset;
-  zVec3DCopy( &v, pdBipedRefBaseAtt(biped) );
+  v.c.x += offset;
+  zVec3DCopy( &v, pdBipedRefTorsoAtt(biped) );
 
   zVec3DCopy( pdFootRefPos( pdBipedLFPtr(biped) ), pdBipedRefLFPos(biped) );
   zVec3DCopy( pdFootRefAtt( pdBipedLFPtr(biped) ), pdBipedRefLFAtt(biped) );
@@ -358,7 +356,7 @@ void pdBipedUpdateState(pdBiped *biped, pdState *state)
   zVec3DCopy( pdBipedRefCOMPos(biped), &state->com_pos );
   zVec3DCopy( pdCZRefVel( pdBipedCZPtr(biped) ), &state->com_vel );
   zVec3DCopy( pdCZRefAcc( pdBipedCZPtr(biped) ), &state->com_acc );
-  zVec3DCopy( pdBipedRefBaseAtt(biped), &state->base_att );
+  zVec3DCopy( pdBipedRefTorsoAtt(biped), &state->torso_att );
   zVec3DCopy( pdBipedRefLFPos(biped), &state->lf_pos );
   zVec3DCopy( pdBipedRefLFAtt(biped), &state->lf_att );
   zVec3DCopy( pdBipedRefRFPos(biped), &state->rf_pos );
@@ -401,23 +399,23 @@ void pdBipedFWrite(FILE *fp, pdBiped *biped)
 
   fprintf( fp, "--\n" );
   fprintf( fp, "lf    x:%g,    y:%g,    z:%g\n",
-           zVec3DElem(&lf->_p,zX), zVec3DElem(&lf->_p,zY),
-           zVec3DElem(&lf->_p,zZ) );
+           lf->_p.c.x, lf->_p.c.y,
+           lf->_p.c.z );
   fprintf( fp, "lf   xd:%g,   yd:%g,   zd:%g\n",
-           zVec3DElem(&lf->_pd,zX), zVec3DElem(&lf->_pd,zY),
-           zVec3DElem(&lf->_pd,zZ) );
+           lf->_pd.c.x, lf->_pd.c.y,
+           lf->_pd.c.z );
   fprintf( fp, "lf refx:%g, refy:%g, refz:%g\n",
-           zVec3DElem(&lf->refp,zX), zVec3DElem(&lf->refp,zY),
-           zVec3DElem(&lf->refp,zZ) );
+           lf->refp.c.x, lf->refp.c.y,
+           lf->refp.c.z );
   fprintf( fp, "lf azim:%g, elev:%g, tilt:%g\n",
-           zVec3DElem(&lf->_a,zX), zVec3DElem(&lf->_a,zY),
-           zVec3DElem(&lf->_a,zZ) );
+           lf->_a.c.x, lf->_a.c.y,
+           lf->_a.c.z );
   fprintf( fp, "lf desa:%g, dese:%g, dest:%g\n",
-           zVec3DElem(&lf->_ad,zX), zVec3DElem(&lf->_ad,zY),
-           zVec3DElem(&lf->_ad,zZ) );
+           lf->_ad.c.x, lf->_ad.c.y,
+           lf->_ad.c.z );
   fprintf( fp, "lf refa:%g, refe:%g, reft:%g\n",
-           zVec3DElem(&lf->refa,zX), zVec3DElem(&lf->refa,zY),
-           zVec3DElem(&lf->refa,zZ) );
+           lf->refa.c.x, lf->refa.c.y,
+           lf->refa.c.z );
   fprintf( fp, "lf sign:%g, kappa:%g, dist:%g, phi:%g\n",
            pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)),
            pdFootUWDist(pdFootUWPtr(lf)), pdFootUWPhi(pdFootUWPtr(lf)) );
@@ -428,29 +426,29 @@ void pdBipedFWrite(FILE *fp, pdBiped *biped)
   fprintf( fp, "lf sign:%g, h:%g, rho:%g, dist:%g\n",
            pdFootZSign(pdFootZPtr(lf)), pdFootZMaxHeight(pdFootZPtr(lf)),
            pdFootZRho(pdFootZPtr(lf)), pdFootZDist(pdFootZPtr(lf)) );
-  fprintf( fp, "lf pz:" );zComplexFWrite( fp, pdFootZZMPPhase(pdFootZPtr(lf)) );
+  fprintf( fp, "lf pz:" );zComplexFPrint( fp, pdFootZZMPPhase(pdFootZPtr(lf)) );
   fprintf( fp, ", phase:%g, zd:%g\n",
            pdFootZFootPhase(pdFootZPtr(lf)), pdFootZRefZ(pdFootZPtr(lf)) );
 
   fprintf( fp, "--\n" );
   fprintf( fp, "rf    x:%g,    y:%g,    z:%g\n",
-           zVec3DElem(&rf->_p,zX), zVec3DElem(&rf->_p,zY),
-           zVec3DElem(&rf->_p,zZ) );
+           rf->_p.c.x, rf->_p.c.y,
+           rf->_p.c.z );
   fprintf( fp, "rf   xd:%g,   yd:%g,   zd:%g\n",
-           zVec3DElem(&rf->_pd,zX), zVec3DElem(&rf->_pd,zY),
-           zVec3DElem(&rf->_pd,zZ) );
+           rf->_pd.c.x, rf->_pd.c.y,
+           rf->_pd.c.z );
   fprintf( fp, "rf refx:%g, refy:%g, refz:%g\n",
-           zVec3DElem(&rf->refp,zX), zVec3DElem(&rf->refp,zY),
-           zVec3DElem(&rf->refp,zZ) );
+           rf->refp.c.x, rf->refp.c.y,
+           rf->refp.c.z );
   fprintf( fp, "rf azim:%g, elev:%g, tilt:%g\n",
-           zVec3DElem(&rf->_a,zX), zVec3DElem(&rf->_a,zY),
-           zVec3DElem(&rf->_a,zZ) );
+           rf->_a.c.x, rf->_a.c.y,
+           rf->_a.c.z );
   fprintf( fp, "rf desa:%g, dese:%g, dest:%g\n",
-           zVec3DElem(&rf->_ad,zX), zVec3DElem(&rf->_ad,zY),
-           zVec3DElem(&rf->_ad,zZ) );
+           rf->_ad.c.x, rf->_ad.c.y,
+           rf->_ad.c.z );
   fprintf( fp, "rf refa:%g, refe:%g, reft:%g\n",
-           zVec3DElem(&rf->refa,zX), zVec3DElem(&rf->refa,zY),
-           zVec3DElem(&rf->refa,zZ) );
+           rf->refa.c.x, rf->refa.c.y,
+           rf->refa.c.z );
   fprintf( fp, "rf sign:%g, kappa:%g, dist:%g, phi:%g\n",
            pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)),
            pdFootUWDist(pdFootUWPtr(rf)), pdFootUWPhi(pdFootUWPtr(rf)) );
@@ -461,7 +459,7 @@ void pdBipedFWrite(FILE *fp, pdBiped *biped)
   fprintf( fp, "rf sign:%g, h:%g, rho:%g, dist:%g\n",
            pdFootZSign(pdFootZPtr(rf)), pdFootZMaxHeight(pdFootZPtr(rf)),
            pdFootZRho(pdFootZPtr(rf)), pdFootZDist(pdFootZPtr(rf)) );
-  fprintf( fp, "rf pz:" );zComplexFWrite( fp, pdFootZZMPPhase(pdFootZPtr(rf)) );
+  fprintf( fp, "rf pz:" );zComplexFPrint( fp, pdFootZZMPPhase(pdFootZPtr(rf)) );
   fprintf( fp, ", phase:%g, zd:%g\n",
            pdFootZFootPhase(pdFootZPtr(rf)), pdFootZRefZ(pdFootZPtr(rf)) );
 }
@@ -487,21 +485,21 @@ void pdBipedDataFWrite(FILE *fp, pdBiped *biped)
 /*28-30*/  pdCZRefVelX(c), pdCZRefVelY(c), pdCZRefVelZ(c),
 /*31-33*/  pdCZRefAccX(c), pdCZRefAccY(c), pdCZRefAccZ(c),
 /*34-36*/  pdCZRefZMPX(c), pdCZRefZMPY(c), pdCZRefZMPZ(c),
-/*37-39*/  zVec3DElem(&lf->_p,zX), zVec3DElem(&lf->_p,zY), zVec3DElem(&lf->_p,zZ),
-/*40-42*/  zVec3DElem(&lf->_pd,zX), zVec3DElem(&lf->_pd,zY), zVec3DElem(&lf->_pd,zZ),
-/*43-45*/  zVec3DElem(&lf->refp,zX), zVec3DElem(&lf->refp,zY), zVec3DElem(&lf->refp,zZ),
-/*46-48*/  zVec3DElem(&lf->_a,zX), zVec3DElem(&lf->_a,zY), zVec3DElem(&lf->_a,zZ),
-/*49-51*/  zVec3DElem(&lf->_ad,zX), zVec3DElem(&lf->_ad,zY), zVec3DElem(&lf->_ad,zZ),
-/*52-54*/  zVec3DElem(&lf->refa,zX), zVec3DElem(&lf->refa,zY), zVec3DElem(&lf->refa,zZ),
+/*37-39*/  pdFootPosX(lf), pdFootPosY(lf), pdFootPosZ(lf),
+/*40-42*/  pdFootDesPosX(lf), pdFootDesPosY(lf), pdFootDesPosZ(lf),
+/*43-45*/  pdFootRefPosX(lf), pdFootRefPosY(lf), pdFootRefPosZ(lf),
+/*46-48*/  pdFootAttX(lf), pdFootAttY(lf), pdFootAttZ(lf),
+/*49-51*/  pdFootDesAttX(lf), pdFootDesAttY(lf), pdFootDesAttZ(lf),
+/*52-54*/  pdFootRefAttX(lf), pdFootRefAttY(lf), pdFootRefAttZ(lf),
 /*55-56*/  pdFootUWPhi(pdFootUWPtr(lf)), pdFootZMaxHeight(pdFootZPtr(lf)),
 /*57-58*/  pdFootZZMPPhase(pdFootZPtr(lf))->re, pdFootZZMPPhase(pdFootZPtr(lf))->im,
 /*59-60*/  pdFootZFootPhase(pdFootZPtr(lf)), pdFootZRefZ(pdFootZPtr(lf)),
-/*61-63*/  zVec3DElem(&rf->_p,zX), zVec3DElem(&rf->_p,zY), zVec3DElem(&rf->_p,zZ),
-/*64-66*/  zVec3DElem(&rf->_pd,zX), zVec3DElem(&rf->_pd,zY), zVec3DElem(&rf->_pd,zZ),
-/*67-69*/  zVec3DElem(&rf->refp,zX), zVec3DElem(&rf->refp,zY), zVec3DElem(&rf->refp,zZ),
-/*70-72*/  zVec3DElem(&rf->_a,zX), zVec3DElem(&rf->_a,zY), zVec3DElem(&rf->_a,zZ),
-/*73-75*/  zVec3DElem(&rf->_ad,zX), zVec3DElem(&rf->_ad,zY), zVec3DElem(&rf->_ad,zZ),
-/*76-78*/  zVec3DElem(&rf->refa,zX), zVec3DElem(&rf->refa,zY), zVec3DElem(&rf->refa,zZ),
+/*61-63*/  pdFootPosX(rf), pdFootPosY(rf), pdFootPosZ(rf),
+/*64-66*/  pdFootDesPosX(rf), pdFootDesPosY(rf), pdFootDesPosZ(rf),
+/*67-69*/  pdFootRefPosX(rf), pdFootRefPosY(rf), pdFootRefPosZ(rf),
+/*70-72*/  pdFootAttX(rf), pdFootAttY(rf), pdFootAttZ(rf),
+/*73-75*/  pdFootDesAttX(rf), pdFootDesAttY(rf), pdFootDesAttZ(rf),
+/*76-78*/  pdFootRefAttX(rf), pdFootRefAttY(rf), pdFootRefAttZ(rf),
 /*79-80*/  pdFootUWPhi(pdFootUWPtr(rf)), pdFootZMaxHeight(pdFootZPtr(rf)),
 /*81-82*/  pdFootZZMPPhase(pdFootZPtr(rf))->re, pdFootZZMPPhase(pdFootZPtr(rf))->im,
 /*83-84*/  pdFootZFootPhase(pdFootZPtr(rf)), pdFootZRefZ(pdFootZPtr(rf))

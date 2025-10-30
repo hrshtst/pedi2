@@ -2,6 +2,7 @@
 #define __PD_CZ_H__
 
 #include <zm/zm_ode.h>
+#include <zeo/zeo_vec3d.h>
 #include <pedi2/pd_cz_vrt.h>
 #include <pedi2/pd_cz_hrz.h>
 
@@ -17,7 +18,7 @@ typedef struct{
   double _fz;       /* vertial reaction force */
   zVec3D _ef;       /* external force */
   double _theta;    /* rotational angle */
-  zVec3DList *_sr;  /* supporting region */
+  zLoop3D *_sr;     /* supporting region */
 
   pdCZVrt _vrt;     /* vertical motion controller */
   pdCZHrz _hrz;     /* horizontal motion controller */
@@ -30,8 +31,8 @@ typedef struct{
   } _errcomp;         /* error compensator */
 
   struct{
-    double _t;       /* time */
-    double _dt;      /* time step */
+    double _t;      /* time */
+    double _dt;     /* time step */
     zVec pos, vel;  /* state vector: pos = [ x y z ]^T */
     zODE2 solver;   /* ODE solver */
   } _ode;
@@ -44,179 +45,179 @@ typedef struct{
 } pdCZ;
 
 /* c'tor and d'tor */
-__EXPORT void pdCZInit(pdCZ *cz, double dt);
-__EXPORT void pdCZDestroy(pdCZ *cz);
+__PEDI2_EXPORT void pdCZInit(pdCZ *cz, double dt);
+__PEDI2_EXPORT void pdCZDestroy(pdCZ *cz);
 
 /* methods to get parameters */
-#define pdCZTime(c)     (c)->_ode._t
-#define pdCZTimeStep(c) (c)->_ode._dt
-#define pdCZCmdCOM(c)   ( &(c)->_comd )
-#define pdCZCmdCOMX(c)  zVec3DElem( pdCZCmdCOM(c), zX )
-#define pdCZCmdCOMY(c)  zVec3DElem( pdCZCmdCOM(c), zY )
-#define pdCZCmdCOMZ(c)  zVec3DElem( pdCZCmdCOM(c), zZ )
-#define pdCZCmdTheta(c) (c)->_thetad
-#define pdCZCOM(c)      ( &(c)->_com )
-#define pdCZCOMX(c)     zVec3DElem( pdCZCOM(c), zX )
-#define pdCZCOMY(c)     zVec3DElem( pdCZCOM(c), zY )
-#define pdCZCOMZ(c)     zVec3DElem( pdCZCOM(c), zZ )
-#define pdCZVel(c)      ( &(c)->_vel )
-#define pdCZVelX(c)     zVec3DElem( pdCZVel(c), zX )
-#define pdCZVelY(c)     zVec3DElem( pdCZVel(c), zY )
-#define pdCZVelZ(c)     zVec3DElem( pdCZVel(c), zZ )
-#define pdCZAcc(c)      ( &(c)->_acc )
-#define pdCZAccX(c)     zVec3DElem( pdCZAcc(c), zX )
-#define pdCZAccY(c)     zVec3DElem( pdCZAcc(c), zY )
-#define pdCZAccZ(c)     zVec3DElem( pdCZAcc(c), zZ )
-#define pdCZZMP(c)      ( &(c)->_zmp )
-#define pdCZZMPX(c)     zVec3DElem( pdCZZMP(c), zX )
-#define pdCZZMPY(c)     zVec3DElem( pdCZZMP(c), zY )
-#define pdCZZMPZ(c)     zVec3DElem( pdCZZMP(c), zZ )
-#define pdCZFZ(c)      (c)->_fz
-#define pdCZExtF(c)    ( &(c)->_ef )
-#define pdCZExtFX(c)   zVec3DElem( pdCZExtF(c), zX )
-#define pdCZExtFY(c)   zVec3DElem( pdCZExtF(c), zY )
-#define pdCZExtFZ(c)   zVec3DElem( pdCZExtF(c), zZ )
-#define pdCZTheta(c)   (c)->_theta
-#define pdCZSR(c)      (c)->_sr
-#define pdCZVrtPtr(c)  ( &(c)->_vrt )
-#define pdCZQ1Z(c)     pdCZVrtQ1( pdCZVrtPtr(c) )
-#define pdCZQ2Z(c)     pdCZVrtQ2( pdCZVrtPtr(c) )
-#define pdCZZeta(c)    pdCZVrtZeta( pdCZVrtPtr(c) )
-#define pdCZHrzPtr(c)  ( &(c)->_hrz )
-#define pdCZRefVelU(c) pdCZHrzRefVelU( pdCZHrzPtr(c) )
-#define pdCZQ1U(c)     pdCZHrzQ1U( pdCZHrzPtr(c) )
-#define pdCZQ2U(c)     pdCZHrzQ2U( pdCZHrzPtr(c) )
-#define pdCZRefVelW(c) pdCZHrzRefVelW( pdCZHrzPtr(c) )
-#define pdCZQ1W(c)     pdCZHrzQ1W( pdCZHrzPtr(c) )
-#define pdCZQ2W(c)     pdCZHrzQ2W( pdCZHrzPtr(c) )
-#define pdCZRho(c)     pdCZHrzRho( pdCZHrzPtr(c) )
-#define pdCZKr(c)      pdCZHrzKr( pdCZHrzPtr(c) )
-#define pdCZDist(c)    pdCZHrzDist( pdCZHrzPtr(c) )
-#define pdCZKappa(c)   pdCZHrzKappa( pdCZHrzPtr(c) )
-#define pdCZRefPosUW(c) pdCZHrzRefPosUW( pdCZHrzPtr(c) )
-#define pdCZRefPosU(c)  pdCZHrzRefPosU( pdCZHrzPtr(c) )
-#define pdCZRefPosW(c)  pdCZHrzRefPosW( pdCZHrzPtr(c) )
-#define pdCZDelta(c)    pdCZHrzDelta( pdCZHrzPtr(c) )
-#define pdCZDeltaU(c)   pdCZHrzDeltaU( pdCZHrzPtr(c) )
-#define pdCZDeltaW(c)   pdCZHrzDeltaW( pdCZHrzPtr(c) )
-#define pdCZVelUW(c)    pdCZHrzVelUW( pdCZHrzPtr(c) )
-#define pdCZVelU(c)     pdCZHrzVelU( pdCZHrzPtr(c) )
-#define pdCZVelW(c)     pdCZHrzVelW( pdCZHrzPtr(c) )
-#define pdCZAlphaX(c)   ( (c)->_errcomp._alpha[0] )
-#define pdCZAlphaY(c)   ( (c)->_errcomp._alpha[1] )
-#define pdCZAlphaZ(c)   ( (c)->_errcomp._alpha[2] )
-#define pdCZBetaX(c)    ( (c)->_errcomp._beta[0] )
-#define pdCZBetaY(c)    ( (c)->_errcomp._beta[1] )
-#define pdCZBetaZ(c)    ( (c)->_errcomp._beta[2] )
-#define pdCZErrCompKX(c) ( (c)->_errcomp._k[0] )
-#define pdCZErrCompKY(c) ( (c)->_errcomp._k[1] )
-#define pdCZErrCompKZ(c) ( (c)->_errcomp._k[2] )
-#define pdCZErrCompBX(c) ( (c)->_errcomp._b[0] )
-#define pdCZErrCompBY(c) ( (c)->_errcomp._b[1] )
-#define pdCZErrCompBZ(c) ( (c)->_errcomp._b[2] )
-#define pdCZRefCOM(c)  ( &(c)->refcom )
-#define pdCZRefCOMX(c) zVec3DElem( pdCZRefCOM(c), zX )
-#define pdCZRefCOMY(c) zVec3DElem( pdCZRefCOM(c), zY )
-#define pdCZRefCOMZ(c) zVec3DElem( pdCZRefCOM(c), zZ )
-#define pdCZRefVel(c)  ( &(c)->refvel )
-#define pdCZRefVelX(c) zVec3DElem( pdCZRefVel(c), zX )
-#define pdCZRefVelY(c) zVec3DElem( pdCZRefVel(c), zY )
-#define pdCZRefVelZ(c) zVec3DElem( pdCZRefVel(c), zZ )
-#define pdCZRefAcc(c)  ( &(c)->refacc )
-#define pdCZRefAccX(c) zVec3DElem( pdCZRefAcc(c), zX )
-#define pdCZRefAccY(c) zVec3DElem( pdCZRefAcc(c), zY )
-#define pdCZRefAccZ(c) zVec3DElem( pdCZRefAcc(c), zZ )
-#define pdCZRefZMP(c)  ( &(c)->refzmp )
-#define pdCZRefZMPX(c) zVec3DElem( pdCZRefZMP(c), zX )
-#define pdCZRefZMPY(c) zVec3DElem( pdCZRefZMP(c), zY )
-#define pdCZRefZMPZ(c) zVec3DElem( pdCZRefZMP(c), zZ )
-#define pdCZRefFZ(c)   ( (c)->reffz )
+#define pdCZTime(cz)      (cz)->_ode._t
+#define pdCZTimeStep(cz)  (cz)->_ode._dt
+#define pdCZCmdCOM(cz)    ( &(cz)->_comd )
+#define pdCZCmdCOMX(cz)   pdCZCmdCOM(cz)->c.x
+#define pdCZCmdCOMY(cz)   pdCZCmdCOM(cz)->c.y
+#define pdCZCmdCOMZ(cz)   pdCZCmdCOM(cz)->c.z
+#define pdCZCmdTheta(cz)  (cz)->_thetad
+#define pdCZCOM(cz)       ( &(cz)->_com )
+#define pdCZCOMX(cz)      pdCZCOM(cz)->c.x
+#define pdCZCOMY(cz)      pdCZCOM(cz)->c.y
+#define pdCZCOMZ(cz)      pdCZCOM(cz)->c.z
+#define pdCZVel(cz)       ( &(cz)->_vel )
+#define pdCZVelX(cz)      pdCZVel(cz)->c.x
+#define pdCZVelY(cz)      pdCZVel(cz)->c.y
+#define pdCZVelZ(cz)      pdCZVel(cz)->c.z
+#define pdCZAcc(cz)       ( &(cz)->_acc )
+#define pdCZAccX(cz)      pdCZAcc(cz)->c.x
+#define pdCZAccY(cz)      pdCZAcc(cz)->c.y
+#define pdCZAccZ(cz)      pdCZAcc(cz)->c.z
+#define pdCZZMP(cz)       ( &(cz)->_zmp )
+#define pdCZZMPX(cz)      pdCZZMP(cz)->c.x
+#define pdCZZMPY(cz)      pdCZZMP(cz)->c.y
+#define pdCZZMPZ(cz)      pdCZZMP(cz)->c.z
+#define pdCZFZ(cz)        (cz)->_fz
+#define pdCZExtF(cz)      ( &(cz)->_ef )
+#define pdCZExtFX(cz)     pdCZExtF(cz)->c.x
+#define pdCZExtFY(cz)     pdCZExtF(cz)->c.y
+#define pdCZExtFZ(cz)     pdCZExtF(cz)->c.z
+#define pdCZTheta(cz)     (cz)->_theta
+#define pdCZSR(cz)        (cz)->_sr
+#define pdCZVrtPtr(cz)    ( &(cz)->_vrt )
+#define pdCZQ1Z(cz)       pdCZVrtQ1( pdCZVrtPtr(cz) )
+#define pdCZQ2Z(cz)       pdCZVrtQ2( pdCZVrtPtr(cz) )
+#define pdCZZeta(cz)      pdCZVrtZeta( pdCZVrtPtr(cz) )
+#define pdCZHrzPtr(cz)    ( &(cz)->_hrz )
+#define pdCZRefVelU(cz)   pdCZHrzRefVelU( pdCZHrzPtr(cz) )
+#define pdCZQ1U(cz)       pdCZHrzQ1U( pdCZHrzPtr(cz) )
+#define pdCZQ2U(cz)       pdCZHrzQ2U( pdCZHrzPtr(cz) )
+#define pdCZRefVelW(cz)   pdCZHrzRefVelW( pdCZHrzPtr(cz) )
+#define pdCZQ1W(cz)       pdCZHrzQ1W( pdCZHrzPtr(cz) )
+#define pdCZQ2W(cz)       pdCZHrzQ2W( pdCZHrzPtr(cz) )
+#define pdCZRho(cz)       pdCZHrzRho( pdCZHrzPtr(cz) )
+#define pdCZKr(cz)        pdCZHrzKr( pdCZHrzPtr(cz) )
+#define pdCZDist(cz)      pdCZHrzDist( pdCZHrzPtr(cz) )
+#define pdCZKappa(cz)     pdCZHrzKappa( pdCZHrzPtr(cz) )
+#define pdCZRefPosUW(cz)  pdCZHrzRefPosUW( pdCZHrzPtr(cz) )
+#define pdCZRefPosU(cz)   pdCZHrzRefPosU( pdCZHrzPtr(cz) )
+#define pdCZRefPosW(cz)   pdCZHrzRefPosW( pdCZHrzPtr(cz) )
+#define pdCZDelta(cz)     pdCZHrzDelta( pdCZHrzPtr(cz) )
+#define pdCZDeltaU(cz)    pdCZHrzDeltaU( pdCZHrzPtr(cz) )
+#define pdCZDeltaW(cz)    pdCZHrzDeltaW( pdCZHrzPtr(cz) )
+#define pdCZVelUW(cz)     pdCZHrzVelUW( pdCZHrzPtr(cz) )
+#define pdCZVelU(cz)      pdCZHrzVelU( pdCZHrzPtr(cz) )
+#define pdCZVelW(cz)      pdCZHrzVelW( pdCZHrzPtr(cz) )
+#define pdCZAlphaX(cz)    ( (cz)->_errcomp._alpha[0] )
+#define pdCZAlphaY(cz)    ( (cz)->_errcomp._alpha[1] )
+#define pdCZAlphaZ(cz)    ( (cz)->_errcomp._alpha[2] )
+#define pdCZBetaX(cz)     ( (cz)->_errcomp._beta[0] )
+#define pdCZBetaY(cz)     ( (cz)->_errcomp._beta[1] )
+#define pdCZBetaZ(cz)     ( (cz)->_errcomp._beta[2] )
+#define pdCZErrCompKX(cz) ( (cz)->_errcomp._k[0] )
+#define pdCZErrCompKY(cz) ( (cz)->_errcomp._k[1] )
+#define pdCZErrCompKZ(cz) ( (cz)->_errcomp._k[2] )
+#define pdCZErrCompBX(cz) ( (cz)->_errcomp._b[0] )
+#define pdCZErrCompBY(cz) ( (cz)->_errcomp._b[1] )
+#define pdCZErrCompBZ(cz) ( (cz)->_errcomp._b[2] )
+#define pdCZRefCOM(cz)    ( &(cz)->refcom )
+#define pdCZRefCOMX(cz)   pdCZRefCOM(cz)->c.x
+#define pdCZRefCOMY(cz)   pdCZRefCOM(cz)->c.y
+#define pdCZRefCOMZ(cz)   pdCZRefCOM(cz)->c.z
+#define pdCZRefVel(cz)    ( &(cz)->refvel )
+#define pdCZRefVelX(cz)   pdCZRefVel(cz)->c.x
+#define pdCZRefVelY(cz)   pdCZRefVel(cz)->c.y
+#define pdCZRefVelZ(cz)   pdCZRefVel(cz)->c.z
+#define pdCZRefAcc(cz)    ( &(cz)->refacc )
+#define pdCZRefAccX(cz)   pdCZRefAcc(cz)->c.x
+#define pdCZRefAccY(cz)   pdCZRefAcc(cz)->c.y
+#define pdCZRefAccZ(cz)   pdCZRefAcc(cz)->c.z
+#define pdCZRefZMP(cz)    ( &(cz)->refzmp )
+#define pdCZRefZMPX(cz)   pdCZRefZMP(cz)->c.x
+#define pdCZRefZMPY(cz)   pdCZRefZMP(cz)->c.y
+#define pdCZRefZMPZ(cz)   pdCZRefZMP(cz)->c.z
+#define pdCZRefFZ(cz)     ( (cz)->reffz )
 
 /* methods to set parameters */
-#define pdCZSetTime(c,t)          ( (c)->_ode._t = (t) )
-#define pdCZResetTime(c)          pdCZSetTime( c, 0 )
-#define pdCZSetTimeStep(c,dt)     ( (c)->_ode._dt = (dt) )
-#define pdCZIncrTime(c)           ( pdCZTime( c ) += pdCZTimeStep( c ) )
-#define pdCZSetCmdCOM(c,xd,yd,zd) zVec3DCreate( pdCZCmdCOM(c), xd, yd, zd )
-#define pdCZSetCmdCOMVec(c,pd)    zVec3DCopy( pd, pdCZCmdCOM(c) )
-#define pdCZSetCmdCOMX(c,xd)      zVec3DSetElem( pdCZCmdCOM(c), zX, xd )
-#define pdCZSetCmdCOMY(c,yd)      zVec3DSetElem( pdCZCmdCOM(c), zY, yd )
-#define pdCZSetCmdCOMZ(c,zd)      zVec3DSetElem( pdCZCmdCOM(c), zZ, zd )
-#define pdCZSetCmdTheta(c,td)     ( pdCZCmdTheta(c) = (td) )
-#define pdCZSetCOM(c,x,y,z)       zVec3DCreate( pdCZCOM(c), x, y, z )
-#define pdCZSetCOMVec(c,p)        zVec3DCopy( p, pdCZCOM(c) )
-#define pdCZSetCOMX(c,x)          zVec3DSetElem( pdCZCOM(c), zX, x )
-#define pdCZSetCOMY(c,y)          zVec3DSetElem( pdCZCOM(c), zY, y )
-#define pdCZSetCOMZ(c,z)          zVec3DSetElem( pdCZCOM(c), zZ, z )
-#define pdCZSetVel(c,vx,vy,vz)    zVec3DCreate( pdCZVel(c), vx, vy, vz )
-#define pdCZSetVelVec(c,v)        zVec3DCopy( v, pdCZVel(c) )
-#define pdCZSetVelX(c,vx)         zVec3DSetElem( pdCZVel(c), zX, vx )
-#define pdCZSetVelY(c,vy)         zVec3DSetElem( pdCZVel(c), zY, vy )
-#define pdCZSetVelZ(c,vz)         zVec3DSetElem( pdCZVel(c), zZ, vz )
-#define pdCZSetAcc(c,ax,ay,az)    zVec3DCreate( pdCZAcc(c), ax, ay, az )
-#define pdCZSetAccVec(c,a)        zVec3DCopy( a, pdCZAcc(c) )
-#define pdCZSetAccX(c,ax)         zVec3DSetElem( pdCZAcc(c), zX, ax )
-#define pdCZSetAccY(c,ay)         zVec3DSetElem( pdCZAcc(c), zY, ay )
-#define pdCZSetAccZ(c,az)         zVec3DSetElem( pdCZAcc(c), zZ, az )
-#define pdCZSetZMP(c,xz,yz,zz)    zVec3DCreate( pdCZZMP(c), xz, yz, zz )
-#define pdCZSetZMPVec(c,pz)       zVec3DCopy( pz, pdCZZMP(c) )
-#define pdCZSetZMPX(c,xz)         zVec3DSetElem( pdCZZMP(c), zX, xz )
-#define pdCZSetZMPY(c,yz)         zVec3DSetElem( pdCZZMP(c), zY, yz )
-#define pdCZSetZMPZ(c,zz)         zVec3DSetElem( pdCZZMP(c), zZ, zz )
-#define pdCZSetFZ(c,fz)           ( (c)->_fz = (fz) )
-#define pdCZSetExtF(c,x,y,z)      zVec3DCreate( pdCZExtF(c), x, y, z )
-#define pdCZSetExtFVec(c,ef)      zVec3DCopy( ef, pdCZExtF(c) )
-#define pdCZSetExtFX(c,x)         zVec3DSetElem( pdCZExtF(c), zX, x )
-#define pdCZSetExtFY(c,y)         zVec3DSetElem( pdCZExtF(c), zY, y )
-#define pdCZSetExtFZ(c,z)         zVec3DSetElem( pdCZExtF(c), zZ, z )
-#define pdCZSetTheta(c,t)         ( (c)->_theta = (t) )
-#define pdCZSetSR(c,sr)           ( (c)->_sr = (sr) )
-#define pdCZSetQ1Z(c,q1)          pdCZVrtSetQ1( pdCZVrtPtr(c), q1 )
-#define pdCZSetQ2Z(c,q2)          pdCZVrtSetQ2( pdCZVrtPtr(c), q2 )
-#define pdCZSetRefVelU(c,vd)      pdCZHrzSetRefVelU( pdCZHrzPtr(c), vd )
-#define pdCZSetQ1U(c,q1)          pdCZHrzSetQ1U( pdCZHrzPtr(c), q1 )
-#define pdCZSetQ2U(c,q2)          pdCZHrzSetQ2U( pdCZHrzPtr(c), q2 )
-#define pdCZSetRefVelW(c,vd)      pdCZHrzSetRefVelW( pdCZHrzPtr(c), vd )
-#define pdCZSetQ1W(c,q1)          pdCZHrzSetQ1W( pdCZHrzPtr(c), q1 )
-#define pdCZSetQ2W(c,q2)          pdCZHrzSetQ2W( pdCZHrzPtr(c), q2 )
-#define pdCZSetRho(c,r)           pdCZHrzSetRho( pdCZHrzPtr(c), r )
-#define pdCZSetKr(c,k)            pdCZHrzSetKr( pdCZHrzPtr(c), k )
-#define pdCZSetDist(c,d)          pdCZHrzSetDist( pdCZHrzPtr(c), d )
-#define pdCZSetKappa(c,k)         pdCZHrzSetKappa( pdCZHrzPtr(c), k )
-#define pdCZSetRefPosUW(c,ud,wd) pdCZHrzSetRefPosUW( pdCZHrzPtr(c), ud, wd )
-#define pdCZSetRefPosUWVec(c,pd) pdCZHrzSetRefPosUWVec( pdCZHrzPtr(c), pd )
-#define pdCZSetRefPosU(c,ud)     pdCZHrzSetRefPosU( pdCZHrzPtr(c), ud )
-#define pdCZSetRefPosW(c,wd)     pdCZHrzSetRefPosW( pdCZHrzPtr(c), wd )
-#define pdCZSetDelta(c,du,dw)    pdCZHrzSetDelta( pdCZHrzPtr(c), du, dw )
-#define pdCZSetDeltaVec(c,d)     pdCZHrzSetDeltaVec( pdCZHrzPtr(c), d )
-#define pdCZSetDeltaU(c,du)      pdCZHrzSetDeltaU( pdCZHrzPtr(c), du )
-#define pdCZSetDeltaW(c,dw)      pdCZHrzSetDeltaW( pdCZHrzPtr(c), dw )
-#define pdCZSetVelUW(c,vu,vw)    pdCZHrzSetVelUW( pdCZHrzPtr(c), vu, vw )
-#define pdCZSetVelUWVec(c,v)     pdCZHrzSetVelUW( pdCZHrzPtr(c), v )
-#define pdCZSetVelU(c,vu)        pdCZHrzSetVelU( pdCZHrzPtr(c), vu )
-#define pdCZSetVelW(c,vw)        pdCZHrzSetVelW( pdCZHrzPtr(c), vw )
-#define pdCZSetErrCompKX(c,kx)   ( (c)->_errcomp._k[0] = (kx) )
-#define pdCZSetErrCompKY(c,ky)   ( (c)->_errcomp._k[1] = (ky) )
-#define pdCZSetErrCompKZ(c,kz)   ( (c)->_errcomp._k[2] = (kz) )
-#define pdCZSetErrCompBX(c,dx)   ( (c)->_errcomp._b[0] = (dx) )
-#define pdCZSetErrCompBY(c,dy)   ( (c)->_errcomp._b[1] = (dy) )
-#define pdCZSetErrCompBZ(c,dz)   ( (c)->_errcomp._b[2] = (dz) )
+#define pdCZSetTime(cz,t)          ( (cz)->_ode._t = (t) )
+#define pdCZResetTime(cz)          pdCZSetTime( cz, 0 )
+#define pdCZSetTimeStep(cz,dt)     ( (cz)->_ode._dt = (dt) )
+#define pdCZIncrTime(cz)           ( pdCZTime( cz ) += pdCZTimeStep( cz ) )
+#define pdCZSetCmdCOM(cz,xd,yd,zd) zVec3DCreate( pdCZCmdCOM(cz), xd, yd, zd )
+#define pdCZSetCmdCOMVec(cz,pd)    zVec3DCopy( pd, pdCZCmdCOM(cz) )
+#define pdCZSetCmdCOMX(cz,xd)      ( pdCZCmdCOMX(cz) = (xd) )
+#define pdCZSetCmdCOMY(cz,yd)      ( pdCZCmdCOMY(cz) = (yd) )
+#define pdCZSetCmdCOMZ(cz,zd)      ( pdCZCmdCOMZ(cz) = (zd) )
+#define pdCZSetCmdTheta(cz,td)     ( pdCZCmdTheta(cz) = (td) )
+#define pdCZSetCOM(cz,x,y,z)       zVec3DCreate( pdCZCOM(cz), x, y, z )
+#define pdCZSetCOMVec(cz,p)        zVec3DCopy( p, pdCZCOM(cz) )
+#define pdCZSetCOMX(cz,x)          ( pdCZCOMX(cz) = (x) )
+#define pdCZSetCOMY(cz,y)          ( pdCZCOMY(cz) = (y) )
+#define pdCZSetCOMZ(cz,z)          ( pdCZCOMZ(cz) = (z) )
+#define pdCZSetVel(cz,vx,vy,vz)    zVec3DCreate( pdCZVel(cz), vx, vy, vz )
+#define pdCZSetVelVec(cz,v)        zVec3DCopy( v, pdCZVel(cz) )
+#define pdCZSetVelX(cz,vx)         ( pdCZVelX(cz) = (vx) )
+#define pdCZSetVelY(cz,vy)         ( pdCZVelY(cz) = (vy) )
+#define pdCZSetVelZ(cz,vz)         ( pdCZVelZ(cz) = (vz) )
+#define pdCZSetAcc(cz,ax,ay,az)    zVec3DCreate( pdCZAcc(cz), ax, ay, az )
+#define pdCZSetAccVec(cz,a)        zVec3DCopy( a, pdCZAcc(cz) )
+#define pdCZSetAccX(cz,ax)         ( pdCZAccX(cz) = (ax) )
+#define pdCZSetAccY(cz,ay)         ( pdCZAccY(cz) = (ay) )
+#define pdCZSetAccZ(cz,az)         ( pdCZAccZ(cz) = (az) )
+#define pdCZSetZMP(cz,xz,yz,zz)    zVec3DCreate( pdCZZMP(cz), xz, yz, zz )
+#define pdCZSetZMPVec(cz,pz)       zVec3DCopy( pz, pdCZZMP(cz) )
+#define pdCZSetZMPX(cz,xz)         ( pdCZZMPX(cz) = (xz) )
+#define pdCZSetZMPY(cz,yz)         ( pdCZZMPY(cz) = (yz) )
+#define pdCZSetZMPZ(cz,zz)         ( pdCZZMPZ(cz) = (zz) )
+#define pdCZSetFZ(cz,fz)           ( (cz)->_fz = (fz) )
+#define pdCZSetExtF(cz,x,y,z)      zVec3DCreate( pdCZExtF(cz), x, y, z )
+#define pdCZSetExtFVec(cz,ef)      zVec3DCopy( ef, pdCZExtF(cz) )
+#define pdCZSetExtFX(cz,x)         ( pdCZExtFX(cz) = (x) )
+#define pdCZSetExtFY(cz,y)         ( pdCZExtFY(cz) = (y) )
+#define pdCZSetExtFZ(cz,z)         ( pdCZExtFZ(cz) = (z) )
+#define pdCZSetTheta(cz,t)         ( (cz)->_theta = (t) )
+#define pdCZSetSR(cz,sr)           ( (cz)->_sr = (sr) )
+#define pdCZSetQ1Z(cz,q1)          pdCZVrtSetQ1( pdCZVrtPtr(cz), q1 )
+#define pdCZSetQ2Z(cz,q2)          pdCZVrtSetQ2( pdCZVrtPtr(cz), q2 )
+#define pdCZSetRefVelU(cz,vd)      pdCZHrzSetRefVelU( pdCZHrzPtr(cz), vd )
+#define pdCZSetQ1U(cz,q1)          pdCZHrzSetQ1U( pdCZHrzPtr(cz), q1 )
+#define pdCZSetQ2U(cz,q2)          pdCZHrzSetQ2U( pdCZHrzPtr(cz), q2 )
+#define pdCZSetRefVelW(cz,vd)      pdCZHrzSetRefVelW( pdCZHrzPtr(cz), vd )
+#define pdCZSetQ1W(cz,q1)          pdCZHrzSetQ1W( pdCZHrzPtr(cz), q1 )
+#define pdCZSetQ2W(cz,q2)          pdCZHrzSetQ2W( pdCZHrzPtr(cz), q2 )
+#define pdCZSetRho(cz,r)           pdCZHrzSetRho( pdCZHrzPtr(cz), r )
+#define pdCZSetKr(cz,k)            pdCZHrzSetKr( pdCZHrzPtr(cz), k )
+#define pdCZSetDist(cz,d)          pdCZHrzSetDist( pdCZHrzPtr(cz), d )
+#define pdCZSetKappa(cz,k)         pdCZHrzSetKappa( pdCZHrzPtr(cz), k )
+#define pdCZSetRefPosUW(cz,ud,wd) pdCZHrzSetRefPosUW( pdCZHrzPtr(cz), ud, wd )
+#define pdCZSetRefPosUWVec(cz,pd) pdCZHrzSetRefPosUWVec( pdCZHrzPtr(cz), pd )
+#define pdCZSetRefPosU(cz,ud)     pdCZHrzSetRefPosU( pdCZHrzPtr(cz), ud )
+#define pdCZSetRefPosW(cz,wd)     pdCZHrzSetRefPosW( pdCZHrzPtr(cz), wd )
+#define pdCZSetDelta(cz,du,dw)    pdCZHrzSetDelta( pdCZHrzPtr(cz), du, dw )
+#define pdCZSetDeltaVec(cz,d)     pdCZHrzSetDeltaVec( pdCZHrzPtr(cz), d )
+#define pdCZSetDeltaU(cz,du)      pdCZHrzSetDeltaU( pdCZHrzPtr(cz), du )
+#define pdCZSetDeltaW(cz,dw)      pdCZHrzSetDeltaW( pdCZHrzPtr(cz), dw )
+#define pdCZSetVelUW(cz,vu,vw)    pdCZHrzSetVelUW( pdCZHrzPtr(cz), vu, vw )
+#define pdCZSetVelUWVec(cz,v)     pdCZHrzSetVelUW( pdCZHrzPtr(cz), v )
+#define pdCZSetVelU(cz,vu)        pdCZHrzSetVelU( pdCZHrzPtr(cz), vu )
+#define pdCZSetVelW(cz,vw)        pdCZHrzSetVelW( pdCZHrzPtr(cz), vw )
+#define pdCZSetErrCompKX(cz,kx)   ( (cz)->_errcomp._k[0] = (kx) )
+#define pdCZSetErrCompKY(cz,ky)   ( (cz)->_errcomp._k[1] = (ky) )
+#define pdCZSetErrCompKZ(cz,kz)   ( (cz)->_errcomp._k[2] = (kz) )
+#define pdCZSetErrCompBX(cz,dx)   ( (cz)->_errcomp._b[0] = (dx) )
+#define pdCZSetErrCompBY(cz,dy)   ( (cz)->_errcomp._b[1] = (dy) )
+#define pdCZSetErrCompBZ(cz,dz)   ( (cz)->_errcomp._b[2] = (dz) )
 
 /* calculation method */
-__EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D refuw);
-__EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D refuw, double delta_theta);
-__EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D refuw, zVec2D nextuwd);
+__PEDI2_EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw);
+__PEDI2_EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta);
+__PEDI2_EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd);
 
 /* update method */
-__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zVec3DList *sr);
-__EXPORT void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad);
-__EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
+__PEDI2_EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zLoop3D *sr);
+__PEDI2_EXPORT void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad);
+__PEDI2_EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
 
 /* output method */
-__EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);
-#define pdCZWrite(c) pdCZFWrite( stdout, c )
-__EXPORT void pdCZDataFWrite(FILE *fp, pdCZ *cz);
-#define pdCZDataWrite(c) pdCZDataFWrite( stdout, c )
+__PEDI2_EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);
+#define pdCZWrite(cz) pdCZFWrite( stdout, cz )
+__PEDI2_EXPORT void pdCZDataFWrite(FILE *fp, pdCZ *cz);
+#define pdCZDataWrite(cz) pdCZDataFWrite( stdout, cz )
 
 __END_DECLS
 

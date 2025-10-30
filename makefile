@@ -1,26 +1,29 @@
-CONFIG:=$(shell test -e config || cp config.org config; echo config)
-include $(CONFIG)
+MAKEFILEGEN=`which zeda-makefile-gen`
+MAKEDEB=`which zeda-deb-gen`
 
-ROOTDIR:=.
-INCDIR:=$(ROOTDIR)/include/$(PROJNAME)
-SRCDIR:=$(ROOTDIR)/src
-LIBDIR:=$(ROOTDIR)/lib
-APPDIR:=$(ROOTDIR)/app
+.PHONY: doc test example
 
 all:
-	@cd $(SRCDIR); make
-	@cd $(APPDIR); make
-
+ifeq ($(MAKEFILEGEN),)
+	echo "ZEDA not installed."
+else
+	@$(MAKEFILEGEN) | make -f -
+endif
+test:
+	@$(MAKEFILEGEN) | make -f - test
+doc:
+	@$(MAKEFILEGEN) | make -f - doc
+example:
+	@$(MAKEFILEGEN) | make -f - example
 clean:
-	-@rm -f $(ROOTDIR)/*~ $(INCDIR)/*~
-	@cd $(SRCDIR); make clean
-	-@rm -f $(LIBDIR)/*.so
-	@cd $(APPDIR); make clean
+	@$(MAKEFILEGEN) | make -f - clean
 install:
-	@echo " INSTALL library"
-	-@install -m 755 $(LIBDIR)/*.so $(PREFIX)/lib/
-	@echo " INSTALL header files"
-	-@install -m 755 -d $(PREFIX)/include/$(PROJNAME)
-	-@install -m 644 $(INCDIR)/*.h $(PREFIX)/include/$(PROJNAME)/
-	@echo " INSTALL applications"
-	@cd $(APPDIR); make install
+	@$(MAKEFILEGEN) | make -f - install
+uninstall:
+	@$(MAKEFILEGEN) | make -f - uninstall
+deb:
+ifeq ($(MAKEDEB),)
+	echo "ZEDA is not installed."
+else
+	@$(MAKEDEB)
+endif

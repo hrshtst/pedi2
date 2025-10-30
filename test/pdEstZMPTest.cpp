@@ -2,81 +2,233 @@
 #include "utility/random_initializer.h"
 #include <pedi2/pd_est_zmp.h>
 
-const double TIME_STEP = 0.01;
+// These definitions should be removed by using CPP version library
+const zVec3D zVec3D::zvec3Dzero = { { 0, 0, 0 } };
+const zMat3D zMat3D::zmat3Dident = { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } };
+const zFrame3D zFrame3D::zframe3Dident = {
+  { { 0, 0, 0 } },
+  { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } }
+};
 
-class pdEstZMPTest : public testing::Test {
+TEST(pdSensorListTest, CellInit)
+{
+  pdSensorListCell cell;
+
+  pdSensorListCellInit( &cell );
+
+  EXPECT_EQ( &cell, zListCellNext(&cell));
+  EXPECT_EQ( &cell, zListCellPrev(&cell));
+  EXPECT_EQ( NULL, pdSensorListCellSensor(&cell) );
+}
+
+TEST(pdSensorListTest, Push)
+{
+  pdSensorList list;
+  pdSensorListCell *cp;
+  pdSensor s1;
+
+  pdSensorDummyCreate( &s1, "foot", ZFRAME3DIDENT );
+  zListInit( &list );
+  EXPECT_EQ( 0, zListSize( &list ) );
+
+  pdSensorListPush( &list, &s1 );
+  EXPECT_EQ( 1, zListSize( &list ) );
+  cp = zListCellNext( zListRoot(&list) );
+  EXPECT_EQ( &s1, cp->data );
+  cp = zListCellPrev( zListRoot(&list) );
+  EXPECT_EQ( &s1, cp->data );
+
+  pdSensorListDestroy( &list );
+  EXPECT_EQ( 0, zListSize( &list ) );
+}
+
+TEST(pdSensorListTest, Push2)
+{
+  pdSensorList list;
+  pdSensorListCell *cp;
+  pdSensor s1, s2;
+
+  pdSensorDummyCreate( &s1, "left_foot", ZFRAME3DIDENT );
+  pdSensorDummyCreate( &s2, "right_foot", ZFRAME3DIDENT );
+  zListInit( &list );
+  EXPECT_EQ( 0, zListSize( &list ) );
+
+  pdSensorListPush( &list, &s1 );
+  pdSensorListPush( &list, &s2 );
+  EXPECT_EQ( 2, zListSize( &list ) );
+  cp = zListCellNext( zListRoot(&list) );
+  EXPECT_EQ( &s2, cp->data );
+  cp = zListCellNext( cp );
+  EXPECT_EQ( &s1, cp->data );
+
+  pdSensorListDestroy( &list );
+  EXPECT_EQ( 0, zListSize( &list ) );
+}
+
+TEST(pdSensorListTest, Pop)
+{
+  pdSensorList list;
+  pdSensor s1, s2;
+  pdSensor *sp;
+
+  pdSensorDummyCreate( &s1, "left_foot", ZFRAME3DIDENT );
+  pdSensorDummyCreate( &s2, "right_foot", ZFRAME3DIDENT );
+  zListInit( &list );
+  EXPECT_EQ( 0, zListSize( &list ) );
+
+  pdSensorListPush( &list, &s1 );
+  pdSensorListPush( &list, &s2 );
+  EXPECT_EQ( 2, zListSize( &list ) );
+  sp = pdSensorListPop( &list );
+  EXPECT_EQ( &s2, sp );
+  sp = pdSensorListPop( &list );
+  EXPECT_EQ( &s1, sp );
+  sp = pdSensorListPop( &list );
+  EXPECT_EQ( NULL, sp );
+
+  pdSensorListDestroy( &list );
+  EXPECT_EQ( 0, zListSize( &list ) );
+}
+
+class pdEstZmpTest : public testing::Test {
  protected:
   virtual void SetUp() {};
   virtual void TearDown() {};
 
   void SetRandomValues() {
-    zArraySetNum( &e._lfsensor, ri.rand() );
-    zArraySetNum( &e._rfsensor, ri.rand() );
+    e._lfsensor.size = ri.rand();
+    e._rfsensor.size = ri.rand();
     ri.SetRandVec3D( &e.estforce );
     ri.SetRandVec3D( &e.estzmp );
   }
 
   RandomInitializer ri;
-  pdEstZMP e;
+  pdEstZmp e;
 };
 
-TEST_F(pdEstZMPTest, Init)
+TEST_F(pdEstZmpTest, Init)
 {
   SetRandomValues();
-  pdEstZMPInit( &e );
-  EXPECT_EQ( NULL, zArrayBuf( &e._lfsensor ) );
-  EXPECT_EQ( NULL, zArrayBuf( &e._rfsensor ) );
-  EXPECT_EQ( 0, zArrayNum( &e._lfsensor ) );
-  EXPECT_EQ( 0, zArrayNum( &e._rfsensor ) );
-  EXPECT_EQ( 0, pdEstZMPEstForceX( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstForceY( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstForceZ( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstZMPX( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstZMPY( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstZMPZ( &e ) );
+  pdEstZmpInit( &e );
+  EXPECT_EQ( 0, zListSize( &e._lfsensor ) );
+  EXPECT_EQ( 0, zListSize( &e._rfsensor ) );
+  EXPECT_EQ( 0, pdEstZmpEstForceX( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstForceY( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstForceZ( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstZMPX( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstZMPY( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstZMPZ( &e ) );
 }
 
-TEST_F(pdEstZMPTest, Destroy)
+TEST_F(pdEstZmpTest, Destroy)
 {
-  pdEstZMPInit( &e );
+  pdEstZmpInit( &e );
   SetRandomValues();
-  pdEstZMPDestroy( &e );
-  EXPECT_EQ( NULL, zArrayBuf( &e._lfsensor ) );
-  EXPECT_EQ( NULL, zArrayBuf( &e._rfsensor ) );
-  EXPECT_EQ( 0, zArrayNum( &e._lfsensor ) );
-  EXPECT_EQ( 0, zArrayNum( &e._rfsensor ) );
-  EXPECT_EQ( 0, pdEstZMPEstForceX( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstForceY( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstForceZ( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstZMPX( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstZMPY( &e ) );
-  EXPECT_EQ( 0, pdEstZMPEstZMPZ( &e ) );
+  pdEstZmpDestroy( &e );
+  EXPECT_EQ( 0, zListSize( &e._lfsensor ) );
+  EXPECT_EQ( 0, zListSize( &e._rfsensor ) );
+  EXPECT_EQ( 0, pdEstZmpEstForceX( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstForceY( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstForceZ( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstZMPX( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstZMPY( &e ) );
+  EXPECT_EQ( 0, pdEstZmpEstZMPZ( &e ) );
 }
 
-TEST_F(pdEstZMPTest, FRead)
+TEST_F(pdEstZmpTest, FromZTK)
 {
-  char filename[] = "model/zmpest.conf";
-  FILE *fp;
+  char filename[] = "model/zmpest.ztk";
+  ZTK ztk;
+  pdSensorListCell *cp;
 
-  fp = fopen( filename, "r" );
-  pdEstZMPConfFRead( fp, &e );
-  // check filter array
-  EXPECT_EQ( 2, zArrayNum( pdEstZMPFilterArray(&e) ) );
-  EXPECT_STREQ( "bw01", zNamePtr(zArrayElem(pdEstZMPFilterArray(&e),0)));
-  EXPECT_STREQ( "bw02", zNamePtr(zArrayElem(pdEstZMPFilterArray(&e),1)));
+  ZTKParse( &ztk, filename );
+  ASSERT_TRUE( pdEstZmpFromZTK( &e, &ztk ) );
+  // check filter list
+  EXPECT_EQ( 2, zArraySize( pdEstZmpFilterArray(&e) ) );
+  EXPECT_STREQ( "bw01", zNamePtr(zArrayElem(pdEstZmpFilterArray(&e),0)));
+  EXPECT_STREQ( "bw02", zNamePtr(zArrayElem(pdEstZmpFilterArray(&e),1)));
   // check sensor array
-  EXPECT_EQ( 4, zArrayNum( pdEstZMPSensorArray(&e) ) );
-  EXPECT_STREQ( "lf_FT01", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),0)));
-  EXPECT_STREQ( "lf_FT02", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),1)));
-  EXPECT_STREQ( "rf_FT01", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),2)));
-  EXPECT_STREQ( "rf_FT02", zNamePtr(zArrayElem(pdEstZMPSensorArray(&e),3)));
-  // check pdEstZMP class
-  EXPECT_EQ( 2, zArrayNum( &e._lfsensor ) );
-  EXPECT_EQ( 2, zArrayNum( &e._rfsensor ) );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),0), zArrayBuf(&e._lfsensor)[0] );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),1), zArrayBuf(&e._lfsensor)[1] );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),2), zArrayBuf(&e._rfsensor)[0] );
-  EXPECT_EQ( zArrayElem(pdEstZMPSensorArray(&e),3), zArrayBuf(&e._rfsensor)[1] );
-  pdEstZMPDestroy( &e );
-  fclose( fp );
+  EXPECT_EQ( 4, zArraySize( pdEstZmpSensorArray(&e) ) );
+  EXPECT_STREQ( "lf_FT01", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),0)));
+  EXPECT_STREQ( "lf_FT02", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),1)));
+  EXPECT_STREQ( "rf_FT01", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),2)));
+  EXPECT_STREQ( "rf_FT02", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),3)));
+  // check pdEstZmp class
+  EXPECT_EQ( 2, zListSize( &e._lfsensor ) );
+  cp = zListRoot(&e._lfsensor);
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),0), pdSensorListCellSensor(cp) );
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),1), pdSensorListCellSensor(cp) );
+  EXPECT_EQ( 2, zListSize( &e._rfsensor ) );
+  cp = zListRoot(&e._rfsensor);
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),2), pdSensorListCellSensor(cp) );
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),3), pdSensorListCellSensor(cp) );
+  pdEstZmpDestroy( &e );
+  ZTKDestroy( &ztk );
+}
+
+TEST_F(pdEstZmpTest, FPrintZTK)
+{
+  char buf[BUFSIZ];
+  char expected[BUFSIZ];
+  FILE *fp;
+  FILE *fp_expected;
+  char filename[] = "model/zmpest.ztk";
+  ZTK ztk;
+
+  ZTKParse( &ztk, filename );
+  ASSERT_TRUE( pdEstZmpFromZTK( &e, &ztk ) );
+
+  fp_expected = fmemopen( expected, sizeof(expected), "r+" );
+  pdFilterArrayFPrintZTK( fp_expected, pdEstZmpFilterArray(&e) );
+  pdSensorArrayFPrintZTK( fp_expected, pdEstZmpSensorArray(&e) );
+  fprintf( fp_expected,
+           "[pedi2::estimator]\n"
+           "type: zmp\n"
+           "leftfoot: lf_FT01 lf_FT02\n"
+           "rightfoot: rf_FT01 rf_FT02\n");
+  fflush( fp_expected );
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  pdEstZmpFPrintZTK( fp, &e );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
+
+  pdEstZmpDestroy( &e );
+  ZTKDestroy( &ztk );
+}
+
+TEST_F(pdEstZmpTest, ReadZTK)
+{
+  char filename[] = "model/zmpest.ztk";
+  pdSensorListCell *cp;
+
+  ASSERT_TRUE( pdEstZmpReadZTK( &e, filename ) );
+  // check filter list
+  EXPECT_EQ( 2, zArraySize( pdEstZmpFilterArray(&e) ) );
+  EXPECT_STREQ( "bw01", zNamePtr(zArrayElem(pdEstZmpFilterArray(&e),0)));
+  EXPECT_STREQ( "bw02", zNamePtr(zArrayElem(pdEstZmpFilterArray(&e),1)));
+  // check sensor array
+  EXPECT_EQ( 4, zArraySize( pdEstZmpSensorArray(&e) ) );
+  EXPECT_STREQ( "lf_FT01", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),0)));
+  EXPECT_STREQ( "lf_FT02", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),1)));
+  EXPECT_STREQ( "rf_FT01", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),2)));
+  EXPECT_STREQ( "rf_FT02", zNamePtr(zArrayElem(pdEstZmpSensorArray(&e),3)));
+  // check pdEstZmp class
+  EXPECT_EQ( 2, zListSize( &e._lfsensor ) );
+  cp = zListRoot(&e._lfsensor);
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),0), pdSensorListCellSensor(cp) );
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),1), pdSensorListCellSensor(cp) );
+  EXPECT_EQ( 2, zListSize( &e._rfsensor ) );
+  cp = zListRoot(&e._rfsensor);
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),2), pdSensorListCellSensor(cp) );
+  cp = zListCellPrev( cp );
+  EXPECT_EQ( zArrayElem(pdEstZmpSensorArray(&e),3), pdSensorListCellSensor(cp) );
+  pdEstZmpDestroy( &e );
 }

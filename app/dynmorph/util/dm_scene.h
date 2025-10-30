@@ -1,11 +1,11 @@
 #ifndef __DM_SCENE_H__
 #define __DM_SCENE_H__
 
-#include <roki/rkgl_glx.h>
-#include <roki/rkgl_camera.h>
-#include <roki/rkgl_optic.h>
-#include <roki/rkgl_shape.h>
-#include <roki/rkgl_chain.h>
+#include <roki_gl/roki_glx.h>
+#include <roki_gl/rkgl_camera.h>
+#include <roki_gl/rkgl_optic.h>
+#include <roki_gl/rkgl_shape.h>
+#include <roki_gl/rkgl_chain.h>
 
 typedef struct{
   rkglCamera cam;
@@ -23,7 +23,7 @@ void dmSceneResize(dmScene *scene, int x, int y, int w, int h);
 void dmSceneDraw(dmScene *scene, zVec dis, zVec3D *force);
 
 /* scene */
-void dmGLInit(const char* model_file);
+void dmGLInit(const char* model_file, rkglLight *light);
 void dmGLExit(void);
 void dmGLGauge(void);
 void dmGLRobot(void);

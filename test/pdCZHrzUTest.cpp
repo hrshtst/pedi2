@@ -107,12 +107,12 @@ TEST_F(pdCZHrzUTest, CalcSimZMP_1)
   zeta = 1.0;
   kappa = 0.0;
   pdCZHrzUSetPrm( &u, 0, 1, 1 );
-  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 0, 0 );
-  EXPECT_NEAR( 0, pdCZHrzUCalcSimZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, 0.2, 0 ); zVec2DCreate( vel, 0.5, 0 );
-  EXPECT_NEAR( 0.8, pdCZHrzUCalcSimZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, 0.8, 0 ); zVec2DCreate( vel, -0.2, 0 );
-  EXPECT_NEAR( -1.2, pdCZHrzUCalcSimZMP( &u, delta, vel ), 1e-12 );
+  zVec2DCreate( &delta, 0, 0 ); zVec2DCreate( &vel, 0, 0 );
+  EXPECT_NEAR( 0, pdCZHrzUCalcSimZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.2, 0 ); zVec2DCreate( &vel, 0.5, 0 );
+  EXPECT_NEAR( 0.8, pdCZHrzUCalcSimZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.8, 0 ); zVec2DCreate( &vel, -0.2, 0 );
+  EXPECT_NEAR( -1.2, pdCZHrzUCalcSimZMP( &u, &delta, &vel ), 1e-12 );
 }
 
 TEST_F(pdCZHrzUTest, CalcSimZMP_2)
@@ -122,10 +122,10 @@ TEST_F(pdCZHrzUTest, CalcSimZMP_2)
   zeta = 1.0;
   kappa = 0.0;
   pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
-  zVec2DCreate( delta, 0.2, 0 ); zVec2DCreate( vel, 0.3, 0 );
-  EXPECT_NEAR( 0, pdCZHrzUCalcSimZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, -0.1, 0 ); zVec2DCreate( vel, 0.2, 0 );
-  EXPECT_NEAR( 0.1, pdCZHrzUCalcSimZMP( &u, delta, vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.2, 0 ); zVec2DCreate( &vel, 0.3, 0 );
+  EXPECT_NEAR( 0, pdCZHrzUCalcSimZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, -0.1, 0 ); zVec2DCreate( &vel, 0.2, 0 );
+  EXPECT_NEAR( 0.1, pdCZHrzUCalcSimZMP( &u, &delta, &vel ), 1e-12 );
 }
 
 TEST_F(pdCZHrzUTest, CalcSimZMP_3)
@@ -135,10 +135,10 @@ TEST_F(pdCZHrzUTest, CalcSimZMP_3)
   zeta = 1.0;
   kappa = 1.0;
   pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
-  zVec2DCreate( delta, 0.2, -0.2 ); zVec2DCreate( vel, 0.2, -0.2 );
-  EXPECT_NEAR( -0.18, pdCZHrzUCalcSimZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, -0.2, -0.2 ); zVec2DCreate( vel, 0.2, 0.2 );
-  EXPECT_NEAR(  0.34, pdCZHrzUCalcSimZMP( &u, delta, vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.2, -0.2 ); zVec2DCreate( &vel, 0.2, -0.2 );
+  EXPECT_NEAR( -0.18, pdCZHrzUCalcSimZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, -0.2, -0.2 ); zVec2DCreate( &vel, 0.2, 0.2 );
+  EXPECT_NEAR(  0.34, pdCZHrzUCalcSimZMP( &u, &delta, &vel ), 1e-12 );
 }
 
 TEST_F(pdCZHrzUTest, CalcRegZMP_1)
@@ -148,12 +148,12 @@ TEST_F(pdCZHrzUTest, CalcRegZMP_1)
   zeta = 1.0;
   kappa = 0.0;
   pdCZHrzUSetPrm( &u, 0, 1, 1 );
-  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 0, 0 );
-  EXPECT_NEAR( 0, pdCZHrzUCalcRegZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, 0.2, 0 ); zVec2DCreate( vel, 0.5, 0 );
-  EXPECT_NEAR( 0.8, pdCZHrzUCalcRegZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, 0.8, 0 ); zVec2DCreate( vel, -0.2, 0 );
-  EXPECT_NEAR( -1.2, pdCZHrzUCalcRegZMP( &u, delta, vel ), 1e-12 );
+  zVec2DCreate( &delta, 0, 0 ); zVec2DCreate( &vel, 0, 0 );
+  EXPECT_NEAR( 0, pdCZHrzUCalcRegZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.2, 0 ); zVec2DCreate( &vel, 0.5, 0 );
+  EXPECT_NEAR( 0.8, pdCZHrzUCalcRegZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.8, 0 ); zVec2DCreate( &vel, -0.2, 0 );
+  EXPECT_NEAR( -1.2, pdCZHrzUCalcRegZMP( &u, &delta, &vel ), 1e-12 );
 }
 
 TEST_F(pdCZHrzUTest, CalcRegZMP_2)
@@ -163,10 +163,10 @@ TEST_F(pdCZHrzUTest, CalcRegZMP_2)
   zeta = 1.0;
   kappa = 0.0;
   pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
-  zVec2DCreate( delta, 0.2, 0 ); zVec2DCreate( vel, 0.3, 0 );
-  EXPECT_NEAR( 0.4, pdCZHrzUCalcRegZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, -0.1, 0 ); zVec2DCreate( vel, 0.2, 0 );
-  EXPECT_NEAR( 0.5, pdCZHrzUCalcRegZMP( &u, delta, vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.2, 0 ); zVec2DCreate( &vel, 0.3, 0 );
+  EXPECT_NEAR( 0.4, pdCZHrzUCalcRegZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, -0.1, 0 ); zVec2DCreate( &vel, 0.2, 0 );
+  EXPECT_NEAR( 0.5, pdCZHrzUCalcRegZMP( &u, &delta, &vel ), 1e-12 );
 }
 
 TEST_F(pdCZHrzUTest, CalcRegZMP_3)
@@ -176,8 +176,8 @@ TEST_F(pdCZHrzUTest, CalcRegZMP_3)
   zeta = 1.0;
   kappa = 1.0;
   pdCZHrzUSetPrm( &u, 0.2, 1, 1 );
-  zVec2DCreate( delta, 0.2, -0.2 ); zVec2DCreate( vel, 0.2, -0.2 );
-  EXPECT_NEAR( 0.14, pdCZHrzUCalcRegZMP( &u, delta, vel ), 1e-12 );
-  zVec2DCreate( delta, -0.2, -0.2 ); zVec2DCreate( vel, 0.2, 0.2 );
-  EXPECT_NEAR( 0.66, pdCZHrzUCalcRegZMP( &u, delta, vel ), 1e-12 );
+  zVec2DCreate( &delta, 0.2, -0.2 ); zVec2DCreate( &vel, 0.2, -0.2 );
+  EXPECT_NEAR( 0.14, pdCZHrzUCalcRegZMP( &u, &delta, &vel ), 1e-12 );
+  zVec2DCreate( &delta, -0.2, -0.2 ); zVec2DCreate( &vel, 0.2, 0.2 );
+  EXPECT_NEAR( 0.66, pdCZHrzUCalcRegZMP( &u, &delta, &vel ), 1e-12 );
 }

@@ -34,9 +34,9 @@ int main(void)
   /* init states */
   zVec3DCreate( &com, 0, 0, 0.3 );
   zVec3DCopy( &com, pdCZRefCOM( &cz ) );
-  zVec3DClear( &vel );
-  zVec3DClear( &acc );
-  zVec3DClear( &zmp );
+  zVec3DZero( &vel );
+  zVec3DZero( &acc );
+  zVec3DZero( &zmp );
   fz = 0;
   zVec3DCreate( &comd, 0, 0, 0.26 );
   theta = thetad = -zPI_2;
@@ -58,7 +58,7 @@ int main(void)
     /* auto reference update */
     if( !zIsTiny( pdCZRefVelU(&cz) ) )
       pdCZAutoUpdateRef_old( &cz, &comd, &thetad );
-    /* state udpate */
+    /* state update */
     zVec3DCopy( pdCZRefCOM(&cz), &com );
     zVec3DCopy( pdCZRefVel(&cz), &vel );
     zVec3DCopy( pdCZRefAcc(&cz), &acc );

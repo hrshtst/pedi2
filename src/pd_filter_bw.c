@@ -3,111 +3,116 @@
 typedef struct{
   dzSys bwf;
   double cf;
-  int dim;
-} _pdFilterBW;
+  uint dim;
+} _pdBW;
 
-static void _pdFilterDestroyBW(_pdFilterBW *bw);
-static void _pdFilterRefreshBW(_pdFilterBW *bw);
-static double _pdFilterUpdateBW(_pdFilterBW *bw, double dt);
-
-void _pdFilterDestroyBW(_pdFilterBW *bw)
+static void _pdFilterBWDestroy(pdFilter *filter)
 {
-  dzSysDestroy( &bw->bwf );
+  _pdBW *bw = filter->prp;
+
+  if( bw ){
+    dzSysDestroy( &bw->bwf );
+    zFree( bw );
+  }
+  zNameFree( filter );
+  pdFilterInit( filter );
 }
 
-void _pdFilterRefreshBW(_pdFilterBW *bw)
+static void _pdFilterBWRefresh(pdFilter *filter)
 {
+  _pdBW *bw = filter->prp;
+
   dzSysRefresh( &bw->bwf );
+  pdFilterOutput( filter ) = 0;
+  pdFilterDefaultRefresh( filter );
 }
 
-double _pdFilterUpdateBW(_pdFilterBW *bw, double dt)
+static double _pdFilterBWUpdate(pdFilter *filter, double dt)
 {
-  return zVecElem( dzSysUpdate( &bw->bwf, dt ), 0 );
-}
+  _pdBW *bw = filter->prp;
 
-void pdFilterDestroyBW(pdFilter *filter)
-{
-  _pdFilterDestroyBW( filter->_prm );
-  pdFilterDestroyDefault( filter );
-}
-
-void pdFilterRefreshBW(pdFilter *filter)
-{
-  _pdFilterRefreshBW( filter->_prm );
-  pdFilterRefreshBW( filter );
-}
-
-pdFilter *pdFilterCloneBW(pdFilter *src, pdFilter *dst)
-{
-  _pdFilterBW *bw;
-
-  bw = src->_prm;
-  pdFilterCreateBW( dst, bw->cf, bw->dim );
-  zNameSet( dst, zNamePtr(src) );
-  pdFilterInput( dst ) = pdFilterInput( src );
-  pdFilterOutput( dst ) = pdFilterOutput( src );
-  return dst;
-}
-
-double pdFilterUpdateBW(pdFilter *filter, double dt)
-{
-  pdFilterOutput( filter ) = _pdFilterUpdateBW( filter->_prm, dt );
+  pdFilterOutput( filter ) = zVecElem( dzSysUpdate( &bw->bwf, dt ), 0 );
   return pdFilterOutput( filter );
+}
+
+static pdFilter *_pdFilterBWClone(pdFilter *org, pdFilter *cln)
+{
+  _pdBW *bw = org->prp;
+
+  pdFilterBWCreate( cln, bw->cf, bw->dim );
+  zNameSet( cln, zNamePtr(org) );
+  pdFilterInput( cln ) = pdFilterInput( org );
+  pdFilterOutput( cln ) = pdFilterOutput( org );
+  return cln;
 }
 
 typedef struct{
   double cf;
-  int dim;
-} _pdFilterBWParam;
+  uint dim;
+} _pdBWParam;
 
-static bool _pdFilterFReadBW(FILE *fp, void *prm, char *buf, bool *success);
+static void *_pdFilterBWCFFromZTK(void *val, int i, void *arg, ZTK *ztk){
+  ((_pdBWParam*)val)->cf = ZTKDouble(ztk);
+  return val;
+}
+static void *_pdFilterBWDimFromZTK(void *val, int i, void *arg, ZTK *ztk){
+  ((_pdBWParam*)val)->dim = ZTKDouble(ztk);
+  return val;
+}
 
-bool _pdFilterFReadBW(FILE *fp, void *prm, char *buf, bool *success)
-{
-  if( strcmp( buf, "cf" ) == 0 ){
-    ((_pdFilterBWParam *)prm)->cf = zFDouble( fp );
-  } else
-  if( strcmp( buf, "dim" ) == 0 ){
-    ((_pdFilterBWParam *)prm)->dim = zFInt( fp );
-  } else
-    return false;
+static bool _pdFilterBWCFFPrintZTK(FILE *fp, int i, void *prp){
+  fprintf( fp, "%.10g\n", ((_pdBW*)((pdFilter*)prp)->prp)->cf );
+  return true;
+}
+static bool _pdFilterBWDimFPrintZTK(FILE *fp, int i, void *prp){
+  fprintf( fp, "%d\n", ((_pdBW*)((pdFilter*)prp)->prp)->dim );
   return true;
 }
 
-pdFilter *pdFilterFReadBW(FILE *fp, pdFilter *filter)
-{
-  _pdFilterBWParam prm = { 1.0, 1 };
-
-  zFieldFRead( fp, _pdFilterFReadBW, &prm );
-  return pdFilterCreateBW( filter, prm.cf, prm.dim ) ? filter : NULL;
-}
-
-pdFilterMethod pd_filter_bw_met = {
-  type: "bw",
-  destroy: pdFilterDestroyBW,
-  refresh: pdFilterRefreshBW,
-  update: pdFilterUpdateBW,
-  clone: pdFilterCloneBW,
-  fread: pdFilterFReadBW,
+static const ZTKPrp __ztk_prp_pdfilter_bw[] = {
+  { ZTK_KEY_PEDI2_FILTER_CUTOFFFREQ, 1, _pdFilterBWCFFromZTK,  _pdFilterBWCFFPrintZTK  },
+  { ZTK_KEY_PEDI2_FILTER_DIM,        1, _pdFilterBWDimFromZTK, _pdFilterBWDimFPrintZTK },
 };
 
-bool pdFilterCreateBW(pdFilter *filter, double cf, int dim)
+static pdFilter *_pdFilterBWFromZTK(pdFilter *filter, ZTK *ztk)
 {
-  _pdFilterBW *bw;
+  _pdBWParam prm = { 1.0, 1 };
+  if( !_ZTKEvalKey( &prm, NULL, ztk, __ztk_prp_pdfilter_bw ) ) return NULL;
+  return pdFilterBWCreate( filter, prm.cf, prm.dim );
+}
 
-  if( !( bw = zAlloc( _pdFilterBW, 1 ) ) ){
+static void _pdFilterBWFPrintZTK(FILE *fp, pdFilter *filter)
+{
+  _ZTKPrpKeyFPrint( fp, filter, __ztk_prp_pdfilter_bw );
+}
+
+pdFilterCom pd_filter_bw_com = {
+  .typestr = "bw",
+  ._destroy = _pdFilterBWDestroy,
+  ._refresh = _pdFilterBWRefresh,
+  ._update = _pdFilterBWUpdate,
+  ._clone = _pdFilterBWClone,
+  ._fromZTK = _pdFilterBWFromZTK,
+  ._fprintZTK = _pdFilterBWFPrintZTK,
+};
+
+pdFilter *pdFilterBWCreate(pdFilter *filter, double cf, uint dim)
+{
+  _pdBW *bw;
+
+  if( !( bw = zAlloc( _pdBW, 1 ) ) ){
     ZALLOCERROR();
-    return false;
+    return NULL;
   }
   bw->cf = cf;
   bw->dim = dim;
-  if( !dzSysCreateBW( &bw->bwf, bw->cf, bw->dim ) ){
+  if( !dzSysBWCreate( &bw->bwf, bw->cf, bw->dim ) ){
     zFree( bw );
-    return false;
+    return NULL;
   }
   pdFilterInit( filter );
   dzSysInputPtr( &bw->bwf, 0 ) = &filter->input;
-  filter->_prm = bw;
-  filter->_met = &pd_filter_bw_met;
-  return true;
+  filter->prp = bw;
+  filter->com = &pd_filter_bw_com;
+  return filter;
 }

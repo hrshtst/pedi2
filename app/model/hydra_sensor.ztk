@@ -1,14 +1,14 @@
-[filter]
+[pedi2::filter]
 name : bw01
 type : bw
 dim : 2
 cf : 1
 
-[filter]
+[pedi2::filter]
 name : none01
 type : none
 
-[sensor]
+[pedi2::sensor]
 name : lfsensor
 type : 6ft
 frame : {
@@ -21,7 +21,7 @@ filter :
  bw01 bw01 bw01
 link : left_foot
 
-[sensor]
+[pedi2::sensor]
 name : rfsensor
 type : 6ft
 frame : {
@@ -34,7 +34,7 @@ filter :
  bw01 bw01 bw01
 link : right_foot
 
-[estimator]
+[pedi2::estimator]
 type : zmp
 leftfoot :  lfsensor
 rightfoot : rfsensor

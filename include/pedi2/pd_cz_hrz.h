@@ -11,7 +11,7 @@ typedef struct{
   zVec2D _xy;      /* COM position */
   zVec2D _vxy;     /* COM velocity */
   double _theta;   /* rotational angle */
-  zVec3DList *_sr; /* supporting region */
+  zLoop3D *_sr;    /* supporting region */
 
   pdCZHrzUW _uw;   /* horizontal controller w.r.t moving frame */
   zVec2D _uwd;     /* desired COM position w.r.t moving frame */
@@ -23,20 +23,20 @@ typedef struct{
 } pdCZHrz;
 
 /* c'tor and d'tor */
-__EXPORT void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt);
-__EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
+__PEDI2_EXPORT void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt);
+__PEDI2_EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 
 /* methods to get parameters */
-#define pdCZHrzRefPos(h)   (h)->_xyd
-#define pdCZHrzRefPosX(h)  ( pdCZHrzRefPos(h)[zX] )
-#define pdCZHrzRefPosY(h)  ( pdCZHrzRefPos(h)[zY] )
+#define pdCZHrzRefPos(h)   ( &(h)->_xyd )
+#define pdCZHrzRefPosX(h)  ( pdCZHrzRefPos(h)->c.x )
+#define pdCZHrzRefPosY(h)  ( pdCZHrzRefPos(h)->c.y )
 #define pdCZHrzRefTheta(h) (h)->_thetad
-#define pdCZHrzPos(h)      (h)->_xy
-#define pdCZHrzPosX(h)     ( pdCZHrzPos(h)[zX] )
-#define pdCZHrzPosY(h)     ( pdCZHrzPos(h)[zY] )
-#define pdCZHrzVel(h)      (h)->_vxy
-#define pdCZHrzVelX(h)     ( pdCZHrzVel(h)[zX] )
-#define pdCZHrzVelY(h)     ( pdCZHrzVel(h)[zY] )
+#define pdCZHrzPos(h)      ( &(h)->_xy )
+#define pdCZHrzPosX(h)     ( pdCZHrzPos(h)->c.x )
+#define pdCZHrzPosY(h)     ( pdCZHrzPos(h)->c.y )
+#define pdCZHrzVel(h)      ( &(h)->_vxy )
+#define pdCZHrzVelX(h)     ( pdCZHrzVel(h)->c.x )
+#define pdCZHrzVelY(h)     ( pdCZHrzVel(h)->c.y )
 #define pdCZHrzTheta(h)    (h)->_theta
 #define pdCZHrzUWPtr(h)    ( &(h)->_uw )
 #define pdCZHrzRefVelU(h)  pdCZHrzUWRefVelU( pdCZHrzUWPtr(h) )
@@ -58,21 +58,21 @@ __EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzAccU(h)     pdCZHrzUWAccU( pdCZHrzUWPtr(h) )
 #define pdCZHrzAccW(h)     pdCZHrzUWAccW( pdCZHrzUWPtr(h) )
 #define pdCZHrzSR(h)       (h)->_sr
-#define pdCZHrzZMP(h)      (h)->zmp
-#define pdCZHrzZMPX(h)     ( pdCZHrzZMP(h)[zX] )
-#define pdCZHrzZMPY(h)     ( pdCZHrzZMP(h)[zY] )
-#define pdCZHrzAcc(h)      (h)->acc
-#define pdCZHrzAccX(h)     ( pdCZHrzAcc(h)[zX] )
-#define pdCZHrzAccY(h)     ( pdCZHrzAcc(h)[zY] )
-#define pdCZHrzRefPosUW(h) (h)->_uwd
-#define pdCZHrzRefPosU(h)  ( pdCZHrzRefPosUW(h)[pdU] )
-#define pdCZHrzRefPosW(h)  ( pdCZHrzRefPosUW(h)[pdW] )
-#define pdCZHrzDelta(h)    (h)->_delta
-#define pdCZHrzDeltaU(h)   ( pdCZHrzDelta(h)[pdU] )
-#define pdCZHrzDeltaW(h)   ( pdCZHrzDelta(h)[pdW] )
-#define pdCZHrzVelUW(h)    (h)->_vuw
-#define pdCZHrzVelU(h)     ( pdCZHrzVelUW(h)[pdU] )
-#define pdCZHrzVelW(h)     ( pdCZHrzVelUW(h)[pdW] )
+#define pdCZHrzZMP(h)      ( &(h)->zmp )
+#define pdCZHrzZMPX(h)     ( pdCZHrzZMP(h)->c.x )
+#define pdCZHrzZMPY(h)     ( pdCZHrzZMP(h)->c.y )
+#define pdCZHrzAcc(h)      ( &(h)->acc )
+#define pdCZHrzAccX(h)     ( pdCZHrzAcc(h)->c.x )
+#define pdCZHrzAccY(h)     ( pdCZHrzAcc(h)->c.y )
+#define pdCZHrzRefPosUW(h) ( &(h)->_uwd )
+#define pdCZHrzRefPosU(h)  ( pdCZHrzRefPosUW(h)->e[pdU] )
+#define pdCZHrzRefPosW(h)  ( pdCZHrzRefPosUW(h)->e[pdW] )
+#define pdCZHrzDelta(h)    ( &(h)->_delta )
+#define pdCZHrzDeltaU(h)   ( pdCZHrzDelta(h)->e[pdU] )
+#define pdCZHrzDeltaW(h)   ( pdCZHrzDelta(h)->e[pdW] )
+#define pdCZHrzVelUW(h)    ( &(h)->_vuw )
+#define pdCZHrzVelU(h)     ( pdCZHrzVelUW(h)->e[pdU] )
+#define pdCZHrzVelW(h)     ( pdCZHrzVelUW(h)->e[pdW] )
 
 /* methods to set parameters */
 #define pdCZHrzSetRefPos(h,xd,yd)   zVec2DCreate( pdCZHrzRefPos(h), xd, yd )
@@ -117,19 +117,19 @@ __EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzSetVelW(h,vw)        ( pdCZHrzVelW(h) = (vw) )
 
 /* calculation method */
-__EXPORT double *pdCZHrzRotUWtoXY(pdCZHrz *hrz, zVec2D vuw, zVec2D vxy);
-__EXPORT double *pdCZHrzRotXYtoUW(pdCZHrz *hrz, zVec2D vxy, zVec2D vuw);
-__EXPORT double *pdCZHrzXformUWtoXY(pdCZHrz *hrz, zVec2D uw, zVec2D xy);
-__EXPORT double *pdCZHrzXformXYtoUW(pdCZHrz *hrz, zVec2D xy, zVec2D uw);
-__EXPORT void pdCZHrzXformSRXYtoUW(pdCZHrz *hrz, zVec3DList *sr);
-__EXPORT void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D uwd, zVec2D delta);
+__PEDI2_EXPORT zVec2D *pdCZHrzRotUWtoXY(pdCZHrz *hrz, zVec2D *vuw, zVec2D *vxy);
+__PEDI2_EXPORT zVec2D *pdCZHrzRotXYtoUW(pdCZHrz *hrz, zVec2D *vxy, zVec2D *vuw);
+__PEDI2_EXPORT zVec2D *pdCZHrzXformUWtoXY(pdCZHrz *hrz, zVec2D *uw, zVec2D *xy);
+__PEDI2_EXPORT zVec2D *pdCZHrzXformXYtoUW(pdCZHrz *hrz, zVec2D *xy, zVec2D *uw);
+__PEDI2_EXPORT void pdCZHrzXformSRXYtoUW(pdCZHrz *hrz, zLoop3D *sr);
+__PEDI2_EXPORT void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D *uwd, zVec2D *delta);
 
 /* update method */
 #define pdCZHrzUpdateUW(h,d,v) pdCZHrzUWUpdate( pdCZHrzUWPtr(h), d, v )
-__EXPORT void pdCZHrzUpdateAcc(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr);
+__PEDI2_EXPORT void pdCZHrzUpdateAcc(pdCZHrz *hrz, zVec2D *xy, double theta, zVec2D *vxy, zVec2D *xyd, double thetad, zLoop3D *sr);
 
 /* for debug */
-__EXPORT void pdCZHrzFWrite(FILE *fp, pdCZHrz *hrz);
+__PEDI2_EXPORT void pdCZHrzFWrite(FILE *fp, pdCZHrz *hrz);
 #define pdCZHrzWrite(h) pdCZHrzFWrite( stdout, h )
 
 __END_DECLS

@@ -15,18 +15,18 @@ zVec ddp(double t, zVec x, zVec dx, void *dummy, zVec ddx)
   return ddx;
 }
 
-void output(double t, zVec2D pd, zVec2D p, zVec2D v, zVec2D pz, double theta)
+void output(double t, zVec2D *pd, zVec2D *p, zVec2D *v, zVec2D *pz, double theta)
 {
   printf( "%f %f %f %f %f %f %f %f %f %f\n",
 /* 0   */ t,
-/* 1-2 */ pd[zX], pd[zY],
-/* 3-4 */ p[zX], p[zY],
-/* 5-6 */ v[zX], v[zY],
-/* 7-8 */ pz[zX], pz[zY],
-/* 9   */ theta);
+/* 1-2 */ pd->c.x, pd->c.y,
+/* 3-4 */ p->c.x, p->c.y,
+/* 5-6 */ v->c.x, v->c.y,
+/* 7-8 */ pz->c.x, pz->c.y,
+/* 9   */ theta );
 }
 
-void auto_update_ref(pdCZHrz *hrz, zVec2D refxy, zVec2D refxyd, double *theta)
+void auto_update_ref(pdCZHrz *hrz, zVec2D *refxy, zVec2D *refxyd, double *theta)
 {
   zVec2D refuw;
   double refdw;
@@ -34,14 +34,14 @@ void auto_update_ref(pdCZHrz *hrz, zVec2D refxy, zVec2D refxyd, double *theta)
   zVec2D refuwd;
 
 
-  pdCZHrzXformXYtoUW( hrz, refxy, refuw );
-  delta_theta = atan2( pdCZHrzKappa(hrz)*refuw[pdU], 1.0+pdCZHrzKappa(hrz)*(pdCZHrzDeltaW(hrz)-refuw[pdW]) );
-  refdw = ( pdCZHrzDeltaW(hrz) - refuw[pdW] ) / cos(delta_theta);
+  pdCZHrzXformXYtoUW( hrz, refxy, &refuw );
+  delta_theta = atan2( pdCZHrzKappa(hrz)*refuw.e[pdU], 1.0+pdCZHrzKappa(hrz)*(pdCZHrzDeltaW(hrz)-refuw.e[pdW]) );
+  refdw = ( pdCZHrzDeltaW(hrz) - refuw.e[pdW] ) / cos(delta_theta);
   if( !zIsTiny(pdCZHrzKappa(hrz)) )
     refdw += ( 1.0 - cos(delta_theta) ) / ( pdCZHrzKappa(hrz)*cos(delta_theta) );
-  zVec2DCreate( refuwd, refuw[pdU] - refdw * sin(delta_theta),
-                        refuw[pdW] + refdw * cos(delta_theta) );
-  pdCZHrzXformUWtoXY( hrz, refuwd, refxyd );
+  zVec2DCreate( &refuwd, refuw.e[pdU] - refdw * sin(delta_theta),
+                        refuw.e[pdW] + refdw * cos(delta_theta) );
+  pdCZHrzXformUWtoXY( hrz, &refuwd, refxyd );
   *theta += delta_theta;
 }
 
@@ -74,17 +74,17 @@ int main(void)
   pdCZHrzSetKappa( &hrz, 0.0 );
   /* init states */
   theta = thetad = -zPI_2;
-  zVec2DCreate( xy, 0, 0 );
-  zVec2DCreate( vxy, 0, 0 );
-  zVec2DClear( zmp );
-  zVec2DClear( xyd );
+  zVec2DCreate( &xy, 0, 0 );
+  zVec2DCreate( &vxy, 0, 0 );
+  zVec2DZero( &zmp );
+  zVec2DZero( &xyd );
   /* init of ODE solver */
   zODE2Assign( &ode, Regular, NULL, NULL, NULL, NULL );
   zODE2AssignRegular( &ode, RK4 );
   zODE2Init( &ode, 2, 0, ddp );
   /* init of state vector */
-  p  = zVecCreateList( 2, xy[zX], xy[zY] );
-  dp = zVecCreateList( 2, vxy[zX], vxy[zY] );
+  p  = zVecCreateList( 2, xy.c.x, xy.c.y );
+  dp = zVecCreateList( 2, vxy.c.x, vxy.c.y );
   /* loop */
   for( t=0; t<T; t+=DT ){
     /* modify commands */
@@ -96,16 +96,16 @@ int main(void)
       pdCZHrzSetKappa( &hrz, -1.0 );
     /* update */
     pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-    pdCZHrzUpdateAcc( &hrz, xy, theta, vxy, xyd, thetad, NULL );
+    pdCZHrzUpdateAcc( &hrz, &xy, theta, &vxy, &xyd, thetad, NULL );
     zODE2Update( &ode, t, p, dp, DT, &hrz );
-    zVec2DCreate( xy, zVecElem(p,0), zVecElem(p,1) );
-    zVec2DCreate( vxy, zVecElem(dp,0), zVecElem(dp,1) );
-    zVec2DCreate( zmp, pdCZHrzZMPX(&hrz), pdCZHrzZMPY(&hrz) );
+    zVec2DCreate( &xy, zVecElem(p,0), zVecElem(p,1) );
+    zVec2DCreate( &vxy, zVecElem(dp,0), zVecElem(dp,1) );
+    zVec2DCreate( &zmp, pdCZHrzZMPX(&hrz), pdCZHrzZMPY(&hrz) );
     /* output */
-    output( t, xyd, xy, vxy, zmp, theta );
+    output( t, &xyd, &xy, &vxy, &zmp, theta );
     /* auto reference update */
     if( !zIsTiny( pdCZHrzRefVelU(&hrz) ) )
-      auto_update_ref( &hrz, xy, xyd, &theta );
+      auto_update_ref( &hrz, &xy, &xyd, &theta );
   }
   /* destroy */
   zVecFree( p );

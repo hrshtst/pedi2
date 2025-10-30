@@ -1,16 +1,16 @@
-[filter]
+[pedi2::filter]
 name : bw01
 type : bw
 dim : 2
 freq : 50
 
-[filter]
+[pedi2::filter]
 name : bw02
 type : bw
 dim : 3
 freq : 20
 
-[sensor]
+[pedi2::sensor]
 name : lf_FT01
 type : 6ft
 frame : {
@@ -23,7 +23,7 @@ filter :
  bw01 bw01 bw01
 link : left_foot
 
-[sensor]
+[pedi2::sensor]
 name : lf_FT02
 type : 6ft
 frame : {
@@ -36,7 +36,7 @@ filter :
  bw02 bw02 bw02
 link : left_foot
 
-[sensor]
+[pedi2::sensor]
 name : rf_FT01
 type : 6ft
 frame : {
@@ -49,7 +49,7 @@ filter :
  bw01 bw01 bw01
 link : right_foot
 
-[sensor]
+[pedi2::sensor]
 name : rf_FT02
 type : 6ft
 frame : {
@@ -62,7 +62,7 @@ filter :
  bw02 bw02 bw02
 link : right_foot
 
-[estimator]
+[pedi2::estimator]
 type : zmp
 leftfoot :  lf_FT01 lf_FT02
 rightfoot : rf_FT01 rf_FT02

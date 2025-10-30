@@ -28,30 +28,30 @@ class pdModeTest : public testing::Test {
   };
 
   void LFOn() {
-    zVec3DSetElem( &state.lf_pos, zZ, 0.0 );
-    if( zListNum( &state.sr_lf) == 0 )
+    state.lf_pos.c.z = 0.0;
+    if( zListSize( &state.sr_lf) == 0 )
       zStackPush( &state.sr_lf, &cell[0] );
   };
 
   void LFOff() {
-    zVec3DListCell *cp;
+    zLoop3DCell *cp;
 
-    zVec3DSetElem( &state.lf_pos, zZ, 0.01 );
-    if( zListNum( &state.sr_lf) > 0 )
+    state.lf_pos.c.z = 0.01;
+    if( zListSize( &state.sr_lf) > 0 )
       zStackPop( &state.sr_lf, &cp );
   };
 
   void RFOn() {
-    zVec3DSetElem( &state.rf_pos, zZ, 0.0 );
-    if( zListNum( &state.sr_rf) == 0 )
+    state.rf_pos.c.z = 0.0;
+    if( zListSize( &state.sr_rf) == 0 )
       zStackPush( &state.sr_rf, &cell[1] );
   };
 
   void RFOff() {
-    zVec3DListCell *cp;
+    zLoop3DCell *cp;
 
-    zVec3DSetElem( &state.rf_pos, zZ, 0.01 );
-    if( zListNum( &state.sr_rf) > 0 )
+    state.rf_pos.c.z = 0.01;
+    if( zListSize( &state.sr_rf) > 0 )
       zStackPop( &state.sr_rf, &cp );
   };
 
@@ -74,7 +74,7 @@ class pdModeTest : public testing::Test {
   pdMode mode;
   pdState state;
   pdCmd cmd;
-  zVec3DListCell cell[2];
+  zLoop3DCell cell[2];
 };
 
 TEST_F(pdModeTest, Init)

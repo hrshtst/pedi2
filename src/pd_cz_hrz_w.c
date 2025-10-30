@@ -49,18 +49,18 @@ double _pdCZHrzWAct(pdCZHrzW *w, double dw, double vw)
   return act;
 }
 
-double pdCZHrzWCalcSimZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel)
+double pdCZHrzWCalcSimZMP(pdCZHrzW *w, zVec2D *delta, zVec2D *vel)
 {
   double r;
 
-  r = 1.0 + pdCZHrzWKappa(w) * delta[pdW];
-  return -_pdCZHrzWK1(w)*delta[pdW] + _pdCZHrzWK2(w)*_pdCZHrzWAct(w,delta[pdW],vel[pdW])*vel[pdW] - (pdCZHrzWKappa(w)/r)*zSqr(vel[pdU]/pdCZHrzWZeta(w));
+  r = 1.0 + pdCZHrzWKappa(w) * delta->e[pdW];
+  return -_pdCZHrzWK1(w)*delta->e[pdW] + _pdCZHrzWK2(w)*_pdCZHrzWAct(w,delta->e[pdW],vel->e[pdW])*vel->e[pdW] - (pdCZHrzWKappa(w)/r)*zSqr(vel->e[pdU]/pdCZHrzWZeta(w));
 }
 
-double pdCZHrzWCalcRegZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel)
+double pdCZHrzWCalcRegZMP(pdCZHrzW *w, zVec2D *delta, zVec2D *vel)
 {
   double r;
 
-  r = 1.0 + pdCZHrzWKappa(w) * delta[pdW];
-  return -_pdCZHrzWK1(w)*delta[pdW] + _pdCZHrzWK2(w)*vel[pdW] - (pdCZHrzWKappa(w)/r)*zSqr(vel[pdU]/pdCZHrzWZeta(w));
+  r = 1.0 + pdCZHrzWKappa(w) * delta->e[pdW];
+  return -_pdCZHrzWK1(w)*delta->e[pdW] + _pdCZHrzWK2(w)*vel->e[pdW] - (pdCZHrzWKappa(w)/r)*zSqr(vel->e[pdU]/pdCZHrzWZeta(w));
 }

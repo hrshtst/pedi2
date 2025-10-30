@@ -2,15 +2,19 @@
 #include <zm/zm_ode.h>
 #include <zeo/zeo_vec3d.h>
 #include <zx11/zxutil.h>
-#include <roki/rkgl_glx.h>
-#include <roki/rkgl_camera.h>
-#include <roki/rkgl_optic.h>
-#include <roki/rkgl_shape.h>
+#include <roki_gl/roki_glx.h>
+#include <roki_gl/rkgl_camera.h>
+#include <roki_gl/rkgl_optic.h>
+#include <roki_gl/rkgl_shape.h>
 #include <pedi2/pd_cz.h>
 #include <liw/liw_time.h>
 
 zVec3D com;
+zVec3D vel;
+zVec3D acc;
 zVec3D zmp;
+zVec3D comd;
+double theta, thetad;
 
 typedef struct{
   rkglCamera cam;
@@ -22,30 +26,35 @@ typedef struct{
 
 void initScene(Scene *scene, zxWindow *parent)
 {
-  GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
-
   scene->canvas = rkglWindowCreateGLX( parent, 0, 0, 1, 1, NULL );
   rkglWindowOpenGLX( scene->canvas );
 
-  rkglBGSet( &scene->cam, 0.6, 0.6, 0.6 );
-  rkglCALookAt( &scene->cam, 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 );
+  rkglCameraInit( &scene->cam );
+  rkglCameraSetBackground( &scene->cam, 0.6, 0.6, 0.6 );
+  rkglCameraLookAt( &scene->cam, 8, 0, 0.3, 0, 0, 0.3, 0, 0, 1 );
+  rkglSetDefaultCamera( &scene->cam );
 
   glEnable( GL_LIGHTING );
-  rkglLightCreate( &scene->light, 0, 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0, 0, 0, 0 );
-  rkglLightSetPos( &scene->light, 10, 0, 4 );
+  rkglLightCreate( &scene->light, 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0, 0, 0 );
+  rkglLightMove( &scene->light, 10, 0, 4 );
 
-  scene->gauge = rkglGauge( zX, 6.0, zY, 6.0, 1.0, 0.2, white );
+  scene->gauge = rkglBeginList();
+  rkglRGBByStr( "white" );
+  glLineWidth( 0.5 );
+  rkglGauge( zX, 6.0, zY, 6.0, 0.2 );
+  glEndList();
 }
 
 void exitScene(Scene *scene)
 {
   glDeleteLists( scene->gauge, 1 );
+  rkglWindowCloseGLX( scene->canvas );
   rkglWindowDestroyGLX( scene->canvas );
 }
 
 void lookAt(Scene *scene, double cx, double cy, double cz, double fx, double fy, double fz)
 {
-  rkglCALookAt( &scene->cam, cx, cy, cz, fx, fy, fz, 0, 0, 1 );
+  rkglCameraLookAt( &scene->cam, cx, cy, cz, fx, fy, fz, 0, 0, 1 );
 }
 
 void resizeScene(Scene *scene, int x, int y, int w, int h)
@@ -56,9 +65,9 @@ void resizeScene(Scene *scene, int x, int y, int w, int h)
   wx = 0.1;
   XMoveWindow( zxdisplay, scene->canvas, scene->reg.x, scene->reg.y );
   XResizeWindow( zxdisplay, scene->canvas, scene->reg.width, scene->reg.height );
-  rkglVPCreate( &scene->cam, 0, 0, scene->reg.width, scene->reg.height );
-  wy = wx / rkglVPAspect(&scene->cam);
-  rkglFrustum( &scene->cam, -wx, wx, -wy, wy, 1, 20 );
+  rkglCameraSetViewport( &scene->cam, 0, 0, scene->reg.width, scene->reg.height );
+  wy = wx / rkglCameraViewportAspectRatio( &scene->cam );
+  rkglCameraSetFrustum( &scene->cam, -wx, wx, -wy, wy, 1, 20 );
 }
 
 void _create_sphere(zVec3D *cen, double r, double g, double b)
@@ -69,7 +78,7 @@ void _create_sphere(zVec3D *cen, double r, double g, double b)
   zOpticalInfoCreateSimple( &oi, r, g, b, NULL );
   zSphere3DCreate( &sphere, cen, 0.02, 0 );
   rkglMaterial( &oi );
-  rkglSphere( &sphere );
+  rkglSphere( &sphere, RKGL_FACE );
 }
 
 void _create_cylinder(zVec3D *c1, zVec3D *c2)
@@ -80,34 +89,32 @@ void _create_cylinder(zVec3D *c1, zVec3D *c2)
   zOpticalInfoCreateSimple( &oi, 0.5, 0.5, 0.5, NULL );
   zCyl3DCreate( &cyl, c1, c2, 0.005, 0 );
   rkglMaterial( &oi );
-  rkglCyl( &cyl );
+  rkglCyl( &cyl, RKGL_FACE );
 }
 
 void drawScene(Scene *scene, zVec3D *com, zVec3D *zmp)
 {
-  rkglActivateGLX( scene->canvas );
+  rkglWindowActivateGLX( scene->canvas );
   rkglClear();
-  /* camera */
-  rkglCALoad( &scene->cam );
-  /* gauge */
-  glDisable( GL_LIGHTING );
-  glCallList( scene->gauge );
-  glEnable( GL_LIGHTING );
   /* light */
   rkglLightPut( &scene->light );
+  /* camera */
+  rkglCameraPut( &scene->cam );
+  /* gauge */
+  glCallList( scene->gauge );
   /* stuff */
   _create_sphere( com, 0.8, 0, 0 );
   _create_sphere( zmp, 0, 0.8, 0 );
   _create_cylinder( com, zmp );
   /* buffering */
-  rkglSwapBuffersGLX( scene->canvas );
+  rkglWindowSwapBuffersGLX( scene->canvas );
   rkglFlushGLX();
 }
 
 void polar(double *r, double *theta)
 {
-  *r = sqrt( zSqr(zVec3DElem(&com,zX)) + zSqr(zVec3DElem(&com,zY)) );
-  *theta = atan2( zVec3DElem(&com,zY), zVec3DElem(&com,zX) );
+  *r = sqrt( zSqr(com.c.x) + zSqr(com.c.y) );
+  *theta = atan2( com.c.y, com.c.x );
 }
 
 void measure(pdCZ *ctrl, double vx, double vy, double *du, double *vu, double *dw, double *vw)
@@ -133,8 +140,8 @@ void world_zmp(double uz, double wz)
 
   polar( &r, &theta );
   zSinCos( theta, &s, &c );
-  zVec3DElem(&zmp,zX) = zVec3DElem(&com,zX) - uz*s - wz*c;
-  zVec3DElem(&zmp,zY) = zVec3DElem(&com,zY) + uz*c - wz*s;
+  zmp.c.x = com.c.x - uz*s - wz*c;
+  zmp.c.y = com.c.y + uz*c - wz*s;
 }
 
 zVec dp(double t, zVec p, void *dummy, zVec v)
@@ -143,29 +150,46 @@ zVec dp(double t, zVec p, void *dummy, zVec v)
   pdCZ *ctrl;
 
   ctrl = (pdCZ *)dummy;
-  zVec3DElem(&com,zX) = zVecElem(p,0);
-  zVec3DElem(&com,zY) = zVecElem(p,2);
+  com.c.x = zVecElem(p,0);
+  com.c.y = zVecElem(p,2);
   measure( ctrl, zVecElem(p,1), zVecElem(p,3), &du, &vu, &dw, &vw );
-  pdCZUpdate( ctrl, du, vu, dw, vw );
-  world_zmp( pdCZZMPTan(ctrl), pdCZZMPRad(ctrl) );
-  zVecElem(v,0) = zVecElem(p,1);
-  zVecElem(v,1) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,0) - zVec3DElem(&zmp,zX) );
-  zVecElem(v,2) = zVecElem(p,3);
-  zVecElem(v,3) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,2) - zVec3DElem(&zmp,zY) );
+  /* pdCZUpdate( ctrl, du, vu, dw, vw ); */
+  /* world_zmp( pdCZZMPTan(ctrl), pdCZZMPRad(ctrl) ); */
+  zVecElemNC(v,0) = zVecElem(p,1);
+  zVecElemNC(v,1) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,0) - zmp.c.x );
+  zVecElemNC(v,2) = zVecElem(p,3);
+  zVecElemNC(v,3) = zSqr(pdCZZeta(ctrl)) * ( zVecElem(p,2) - zmp.c.y );
   return v;
 }
 
+#define DT     0.01
 void init_ctrl(pdCZ *ctrl)
 {
-  pdCZInit( ctrl );
+  pdCZInit( ctrl, DT );
   /*                qu1, qu2, qw1, qw2, kappa, rho, kr */
-  pdCZSetPrm( ctrl, 1,   0,   1, 1.5,     2,   1,  1 );
+  pdCZSetQ1U( ctrl, 1.0 );
+  pdCZSetQ2U( ctrl, 1.0 );
+  pdCZSetQ1W( ctrl, 1.0 );
+  pdCZSetQ2W( ctrl, 1.5 );
+  pdCZSetKappa( ctrl, 2.0 );
+  pdCZSetRho( ctrl, 1.0 );
+  pdCZSetKr( ctrl, 1.0 );
   /*                     zd */
-  pdCZSetRefVrt( ctrl, 0.26 );
+  pdCZSetQ1Z( ctrl, 1.0 );
+  pdCZSetQ2Z( ctrl, 0.5 );
   /*                      vud, vwd, dist */
-  pdCZSetRefHrz( ctrl, 0.25, 0.0, 0.1 );
+  pdCZSetRefVelU( ctrl, 0.25 );
+  pdCZSetRefVelW( ctrl, 0.0 );
+  pdCZSetDist( ctrl, 0.1 );
+
   zVec3DCreate( &com, 0.6, 0, 0.26 );
+  zVec3DZero( &vel );
+  zVec3DZero( &acc );
   zVec3DCreate( &zmp, 0.6, 0, 0 );
+  zVec3DCopy( &com, &comd );
+  theta = thetad = -zPI_2;
+  pdCZSetCmdCOMVec( ctrl, &comd );
+  pdCZSetCmdTheta( ctrl, thetad );
 }
 
 void resize(zxWindow *win, Scene *sc)
@@ -178,14 +202,13 @@ void resize(zxWindow *win, Scene *sc)
   resizeScene( sc, 0, 0, w, h );
 }
 
-#define DT     0.01
 void mainloop(zxWindow *win, Scene *sc, zODE *ode, pdCZ *ctrl)
 {
   int count = 0;
   int t;
   zVec p;
 
-  p = zVecCreateList( 4, zVec3DElem(&com,zX), 0, zVec3DElem(&com,zY), 0 );
+  p = zVecCreateList( 4, com.c.x, 0, com.c.y, 0 );
   while( 1 ){
     switch( zxGetEvent() ){
     case KeyPress:
@@ -201,10 +224,18 @@ void mainloop(zxWindow *win, Scene *sc, zODE *ode, pdCZ *ctrl)
     }
     t = count*DT;
     resize( win, sc );
-    zODEUpdate( ode, t, p, DT, ctrl );
+    /* zODEUpdate( ode, t, p, DT, ctrl ); */
+    pdCZUpdate( ctrl, &com, &vel, &acc, &zmp, 0, ZVEC3DZERO, theta, NULL );
     lookAt( sc, 0.0, -5.5, 3, 0.0, 0.0, 0.0 );
     drawScene( sc, &com, &zmp );
     usleep( sec2usec(DT) );
+    if( !zIsTiny( pdCZRefVelU( ctrl ) ) )
+      pdCZAutoUpdateRef_old( ctrl, &comd, &thetad );
+    zVec3DCopy( pdCZRefCOM(ctrl), &com );
+    zVec3DCopy( pdCZRefVel(ctrl), &vel );
+    zVec3DCopy( pdCZRefAcc(ctrl), &acc );
+    zVec3DCopy( pdCZRefZMP(ctrl), &zmp );
+    theta = thetad;
     count++;
   }
 }
@@ -222,14 +253,14 @@ int main(int argc, char *argv[])
 
   rkglInitGLX();
   zxWindowCreate( &win, 0, 0, WIDTH, HEIGHT );
-  zxWindowSetBG( &win, (char *)"lightgray" );
+  zxWindowSetBGColorByName( &win, (char *)"lightgray" );
   zxWindowClear( &win );
-  zxKeyEnable( &win );
-  zxWindowSetTitle( &win, (char *)"ctrl view test" );
+  zxWindowKeyEnable( &win );
+  zxWindowSetTitle( &win, (char *)"COM-ZMP control test" );
   zxWindowOpen( &win );
 
-  zODEAssign( &ode, RKF45, NULL, NULL );
-  zODEInit( &ode, 4, 0, dp );
+  /* zODEAssign( &ode, RKF45, NULL, NULL ); */
+  /* zODEInit( &ode, 4, 0, dp ); */
   init_ctrl( &ctrl );
   initScene( &sc, &win );
 

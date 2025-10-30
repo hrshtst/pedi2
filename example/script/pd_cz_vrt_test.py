@@ -1,39 +1,40 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import annotations
+
+import matplotlib.pyplot as plt
 
 from datautil import Data
 from plotutil import FigureCreator
-import matplotlib.pyplot as plt
 
-LABEL_LIST = [
-    't', 'z', 'vz', 'az'
-]
+LABEL_LIST = ["t", "z", "vz", "az"]
 
 
 def plot(data):
     fig = FigureCreator()
     fig.plot(data.t, data.z)
-    fig.setTitleLabels(xlabel='time', ylabel='z')
+    fig.setTitleLabels(xlabel="time", ylabel="z")
 
 
 def usage(prog):
-    print """\
+    print(
+        f"""\
 usage:
-    %s [-hx] datafile""" % prog
+    {prog} [-hx] datafile""",
+    )
 
 
 def main():
     import sys
+
     showflag = True
     datafile = None
 
     # parse arguments
     for arg in sys.argv:
-        if arg.startswith('-'):
-            if arg == '-h':
+        if arg.startswith("-"):
+            if arg == "-h":
                 usage(sys.argv[0])
                 sys.exit(0)
-            if arg == '-x':
+            if arg == "-x":
                 showflag = False
         elif arg != sys.argv[0]:
             datafile = arg
@@ -48,5 +49,6 @@ def main():
     if showflag:
         plt.show()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

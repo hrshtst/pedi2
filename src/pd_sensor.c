@@ -1,126 +1,102 @@
 #include <pedi2/pd_sensor.h>
 
-void pdSensorDestroyDefault(pdSensor *sensor)
+void pdSensorDefaultDestroy(pdSensor *sensor)
 {
-  zNameDestroy( sensor );
-  pdFilterArrayDestroy( pdSensorFilterArray( sensor ) );
-  zVecFree( pdSensorInput( sensor ) );
-  zVecFree( pdSensorOutput( sensor ) );
-  zFree( sensor->_prm );
+  zNameFree( sensor );
+  pdFilterArrayDestroy( pdSensorFilters( sensor ) );
+  zVecFree( pdSensorRawData( sensor ) );
+  zVecFree( pdSensorData( sensor ) );
+  zFree( sensor->prp );
   pdSensorInit( sensor );
 }
 
-zVec pdSensorProcessDefault(pdSensor *sensor, double dt)
+zVec pdSensorDefaultProcess(pdSensor *sensor, double dt)
 {
   register int i;
 
   for( i=0; i<pdSensorSize(sensor); i++ )
-    pdFilterArrayInput( pdSensorFilterArray(sensor), i ) = pdSensorInputVal( sensor, i );
-  pdFilterArrayUpdate( pdSensorFilterArray(sensor), dt );
+    pdFilterArrayInput( pdSensorFilters(sensor), i ) = pdSensorRawDataVal( sensor, i );
+  pdFilterArrayUpdate( pdSensorFilters(sensor), dt );
   for( i=0; i<pdSensorSize(sensor); i++ )
-    pdSensorOutputVal( sensor, i ) = pdFilterArrayOutput( pdSensorFilterArray(sensor), i );
-  return pdSensorOutput( sensor );
+    pdSensorDataSetVal( sensor, i, pdSensorFilterOutput( sensor, i ) );
+  return pdSensorData( sensor );
 }
 
-void pdSensorFrameUpdateDefault(pdSensor *sensor, zFrame3D *frame)
+void pdSensorDefaultFrameUpdate(pdSensor *sensor, zFrame3D *frame)
 {
   zFrame3DCascade( frame, pdSensorLinkFrame(sensor), pdSensorWldFrame(sensor) );
 }
 
-static pdSensorMethod *_pdSensorMethodByStr(char str[]);
-
-pdSensorMethod *_pdSensorMethodByStr(char str[])
+static pdSensor *_pdSensorAssignByStr(pdSensor *sensor, const char *str)
 {
-  static pdSensorMethod *met_array[] = {
-    &pd_sensor_6ft_met,
-    NULL,
-  };
+  PD_SENSOR_COM_ARRAY;
   register int i;
 
-  for( i=0; met_array[i]; i++ ){
-    if( strcmp( met_array[i]->type, str ) == 0 ) return met_array[i];
+  for( i=0; pd_sensor_com[i]; i++ ){
+    if( strcmp( pd_sensor_com[i]->typestr, str ) == 0 ){
+      sensor->com = pd_sensor_com[i];
+      return sensor;
+    }
   }
   ZRUNERROR( "cannot find a sensor type %s", str );
   return NULL;
 }
 
-typedef struct{
-  pdSensorMethod *met;
-  char name[BUFSIZ];
-  char linkname[BUFSIZ];
-} _pdSensorParam;
+static void *_pdSensorNameFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return zNameSet( (pdSensor*)obj, ZTKVal(ztk) ) ? obj : NULL;
+}
+static void *_pdSensorTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return _pdSensorAssignByStr( (pdSensor*)obj, ZTKVal(ztk) ) ? obj : NULL;
+}
 
-bool _pdSensorFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  if( strcmp( buf, "type" ) == 0 ){
-    if( !( ((_pdSensorParam *)instance)->met = _pdSensorMethodByStr( zFToken(fp,buf,BUFSIZ) ) ) )
-      *success = false;
-  } else
-  if( strcmp( buf, "name" )  == 0 ){
-    if( !zFToken( fp, ((_pdSensorParam *)instance)->name, BUFSIZ ) )
-      *success = false;
-  } else
-  if( strcmp( buf, "link" )  == 0 ){
-    if( !zFToken( fp, ((_pdSensorParam *)instance)->linkname, BUFSIZ ) )
-      *success = false;
-  } else
-    return false;
+static bool _pdSensorNameFPrintZTK(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", zName((pdSensor*)obj) );
+  return true;
+}
+static bool _pdSensorTypeFPrintZTK(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", ((pdSensor*)obj)->com ? ((pdSensor*)obj)->com->typestr : "unknown" );
   return true;
 }
 
-pdSensor *pdSensorFRead(FILE *fp, pdSensor *sensor, pdFilterArray *srcfarr)
-{
-  _pdSensorParam prm;
-  int cur;
+static const ZTKPrp __ztk_prp_pdsensor[] = {
+  { ZTK_KEY_PEDI2_SENSOR_NAME, 1, _pdSensorNameFromZTK, _pdSensorNameFPrintZTK },
+  { ZTK_KEY_PEDI2_SENSOR_TYPE, 1, _pdSensorTypeFromZTK, _pdSensorTypeFPrintZTK },
+};
 
-  prm.met = NULL;
-  prm.name[0] = '\0';
-  prm.linkname[0] = '\0';
-  cur = ftell( fp );
-  zFieldFRead( fp, _pdSensorFRead, &prm );
-  if( !prm.met ){
-    ZRUNERROR( "type not specified" );
-    return NULL;
-  }
-  fseek( fp, cur, SEEK_SET );
-  if( prm.met->fread( fp, sensor, srcfarr ) ){
-    if( !zNameSet( sensor, prm.name ) ){
-      ZALLOCERROR();
-      return NULL;
-    }
-    zStrCopy( pdSensorLinkName(sensor), prm.linkname, BUFSIZ );
-    return sensor;
-  }
-  return NULL;
+pdSensor *pdSensorFromZTK(pdSensor *sensor, pdFilterArray *filters, ZTK *ztk)
+{
+  char *name;
+  if( !_ZTKEvalKey( sensor, NULL, ztk, __ztk_prp_pdsensor ) ) return NULL;
+  name = zNamePtr(sensor);
+  if( !sensor->com || !sensor->com->_fromZTK( sensor, filters, ztk ) ) return NULL;
+  zNameSet( sensor, name );
+  return sensor;
 }
 
-static bool _pdSensorFAlloc(FILE *fp, pdSensorArray *arr);
-
-bool pdSensorArrayAlloc(pdSensorArray *arr, int n)
+void pdSensorFPrintZTK(FILE *fp, pdSensor *sensor)
 {
-  zArrayAlloc( arr, pdSensor, n );
+  _ZTKPrpKeyFPrint( fp, sensor, __ztk_prp_pdsensor );
+  if( sensor->com )
+    sensor->com->_fprintZTK( fp, sensor );
+}
+
+pdSensorArray *pdSensorArrayAlloc(pdSensorArray *arr, int size)
+{
+  zArrayAlloc( arr, pdSensor, size );
   if( !zArrayBuf(arr) ){
     ZALLOCERROR();
-    return false;
+    return NULL;
   }
-  return true;
+  return arr;
 }
 
 void pdSensorArrayDestroy(pdSensorArray *arr)
 {
   register int i;
 
-  for( i=0; i<zArrayNum(arr); i++ )
+  for( i=0; i<zArraySize(arr); i++ )
     pdSensorDestroy( zArrayElem(arr,i) );
   zArrayFree( arr );
-}
-
-bool _pdSensorFAlloc(FILE *fp, pdSensorArray *arr)
-{
-  int n;
-
-  n = zFCountTag( fp, PD_SENSOR_TAG );
-  return pdSensorArrayAlloc( arr, n );
 }
 
 pdSensor *pdSensorArrayNameFind(pdSensorArray *arr, const char *name)
@@ -137,42 +113,63 @@ pdSensor *pdSensorArrayNameFind(pdSensorArray *arr, const char *name)
 
 void pdSensorArrayProcess(pdSensorArray *arr, double dt)
 {
-  register uint i;
+  register int i;
 
-  for( i=0; i<zArrayNum(arr); i++ )
+  for( i=0; i<zArraySize(arr); i++ )
     pdSensorProcess( zArrayElem(arr,i), dt );
 }
 
-typedef struct{
-  pdFilterArray *srcfarr;
-  pdSensorArray *arr;
-  int count;
-} _pdSensorArrayParam;
-
-bool _pdSensorArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  _pdSensorArrayParam *prm;
-
-  prm = instance;
-  if( strcmp( buf, PD_SENSOR_TAG ) == 0){
-    if( !pdSensorFRead( fp, zArrayElem(prm->arr,prm->count++), prm->srcfarr ) ){
-      *success = false;
-      return false;
-    }
-  } else
-    return false;
-  return true;
+static void *_pdSensorArraySensorFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return pdSensorFromZTK( zArrayElemNC((pdSensorArray*)obj,i), (pdFilterArray*)arg, ztk ) ? obj : NULL;
 }
 
-bool pdSensorArrayFRead(FILE *fp, pdSensorArray *arr, pdFilterArray *srcfarr)
-{
-  _pdSensorArrayParam prm;
+static const ZTKPrp __ztk_prp_tag_pedi2_sensor[] = {
+  { ZTK_TAG_PEDI2_SENSOR, -1, _pdSensorArraySensorFromZTK, NULL },
+};
 
+pdSensorArray *pdSensorArrayFromZTK(pdSensorArray *arr, pdFilterArray *farray, ZTK *ztk)
+{
+  int num;
+
+  if( ( num = ZTKCountTag( ztk, ZTK_TAG_PEDI2_SENSOR ) ) == 0 ){
+    ZRUNWARN( "empty array of sensors specified." );
+    return NULL;
+  }
+  if( !pdSensorArrayAlloc( arr, num ) ) return NULL;
+  _ZTKEvalTag( arr, farray, ztk, __ztk_prp_tag_pedi2_sensor );
+  return arr;
+}
+
+void pdSensorArrayFPrintZTK(FILE *fp, pdSensorArray *arr)
+{
+  int i;
+
+  for( i=0; i<zArraySize(arr); i++ ){
+    fprintf( fp, "[%s]\n", ZTK_TAG_PEDI2_SENSOR );
+    pdSensorFPrintZTK( fp, zArrayElemNC(arr,i) );
+    fprintf( fp, "\n" );
+  }
+  _ZTKPrpTagFPrint( fp, arr, __ztk_prp_tag_pedi2_sensor );
+}
+
+pdSensorArray *pdSensorArrayReadZTK(pdSensorArray *arr, pdFilterArray *farray, char filename[])
+{
+  ZTK ztk;
+
+  ZTKInit( &ztk );
   zArrayInit( arr );
-  if( !_pdSensorFAlloc( fp, arr ) ) return false;
-  rewind( fp );
-  prm.count = 0;
-  prm.arr = arr;
-  prm.srcfarr = srcfarr;
-  return zTagFRead( fp, _pdSensorArrayFRead, &prm );
+  if( ZTKParse( &ztk, filename ) )
+    arr = pdSensorArrayFromZTK( arr, farray, &ztk );
+  ZTKDestroy( &ztk );
+  return arr;
+}
+
+bool pdSensorArrayWriteZTK(pdSensorArray *arr, char filename[])
+{
+  FILE *fp;
+
+  if( !( fp = zOpenZTKFile( filename, "w" ) ) ) return false;
+  pdSensorArrayFPrintZTK( fp, arr );
+  fclose(fp);
+  return true;
 }

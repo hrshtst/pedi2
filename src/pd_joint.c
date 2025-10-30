@@ -1,32 +1,32 @@
 #include <pedi2/pd_joint.h>
 
-void pdJointSetDisDefault(pdJoint *joint, double dis)
+void pdJointDefaultSetDis(pdJoint *joint, double dis)
 {
   joint->disold = joint->dis;
   joint->dis = dis;
 }
 
-void pdJointSetVelDefault(pdJoint *joint, double vel)
+void pdJointDefaultSetVel(pdJoint *joint, double vel)
 {
   joint->velold = joint->vel;
   joint->vel = vel;
   joint->is_set_vel = true;
 }
 
-void pdJointSetRefDisDefault(pdJoint *joint, double refdis)
+void pdJointDefaultSetRefDis(pdJoint *joint, double refdis)
 {
   joint->refdisold = joint->refdis;
   joint->refdis = refdis;
 }
 
-void pdJointSetRefVelDefault(pdJoint *joint, double refvel)
+void pdJointDefaultSetRefVel(pdJoint *joint, double refvel)
 {
   joint->refvelold = joint->refvel;
   joint->refvel = refvel;
   joint->is_set_refvel = true;
 }
 
-void pdJointRefreshDefault(pdJoint *joint, double dis)
+void pdJointDefaultRefresh(pdJoint *joint, double dis)
 {
   joint->dis = dis;
   joint->disold = dis;
@@ -38,99 +38,92 @@ void pdJointRefreshDefault(pdJoint *joint, double dis)
   joint->refvelold = 0;
 }
 
-void pdJointUpdateDefault(pdJoint *joint, double dt)
+void pdJointDefaultUpdate(pdJoint *joint, double dt)
 {
   double v, refv;
 
   if( !joint->is_set_vel ){
     v = ( pdJointDis(joint) - pdJointDisOld(joint) ) / dt;
-    pdJointSetVelDefault( joint, v );
+    pdJointDefaultSetVel( joint, v );
   }
   if( !joint->is_set_refvel ){
     refv = ( pdJointRefDis(joint) - pdJointRefDisOld(joint) ) / dt;
-    pdJointSetRefVelDefault( joint, refv );
+    pdJointDefaultSetRefVel( joint, refv );
   }
   joint->is_set_vel = false;
   joint->is_set_refvel = false;
 }
 
-void pdJointDestroyDefault(pdJoint *joint)
+void pdJointDefaultDestroy(pdJoint *joint)
 {
-  zNameDestroy( joint );
-  zFree( joint->_prm );
+  zNameFree( joint );
+  zFree( joint->prp );
   pdJointInit( joint );
 }
 
-static pdJointMethod *_pdJointMethodByStr(char str[]);
-
-pdJointMethod *_pdJointMethodByStr(char str[])
+static pdJoint *_pdJointAssignByStr(pdJoint *joint, const char *str)
 {
-  static pdJointMethod *met_array[] = {
-    &pd_joint_pd_trq_met, &pd_joint_pid_trq_met,
-    NULL,
-  };
+  PD_JOINT_COM_ARRAY;
   register int i;
 
-  for( i=0; met_array[i]; i++ ){
-    if( strcmp( met_array[i]->type, str ) == 0 ) return met_array[i];
+  for( i=0; pd_joint_com[i]; i++ ){
+    if( strcmp( pd_joint_com[i]->typestr, str ) == 0 ){
+      joint->com = pd_joint_com[i];
+      return joint;
+    }
   }
   ZRUNERROR( "cannot find a joint type %s", str );
   return NULL;
 }
 
-typedef struct{
-  pdJointMethod *met;
-  char name[BUFSIZ];
-} _pdJointParam;
+static void *_pdJointNameFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return zNameSet( (pdJoint*)obj, ZTKVal(ztk) ) ? obj : NULL;
+}
+static void *_pdJointTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return _pdJointAssignByStr( (pdJoint*)obj, ZTKVal(ztk) ) ? obj : NULL;
+}
 
-bool _pdJointFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  if( strcmp( buf, "type" ) == 0 ){
-    if( !( ((_pdJointParam *)instance)->met = _pdJointMethodByStr( zFToken(fp,buf,BUFSIZ) ) ) )
-      *success = false;
-  } else
-  if( strcmp( buf, "name" ) == 0 ){
-    if( !zFToken( fp, ((_pdJointParam *)instance)->name, BUFSIZ ) )
-      *success = false;
-  } else
-    return false;
+static bool _pdJointNameFPrintZTK(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", zName((pdJoint*)obj) );
+  return true;
+}
+static bool _pdJointTypeFPrintZTK(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", ((pdJoint*)obj)->com ? ((pdJoint*)obj)->com->typestr : "unknown" );
   return true;
 }
 
-pdJoint *pdJointFRead(FILE *fp, pdJoint *joint)
-{
-  _pdJointParam prm;
-  int cur;
+static const ZTKPrp __ztk_prp_pdjoint[] = {
+  { ZTK_KEY_PEDI2_JOINT_NAME, 1, _pdJointNameFromZTK, _pdJointNameFPrintZTK },
+  { ZTK_KEY_PEDI2_JOINT_TYPE, 1, _pdJointTypeFromZTK, _pdJointTypeFPrintZTK },
+};
 
-  prm.met = NULL;
-  prm.name[0] = '\0';
-  cur = ftell( fp );
-  zFieldFRead( fp, _pdJointFRead, &prm );
-  if( !prm.met ){
-    ZRUNERROR( "type not specified" );
-    return NULL;
-  }
-  fseek( fp, cur, SEEK_SET );
-  if( prm.met->fread( fp, joint ) ){
-    if( !zNameSet( joint, prm.name ) ){
-      ZALLOCERROR();
-      return NULL;
-    }
-    return joint;
-  }
-  return NULL;
+pdJoint *pdJointFromZTK(pdJoint *joint, ZTK *ztk)
+{
+  char *name;
+  if( !_ZTKEvalKey( joint, NULL, ztk, __ztk_prp_pdjoint ) ) return NULL;
+  name = zNamePtr(joint);
+  if( !joint->com || !joint->com->_fromZTK( joint, ztk ) ) return NULL;
+  zNameSet( joint, name );
+  return joint;
+}
+
+void pdJointFPrintZTK(FILE *fp, pdJoint *joint)
+{
+  _ZTKPrpKeyFPrint( fp, joint, __ztk_prp_pdjoint );
+  if( joint->com )
+    joint->com->_fprintZTK( fp, joint );
 }
 
 #define PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH \
-  "Joint controller number is not matched with the vecotr size"
+  "Joint controller number is not matched with the vector size"
 
 void pdJointArraySetDis(pdJointArray *arr, zVec q)
 {
   register int i;
 
-  if( (int)zArrayNum(arr) != zVecSize(q) )
+  if( (int)zArraySize(arr) != zVecSize(q) )
     ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetDis( zArrayElem( arr, i ), zVecElem( q, i) );
 }
 
@@ -138,9 +131,9 @@ void pdJointArraySetVel(pdJointArray *arr, zVec v)
 {
   register int i;
 
-  if( (int)zArrayNum(arr) != zVecSize(v) )
+  if( (int)zArraySize(arr) != zVecSize(v) )
     ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetVel( zArrayElem( arr, i ), zVecElem( v, i) );
 }
 
@@ -148,9 +141,9 @@ void pdJointArraySetRefDis(pdJointArray *arr, zVec q)
 {
   register int i;
 
-  if( (int)zArrayNum(arr) != zVecSize(q) )
+  if( (int)zArraySize(arr) != zVecSize(q) )
     ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetRefDis( zArrayElem( arr, i ), zVecElem( q, i) );
 }
 
@@ -158,9 +151,9 @@ void pdJointArraySetRefVel(pdJointArray *arr, zVec v)
 {
   register int i;
 
-  if( (int)zArrayNum(arr) != zVecSize(v) )
+  if( (int)zArraySize(arr) != zVecSize(v) )
     ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetRefVel( zArrayElem( arr, i ), zVecElem( v, i) );
 }
 
@@ -168,9 +161,9 @@ void pdJointArrayRefresh(pdJointArray *arr, zVec q)
 {
   register int i;
 
-  if( (int)zArrayNum(arr) != zVecSize(q) )
+  if( (int)zArraySize(arr) != zVecSize(q) )
     ZRUNERROR( PD_JOINT_ERR_MSG_VEC_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointRefresh( zArrayElem( arr, i ), zVecElem( q, i) );
 }
 
@@ -178,7 +171,7 @@ void pdJointArrayUpdate(pdJointArray *arr, double dt)
 {
   register int i;
 
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointUpdate( zArrayElem(arr,i), dt );
 }
 
@@ -186,33 +179,25 @@ void pdJointArrayDestroy(pdJointArray *arr)
 {
   register uint i;
 
-  for( i=0; i<zArrayNum(arr); i++ )
+  for( i=0; i<zArraySize(arr); i++ )
     pdJointDestroy( zArrayElem(arr,i) );
   zArrayFree( arr );
 }
 
-bool pdJointArrayAlloc(pdJointArray *arr, int n)
+pdJointArray *pdJointArrayAlloc(pdJointArray *arr, int size)
 {
   register int i;
 
-  zArrayAlloc( arr, pdJoint, n );
-  if( !zArrayBuf(arr) ){
+  zArrayAlloc( arr, pdJoint, size );
+  if( !zArrayBuf(arr) || zArraySize(arr) != size ){
     ZALLOCERROR();
-    return false;
+    return NULL;
   }
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<size; i++ ){
+    pdJointInit( zArrayElemNC(arr, i) );
     pdJointSetOffset( zArrayElem(arr,i), i );
-  return true;
-}
-
-static bool _pdJointFAlloc(FILE *fp, pdJointArray *arr);
-
-bool _pdJointFAlloc(FILE *fp, pdJointArray *arr)
-{
-  int n;
-
-  n = zFCountTag( fp, PD_JOINT_TAG );
-  return pdJointArrayAlloc( arr, n );
+  }
+  return arr;
 }
 
 pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name)
@@ -232,23 +217,8 @@ rkLink *_rkChainLinkFindName(rkChain *c, const char *name)
 {
   rkLink *link;
 
-  zNameFind( rkChainRoot(c), rkChainNum(c), name, link );
+  zNameFind( rkChainRoot(c), rkChainLinkNum(c), name, link );
   return link;
-}
-
-zIndex pdJointArrayCreateIndex(pdJointArray *arr)
-{
-  register int i;
-  zIndex index;
-
-  if( !( index = zIndexCreate( zArrayNum(arr) ) ) ){
-    ZALLOCERROR();
-    return NULL;
-  }
-  for( i=0; i<(int)zArrayNum(arr); i++ ){
-    zIndexSetElem( index, i, pdJointArrayOffset( arr, i ) );
-  }
-  return index;
 }
 
 bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c)
@@ -256,40 +226,27 @@ bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c)
   register int i;
   rkLink *link;
 
-  for( i=0; i<(int)zArrayNum(arr); i++ ){
+  for( i=0; i<(int)zArraySize(arr); i++ ){
     link = _rkChainLinkFindName(c,zName(zArrayElem(arr,i)));
     if( !link ){
       ZRUNERROR( "joint %s cannot be found in robot model",
                  zName(zArrayElem(arr,i)) );
       return false;
     } else
-      pdJointArraySetOffset( arr, i, rkLinkOffset(link) );
+      pdJointArraySetOffset( arr, i, rkLinkJointIDOffset(link) );
   }
   return true;
 }
 
-typedef struct{
-  pdJointArray *arr;
-  int count;
-} _pdJointArrayParam;
-
-bool _pdJointArrayFRead(FILE *fp, void *instance, char *buf, bool *success)
-{
-  _pdJointArrayParam *prm;
-
-  prm = instance;
-  if( strcmp( buf, PD_JOINT_TAG ) == 0 ){
-    if( !pdJointFRead( fp, zArrayElem(prm->arr,prm->count++) ) ){
-      *success = false;
-      return false;
-    }
-  } else
-    return false;
-  return true;
+static void *_pdJointArrayJointFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  return pdJointFromZTK( zArrayElemNC((pdJointArray*)obj,i), ztk ) ? obj : NULL;
 }
 
-static void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*));
-void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*))
+static const ZTKPrp __ztk_prp_tag_pedi2_joint[] = {
+  { ZTK_TAG_PEDI2_JOINT, -1, _pdJointArrayJointFromZTK, NULL },
+};
+
+static void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*))
 {
   register int i, j;
   uint s;
@@ -297,55 +254,102 @@ void _pdJointArrayInsertionSort(pdJointArray *arr, int (*cmp)(pdJoint*, pdJoint*
 
   s = sizeof(pdJoint);
   saved = zAlloc( pdJoint, 1 );
-  for( j=1; j<(int)zArrayNum(arr); j++ ){
+  for( j=1; j<(int)zArraySize(arr); j++ ){
     i = j - 1;
     value = zArrayElem(arr, j);
     while( i >= 0 && cmp(zArrayElem(arr,i), value) > 0 ) i--;
     if( ++i == j ) continue;
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+#endif
     memmove( saved, value, s );
     memmove( zArrayElem(arr,i+1), zArrayElem(arr,i), s*(j-i) );
     memmove( zArrayElem(arr,i), saved, s );
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#endif
   }
   zFree( saved );
 }
 
-static int _pdJointOffsetCmp(pdJoint *p, pdJoint *q);
-int _pdJointOffsetCmp(pdJoint *p, pdJoint *q)
+static int _pdJointOffsetCmp(pdJoint *p, pdJoint *q)
 {
   if( pdJointOffset(p) == pdJointOffset(q) ) return 0;
   return ( pdJointOffset(p) > pdJointOffset(q) ) ? 1 : -1;
 }
 
-bool pdJointArrayFRead(FILE *fp, pdJointArray *arr, rkChain *c)
+pdJointArray *pdJointArrayFromZTK(pdJointArray *arr, rkChain *c, ZTK *ztk)
 {
-  _pdJointArrayParam prm;
+  int num;
   bool result;
 
-  zArrayInit( arr );
-  if( !_pdJointFAlloc( fp, arr ) ) return false;
-  rewind( fp );
-  prm.count = 0;
-  prm.arr = arr;
-  result = zTagFRead( fp, _pdJointArrayFRead, &prm );
+  if( ( num = ZTKCountTag( ztk, ZTK_TAG_PEDI2_JOINT ) ) == 0 ){
+    ZRUNWARN( "empty array of joints specified." );
+    return NULL;
+  }
+  if( !pdJointArrayAlloc( arr, num ) ) return NULL;
+  _ZTKEvalTag( arr, NULL, ztk, __ztk_prp_tag_pedi2_joint );
+  result = false;
   if( c )
-    result &= pdJointArraySetOffsetMapping( arr, c );
+    result = pdJointArraySetOffsetMapping( arr, c );
   if( result )
     _pdJointArrayInsertionSort( arr, _pdJointOffsetCmp );
-  return result;
+  return arr;
 }
 
-bool pdJointArrayReadFile(pdJointArray *arr, const char *filename, rkChain *c)
+void pdJointArrayFPrintZTK(FILE *fp, pdJointArray *arr)
+{
+  int i;
+
+  for( i=0; i<zArraySize(arr); i++ ){
+    fprintf( fp, "[%s]\n", ZTK_TAG_PEDI2_JOINT );
+    pdJointFPrintZTK( fp, zArrayElemNC(arr,i) );
+    fprintf( fp, "\n" );
+  }
+  _ZTKPrpTagFPrint( fp, arr, __ztk_prp_tag_pedi2_joint );
+}
+
+pdJointArray *pdJointArrayReadZTK(pdJointArray *arr, rkChain *c, char filename[])
+{
+  ZTK ztk;
+
+  ZTKInit( &ztk );
+  zArrayInit( arr );
+  if( ZTKParse( &ztk, filename ) )
+    arr = pdJointArrayFromZTK( arr, c, &ztk );
+  ZTKDestroy( &ztk );
+  return arr;
+}
+
+bool pdJointArrayWriteZTK(pdJointArray *arr, char filename[])
 {
   FILE *fp;
-  bool result;
 
-  if( !( fp = fopen( filename, "r" ) ) ){
-    ZOPENERROR( filename );
-    return false;
+  if( !( fp = zOpenZTKFile( filename, "w" ) ) ) return false;
+  pdJointArrayFPrintZTK( fp, arr );
+  fclose(fp);
+  return true;
+}
+
+zIndex pdJointArrayCreateIndex(pdJointArray *arr)
+{
+  register int i;
+  zIndex index;
+
+  if( !( index = zIndexCreate( zArraySize(arr) ) ) ){
+    ZALLOCERROR();
+    return NULL;
   }
-  result = pdJointArrayFRead( fp, arr, c );
-  fclose( fp );
-  return result;
+  for( i=0; i<(int)zArraySize(arr); i++ ){
+    zIndexSetElem( index, i, pdJointArrayOffset( arr, i ) );
+  }
+  return index;
 }
 
 #define PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH \
@@ -355,9 +359,9 @@ void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q)
 {
   register int i;
 
-  if( zArrayNum(arr) != zArrayNum(idx) )
+  if( zArraySize(arr) != zArraySize(idx) )
     ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetDis( zArrayElem(arr,i), zVecElem(q,zIndexElem(idx,i)) );
 }
 
@@ -365,9 +369,9 @@ void pdJointArraySetVelIndex(pdJointArray *arr, zIndex idx, zVec v)
 {
   register int i;
 
-  if( zArrayNum(arr) != zArrayNum(idx) )
+  if( zArraySize(arr) != zArraySize(idx) )
     ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetVel( zArrayElem(arr,i), zVecElem(v,zIndexElem(idx,i)) );
 }
 
@@ -375,9 +379,9 @@ void pdJointArraySetRefDisIndex(pdJointArray *arr, zIndex idx, zVec q)
 {
   register int i;
 
-  if( zArrayNum(arr) != zArrayNum(idx) )
+  if( zArraySize(arr) != zArraySize(idx) )
     ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetRefDis( zArrayElem(arr,i), zVecElem(q,zIndexElem(idx,i)) );
 }
 
@@ -385,9 +389,9 @@ void pdJointArraySetRefVelIndex(pdJointArray *arr, zIndex idx, zVec v)
 {
   register int i;
 
-  if( zArrayNum(arr) != zArrayNum(idx) )
+  if( zArraySize(arr) != zArraySize(idx) )
     ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointSetRefVel( zArrayElem(arr,i), zVecElem(v,zIndexElem(idx,i)) );
 }
 
@@ -395,8 +399,8 @@ void pdJointArrayRefreshIndex(pdJointArray *arr, zIndex idx, zVec q)
 {
   register int i;
 
-  if( zArrayNum(arr) != zArrayNum(idx) )
+  if( zArraySize(arr) != zArraySize(idx) )
     ZRUNERROR( PD_JOINT_ERR_MSG_INDEX_SIZE_MISMATCH );
-  for( i=0; i<(int)zArrayNum(arr); i++ )
+  for( i=0; i<(int)zArraySize(arr); i++ )
     pdJointRefresh( zArrayElem(arr,i), zVecElem(q,zIndexElem(idx,i)) );
 }

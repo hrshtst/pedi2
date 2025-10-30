@@ -1,55 +1,46 @@
 #include <pedi2/pd_filter.h>
 
-void pdFilterDestroyNone(pdFilter *filter)
+static void _pdFilterNoneDestroy(pdFilter *filter)
 {
-  pdFilterDestroyDefault( filter );
+  pdFilterDefaultDestroy( filter );
 }
 
-void pdFilterRefreshNone(pdFilter *filter)
+static void _pdFilterNoneRefresh(pdFilter *filter)
 {
-  pdFilterRefreshDefault( filter );
+  pdFilterDefaultRefresh( filter );
 }
 
-double pdFilterUpdateNone(pdFilter *filter, double dt)
+static double _pdFilterNoneUpdate(pdFilter *filter, double dt)
 {
   pdFilterOutput( filter ) = pdFilterInput( filter );
   return pdFilterOutput( filter );
 }
 
-pdFilter *pdFilterCloneNone(pdFilter *src, pdFilter *dst)
+static pdFilter *_pdFilterNoneClone(pdFilter *org, pdFilter *cln)
 {
-  pdFilterCreateNone( dst );
-  zNameSet( dst, zNamePtr(src) );
-  pdFilterInput( dst ) = pdFilterInput( src );
-  pdFilterOutput( dst ) = pdFilterOutput( src );
-  return dst;
+  pdFilterNoneCreate( cln );
+  zNameSet( cln, zNamePtr(org) );
+  pdFilterInput( cln ) = pdFilterInput( org );
+  pdFilterOutput( cln ) = pdFilterOutput( org );
+  return cln;
 }
 
-static bool _pdFilterFReadNone(FILE *fp, void *prm, char *bur, bool *success);
+static pdFilter *_pdFilterNoneFromZTK(pdFilter *filter, ZTK *ztk){ return filter; }
+static void _pdFilterNoneFPrintZTK(FILE *fp, pdFilter *filter){}
 
-bool _pdFilterFReadNone(FILE *fp, void *prm, char *buf, bool *success)
-{
-  return true;
-}
-
-pdFilter *pdFilterFReadNone(FILE *fp, pdFilter *filter)
-{
-  zFieldFRead( fp, _pdFilterFReadNone, NULL );
-  return pdFilterCreateNone( filter ) ? filter : NULL;
-}
-
-pdFilterMethod pd_filter_none_met = {
-  type: "none",
-  destroy: pdFilterDestroyNone,
-  refresh: pdFilterRefreshNone,
-  update: pdFilterUpdateNone,
-  clone: pdFilterCloneNone,
-  fread: pdFilterFReadNone,
+pdFilterCom pd_filter_none_com = {
+  .typestr = "none",
+  ._destroy = _pdFilterNoneDestroy,
+  ._refresh = _pdFilterNoneRefresh,
+  ._update = _pdFilterNoneUpdate,
+  ._clone = _pdFilterNoneClone,
+  ._fromZTK = _pdFilterNoneFromZTK,
+  ._fprintZTK = _pdFilterNoneFPrintZTK,
 };
 
-bool pdFilterCreateNone(pdFilter *filter)
+pdFilter *pdFilterNoneCreate(pdFilter *filter)
 {
   pdFilterInit( filter );
-  filter->_met = &pd_filter_none_met;
-  return true;
+  filter->com = &pd_filter_none_com;
+  return filter;
 }

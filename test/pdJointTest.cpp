@@ -45,8 +45,8 @@ TEST_F(pdJointTest, Init)
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( 0, pdJointOffset( &joint ) );
-  EXPECT_EQ( NULL, joint._prm );
-  EXPECT_EQ( NULL, joint._met );
+  EXPECT_EQ( NULL, joint.prp );
+  EXPECT_EQ( NULL, joint.com );
 }
 
 TEST_F(pdJointTest, SetDisDefault)
@@ -55,11 +55,11 @@ TEST_F(pdJointTest, SetDisDefault)
 
   pdJointInit( &joint );
   dis1 = ri.rand();
-  pdJointSetDisDefault( &joint, dis1 );
+  pdJointDefaultSetDis( &joint, dis1 );
   EXPECT_EQ( dis1, pdJointDis( &joint ) );
 
   dis2 = ri.rand();
-  pdJointSetDisDefault( &joint, dis2 );
+  pdJointDefaultSetDis( &joint, dis2 );
   EXPECT_EQ( dis2, pdJointDis( &joint ) );
   EXPECT_EQ( dis1, pdJointDisOld( &joint ) );
 }
@@ -70,12 +70,12 @@ TEST_F(pdJointTest, SetVelDefault)
 
   pdJointInit( &joint );
   vel1 = ri.rand();
-  pdJointSetVelDefault( &joint, vel1 );
+  pdJointDefaultSetVel( &joint, vel1 );
   EXPECT_EQ( vel1, pdJointVel( &joint ) );
   EXPECT_TRUE( joint.is_set_vel );
 
   vel2 = ri.rand();
-  pdJointSetVelDefault( &joint, vel2 );
+  pdJointDefaultSetVel( &joint, vel2 );
   EXPECT_EQ( vel2, pdJointVel( &joint ) );
   EXPECT_EQ( vel1, pdJointVelOld( &joint ) );
   EXPECT_TRUE( joint.is_set_vel );
@@ -87,11 +87,11 @@ TEST_F(pdJointTest, SetRefDisDefault)
 
   pdJointInit( &joint );
   refdis1 = ri.rand();
-  pdJointSetRefDisDefault( &joint, refdis1 );
+  pdJointDefaultSetRefDis( &joint, refdis1 );
   EXPECT_EQ( refdis1, pdJointRefDis( &joint ) );
 
   refdis2 = ri.rand();
-  pdJointSetRefDisDefault( &joint, refdis2 );
+  pdJointDefaultSetRefDis( &joint, refdis2 );
   EXPECT_EQ( refdis2, pdJointRefDis( &joint ) );
   EXPECT_EQ( refdis1, pdJointRefDisOld( &joint ) );
 }
@@ -102,12 +102,12 @@ TEST_F(pdJointTest, SetRefVelDefault)
 
   pdJointInit( &joint );
   refvel1 = ri.rand();
-  pdJointSetRefVelDefault( &joint, refvel1 );
+  pdJointDefaultSetRefVel( &joint, refvel1 );
   EXPECT_EQ( refvel1, pdJointRefVel( &joint ) );
   EXPECT_TRUE( joint.is_set_refvel );
 
   refvel2 = ri.rand();
-  pdJointSetRefVelDefault( &joint, refvel2 );
+  pdJointDefaultSetRefVel( &joint, refvel2 );
   EXPECT_EQ( refvel2, pdJointRefVel( &joint ) );
   EXPECT_EQ( refvel1, pdJointRefVelOld( &joint ) );
   EXPECT_TRUE( joint.is_set_refvel );
@@ -122,7 +122,7 @@ TEST_F(pdJointTest, RefreshDefault)
   SetRandomValues();
   dis = ri.rand();
   offset = pdJointOffset( &joint );
-  pdJointRefreshDefault( &joint, dis );
+  pdJointDefaultRefresh( &joint, dis );
   EXPECT_EQ( dis, pdJointDis( &joint ) );
   EXPECT_EQ( dis, pdJointDisOld( &joint ) );
   EXPECT_EQ( 0,   pdJointVel( &joint ) );
@@ -139,19 +139,19 @@ TEST_F(pdJointTest, RefreshDefault)
 TEST_F(pdJointTest, UpdateDefault)
 {
   pdJointInit( &joint );
-  pdJointRefreshDefault( &joint, 10 );
+  pdJointDefaultRefresh( &joint, 10 );
 
-  pdJointSetRefDisDefault( &joint, 20 );
-  pdJointSetDisDefault( &joint, 10 );
-  pdJointUpdateDefault( &joint, TIME_STEP );
+  pdJointDefaultSetRefDis( &joint, 20 );
+  pdJointDefaultSetDis( &joint, 10 );
+  pdJointDefaultUpdate( &joint, TIME_STEP );
   EXPECT_DOUBLE_EQ( 0, pdJointVel( &joint ) );
   EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
 
-  pdJointSetRefDisDefault( &joint, 30 );
-  pdJointSetDisDefault( &joint, 15 );
-  pdJointUpdateDefault( &joint, TIME_STEP );
+  pdJointDefaultSetRefDis( &joint, 30 );
+  pdJointDefaultSetDis( &joint, 15 );
+  pdJointDefaultUpdate( &joint, TIME_STEP );
   EXPECT_DOUBLE_EQ( 500, pdJointVel( &joint ) );
   EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
   EXPECT_FALSE( joint.is_set_vel );
@@ -161,18 +161,18 @@ TEST_F(pdJointTest, UpdateDefault)
 TEST_F(pdJointTest, UpdateDefault_SetVel)
 {
   pdJointInit( &joint );
-  pdJointRefreshDefault( &joint, 10 );
+  pdJointDefaultRefresh( &joint, 10 );
 
-  pdJointSetRefDisDefault( &joint, 20 );
-  pdJointSetDisDefault( &joint, 10 );
-  pdJointUpdateDefault( &joint, TIME_STEP );
+  pdJointDefaultSetRefDis( &joint, 20 );
+  pdJointDefaultSetDis( &joint, 10 );
+  pdJointDefaultUpdate( &joint, TIME_STEP );
   EXPECT_DOUBLE_EQ( 0, pdJointVel( &joint ) );
   EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
 
-  pdJointSetRefDisDefault( &joint, 30 );
-  pdJointSetDisDefault( &joint, 15 );
-  pdJointSetVelDefault( &joint, 600 );
-  pdJointUpdateDefault( &joint, TIME_STEP );
+  pdJointDefaultSetRefDis( &joint, 30 );
+  pdJointDefaultSetDis( &joint, 15 );
+  pdJointDefaultSetVel( &joint, 600 );
+  pdJointDefaultUpdate( &joint, TIME_STEP );
   EXPECT_DOUBLE_EQ( 600, pdJointVel( &joint ) );
   EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
 }
@@ -180,18 +180,18 @@ TEST_F(pdJointTest, UpdateDefault_SetVel)
 TEST_F(pdJointTest, UpdateDefault_SetRefVel)
 {
   pdJointInit( &joint );
-  pdJointRefreshDefault( &joint, 10 );
+  pdJointDefaultRefresh( &joint, 10 );
 
-  pdJointSetRefDisDefault( &joint, 20 );
-  pdJointSetDisDefault( &joint, 10 );
-  pdJointUpdateDefault( &joint, TIME_STEP );
+  pdJointDefaultSetRefDis( &joint, 20 );
+  pdJointDefaultSetDis( &joint, 10 );
+  pdJointDefaultUpdate( &joint, TIME_STEP );
   EXPECT_DOUBLE_EQ( 0, pdJointVel( &joint ) );
   EXPECT_DOUBLE_EQ( 1000, pdJointRefVel( &joint ) );
 
-  pdJointSetRefDisDefault( &joint, 30 );
-  pdJointSetDisDefault( &joint, 15 );
-  pdJointSetRefVelDefault( &joint, 900 );
-  pdJointUpdateDefault( &joint, TIME_STEP );
+  pdJointDefaultSetRefDis( &joint, 30 );
+  pdJointDefaultSetDis( &joint, 15 );
+  pdJointDefaultSetRefVel( &joint, 900 );
+  pdJointDefaultUpdate( &joint, TIME_STEP );
   EXPECT_DOUBLE_EQ( 500, pdJointVel( &joint ) );
   EXPECT_DOUBLE_EQ( 900, pdJointRefVel( &joint ) );
 }
@@ -199,7 +199,7 @@ TEST_F(pdJointTest, UpdateDefault_SetRefVel)
 TEST_F(pdJointTest, DestroyDefault)
 {
   pdJointInit( &joint );
-  zNameSet( &joint, (char*)ZNONAME );
+  zNameSet( &joint, ZNONAME );
   SetRandomValues();
   // check
   EXPECT_TRUE( zNamePtr(&joint) );
@@ -213,7 +213,7 @@ TEST_F(pdJointTest, DestroyDefault)
   EXPECT_NE( 0.0, pdJointRefVelOld( &joint ) );
   EXPECT_NE( 0.0, pdJointOutput( &joint ) );
   // test
-  pdJointDestroyDefault( &joint );
+  pdJointDefaultDestroy( &joint );
   EXPECT_EQ( NULL, zNamePtr( &joint ) );
   EXPECT_EQ( 0.0, pdJointDis( &joint ) );
   EXPECT_EQ( 0.0, pdJointVel( &joint ) );
@@ -224,8 +224,8 @@ TEST_F(pdJointTest, DestroyDefault)
   EXPECT_EQ( 0.0, pdJointRefDisOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointRefVelOld( &joint ) );
   EXPECT_EQ( 0.0, pdJointOutput( &joint ) );
-  EXPECT_EQ( NULL, joint._prm );
-  EXPECT_EQ( NULL, joint._met );
+  EXPECT_EQ( NULL, joint.prp );
+  EXPECT_EQ( NULL, joint.com );
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( 0, pdJointOffset( &joint ) );
@@ -239,7 +239,6 @@ TEST_F(pdJointTest, SetOffset)
   pdJointSetOffset( &joint, 2 );
   EXPECT_EQ( 2, pdJointOffset( &joint ) );
 }
-
 
 typedef struct{
   double pgain, dgain;
@@ -275,7 +274,7 @@ protected:
 
 TEST_F(pdJointPDTrqTest, Create)
 {
-  EXPECT_TRUE( pdJointCreatePDTrq( &joint, pgain, dgain ) );
+  EXPECT_TRUE( pdJointPDTrqCreate( &joint, pgain, dgain ) );
   EXPECT_EQ( NULL, zNamePtr( &joint ) );
   EXPECT_EQ( 0.0, pdJointDis( &joint ) );
   EXPECT_EQ( 0.0, pdJointVel( &joint ) );
@@ -289,19 +288,19 @@ TEST_F(pdJointPDTrqTest, Create)
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( 0, pdJointOffset( &joint ) );
-  EXPECT_EQ( pgain, ((_pdJointPDTrq*)joint._prm)->pgain );
-  EXPECT_EQ( dgain, ((_pdJointPDTrq*)joint._prm)->dgain );
-  EXPECT_EQ( -HUGE_VAL, ((_pdJointPDTrq*)joint._prm)->trqmin );
-  EXPECT_EQ(  HUGE_VAL, ((_pdJointPDTrq*)joint._prm)->trqmax );
-  EXPECT_TRUE( joint._prm );
-  EXPECT_EQ( &pd_joint_pd_trq_met, joint._met );
+  EXPECT_EQ( pgain, ((_pdJointPDTrq*)joint.prp)->pgain );
+  EXPECT_EQ( dgain, ((_pdJointPDTrq*)joint.prp)->dgain );
+  EXPECT_EQ( -HUGE_VAL, ((_pdJointPDTrq*)joint.prp)->trqmin );
+  EXPECT_EQ(  HUGE_VAL, ((_pdJointPDTrq*)joint.prp)->trqmax );
+  EXPECT_TRUE( joint.prp );
+  EXPECT_EQ( &pd_joint_pd_trq_com, joint.com );
   pdJointDestroy( &joint );
 }
 
 TEST_F(pdJointPDTrqTest, Destroy)
 {
-  pdJointCreatePDTrq( &joint, pgain, dgain );
-  zNameSet( &joint, (char*)ZNONAME );
+  pdJointPDTrqCreate( &joint, pgain, dgain );
+  zNameSet( &joint, ZNONAME );
   SetRandomValues();
   pdJointDestroy( &joint );
   EXPECT_EQ( NULL, zNamePtr( &joint ) );
@@ -317,13 +316,13 @@ TEST_F(pdJointPDTrqTest, Destroy)
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( 0, pdJointOffset( &joint ) );
-  EXPECT_EQ( NULL, joint._prm );
-  EXPECT_EQ( NULL, joint._met );
+  EXPECT_EQ( NULL, joint.prp );
+  EXPECT_EQ( NULL, joint.com );
 }
 
 TEST_F(pdJointPDTrqTest, Update)
 {
-  pdJointCreatePDTrq( &joint, 2, 3 );
+  pdJointPDTrqCreate( &joint, 2, 3 );
   pdJointRefresh( &joint, 0 );
   pdJointSetDis( &joint, 0 );
   pdJointSetRefDis( &joint, 10 );
@@ -353,7 +352,7 @@ TEST_F(pdJointPDTrqTest, Update)
 
 TEST_F(pdJointPDTrqTest, Output_Limit)
 {
-  pdJointCreatePDTrq( &joint, 2, 3 );
+  pdJointPDTrqCreate( &joint, 2, 3 );
   pdJointPDTrqSetLim( &joint, -100, 100 );
 
   pdJointRefresh( &joint, 0 );
@@ -371,41 +370,86 @@ TEST_F(pdJointPDTrqTest, SetPgain)
 {
   double p;
 
-  pdJointCreatePDTrq( &joint, pgain, dgain );
+  pdJointPDTrqCreate( &joint, pgain, dgain );
   p = ri.rand();
-  EXPECT_NE( p, ((_pdJointPDTrq*)joint._prm)->pgain );
+  EXPECT_NE( p, ((_pdJointPDTrq*)joint.prp)->pgain );
 
   pdJointPDTrqSetPgain( &joint, p );
-  EXPECT_EQ( p, ((_pdJointPDTrq*)joint._prm)->pgain );
+  EXPECT_EQ( p, ((_pdJointPDTrq*)joint.prp)->pgain );
 }
 
 TEST_F(pdJointPDTrqTest, SetDgain)
 {
   double d;
 
-  pdJointCreatePDTrq( &joint, pgain, dgain );
+  pdJointPDTrqCreate( &joint, pgain, dgain );
   d = ri.rand();
-  EXPECT_NE( d, ((_pdJointPDTrq*)joint._prm)->dgain );
+  EXPECT_NE( d, ((_pdJointPDTrq*)joint.prp)->dgain );
 
   pdJointPDTrqSetDgain( &joint, d );
-  EXPECT_EQ( d, ((_pdJointPDTrq*)joint._prm)->dgain );
+  EXPECT_EQ( d, ((_pdJointPDTrq*)joint.prp)->dgain );
 }
 
-TEST_F(pdJointPDTrqTest, FRead)
+TEST_F(pdJointPDTrqTest, FromZTK)
 {
-  char filename[] = "model/joint_pd.conf";
+  char filename[] = "model/joint_pd.ztk";
   _pdJointPDTrq *pd;
-  FILE *fp;
+  ZTK ztk;
 
-  fp = fopen( filename, "r" );
-  pdJointFRead( fp, &joint );
-  pd = (_pdJointPDTrq*)joint._prm;
+  ZTKParse( &ztk, filename );
+  pdJointFromZTK( &joint, &ztk );
+  pd = (_pdJointPDTrq*)joint.prp;
   EXPECT_STREQ( "test_joint", zNamePtr( &joint ) );
   EXPECT_EQ( 1000, pd->pgain );
   EXPECT_EQ( 50, pd->dgain );
   EXPECT_EQ( 5000, pd->trqmax );
   EXPECT_EQ( -5000, pd->trqmin );
-  EXPECT_EQ( &pd_joint_pd_trq_met, joint._met );
+  EXPECT_EQ( &pd_joint_pd_trq_com, joint.com );
+  pdJointDestroy( &joint );
+  ZTKDestroy( &ztk );
+}
+
+TEST_F(pdJointPDTrqTest, FPrintZTK)
+{
+  char buf[BUFSIZ];
+  char expected[BUFSIZ];
+  FILE *fp;
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  pdJointPDTrqCreate( &joint, 1000, 50 );
+  pdJointPDTrqSetLim( &joint, -5000, 5000 );
+  zNameSet( &joint, "test_joint" );
+  sprintf( expected,
+           "name: %s\ntype: PDtrq\n"
+           "pgain: %.10g\ndgain: %.10g\n"
+           "min: %.10g\nmax: %.10g\n",
+           zName(&joint), 1000.0, 50.0, -5000.0, 5000.0 );
+
+  pdJointFPrintZTK( fp, &joint );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
+  pdJointDestroy( &joint );
+  fclose( fp );
+}
+
+TEST_F(pdJointPDTrqTest, FPrintZTK_inf)
+{
+  char buf[2*BUFSIZ];
+  char expected[BUFSIZ];
+  FILE *fp;
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  pdJointPDTrqCreate( &joint, 2000, 100 );
+  zNameSet( &joint, "test_joint" );
+  sprintf( expected,
+           "name: %s\ntype: PDtrq\n"
+           "pgain: %.10g\ndgain: %.10g\n",
+           zName(&joint), 2000.0, 100.0 );
+
+  pdJointFPrintZTK( fp, &joint );
+  fprintf( fp, "%c", '\0' );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
   pdJointDestroy( &joint );
   fclose( fp );
 }
@@ -447,7 +491,7 @@ protected:
 
 TEST_F(pdJointPIDTrqTest, Create)
 {
-  EXPECT_TRUE( pdJointCreatePIDTrq( &joint, pgain, igain, dgain ) );
+  EXPECT_TRUE( pdJointPIDTrqCreate( &joint, pgain, igain, dgain ) );
   EXPECT_EQ( NULL, zNamePtr( &joint ) );
   EXPECT_EQ( 0.0, pdJointDis( &joint ) );
   EXPECT_EQ( 0.0, pdJointVel( &joint ) );
@@ -461,20 +505,20 @@ TEST_F(pdJointPIDTrqTest, Create)
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( 0, pdJointOffset( &joint ) );
-  EXPECT_EQ( pgain, ((_pdJointPIDTrq*)joint._prm)->pgain );
-  EXPECT_EQ( igain, ((_pdJointPIDTrq*)joint._prm)->igain );
-  EXPECT_EQ( dgain, ((_pdJointPIDTrq*)joint._prm)->dgain );
-  EXPECT_EQ( -HUGE_VAL, ((_pdJointPIDTrq*)joint._prm)->trqmin );
-  EXPECT_EQ(  HUGE_VAL, ((_pdJointPIDTrq*)joint._prm)->trqmax );
-  EXPECT_TRUE( joint._prm );
-  EXPECT_EQ( &pd_joint_pid_trq_met, joint._met );
+  EXPECT_EQ( pgain, ((_pdJointPIDTrq*)joint.prp)->pgain );
+  EXPECT_EQ( igain, ((_pdJointPIDTrq*)joint.prp)->igain );
+  EXPECT_EQ( dgain, ((_pdJointPIDTrq*)joint.prp)->dgain );
+  EXPECT_EQ( -HUGE_VAL, ((_pdJointPIDTrq*)joint.prp)->trqmin );
+  EXPECT_EQ(  HUGE_VAL, ((_pdJointPIDTrq*)joint.prp)->trqmax );
+  EXPECT_TRUE( joint.prp );
+  EXPECT_EQ( &pd_joint_pid_trq_com, joint.com );
   pdJointDestroy( &joint );
 }
 
 TEST_F(pdJointPIDTrqTest, Destroy)
 {
-  pdJointCreatePIDTrq( &joint, pgain, igain, dgain );
-  zNameSet( &joint, (char*)ZNONAME );
+  pdJointPIDTrqCreate( &joint, pgain, igain, dgain );
+  zNameSet( &joint, ZNONAME );
   SetRandomValues();
   pdJointDestroy( &joint );
   EXPECT_EQ( NULL, zNamePtr( &joint ) );
@@ -490,13 +534,13 @@ TEST_F(pdJointPIDTrqTest, Destroy)
   EXPECT_FALSE( joint.is_set_vel );
   EXPECT_FALSE( joint.is_set_refvel );
   EXPECT_EQ( 0, pdJointOffset( &joint ) );
-  EXPECT_EQ( NULL, joint._prm );
-  EXPECT_EQ( NULL, joint._met );
+  EXPECT_EQ( NULL, joint.prp );
+  EXPECT_EQ( NULL, joint.com );
 }
 
 TEST_F(pdJointPIDTrqTest, Update)
 {
-  pdJointCreatePIDTrq( &joint, 2, 4, 3 );
+  pdJointPIDTrqCreate( &joint, 2, 4, 3 );
   pdJointRefresh( &joint, 0 );
   pdJointSetDis( &joint, 0 );
   pdJointSetRefDis( &joint, 10 );
@@ -526,7 +570,7 @@ TEST_F(pdJointPIDTrqTest, Update)
 
 TEST_F(pdJointPIDTrqTest, Output_Limit)
 {
-  pdJointCreatePIDTrq( &joint, 2, 4, 3 );
+  pdJointPIDTrqCreate( &joint, 2, 4, 3 );
   pdJointPIDTrqSetLim( &joint, -100, 100 );
 
   pdJointRefresh( &joint, 0 );
@@ -544,54 +588,99 @@ TEST_F(pdJointPIDTrqTest, SetPgain)
 {
   double p;
 
-  pdJointCreatePIDTrq( &joint, pgain, igain, dgain );
+  pdJointPIDTrqCreate( &joint, pgain, igain, dgain );
   p = ri.rand();
-  EXPECT_NE( p, ((_pdJointPIDTrq*)joint._prm)->pgain );
+  EXPECT_NE( p, ((_pdJointPIDTrq*)joint.prp)->pgain );
 
   pdJointPIDTrqSetPgain( &joint, p );
-  EXPECT_EQ( p, ((_pdJointPIDTrq*)joint._prm)->pgain );
+  EXPECT_EQ( p, ((_pdJointPIDTrq*)joint.prp)->pgain );
 }
 
 TEST_F(pdJointPIDTrqTest, SetIgain)
 {
   double i;
 
-  pdJointCreatePIDTrq( &joint, pgain, igain, dgain );
+  pdJointPIDTrqCreate( &joint, pgain, igain, dgain );
   i = ri.rand();
-  EXPECT_NE( i, ((_pdJointPIDTrq*)joint._prm)->igain );
+  EXPECT_NE( i, ((_pdJointPIDTrq*)joint.prp)->igain );
 
   pdJointPIDTrqSetIgain( &joint, i );
-  EXPECT_EQ( i, ((_pdJointPIDTrq*)joint._prm)->igain );
+  EXPECT_EQ( i, ((_pdJointPIDTrq*)joint.prp)->igain );
 }
 
 TEST_F(pdJointPIDTrqTest, SetDgain)
 {
   double d;
 
-  pdJointCreatePIDTrq( &joint, pgain, igain, dgain );
+  pdJointPIDTrqCreate( &joint, pgain, igain, dgain );
   d = ri.rand();
-  EXPECT_NE( d, ((_pdJointPIDTrq*)joint._prm)->dgain );
+  EXPECT_NE( d, ((_pdJointPIDTrq*)joint.prp)->dgain );
 
   pdJointPIDTrqSetDgain( &joint, d );
-  EXPECT_EQ( d, ((_pdJointPIDTrq*)joint._prm)->dgain );
+  EXPECT_EQ( d, ((_pdJointPIDTrq*)joint.prp)->dgain );
 }
 
-TEST_F(pdJointPIDTrqTest, FRead)
+TEST_F(pdJointPIDTrqTest, FromZTK)
 {
-  char filename[] = "model/joint_pid.conf";
+  char filename[] = "model/joint_pid.ztk";
   _pdJointPIDTrq *pid;
-  FILE *fp;
+  ZTK ztk;
 
-  fp = fopen( filename, "r" );
-  pdJointFRead( fp, &joint );
-  pid = (_pdJointPIDTrq*)joint._prm;
+  ZTKParse( &ztk, filename );
+  pdJointFromZTK( &joint, &ztk );
+  pid = (_pdJointPIDTrq*)joint.prp;
   EXPECT_STREQ( "test_joint_pid", zNamePtr( &joint ) );
   EXPECT_EQ( 200, pid->pgain );
   EXPECT_EQ( 50, pid->igain );
   EXPECT_EQ( 10, pid->dgain );
   EXPECT_EQ( 1000, pid->trqmax );
   EXPECT_EQ( -1000, pid->trqmin );
-  EXPECT_EQ( &pd_joint_pid_trq_met, joint._met );
+  EXPECT_EQ( &pd_joint_pid_trq_com, joint.com );
+  pdJointDestroy( &joint );
+  ZTKDestroy( &ztk );
+}
+
+TEST_F(pdJointPIDTrqTest, FPrintZTK)
+{
+  char buf[BUFSIZ];
+  char expected[BUFSIZ];
+  FILE *fp;
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  pdJointPIDTrqCreate( &joint, 200, 50, 10 );
+  pdJointPIDTrqSetLim( &joint, -1000, 1000 );
+  zNameSet( &joint, "test_joint_pid" );
+  sprintf( expected,
+           "name: %s\ntype: PIDtrq\n"
+           "pgain: %.10g\nigain: %.10g\ndgain: %.10g\n"
+           "min: %.10g\nmax: %.10g\n",
+           zName(&joint), 200.0, 50.0, 10.0, -1000.0, 1000.0 );
+
+  pdJointFPrintZTK( fp, &joint );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
+  pdJointDestroy( &joint );
+  fclose( fp );
+}
+
+TEST_F(pdJointPIDTrqTest, FPrintZTK_inf)
+{
+  char buf[2*BUFSIZ];
+  char expected[BUFSIZ];
+  FILE *fp;
+
+  fp = fmemopen( buf, sizeof(buf), "r+" );
+  pdJointPIDTrqCreate( &joint, 400, 100, 5 );
+  zNameSet( &joint, "test_joint_pid" );
+  sprintf( expected,
+           "name: %s\ntype: PIDtrq\n"
+           "pgain: %.10g\nigain: %.10g\ndgain: %.10g\n",
+           zName(&joint), 400.0, 100.0, 5.0 );
+
+  pdJointFPrintZTK( fp, &joint );
+  fprintf( fp, "%c", '\0' );
+  fflush( fp );
+  EXPECT_STREQ( expected, buf );
   pdJointDestroy( &joint );
   fclose( fp );
 }
@@ -608,14 +697,14 @@ protected:
 
   void MakeJointArray() {
     pdJointArrayAlloc( &arr, 4 );
-    pdJointCreatePDTrq( zArrayElem(&arr,0), pgain, dgain );
-    pdJointCreatePDTrq( zArrayElem(&arr,1), pgain, dgain );
-    pdJointCreatePDTrq( zArrayElem(&arr,2), pgain, dgain );
-    pdJointCreatePDTrq( zArrayElem(&arr,3), pgain, dgain );
-    zNameSet( zArrayElem(&arr,0), (char*)"joint01" );
-    zNameSet( zArrayElem(&arr,1), (char*)"joint02" );
-    zNameSet( zArrayElem(&arr,2), (char*)"joint03" );
-    zNameSet( zArrayElem(&arr,3), (char*)"joint04" );
+    pdJointPDTrqCreate( zArrayElem(&arr,0), pgain, dgain );
+    pdJointPDTrqCreate( zArrayElem(&arr,1), pgain, dgain );
+    pdJointPDTrqCreate( zArrayElem(&arr,2), pgain, dgain );
+    pdJointPDTrqCreate( zArrayElem(&arr,3), pgain, dgain );
+    zNameSet( zArrayElem(&arr,0), "joint01" );
+    zNameSet( zArrayElem(&arr,1), "joint02" );
+    zNameSet( zArrayElem(&arr,2), "joint03" );
+    zNameSet( zArrayElem(&arr,3), "joint04" );
   };
 
   void CheckAllJointNames() {
@@ -660,8 +749,8 @@ protected:
 TEST_F(pdJointArrayTest, ArrayAlloc)
 {
   ASSERT_TRUE( pdJointArrayAlloc( &arr, 5 ) );
-  EXPECT_EQ( 5, zArrayNum( &arr ) );
-  for( int i=0; i<(int)zArrayNum(&arr); i++ ){
+  EXPECT_EQ( 5, zArraySize( &arr ) );
+  for( int i=0; i<(int)zArraySize(&arr); i++ ){
     EXPECT_EQ( i, pdJointArrayOffset( &arr, i ) );
   }
   zArrayFree( &arr );
@@ -752,72 +841,73 @@ TEST_F(pdJointArrayTest, Refresh)
 TEST_F(pdJointArrayTest, NameFind)
 {
   pdJointArrayAlloc( &arr, 2 );
-  pdJointCreatePDTrq( zArrayElem(&arr,0), pgain, dgain );
-  pdJointCreatePIDTrq( zArrayElem(&arr,1), pgain, igain, dgain );
-  zNameSet( zArrayElem(&arr,0), (char*)"joint_pi" );
-  zNameSet( zArrayElem(&arr,1), (char*)"joint_pid" );
+  pdJointPDTrqCreate( zArrayElem(&arr,0), pgain, dgain );
+  pdJointPIDTrqCreate( zArrayElem(&arr,1), pgain, igain, dgain );
+  zNameSet( zArrayElem(&arr,0), "joint_pi" );
+  zNameSet( zArrayElem(&arr,1), "joint_pid" );
   EXPECT_EQ( zArrayElem(&arr,0), pdJointArrayNameFind( &arr, "joint_pi" ) );
   EXPECT_EQ( zArrayElem(&arr,1), pdJointArrayNameFind( &arr, "joint_pid" ) );
   pdJointArrayDestroy( &arr );
 }
 
-TEST_F(pdJointArrayTest, FRead)
+TEST_F(pdJointArrayTest, FromZTK)
 {
-  char filename[] = "model/joint.conf";
-  FILE *fp;
+  char filename[] = "model/joint.ztk";
+  ZTK ztk;
 
-  fp  = fopen( filename, "r" );
-  pdJointArrayFRead( fp, &arr, NULL );
+  ZTKParse( &ztk, filename );
+  pdJointArrayFromZTK( &arr, NULL, &ztk );
   CheckAllJointNames();
   pdJointArrayDestroy( &arr );
-  fclose( fp );
+  ZTKDestroy( &ztk );
 }
 
-TEST_F(pdJointArrayTest, FRead_CheckOffset)
+TEST_F(pdJointArrayTest, FromZTK_CheckOffset)
 {
-  char modelfile[] = "model/hydra.zkc";
-  char conffile[]  = "model/joint.conf";
+  char modelfile[] = "model/hydra.ztk";
+  char jointfile[] = "model/joint.ztk";
   rkChain chain;
   pdJointArray joint;
-  FILE *fp;
-  register int i;
+  ZTK ztk;
+  int i;
 
-  rkChainReadFile( &chain, modelfile );
-  fp = fopen( conffile, "r" );
-  pdJointArrayFRead( fp, &joint, &chain );
-  for( i=0; i<(int)zArrayNum(&joint); i++ ){
+  rkChainReadZTK( &chain, modelfile );
+  ZTKParse( &ztk, jointfile );
+  pdJointArrayFromZTK( &joint, &chain, &ztk );
+  for( i=0; i<(int)zArraySize(&joint); i++ ){
     EXPECT_EQ( 6+i, pdJointArrayOffset( &joint, i ) );
   }
   pdJointArrayDestroy( &joint );
   rkChainDestroy( &chain );
-  fclose( fp );
+  ZTKDestroy( &ztk );
 }
 
-TEST_F(pdJointArrayTest, FRead_NoNameErr)
+TEST_F(pdJointArrayTest, FromZTK_NoNameErr)
 {
-  char modelfile[] = "model/hydra.zkc";
-  char conffile[]  = "model/joint_noname_err.conf";
+  char modelfile[] = "model/hydra.ztk";
+  char jointfile[] = "model/joint_noname_err.ztk";
   rkChain chain;
   pdJointArray joint;
-  bool result;
 
-  rkChainReadFile( &chain, modelfile );
-  zEchoOff();
-  result = pdJointArrayReadFile( &joint, conffile, &chain );
-  EXPECT_FALSE( result );
+  testing::internal::CaptureStderr();
+  rkChainReadZTK( &chain, modelfile );
+  pdJointArrayReadZTK( &joint, &chain, jointfile );
+  std::string msg = testing::internal::GetCapturedStderr();
+  std::string expected = \
+    "run-time error: joint neck_y cannot be found in robot model (pdJointArraySetOffsetMapping).\n";
+  EXPECT_EQ( expected, msg );
   pdJointArrayDestroy( &joint );
   rkChainDestroy( &chain );
-  zEchoOn();
 }
 
-TEST_F(pdJointArrayTest, FRead_CheckSort)
+TEST_F(pdJointArrayTest, FromZTK_CheckSort)
 {
-  char modelfile[] = "model/hydra.zkc";
-  char conffile[]  = "model/joint_unsorted.conf";
+  char modelfile[] = "model/hydra.ztk";
+  char jointfile[] = "model/joint_unsorted.ztk";
   rkChain chain;
 
-  rkChainReadFile( &chain, modelfile );
-  ASSERT_TRUE( pdJointArrayReadFile( &arr, conffile, &chain ) );
+  rkChainReadZTK( &chain, modelfile );
+  pdJointArrayReadZTK( &arr, &chain, jointfile );
   CheckAllJointNames();
   pdJointArrayDestroy( &arr );
   rkChainDestroy( &chain );
@@ -825,18 +915,18 @@ TEST_F(pdJointArrayTest, FRead_CheckSort)
 
 TEST_F(pdJointArrayTest, CreateIndex)
 {
-  char modelfile[] = "model/hydra.zkc";
-  char conffile[]  = "model/joint.conf";
+  char modelfile[] = "model/hydra.ztk";
+  char jointfile[] = "model/joint.ztk";
   rkChain chain;
   pdJointArray joint;
   zIndex index;
-  register int i;
+  int i;
 
-  rkChainReadFile( &chain, modelfile );
-  pdJointArrayReadFile( &joint, conffile, &chain );
+  rkChainReadZTK( &chain, modelfile );
+  pdJointArrayReadZTK( &joint, &chain, jointfile );
   index = pdJointArrayCreateIndex( &joint );
-  EXPECT_EQ( 31, zArrayNum( index ) );
-  for( i=0; i<(int)zArrayNum(index); i++ )
+  EXPECT_EQ( 31, zArraySize( index ) );
+  for( i=0; i<(int)zArraySize(index); i++ )
     EXPECT_EQ( 6+i, zIndexElem( index, i ) );
   zIndexFree( index );
   pdJointArrayDestroy( &joint );

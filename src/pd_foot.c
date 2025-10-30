@@ -34,12 +34,12 @@ void pdFootInit(pdFoot *f, pdCZHrz *cz, byte dir, double dt)
     pdFootUWSign( pdFootUWPtr(f) ) = -1;
     pdFootZSign( pdFootZPtr(f) ) = -1;
   } else{
-    ZRUNERROR( "invalid foot dir specified - %d", dir );
+    ZRUNERROR( "invalid foot direction specified - %d", dir );
     pdFootDestroy( f );
     return;
   }
-  zVec3DClear( pdFootPivotPos( f ) );
-  zVec3DClear( pdFootPivotAtt( f ) );
+  zVec3DZero( pdFootPivotPos( f ) );
+  zVec3DZero( pdFootPivotAtt( f ) );
 }
 
 void pdFootDestroy(pdFoot *f)
@@ -69,8 +69,8 @@ void pdFootDestroy(pdFoot *f)
   pdFootRefAttX( f ) = 0;
   pdFootRefAttY( f ) = 0;
   pdFootRefAttZ( f ) = 0;
-  zVec3DClear( pdFootPivotPos( f ) );
-  zVec3DClear( pdFootPivotAtt( f ) );
+  zVec3DZero( pdFootPivotPos( f ) );
+  zVec3DZero( pdFootPivotAtt( f ) );
 }
 
 #define PD_CUR_FOOT_TOL  (1e-03)
@@ -112,28 +112,28 @@ pdFoot *pdFootBFPtr(pdFoot *lf, pdFoot *rf, double vwd)
   else return rf;
 }
 
-void pdFootXformSRXYtoUW(pdFoot *f, zVec3DList *sr)
+void pdFootXformSRXYtoUW(pdFoot *f, zLoop3D *sr)
 {
   zVec3D *p, *pp;
-  zVec3DListCell *cp;
+  zLoop3DCell *cp;
   zVec2D xy, uw;
 
-  if( !sr || zListNum( sr ) == 0 ){
+  if( !sr || zListSize( sr ) == 0 ){
     pdFootZSetSR( pdFootZPtr(f), NULL, 0 );
     return;
   } else {
-    if( !( p = zAlloc( zVec3D, zListNum( sr ) ) ) ){
+    if( !( p = zAlloc( zVec3D, zListSize( sr ) ) ) ){
       ZALLOCERROR();
       zFree( p );
       exit( EXIT_FAILURE );
     }
     pp = p;
     zListForEach( sr, cp ){
-      zVec2DCreate( xy, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
-      pdFootXformXYtoUW( f, xy, uw );
-      zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
+      zVec2DCreate( &xy, cp->data->c.x, cp->data->c.y );
+      pdFootXformXYtoUW( f, &xy, &uw );
+      zVec3DCreate( pp++, uw.e[pdU], uw.e[pdW], cp->data->c.z );
     }
-    pdFootZSetSR( pdFootZPtr(f), p, zListNum(sr) );
+    pdFootZSetSR( pdFootZPtr(f), p, zListSize(sr) );
     zFree( p );
   }
 }
@@ -151,8 +151,8 @@ void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp)
   _pdFootUpdateSOL( f, p, pd, refp, zX, pdFootTimeStep(f) );
   _pdFootUpdateSOL( f, p, pd, refp, zY, pdFootTimeStep(f) );
   _pdFootUpdateSOL( f, p, pd, refp, zZ, pdFootTimeStep(f) );
-  if( zVec3DElem( refp, zZ ) < 0 )
-    zVec3DElem( refp, zZ ) = 0;
+  if( refp->c.z < 0 )
+    refp->c.z = 0;
 }
 
 void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
@@ -167,49 +167,49 @@ void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
   zVec3DCreate( refa, ( theta + zPI_2 ) + phi, 0, 0 );
 }
 
-void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3DList *pfsr)
+void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zLoop3D *pfsr)
 {
   zVec2D xy;
   zVec2D zmpxy, zmpuw;
 
   /* world frame -> moving frame */
-  zVec2DCreate( zmpxy, zVec3DElem(zmp,zX), zVec3DElem(zmp,zY) );
-  pdFootXformXYtoUW( pf, zmpxy, zmpuw );
+  zVec2DCreate( &zmpxy, zmp->c.x, zmp->c.y );
+  pdFootXformXYtoUW( pf, &zmpxy, &zmpuw );
   pdFootXformSRXYtoUW( pf, pfsr );
   /* update desired position */
   pdFootUWUpdate( pdFootUWPtr( kf ), delta, vel );
-  pdFootZUpdate( pdFootZPtr( pf ), pdFootZPtr( kf ), delta, vel, zmpuw );
+  pdFootZUpdate( pdFootZPtr( pf ), pdFootZPtr( kf ), delta, vel, &zmpuw );
   /* moving frame -> world frame */
-  pdFootXformUWtoXY( kf, pdFootUWRefPos( pdFootUWPtr( kf ) ), xy );
+  pdFootXformUWtoXY( kf, pdFootUWRefPos( pdFootUWPtr( kf ) ), &xy );
   /* set desired position */
-  pdFootSetDesPos( kf, xy[zX], xy[zY], pdFootZRefZ( pdFootZPtr( kf ) ) );
+  pdFootSetDesPos( kf, xy.c.x, xy.c.y, pdFootZRefZ( pdFootZPtr( kf ) ) );
 }
 
 void _pdFootSmoothDesPos(pdFoot *kf, zVec3D *pd, zVec3D *smoothed_pd)
 {
   zVec3DCreate( smoothed_pd,
-                pdFootPivotPosX(kf) + pdFootPhase(kf) * ( zVec3DElem(pd,zX) - pdFootPivotPosX(kf) ),
-                pdFootPivotPosY(kf) + pdFootPhase(kf) * ( zVec3DElem(pd,zY) - pdFootPivotPosY(kf) ),
-                zVec3DElem(pd,zZ) );
+                pdFootPivotPosX(kf) + pdFootPhase(kf) * ( pd->c.x - pdFootPivotPosX(kf) ),
+                pdFootPivotPosY(kf) + pdFootPhase(kf) * ( pd->c.y - pdFootPivotPosY(kf) ),
+                pd->c.z );
 }
 
 void _pdFootSmoothDesPos2(pdFoot *kf, zVec3D *pd, zVec3D *smoothed_pd)
 {
   zVec3DCreate( smoothed_pd,
-                pdFootPosX(kf) + pdFootPhase(kf) * ( zVec3DElem(pd,zX) - pdFootPosX(kf) ),
-                pdFootPosY(kf) + pdFootPhase(kf) * ( zVec3DElem(pd,zY) - pdFootPosY(kf) ),
-                zVec3DElem(pd,zZ) );
+                pdFootPosX(kf) + pdFootPhase(kf) * ( pd->c.x - pdFootPosX(kf) ),
+                pdFootPosY(kf) + pdFootPhase(kf) * ( pd->c.y - pdFootPosY(kf) ),
+                pd->c.z );
 }
 
 void _pdFootSmoothDesPos3(pdFoot *kf, zVec3D *pd, zVec3D *smoothed_pd)
 {
   zVec3DCreate( smoothed_pd,
-                pdFootPosX(kf) + zSqr( pdFootPhase(kf) ) * ( zVec3DElem(pd,zX) - pdFootPosX(kf) ),
-                pdFootPosY(kf) + zSqr( pdFootPhase(kf) ) * ( zVec3DElem(pd,zY) - pdFootPosY(kf) ),
-                zVec3DElem(pd,zZ) );
+                pdFootPosX(kf) + zSqr( pdFootPhase(kf) ) * ( pd->c.x - pdFootPosX(kf) ),
+                pdFootPosY(kf) + zSqr( pdFootPhase(kf) ) * ( pd->c.y - pdFootPosY(kf) ),
+                pd->c.z );
 }
 
-void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zVec3DList *kfsr)
+void _pdFootRefPosUpdate(pdFoot *kf, zVec3D *kfp, zVec3D *kfa, zLoop3D *kfsr)
 {
   zVec3D smoothed_pd;
 
@@ -237,18 +237,18 @@ void pdFootCalcCOMRefPos(pdFoot *lf, pdFoot *rf, zVec3D *lfpos, zVec3D *rfpos, z
   zVec2D comdxy, comduw;
 
   /* world frame -> moving frame */
-  zVec2DCreate( lfxy, zVec3DElem(lfpos,zX), zVec3DElem(lfpos,zY) );
-  pdFootXformXYtoUW( lf, lfxy, lfuw );
-  zVec2DCreate( rfxy, zVec3DElem(rfpos,zX), zVec3DElem(rfpos,zY) );
-  pdFootXformXYtoUW( rf, rfxy, rfuw );
+  zVec2DCreate( &lfxy, lfpos->c.x, lfpos->c.y );
+  pdFootXformXYtoUW( lf, &lfxy, &lfuw );
+  zVec2DCreate( &rfxy, rfpos->c.x, rfpos->c.y );
+  pdFootXformXYtoUW( rf, &rfxy, &rfuw );
   /* calculate desired COM position */
-  pdFootUWCalcCOMRefPos( lfuw, rfuw, comduw );
+  pdFootUWCalcCOMRefPos( &lfuw, &rfuw, &comduw );
   /* moving frame -> world frame */
-  pdFootXformUWtoXY( lf, comduw, comdxy );
-  zVec3DCreate( comd, comdxy[zX], comdxy[zY], zVec3DElem( comd, zZ ) );
+  pdFootXformUWtoXY( lf, &comduw, &comdxy );
+  zVec3DCreate( comd, comdxy.c.x, comdxy.c.y, comd->c.z );
 }
 
-void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zVec3DList *sr)
+void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zLoop3D *sr)
 {
   /* update current state */
   pdFootSetPosVec( f, pos );
@@ -262,7 +262,7 @@ void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zVec3DList *sr)
   }
 }
 
-void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D delta, zVec2D vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zVec3DList *lfsr, zVec3DList *rfsr)
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zLoop3D *lfsr, zLoop3D *rfsr)
 {
   pdFootUpdateState( lf, lfp, lfa, lfsr );
   pdFootUpdateState( rf, rfp, rfa, rfsr );
@@ -278,34 +278,34 @@ void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)
 {
   /* for debug */
   fprintf( fp, "--\n" );
-  fprintf( fp, "lf    x:%g,    y:%g,    z:%g\n", zVec3DElem(&lf->_p,zX), zVec3DElem(&lf->_p,zY), zVec3DElem(&lf->_p,zZ) );
-  fprintf( fp, "lf   xd:%g,   yd:%g,   zd:%g\n", zVec3DElem(&lf->_pd,zX), zVec3DElem(&lf->_pd,zY), zVec3DElem(&lf->_pd,zZ) );
-  fprintf( fp, "lf refx:%g, refy:%g, refz:%g\n", zVec3DElem(&lf->refp,zX), zVec3DElem(&lf->refp,zY), zVec3DElem(&lf->refp,zZ) );
-  fprintf( fp, "lf azim:%g, elev:%g, tilt:%g\n", zVec3DElem(&lf->_a,zX), zVec3DElem(&lf->_a,zY), zVec3DElem(&lf->_a,zZ) );
-  fprintf( fp, "lf desa:%g, dese:%g, dest:%g\n", zVec3DElem(&lf->_ad,zX), zVec3DElem(&lf->_ad,zY), zVec3DElem(&lf->_ad,zZ) );
-  fprintf( fp, "lf refa:%g, refe:%g, reft:%g\n", zVec3DElem(&lf->refa,zX), zVec3DElem(&lf->refa,zY), zVec3DElem(&lf->refa,zZ) );
+  fprintf( fp, "lf    x:%g,    y:%g,    z:%g\n", lf->_p.c.x, lf->_p.c.y, lf->_p.c.z );
+  fprintf( fp, "lf   xd:%g,   yd:%g,   zd:%g\n", lf->_pd.c.x, lf->_pd.c.y, lf->_pd.c.z );
+  fprintf( fp, "lf refx:%g, refy:%g, refz:%g\n", lf->refp.c.x, lf->refp.c.y, lf->refp.c.z );
+  fprintf( fp, "lf azim:%g, elev:%g, tilt:%g\n", lf->_a.c.x, lf->_a.c.y, lf->_a.c.z );
+  fprintf( fp, "lf desa:%g, dese:%g, dest:%g\n", lf->_ad.c.x, lf->_ad.c.y, lf->_ad.c.z );
+  fprintf( fp, "lf refa:%g, refe:%g, reft:%g\n", lf->refa.c.x, lf->refa.c.y, lf->refa.c.z );
   fprintf( fp, "lf sign:%g, kappa:%g, dist:%g, phi:%g\n",
            pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)), pdFootUWDist(pdFootUWPtr(lf)), pdFootPhi(lf) );
   fprintf( fp, "lf reguz:%g, regwz:%g\n", pdFootRegZMPU(lf), pdFootRegZMPW(lf) );
   fprintf( fp, "lf refud:%g, refwd:%g\n", pdFootUWRefPosU(pdFootUWPtr(lf)), pdFootUWRefPosW(pdFootUWPtr(lf)) );
   fprintf( fp, "lf sign:%g, h:%g, rho:%g, dist:%g\n",
            pdFootZSign(pdFootZPtr(lf)), pdFootZMaxHeight(pdFootZPtr(lf)), pdFootZRho(pdFootZPtr(lf)), pdFootZDist(pdFootZPtr(lf)) );
-  fprintf( fp, "lf pz:" );zComplexFWrite( fp, pdFootZMPPhase(lf) );
+  fprintf( fp, "lf pz:" );zComplexFPrint( fp, pdFootZMPPhase(lf) );
   fprintf( fp, ", phase:%g, zd:%g\n", pdFootPhase(lf), pdFootZRefZ(pdFootZPtr(lf)) );
   fprintf( fp, "--\n" );
-  fprintf( fp, "rf    x:%g,    y:%g,    z:%g\n", zVec3DElem(&rf->_p,zX), zVec3DElem(&rf->_p,zY), zVec3DElem(&rf->_p,zZ) );
-  fprintf( fp, "rf   xd:%g,   yd:%g,   zd:%g\n", zVec3DElem(&rf->_pd,zX), zVec3DElem(&rf->_pd,zY), zVec3DElem(&rf->_pd,zZ) );
-  fprintf( fp, "rf refx:%g, refy:%g, refz:%g\n", zVec3DElem(&rf->refp,zX), zVec3DElem(&rf->refp,zY), zVec3DElem(&rf->refp,zZ) );
-  fprintf( fp, "rf azim:%g, elev:%g, tilt:%g\n", zVec3DElem(&rf->_a,zX), zVec3DElem(&rf->_a,zY), zVec3DElem(&rf->_a,zZ) );
-  fprintf( fp, "rf desa:%g, dese:%g, dest:%g\n", zVec3DElem(&rf->_ad,zX), zVec3DElem(&rf->_ad,zY), zVec3DElem(&rf->_ad,zZ) );
-  fprintf( fp, "rf refa:%g, refe:%g, reft:%g\n", zVec3DElem(&rf->refa,zX), zVec3DElem(&rf->refa,zY), zVec3DElem(&rf->refa,zZ) );
+  fprintf( fp, "rf    x:%g,    y:%g,    z:%g\n", rf->_p.c.x, rf->_p.c.y, rf->_p.c.z );
+  fprintf( fp, "rf   xd:%g,   yd:%g,   zd:%g\n", rf->_pd.c.x, rf->_pd.c.y, rf->_pd.c.z );
+  fprintf( fp, "rf refx:%g, refy:%g, refz:%g\n", rf->refp.c.x, rf->refp.c.y, rf->refp.c.z );
+  fprintf( fp, "rf azim:%g, elev:%g, tilt:%g\n", rf->_a.c.x, rf->_a.c.y, rf->_a.c.z );
+  fprintf( fp, "rf desa:%g, dese:%g, dest:%g\n", rf->_ad.c.x, rf->_ad.c.y, rf->_ad.c.z );
+  fprintf( fp, "rf refa:%g, refe:%g, reft:%g\n", rf->refa.c.x, rf->refa.c.y, rf->refa.c.z );
   fprintf( fp, "rf sign:%g, kappa:%g, dist:%g, phi:%g\n",
            pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)), pdFootUWDist(pdFootUWPtr(rf)), pdFootPhi(rf) );
   fprintf( fp, "rf reguz:%g, regwz:%g\n", pdFootRegZMPU(rf), pdFootRegZMPW(rf) );
   fprintf( fp, "rf refud:%g, refwd:%g\n", pdFootUWRefPosU(pdFootUWPtr(rf)), pdFootUWRefPosW(pdFootUWPtr(rf)) );
   fprintf( fp, "rf sign:%g, h:%g, rho:%g, dist:%g\n",
            pdFootZSign(pdFootZPtr(rf)), pdFootZMaxHeight(pdFootZPtr(rf)), pdFootZRho(pdFootZPtr(rf)), pdFootZDist(pdFootZPtr(rf)) );
-  fprintf( fp, "rf pz:" );zComplexFWrite( fp, pdFootZMPPhase(rf) );
+  fprintf( fp, "rf pz:" );zComplexFPrint( fp, pdFootZMPPhase(rf) );
   fprintf( fp, ", phase:%g, zd:%g\n", pdFootPhase(rf), pdFootZRefZ(pdFootZPtr(rf)) );
 }
 
@@ -313,24 +313,24 @@ void pdFootDataFWrite(FILE *fp, pdFoot *lf, pdFoot *rf)
 {
   fprintf( fp, "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
 /* 0- 1*/  pdFootTime(lf), pdFootTimeStep(rf),
-/* 2- 4*/  zVec3DElem(&lf->_p,zX), zVec3DElem(&lf->_p,zY), zVec3DElem(&lf->_p,zZ),
-/* 5- 7*/  zVec3DElem(&lf->_pd,zX), zVec3DElem(&lf->_pd,zY), zVec3DElem(&lf->_pd,zZ),
-/* 8-10*/  zVec3DElem(&lf->refp,zX), zVec3DElem(&lf->refp,zY), zVec3DElem(&lf->refp,zZ),
-/*11-13*/  zVec3DElem(&lf->_a,zX), zVec3DElem(&lf->_a,zY), zVec3DElem(&lf->_a,zZ),
-/*14-16*/  zVec3DElem(&lf->_ad,zX), zVec3DElem(&lf->_ad,zY), zVec3DElem(&lf->_ad,zZ),
-/*17-19*/  zVec3DElem(&lf->refa,zX), zVec3DElem(&lf->refa,zY), zVec3DElem(&lf->refa,zZ),
+/* 2- 4*/  lf->_p.c.x, lf->_p.c.y, lf->_p.c.z,
+/* 5- 7*/  lf->_pd.c.x, lf->_pd.c.y, lf->_pd.c.z,
+/* 8-10*/  lf->refp.c.x, lf->refp.c.y, lf->refp.c.z,
+/*11-13*/  lf->_a.c.x, lf->_a.c.y, lf->_a.c.z,
+/*14-16*/  lf->_ad.c.x, lf->_ad.c.y, lf->_ad.c.z,
+/*17-19*/  lf->refa.c.x, lf->refa.c.y, lf->refa.c.z,
 /*20-23*/  pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)), pdFootUWDist(pdFootUWPtr(lf)), pdFootPhi(lf),
 /*24-25*/  pdFootRegZMPU(lf), pdFootRegZMPW(lf),
 /*26-27*/  pdFootUWRefPosU(pdFootUWPtr(lf)), pdFootUWRefPosW(pdFootUWPtr(lf)),
 /*28-31*/  pdFootZSign(pdFootZPtr(lf)), pdFootZMaxHeight(pdFootZPtr(lf)), pdFootZRho(pdFootZPtr(lf)), pdFootZDist(pdFootZPtr(lf)),
 /*32-33*/  pdFootZMPPhase(lf)->re, pdFootZMPPhase(lf)->im,
 /*34-35*/  pdFootPhase(lf), pdFootZRefZ(pdFootZPtr(lf)),
-/*36-38*/  zVec3DElem(&rf->_p,zX), zVec3DElem(&rf->_p,zY), zVec3DElem(&rf->_p,zZ),
-/*39-41*/  zVec3DElem(&rf->_pd,zX), zVec3DElem(&rf->_pd,zY), zVec3DElem(&rf->_pd,zZ),
-/*42-44*/  zVec3DElem(&rf->refp,zX), zVec3DElem(&rf->refp,zY), zVec3DElem(&rf->refp,zZ),
-/*45-47*/  zVec3DElem(&rf->_a,zX), zVec3DElem(&rf->_a,zY), zVec3DElem(&rf->_a,zZ),
-/*48-50*/  zVec3DElem(&rf->_ad,zX), zVec3DElem(&rf->_ad,zY), zVec3DElem(&rf->_ad,zZ),
-/*51-53*/  zVec3DElem(&rf->refa,zX), zVec3DElem(&rf->refa,zY), zVec3DElem(&rf->refa,zZ),
+/*36-38*/  rf->_p.c.x, rf->_p.c.y, rf->_p.c.z,
+/*39-41*/  rf->_pd.c.x, rf->_pd.c.y, rf->_pd.c.z,
+/*42-44*/  rf->refp.c.x, rf->refp.c.y, rf->refp.c.z,
+/*45-47*/  rf->_a.c.x, rf->_a.c.y, rf->_a.c.z,
+/*48-50*/  rf->_ad.c.x, rf->_ad.c.y, rf->_ad.c.z,
+/*51-53*/  rf->refa.c.x, rf->refa.c.y, rf->refa.c.z,
 /*54-57*/  pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)), pdFootUWDist(pdFootUWPtr(rf)), pdFootPhi(rf),
 /*58-59*/  pdFootRegZMPU(rf), pdFootRegZMPW(rf),
 /*60-61*/  pdFootUWRefPosU(pdFootUWPtr(rf)), pdFootUWRefPosW(pdFootUWPtr(rf)),

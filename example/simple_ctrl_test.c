@@ -9,7 +9,7 @@ int main(void)
 {
   pdCmd cmd;      /* user-defined command values */
   pdState state;  /* robot state */
-  pdBiped biped;  /* bipdal locomotion controller */
+  pdBiped biped;  /* bipedal locomotion controller */
   pdRobot robot;  /* robot model instance */
   zVec dis;       /* joint displacement vector */
   register int i;
@@ -20,8 +20,8 @@ int main(void)
   pdBipedInit( &biped, &cmd, DT );
   pdRobotInit( &robot );
 
-  /* load kinematics/dynamics model file (robot.zkc) */
-  if( !pdRobotLoad( &robot, "model/hydra.zkc" ) )
+  /* load kinematics/dynamics model file (robot.ztk) */
+  if( !pdRobotLoad( &robot, "model/hydra.ztk" ) )
     exit( EXIT_FAILURE );
 
   /* prepare joint displacement vector */
@@ -35,7 +35,7 @@ int main(void)
   cmd.kappa = 0.0;         /* referential curvature for rotation */
 
   /* initialize robot state */
-  pdRobotDefaultBipedInit( &robot, &biped, &state );
+  pdRobotBipedDefaultInit( &robot, &biped, &state );
 
   /* main loop */
   for( i=0; i<STEP; i++ ){
@@ -47,15 +47,15 @@ int main(void)
 
     /* update controller */
     pdBipedUpdate( &biped, &state );
-    pdRobotSetBipedRefVec( &robot, &biped );
+    pdRobotBipedSetRefVec( &robot, &biped );
     pdRobotSolveIK( &robot, 0 );
 
     /* output */
     /* obtain desired joint displacement as a zVec instance */
     zVecCopy( pdRobotJointDis( &robot ), dis );
     /* you can visualize the motion by executing the following command, e.g. */
-    /*   $ rk_anim model/hydra.zkc motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
-    printf( "%f ", DT );zVecWrite( dis );
+    /*   $ rk_anim model/hydra.ztk motion.zvs -pan -- -90 -x 0 -y -- -15 -z 1 */
+    printf( "%f ", DT );zVecPrint( dis );
 
     /* update state */
     pdBipedUpdateState( &biped, &state );

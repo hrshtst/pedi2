@@ -77,7 +77,8 @@ TEST_F(pdCZHrzUWTest, Init)
   EXPECT_EQ( &uw._kappa, uw._u._kappa );
   EXPECT_EQ( &uw._kappa, uw._w._kappa );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
-  EXPECT_EQ( NULL, pdCZHrzUWSRVert( &uw ) );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, uw._vert_num );
   EXPECT_EQ( 0, pdCZHrzUWZMPU( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWZMPW( &uw ) );
@@ -106,8 +107,22 @@ TEST_F(pdCZHrzUWTest, Destroy)
   EXPECT_EQ( NULL, uw._u._kappa );
   EXPECT_EQ( NULL, uw._w._kappa );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
-  EXPECT_EQ( NULL, pdCZHrzUWSRVert( &uw ) );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, uw._vert_num );
+}
+
+TEST_F(pdCZHrzUWTest, SetSRZeroNum)
+{
+  zVec3D v[2];
+
+  pdCZHrzUWSetSR( &uw, v, 0 );
+  EXPECT_EQ( 0, uw._vert_num );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellNext( zListRoot( pdCZHrzUWSR(&uw) ) ) );
+  EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellPrev( zListRoot( pdCZHrzUWSR(&uw) ) ) );
 }
 
 TEST_F(pdCZHrzUWTest, SetSR)
@@ -119,37 +134,93 @@ TEST_F(pdCZHrzUWTest, SetSR)
   zVec3DCreate( &v[1], 0, 1, 0 );
   zVec3DCreate( &v[2], 1, 1, 0 );
   pdCZHrzUWSetSR( &uw, v, 3 );
-  EXPECT_EQ( 0, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zX ) );
-  EXPECT_EQ( 0, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zY ) );
-  EXPECT_EQ( 0, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zX ) );
-  EXPECT_EQ( 1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zY ) );
-  EXPECT_EQ( 1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zX ) );
-  EXPECT_EQ( 1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zY ) );
+  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 3, uw._vert_num );
 
   zVec3DCreate( &v[0], 0.1, 0.1, 0 );
   zVec3DCreate( &v[1], 0.1, 0.2, 0 );
   zVec3DCreate( &v[2], 0.2, 0.2, 0 );
   pdCZHrzUWSetSR( &uw, v, 3 );
-  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zX ) );
-  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zY ) );
-  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zX ) );
-  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zY ) );
-  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zX ) );
-  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zY ) );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 3, uw._vert_num );
 
   zVec3DCreate( &vv[0], 0.1, 0.1, 0 );
   zVec3DCreate( &vv[1], 0.1, 0.2, 0 );
   zVec3DCreate( &vv[2], 0.2, 0.2, 0 );
   zVec3DCreate( &vv[3], 0.2, 0.1, 0 );
   pdCZHrzUWSetSR( &uw, vv, 4 );
-  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zX ) );
-  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[0], zY ) );
-  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zX ) );
-  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[1], zY ) );
-  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zX ) );
-  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[2], zY ) );
-  EXPECT_EQ( 0.2, zVec3DElem( &pdCZHrzUWSRVert(&uw)[3], zX ) );
-  EXPECT_EQ( 0.1, zVec3DElem( &pdCZHrzUWSRVert(&uw)[3], zY ) );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.y );
+  EXPECT_EQ( 4, uw._vert_num );
+}
+
+TEST_F(pdCZHrzUWTest, SetSR_2)
+{
+  zVec3D v[3];
+  zVec3D vv[4];
+
+  // start with zero contact points
+  pdCZHrzUWSetSR( &uw, NULL, 0 );
+  EXPECT_EQ( 0, uw._vert_num );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellNext( zListRoot( pdCZHrzUWSR(&uw) ) ) );
+  EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellPrev( zListRoot( pdCZHrzUWSR(&uw) ) ) );
+
+  // make a contact with three points
+  zVec3DCreate( &v[0], 0, 0, 0 );
+  zVec3DCreate( &v[1], 0, 1, 0 );
+  zVec3DCreate( &v[2], 1, 1, 0 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_EQ( 3, uw._vert_num );
+  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+
+  // make the contact off
+  pdCZHrzUWSetSR( &uw, v, 0 );
+  EXPECT_EQ( 0, uw._vert_num );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellNext( zListRoot( pdCZHrzUWSR(&uw) ) ) );
+  EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellPrev( zListRoot( pdCZHrzUWSR(&uw) ) ) );
+
+  // make another contact with four points
+  zVec3DCreate( &vv[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &vv[1], 0.1, 0.2, 0 );
+  zVec3DCreate( &vv[2], 0.2, 0.2, 0 );
+  zVec3DCreate( &vv[3], 0.2, 0.1, 0 );
+  pdCZHrzUWSetSR( &uw, vv, 4 );
+  EXPECT_EQ( 4, uw._vert_num );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.y );
 }
 
 TEST_F(pdCZHrzUWTest, SetSR_chk_memory)
@@ -173,21 +244,22 @@ TEST_F(pdCZHrzUWTest, SetSR_chk_memory)
   zVec3DCreate( &v3[2], 1, 1, 0 );
   zVec3DCreate( &v3[3], 1, 0, 0 );
 
-  EXPECT_EQ( NULL, pdCZHrzUWSRVert(&uw) );
+  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
   pdCZHrzUWSetSR( &uw, v1, 3 );
-  p1 = pdCZHrzUWSRVert(&uw);
+  p1 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_TRUE( NULL != p1 );
 
   pdCZHrzUWSetSR( &uw, v2, 4 );
-  p2 = pdCZHrzUWSRVert(&uw);
+  p2 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_NE( p1, p2 );
 
   pdCZHrzUWSetSR( &uw, v3, 4 );
-  p3 = pdCZHrzUWSRVert(&uw);
+  p3 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_EQ( p2, p3 );
 
   pdCZHrzUWSetSR( &uw, v1, 3 );
-  p1 = pdCZHrzUWSRVert(&uw);
+  p1 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_NE( p3, p1 );
 }
 
@@ -231,10 +303,10 @@ TEST_F(pdCZHrzUWTest, CheckSimZMPAllStateZero)
   pdCZVrtSetRef( &vrt, 0.26 );
   pdCZHrzUWSetPrm( &uw, 0.25, 1.0, 0, 0, 1.0, 1.5, 1.0, 1.0, 0.1, 0 );
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 0, 0 );
-  pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
-  EXPECT_DOUBLE_EQ( -0.040706737871602130529602, zmp[pdU] );
-  EXPECT_DOUBLE_EQ( 0.0, zmp[pdW] );
+  zVec2DCreate( &delta, 0, 0 ); zVec2DCreate( &vel, 0, 0 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  EXPECT_DOUBLE_EQ( -0.040706737871602130529602, zmp.e[pdU] );
+  EXPECT_DOUBLE_EQ( 0.0, zmp.e[pdW] );
 }
 
 TEST_F(pdCZHrzUWTest, CheckSimZMPVelocityFollow)
@@ -243,10 +315,10 @@ TEST_F(pdCZHrzUWTest, CheckSimZMPVelocityFollow)
 
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
-  pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
-  EXPECT_DOUBLE_EQ( -0.008141347574320424718142, zmp[pdU] );
-  EXPECT_DOUBLE_EQ( -0.029689777531362912532664, zmp[pdW] );
+  zVec2DCreate( &delta, 0, 0.01 ); zVec2DCreate( &vel, 0.2, 0.1 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  EXPECT_DOUBLE_EQ( -0.008141347574320424718142, zmp.e[pdU] );
+  EXPECT_DOUBLE_EQ( -0.029689777531362912532664, zmp.e[pdW] );
 }
 
 TEST_F(pdCZHrzUWTest, CheckSimZMPVelocityFollowCurve)
@@ -255,10 +327,10 @@ TEST_F(pdCZHrzUWTest, CheckSimZMPVelocityFollowCurve)
 
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
-  pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
-  EXPECT_DOUBLE_EQ( -0.006876061458783272808959, zmp[pdU] );
-  EXPECT_DOUBLE_EQ( -0.031769198404332107954495, zmp[pdW] );
+  zVec2DCreate( &delta, 0, 0.01 ); zVec2DCreate( &vel, 0.2, 0.1 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  EXPECT_DOUBLE_EQ( -0.006876061458783272808959, zmp.e[pdU] );
+  EXPECT_DOUBLE_EQ( -0.031769198404332107954495, zmp.e[pdW] );
   // EXPECT_DOUBLE_EQ( -0.005162917622573504408678, pdCZHrzUWZMPU( &uw ) );
   // EXPECT_DOUBLE_EQ( -0.001854072725677788271298, pdCZHrzUWZMPW( &uw ) );
 }
@@ -269,11 +341,11 @@ TEST_F(pdCZHrzUWTest, CheckAccVelocityFollow)
 
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
-  pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
-  pdCZHrzUWCalcAcc( &uw, zmp, acc );
-  EXPECT_DOUBLE_EQ( 0.307074471047709740556542, acc[pdU] );
-  EXPECT_DOUBLE_EQ( 1.119835831567288941812421, acc[pdW] );
+  zVec2DCreate( &delta, 0, 0.01 ); zVec2DCreate( &vel, 0.2, 0.1 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  pdCZHrzUWCalcAcc( &uw, &zmp, &acc );
+  EXPECT_DOUBLE_EQ( 0.307074471047709740556542, acc.e[pdU] );
+  EXPECT_DOUBLE_EQ( 1.119835831567288941812421, acc.e[pdW] );
 }
 
 TEST_F(pdCZHrzUWTest, CheckAccVelocityFollowCurve)
@@ -282,11 +354,11 @@ TEST_F(pdCZHrzUWTest, CheckAccVelocityFollowCurve)
 
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
-  pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
-  pdCZHrzUWCalcAcc( &uw, zmp, acc );
-  EXPECT_DOUBLE_EQ( 0.259350545603461102306397, acc[pdU] );
-  EXPECT_DOUBLE_EQ( 1.198267204116308493055953, acc[pdW] );
+  zVec2DCreate( &delta, 0, 0.01 ); zVec2DCreate( &vel, 0.2, 0.1 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  pdCZHrzUWCalcAcc( &uw, &zmp, &acc );
+  EXPECT_DOUBLE_EQ( 0.259350545603461102306397, acc.e[pdU] );
+  EXPECT_DOUBLE_EQ( 1.198267204116308493055953, acc.e[pdW] );
 }
 
 TEST_F(pdCZHrzUWTest, SaturationOfZMP)
@@ -308,17 +380,17 @@ TEST_F(pdCZHrzUWTest, SaturationOfZMP)
 
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 1, 1 );
-  pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
-  EXPECT_DOUBLE_EQ( 0.122120213614806391588807, zmp[pdU] );
-  EXPECT_DOUBLE_EQ( 0.3, zmp[pdW] );
+  zVec2DCreate( &delta, 0, 0 ); zVec2DCreate( &vel, 1, 1 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  EXPECT_DOUBLE_EQ( 0.122120213614806391588807, zmp.e[pdU] );
+  EXPECT_DOUBLE_EQ( 0.3, zmp.e[pdW] );
 
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0 ); zVec2DCreate( vel, 1, 1 );
-  pdCZHrzUWCalcZMP( &uw, delta, vel, zmp );
-  EXPECT_DOUBLE_EQ( 0.2, zmp[pdU] );
-  EXPECT_DOUBLE_EQ( 0.3, zmp[pdW] );
+  zVec2DCreate( &delta, 0, 0 ); zVec2DCreate( &vel, 1, 1 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  EXPECT_DOUBLE_EQ( 0.2, zmp.e[pdU] );
+  EXPECT_DOUBLE_EQ( 0.3, zmp.e[pdW] );
 }
 
 TEST_F(pdCZHrzUWTest, CalcRegZMP)
@@ -327,14 +399,14 @@ TEST_F(pdCZHrzUWTest, CalcRegZMP)
 
   pdCZVrtZeta( &vrt ) = 1;
   pdCZHrzUWSetPrm( &uw, 0.2, 1, 1, 0.2, 1, 1, 1, 1, 1, 1 );
-  zVec2DCreate( delta, 0.2, -0.2 ); zVec2DCreate( vel, 0.2, -0.2 );
-  pdCZHrzUWCalcRegZMP( &uw, delta, vel, regzmp );
-  EXPECT_NEAR( 0.14,  regzmp[pdU], 1e-12 );
-  EXPECT_NEAR( -0.25, regzmp[pdW], 1e-12 );
-  zVec2DCreate( delta, -0.2, -0.2 ); zVec2DCreate( vel, 0.2, 0.2 );
-  pdCZHrzUWCalcRegZMP( &uw, delta, vel, regzmp );
-  EXPECT_NEAR( 0.66, regzmp[pdU], 1e-12 );
-  EXPECT_NEAR( 0.55, regzmp[pdW], 1e-12 );
+  zVec2DCreate( &delta, 0.2, -0.2 ); zVec2DCreate( &vel, 0.2, -0.2 );
+  pdCZHrzUWCalcRegZMP( &uw, &delta, &vel, &regzmp );
+  EXPECT_NEAR( 0.14,  regzmp.e[pdU], 1e-12 );
+  EXPECT_NEAR( -0.25, regzmp.e[pdW], 1e-12 );
+  zVec2DCreate( &delta, -0.2, -0.2 ); zVec2DCreate( &vel, 0.2, 0.2 );
+  pdCZHrzUWCalcRegZMP( &uw, &delta, &vel, &regzmp );
+  EXPECT_NEAR( 0.66, regzmp.e[pdU], 1e-12 );
+  EXPECT_NEAR( 0.55, regzmp.e[pdW], 1e-12 );
 }
 
 TEST_F(pdCZHrzUWTest, CalcZMPPhase_1)
@@ -345,10 +417,10 @@ TEST_F(pdCZHrzUWTest, CalcZMPPhase_1)
   pdCZVrtZeta( &vrt ) = 1;
   pdCZHrzUWSetQ1W( &uw, 1 );
   pdCZHrzUWSetQ2W( &uw, 1 );
-  zVec2DCreate( delta, 0, 0 );
-  zVec2DCreate( vel, 0, 0 );
-  zVec2DCreate( zmp, 0, 0 );
-  pdCZHrzUWCalcZMPPhase( &uw, delta, vel, zmp, &pz );
+  zVec2DCreate( &delta, 0, 0 );
+  zVec2DCreate( &vel, 0, 0 );
+  zVec2DCreate( &zmp, 0, 0 );
+  pdCZHrzUWCalcZMPPhase( &uw, &delta, &vel, &zmp, &pz );
   EXPECT_NEAR( 0, pz.re, 1e-12 );
   EXPECT_NEAR( 0, pz.im, 1e-12 );
 }
@@ -361,10 +433,10 @@ TEST_F(pdCZHrzUWTest, CalcZMPPhase_2)
   pdCZVrtZeta( &vrt ) = 2;
   pdCZHrzUWSetQ1W( &uw, 1 );
   pdCZHrzUWSetQ2W( &uw, 1 );
-  zVec2DCreate( delta, 0, 0.2 );
-  zVec2DCreate( vel, 0, 0.5 );
-  zVec2DCreate( zmp, 0, 0.1 );
-  pdCZHrzUWCalcZMPPhase( &uw, delta, vel, zmp, &pz );
+  zVec2DCreate( &delta, 0, 0.2 );
+  zVec2DCreate( &vel, 0, 0.5 );
+  zVec2DCreate( &zmp, 0, 0.1 );
+  pdCZHrzUWCalcZMPPhase( &uw, &delta, &vel, &zmp, &pz );
   EXPECT_NEAR( -0.1, pz.re, 1e-12 );
   EXPECT_NEAR( -0.5, pz.im, 1e-12 );
 }
@@ -375,8 +447,8 @@ TEST_F(pdCZHrzUWTest, UpdateVelocityFollow)
 
   SetDefaultPrmVelocityFollow();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
-  pdCZHrzUWUpdate( &uw, delta, vel );
+  zVec2DCreate( &delta, 0, 0.01 ); zVec2DCreate( &vel, 0.2, 0.1 );
+  pdCZHrzUWUpdate( &uw, &delta, &vel );
   EXPECT_DOUBLE_EQ( -0.008141347574320424718142, pdCZHrzUWZMPU(&uw) );
   EXPECT_DOUBLE_EQ( -0.029689777531362912532664, pdCZHrzUWZMPW(&uw) );
   EXPECT_DOUBLE_EQ( 0.307074471047709740556542,  pdCZHrzUWAccU(&uw) );
@@ -389,8 +461,8 @@ TEST_F(pdCZHrzUWTest, UpdateVelocityFollowCurve)
 
   SetDefaultPrmVelocityFollowCurve();
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
-  zVec2DCreate( delta, 0, 0.01 ); zVec2DCreate( vel, 0.2, 0.1 );
-  pdCZHrzUWUpdate( &uw, delta, vel );
+  zVec2DCreate( &delta, 0, 0.01 ); zVec2DCreate( &vel, 0.2, 0.1 );
+  pdCZHrzUWUpdate( &uw, &delta, &vel );
   EXPECT_DOUBLE_EQ( -0.006876061458783272808959, pdCZHrzUWZMPU(&uw) );
   EXPECT_DOUBLE_EQ( -0.031769198404332107954495, pdCZHrzUWZMPW(&uw) );
   EXPECT_DOUBLE_EQ(  0.259350545603461102306397, pdCZHrzUWAccU(&uw) );

@@ -10,47 +10,31 @@ class pdStateTest : public testing::Test {
     pdStateDestroy( &state );
   };
 
-  bool zMat3DIsTol(zMat3D *m, double tol) {
-    return zIsTol( m->c[0], tol ) &&
-        zIsTol( m->c[1], tol ) &&
-        zIsTol( m->c[2], tol ) &&
-        zIsTol( m->c[3], tol ) &&
-        zIsTol( m->c[4], tol ) &&
-        zIsTol( m->c[5], tol ) &&
-        zIsTol( m->c[6], tol ) &&
-        zIsTol( m->c[7], tol ) &&
-        zIsTol( m->c[8], tol );
-  }
-
-  bool zMat3DIsTiny(zMat3D *m) {
-    return zMat3DIsTol( m, zTOL );
-  }
-
   void LFOn() {
-    zVec3DSetElem( &state.lf_pos, zZ, 0.0 );
-    if( zListNum( &state.sr_lf) == 0 )
+    state.lf_pos.c.z = 0.0;
+    if( zListSize( &state.sr_lf) == 0 )
       zStackPush( &state.sr_lf, &cell[0] );
   };
 
   void LFOff() {
-    zVec3DListCell *cp;
+    zLoop3DCell *cp;
 
-    zVec3DSetElem( &state.lf_pos, zZ, 0.01 );
-    if( zListNum( &state.sr_lf) > 0 )
+    state.lf_pos.c.z = 0.01;
+    if( zListSize( &state.sr_lf) > 0 )
       zStackPop( &state.sr_lf, &cp );
   };
 
   void RFOn() {
-    zVec3DSetElem( &state.rf_pos, zZ, 0.0 );
-    if( zListNum( &state.sr_rf) == 0 )
+    state.rf_pos.c.z = 0.0;
+    if( zListSize( &state.sr_rf) == 0 )
       zStackPush( &state.sr_rf, &cell[1] );
   };
 
   void RFOff() {
-    zVec3DListCell *cp;
+    zLoop3DCell *cp;
 
-    zVec3DSetElem( &state.rf_pos, zZ, 0.01 );
-    if( zListNum( &state.sr_rf) > 0 )
+    state.rf_pos.c.z = 0.01;
+    if( zListSize( &state.sr_rf) > 0 )
       zStackPop( &state.sr_rf, &cp );
   };
 
@@ -70,7 +54,7 @@ class pdStateTest : public testing::Test {
   };
 
   pdState state;
-  zVec3DListCell cell[2];
+  zLoop3DCell cell[2];
 };
 
 TEST_F(pdStateTest, Init)
@@ -82,12 +66,12 @@ TEST_F(pdStateTest, Init)
   EXPECT_TRUE( zVec3DIsTiny( &state.rf_pos ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.lh_pos ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.rh_pos ) );
-  // EXPECT_TRUE( zMat3DIsTiny( &state.base_att ) );
+  // EXPECT_TRUE( zMat3DIsTiny( &state.torso_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.lf_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.rf_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.lh_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.rh_att ) );
-  EXPECT_TRUE( zVec3DIsTiny( &state.base_att ) );
+  EXPECT_TRUE( zVec3DIsTiny( &state.torso_att ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.lf_att ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.rf_att ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.lh_att ) );
@@ -96,9 +80,9 @@ TEST_F(pdStateTest, Init)
   EXPECT_TRUE( zVec3DIsTiny( &state.deszmp ) );
   EXPECT_EQ( 0, state.fz );
   EXPECT_TRUE( zVec3DIsTiny( &state.ef ) );
-  EXPECT_EQ( 0, zListNum( &state.sr_lf ) );
-  EXPECT_EQ( 0, zListNum( &state.sr_rf ) );
-  EXPECT_EQ( 0, zListNum( &state.sr ) );
+  EXPECT_EQ( 0, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 0, zListSize( &state.sr_rf ) );
+  EXPECT_EQ( 0, zListSize( &state.sr ) );
 }
 
 TEST_F(pdStateTest, Destroy)
@@ -110,12 +94,12 @@ TEST_F(pdStateTest, Destroy)
   EXPECT_TRUE( zVec3DIsTiny( &state.rf_pos ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.lh_pos ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.rh_pos ) );
-  // EXPECT_TRUE( zMat3DIsTiny( &state.base_att ) );
+  // EXPECT_TRUE( zMat3DIsTiny( &state.torso_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.lf_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.rf_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.lh_att ) );
   // EXPECT_TRUE( zMat3DIsTiny( &state.rh_att ) );
-  EXPECT_TRUE( zVec3DIsTiny( &state.base_att ) );
+  EXPECT_TRUE( zVec3DIsTiny( &state.torso_att ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.lf_att ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.rf_att ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.lh_att ) );
@@ -124,9 +108,9 @@ TEST_F(pdStateTest, Destroy)
   EXPECT_TRUE( zVec3DIsTiny( &state.deszmp ) );
   EXPECT_EQ( 0, state.fz );
   EXPECT_TRUE( zVec3DIsTiny( &state.ef ) );
-  EXPECT_EQ( 0, zListNum( &state.sr_lf ) );
-  EXPECT_EQ( 0, zListNum( &state.sr_rf ) );
-  EXPECT_EQ( 0, zListNum( &state.sr ) );
+  EXPECT_EQ( 0, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 0, zListSize( &state.sr_rf ) );
+  EXPECT_EQ( 0, zListSize( &state.sr ) );
 }
 
 TEST_F(pdStateTest, FootIsOn)

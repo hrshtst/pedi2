@@ -4,10 +4,10 @@
 zVec3D lfvert[4];
 zVec3D rfvert[4];
 zPH3D lfph, rfph;
-zVec3D sr_lf_vert[4];
-zVec3D sr_rf_vert[4];
-zVec3D sr_vert[8];
-zVec3DList sr_lf, sr_rf, sr;
+zVec3DData sr_lf_vert;
+zVec3DData sr_rf_vert;
+zVec3DData sr_vert;
+zLoop3D sr_lf, sr_rf, sr;
 
 void create_foot_shape(void)
 {
@@ -19,6 +19,7 @@ void create_foot_shape(void)
   zPH3DInit( &lfph );
   zPH3DSetVertNum( &lfph, 4 );
   zPH3DSetVertBuf( &lfph, lfvert );
+  zVec3DDataInitArray( &sr_lf_vert, 4 );
   /* create right foot shape */
   zVec3DCreate( &rfvert[0], -0.15,  0.08, 0.0 );
   zVec3DCreate( &rfvert[1],  0.15,  0.08, 0.0 );
@@ -27,55 +28,60 @@ void create_foot_shape(void)
   zPH3DInit( &rfph );
   zPH3DSetVertNum( &rfph, 4 );
   zPH3DSetVertBuf( &rfph, rfvert );
+  zVec3DDataInitArray( &sr_rf_vert, 4 );
+  zVec3DDataInitArray( &sr_vert, 8 );
 }
 
 void make_frame(zVec3D *p, zVec3D *a, zFrame3D *f)
 {
-  zFrame3DZYX( f, p->e[zX], p->e[zY], p->e[zZ],
-               a->e[0], a->e[1], a->e[2] );
+  zFrame3DFromZYX( f,
+                   p->e[zX], p->e[zY], p->e[zZ],
+                   a->e[0], a->e[1], a->e[2] );
 }
 
 void find_supporting_region(zVec3D *lfp, zVec3D *lfa, zVec3D *rfp, zVec3D *rfa)
 {
   zFrame3D frame_lf, frame_rf;
-  int i, nl, nr, n;
+  int i;
   zVec3D v;
 
-  nl = nr = n = 0;
+  zVec3DDataRewind( &sr_lf_vert );
+  zVec3DDataRewind( &sr_rf_vert );
+  zVec3DDataRewind( &sr_vert );
   make_frame( lfp, lfa, &frame_lf );
   make_frame( rfp, rfa, &frame_rf );
   /* left foot */
   for( i=0; i<4; i++ ){
-    zXfer3D( &frame_lf, zPH3DVert(&lfph,i), &v );
-    if( zVec3DElem(&v,zZ) < 1e-03 ){
-      zVec3DCopy( &v, &sr_lf_vert[nl++] );
-      zVec3DCopy( &v, &sr_vert[n++] );
+    zXform3D( &frame_lf, zPH3DVert(&lfph,i), &v );
+    if( v.c.z < 1e-03 ){
+      zVec3DDataAdd( &sr_lf_vert, &v );
+      zVec3DDataAdd( &sr_vert, &v );
     }
   }
   /* right foot */
   for( i=0; i<4; i++ ){
-    zXfer3D( &frame_rf, zPH3DVert(&rfph,i), &v );
+    zXform3D( &frame_rf, zPH3DVert(&rfph,i), &v );
     /* zVec3DWrite( &v ); */
-    if( zVec3DElem(&v,zZ) < 1e-03 ){
-      zVec3DCopy( &v, &sr_rf_vert[nr++] );
-      zVec3DCopy( &v, &sr_vert[n++] );
+    if( v.c.z < 1e-03 ){
+      zVec3DDataAdd( &sr_rf_vert, &v );
+      zVec3DDataAdd( &sr_vert, &v );
     }
   }
   /* supporting region */
-  zVec3DListDestroy( &sr_lf, false );
-  zVec3DListDestroy( &sr_rf, false );
-  zVec3DListDestroy( &sr, false );
-  if( nl > 0 ) zCH2D( &sr_lf, sr_lf_vert, nl );
-  if( nr > 0 ) zCH2D( &sr_rf, sr_rf_vert, nr );
-  if( n  > 0 ) zCH2D( &sr, sr_vert, n );
+  zLoop3DDestroy( &sr_lf );
+  zLoop3DDestroy( &sr_rf );
+  zLoop3DDestroy( &sr );
+  if( zVec3DDataSize( &sr_lf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_lf_vert, &sr_lf );
+  if( zVec3DDataSize( &sr_rf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_rf_vert, &sr_rf );
+  if( zVec3DDataSize( &sr_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_vert, &sr );
 }
 
-void write_sr(zVec3DList *_sr)
+void write_sr(zLoop3D *_sr)
 {
-  zVec3DListCell *cp;
+  zLoop3DCell *cp;
 
   zListForEach( _sr, cp ){
-    printf( "{%.10g %.10g %.10g} ", zVec3DElem(cp->data,zX),zVec3DElem(cp->data,zY),zVec3DElem(cp->data,zZ)  );
+    printf( "{%.10g %.10g %.10g} ", cp->data->c.x,cp->data->c.y,cp->data->c.z  );
   }
   printf( "\n" );
 }
@@ -118,9 +124,9 @@ int main(void)
   /* init states */
   zVec3DCreate( &com, 0, -0.001, 0.3 );
   zVec3DCopy( &com, pdCZRefCOM( &cz ) );
-  zVec3DClear( &vel );
-  zVec3DClear( &acc );
-  zVec3DClear( &zmp );
+  zVec3DZero( &vel );
+  zVec3DZero( &acc );
+  zVec3DZero( &zmp );
   fz = 0;
   zVec3DCreate( &comd, 0, 0, 0.26 );
   theta = thetad = -zPI_2;
@@ -164,7 +170,7 @@ int main(void)
     /* auto reference update */
     if( !zIsTiny( pdCZRefVelU(&cz) ) )
       pdCZAutoUpdateRef( &cz, &lfp, &rfp, &comd, &thetad );
-    /* state udpate */
+    /* state update */
     zVec3DCopy( pdCZRefCOM(&cz), &com );
     zVec3DCopy( pdCZRefVel(&cz), &vel );
     zVec3DCopy( pdCZRefAcc(&cz), &acc );

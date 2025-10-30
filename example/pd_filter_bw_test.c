@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
   pdFilter bwf;
   double val;
 
-  pdFilterCreateBW( &bwf, CF, DIM );
+  pdFilterBWCreate( &bwf, CF, DIM );
   zRandInit();
 
   /* signal processing */

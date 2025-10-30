@@ -1,0 +1,14 @@
+CFLAGS_I=`roki-config -I`
+CFLAGS_L=`roki-config -L`
+CFLAGS_D=`roki-config -D`
+
+CFLAGS_I+=`dzco-config -I`
+CFLAGS_L+=`dzco-config -L`
+CFLAGS_D+=`dzco-config -D`
+
+INCLUDE+=$(shell echo ${CFLAGS_I} | tr ' ' '\n' | sort | uniq | xargs)
+LIB+=$(shell echo ${CFLAGS_L} | tr ' ' '\n' | sort | uniq | xargs)
+DEF+=$(shell echo ${CFLAGS_D} | tr ' ' '\n' | sort | uniq | xargs)
+
+LINK+=$(filter-out $(shell zm-config -l), $(shell roki-config -l)) $(shell dzco-config -l)
+LINKCPP+=$(filter-out $(shell zm-config -lcpp), $(shell roki-config -lcpp)) $(shell dzco-config -lcpp)

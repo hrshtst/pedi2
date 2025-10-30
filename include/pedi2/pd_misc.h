@@ -1,7 +1,10 @@
 #ifndef __PD_MISC_H__
 #define __PD_MISC_H__
 
-#include <cure/cure.h>
+#include <zeda/zeda.h>
+#include <zm/zm.h>
+#include <roki/rk_g.h>
+#include <pedi2/pedi2_export.h>
 
 __BEGIN_DECLS
 

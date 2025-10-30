@@ -4,128 +4,163 @@ typedef struct{
   double pgain, igain, dgain;
   double trqmin, trqmax;
   double err;
-} _pdJointPIDTrq;
+} _pdJointPIDTrqPrp;
 
-void pdJointDestroyPIDTrq(pdJoint *joint)
+static void _pdJointPIDTrqDestroy(pdJoint *joint)
 {
-  zFree( joint->_prm );
-  pdJointDestroyDefault( joint );
+  zFree( joint->prp );
+  pdJointDefaultDestroy( joint );
 }
 
-void pdJointUpdatePIDTrq(pdJoint *joint, double dt)
+static void _pdJointPIDTrqUpdate(pdJoint *joint, double dt)
 {
   double x, v;
-  _pdJointPIDTrq *pid;
+  _pdJointPIDTrqPrp *prp;
 
-  pdJointUpdateDefault( joint, dt );
+  pdJointDefaultUpdate( joint, dt );
   x = pdJointRefDis(joint) - pdJointDis(joint);
   v = pdJointRefVel(joint) - pdJointVel(joint);
-  pid = joint->_prm;
-  pid->err += x * dt;
-  joint->output = pid->pgain * x + pid->dgain * v + pid->igain * pid->err;
-  joint->output = zLimit( joint->output, pid->trqmin, pid->trqmax );
+  prp = joint->prp;
+  prp->err += x * dt;
+  joint->output = prp->pgain * x + prp->dgain * v + prp->igain * prp->err;
+  joint->output = zLimit( joint->output, prp->trqmin, prp->trqmax );
 }
 
-typedef struct{
-  double pgain, igain, dgain;
-  double trqmin, trqmax;
-} _pdJointPIDTrqParam;
+static void *_pdJointPIDTrqPGainFromZTK(void *val, int i, void *arg, ZTK *ztk){
+  ((_pdJointPIDTrqPrp*)val)->pgain = ZTKDouble(ztk);
+  return val;
+}
+static void *_pdJointPIDTrqIGainFromZTK(void *val, int i, void *arg, ZTK *ztk){
+  ((_pdJointPIDTrqPrp*)val)->igain = ZTKDouble(ztk);
+  return val;
+}
+static void *_pdJointPIDTrqDGainFromZTK(void *val, int i, void *arg, ZTK *ztk){
+  ((_pdJointPIDTrqPrp*)val)->dgain = ZTKDouble(ztk);
+  return val;
+}
+static void *_pdJointPIDTrqMinFromZTK(void *val, int i, void *arg, ZTK *ztk){
+  ((_pdJointPIDTrqPrp*)val)->trqmin = ZTKDouble(ztk);
+  return val;
+}
+static void *_pdJointPIDTrqMaxFromZTK(void *val, int i, void *arg, ZTK *ztk){
+  ((_pdJointPIDTrqPrp*)val)->trqmax = ZTKDouble(ztk);
+  return val;
+}
 
-static bool _pdJointFReadPIDTrq(FILE *fp, void *prm, char *buf, bool *success);
-
-bool _pdJointFReadPIDTrq(FILE *fp, void *prm, char *buf, bool *success)
-{
-  if( strcmp( buf, "pgain" ) == 0 ){
-    ((_pdJointPIDTrqParam *)prm)->pgain = zFDouble( fp );
-  } else
-  if( strcmp( buf, "igain" ) == 0 ){
-    ((_pdJointPIDTrqParam *)prm)->igain = zFDouble( fp );
-  } else
-  if( strcmp( buf, "dgain" ) == 0 ){
-    ((_pdJointPIDTrqParam *)prm)->dgain = zFDouble( fp );
-  } else
-  if( strcmp( buf, "min" ) == 0 ){
-    ((_pdJointPIDTrqParam *)prm)->trqmin = zFDouble( fp );
-  } else
-  if( strcmp( buf, "max" ) == 0 ){
-    ((_pdJointPIDTrqParam *)prm)->trqmax = zFDouble( fp );
-  } else
-    return false;
+static bool _pdJointPIDTrqPGainFPrintZTK(FILE *fp, int i, void *prp){
+  fprintf( fp, "%.10g\n", ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->pgain );
+  return true;
+}
+static bool _pdJointPIDTrqIGainFPrintZTK(FILE *fp, int i, void *prp){
+  fprintf( fp, "%.10g\n", ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->igain );
+  return true;
+}
+static bool _pdJointPIDTrqDGainFPrintZTK(FILE *fp, int i, void *prp){
+  fprintf( fp, "%.10g\n", ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->dgain );
+  return true;
+}
+static bool _pdJointPIDTrqMinFPrintZTK(FILE *fp, int i, void *prp){
+  double trqmin;
+  trqmin = ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->trqmin;
+  if( zIsInf( -trqmin ) ) return false;
+  fprintf( fp, "%.10g\n", trqmin );
+  return true;
+}
+static bool _pdJointPIDTrqMaxFPrintZTK(FILE *fp, int i, void *prp){
+  double trqmax;
+  trqmax = ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->trqmax;
+  if( zIsInf( trqmax ) ) return false;
+  fprintf( fp, "%.10g\n", trqmax );
   return true;
 }
 
-pdJoint *pdJointFReadPIDTrq(FILE *fp, pdJoint *joint)
-{
-  _pdJointPIDTrq prm = { 0, 0, 0, -HUGE_VAL, HUGE_VAL, 0 };
+static const ZTKPrp __ztk_prp_pdjoint_pid_trq[] = {
+  { ZTK_KEY_PEDI2_JOINT_PGAIN, 1, _pdJointPIDTrqPGainFromZTK, _pdJointPIDTrqPGainFPrintZTK },
+  { ZTK_KEY_PEDI2_JOINT_IGAIN, 1, _pdJointPIDTrqIGainFromZTK, _pdJointPIDTrqIGainFPrintZTK },
+  { ZTK_KEY_PEDI2_JOINT_DGAIN, 1, _pdJointPIDTrqDGainFromZTK, _pdJointPIDTrqDGainFPrintZTK },
+  { ZTK_KEY_PEDI2_JOINT_MIN,   1, _pdJointPIDTrqMinFromZTK,   _pdJointPIDTrqMinFPrintZTK   },
+  { ZTK_KEY_PEDI2_JOINT_MAX,   1, _pdJointPIDTrqMaxFromZTK,   _pdJointPIDTrqMaxFPrintZTK   },
+};
 
-  zFieldFRead( fp, _pdJointFReadPIDTrq, &prm );
-  if( !pdJointCreatePIDTrq( joint, prm.pgain, prm.igain, prm.dgain ) )
+static pdJoint *_pdJointPIDTrqFromZTK(pdJoint *joint, ZTK *ztk)
+{
+  _pdJointPIDTrqPrp prp = { 0, 0, 0, -HUGE_VAL, HUGE_VAL, 0 };
+  if( !_ZTKEvalKey( &prp, NULL, ztk, __ztk_prp_pdjoint_pid_trq ) ) return NULL;
+  if( !pdJointPIDTrqCreate( joint, prp.pgain, prp.igain, prp.dgain ) ) return NULL;
+  return pdJointPIDTrqSetLim( joint, prp.trqmin, prp.trqmax );
+}
+
+static void _pdJointPIDTrqFPrintZTK(FILE *fp, pdJoint *joint)
+{
+  _ZTKPrpKeyFPrint( fp, joint, __ztk_prp_pdjoint_pid_trq );
+}
+
+pdJointCom pd_joint_pid_trq_com = {
+  .typestr = "PIDtrq",
+  ._setdis = pdJointDefaultSetDis,
+  ._setvel = pdJointDefaultSetVel,
+  ._setrefdis = pdJointDefaultSetRefDis,
+  ._setrefvel = pdJointDefaultSetRefVel,
+  ._refresh = pdJointDefaultRefresh,
+  ._update = _pdJointPIDTrqUpdate,
+  ._destroy = _pdJointPIDTrqDestroy,
+  ._fromZTK = _pdJointPIDTrqFromZTK,
+  ._fprintZTK = _pdJointPIDTrqFPrintZTK,
+};
+
+pdJoint *pdJointPIDTrqCreate(pdJoint *joint, double pgain, double igain, double dgain)
+{
+  _pdJointPIDTrqPrp *prp;
+
+  if( !( prp = zAlloc( _pdJointPIDTrqPrp, 1 ) ) ){
+    ZALLOCERROR();
     return NULL;
-  pdJointPIDTrqSetLim( joint, prm.trqmin, prm.trqmax );
+  }
+  prp->pgain = pgain;
+  prp->igain = igain;
+  prp->dgain = dgain;
+  prp->trqmin = -HUGE_VAL;
+  prp->trqmax = HUGE_VAL;
+  prp->err = 0;
+  pdJointInit( joint );
+  joint->prp = prp;
+  joint->com = &pd_joint_pid_trq_com;
   return joint;
 }
 
-pdJointMethod pd_joint_pid_trq_met = {
-  type: "PIDtrq",
-  setdis: pdJointSetDisDefault,
-  setvel: pdJointSetVelDefault,
-  setrefdis: pdJointSetRefDisDefault,
-  setrefvel: pdJointSetRefVelDefault,
-  refresh: pdJointRefreshDefault,
-  update: pdJointUpdatePIDTrq,
-  destroy: pdJointDestroyPIDTrq,
-  fread: pdJointFReadPIDTrq,
-};
-
-bool pdJointCreatePIDTrq(pdJoint *joint, double pgain, double igain, double dgain)
+pdJoint *pdJointPIDTrqSetLim(pdJoint *joint, double min, double max)
 {
-  _pdJointPIDTrq *pid;
+  _pdJointPIDTrqPrp *prp;
 
-  if( !( pid = zAlloc( _pdJointPIDTrq, 1 ) ) ){
-    ZALLOCERROR();
-    return false;
-  }
-  pid->pgain = pgain;
-  pid->igain = igain;
-  pid->dgain = dgain;
-  pid->trqmin = -HUGE_VAL;
-  pid->trqmax = HUGE_VAL;
-  pid->err = 0;
-  pdJointInit( joint );
-  joint->_prm = pid;
-  joint->_met = &pd_joint_pid_trq_met;
-  return true;
+  prp = joint->prp;
+  prp->trqmin = zMin( min, max );
+  prp->trqmax = zMax( min, max );
+  return joint;
 }
 
-void pdJointPIDTrqSetLim(pdJoint *joint, double min, double max)
+pdJoint *pdJointPIDTrqSetPgain(pdJoint *joint, double pgain)
 {
-  _pdJointPIDTrq *pid;
+  _pdJointPIDTrqPrp *prp;
 
-  pid = joint->_prm;
-  pid->trqmin = zMin( min, max );
-  pid->trqmax = zMax( min, max );
+  prp = joint->prp;
+  prp->pgain = pgain;
+  return joint;
 }
 
-void pdJointPIDTrqSetPgain(pdJoint *joint, double pgain)
+pdJoint *pdJointPIDTrqSetIgain(pdJoint *joint, double igain)
 {
-  _pdJointPIDTrq *pid;
+  _pdJointPIDTrqPrp *prp;
 
-  pid = joint->_prm;
-  pid->pgain = pgain;
+  prp = joint->prp;
+  prp->igain = igain;
+  return joint;
 }
 
-void pdJointPIDTrqSetIgain(pdJoint *joint, double igain)
+pdJoint *pdJointPIDTrqSetDgain(pdJoint *joint, double dgain)
 {
-  _pdJointPIDTrq *pid;
+  _pdJointPIDTrqPrp *prp;
 
-  pid = joint->_prm;
-  pid->igain = igain;
-}
-
-void pdJointPIDTrqSetDgain(pdJoint *joint, double dgain)
-{
-  _pdJointPIDTrq *pid;
-
-  pid = joint->_prm;
-  pid->dgain = dgain;
+  prp = joint->prp;
+  prp->dgain = dgain;
+  return joint;
 }

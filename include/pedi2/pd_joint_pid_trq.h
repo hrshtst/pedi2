@@ -5,14 +5,14 @@
 
 __BEGIN_DECLS
 
-__EXPORT bool pdJointCreatePIDTrq(pdJoint *joint, double pgain, double igain, double dgain);
+__PEDI2_EXPORT pdJoint *pdJointPIDTrqCreate(pdJoint *joint, double pgain, double igain, double dgain);
 
-__EXPORT void pdJointPIDTrqSetLim(pdJoint *joint, double min, double max);
-__EXPORT void pdJointPIDTrqSetPgain(pdJoint *joint, double pgain);
-__EXPORT void pdJointPIDTrqSetIgain(pdJoint *joint, double igain);
-__EXPORT void pdJointPIDTrqSetDgain(pdJoint *joint, double dgain);
+__PEDI2_EXPORT pdJoint *pdJointPIDTrqSetLim(pdJoint *joint, double min, double max);
+__PEDI2_EXPORT pdJoint *pdJointPIDTrqSetPgain(pdJoint *joint, double pgain);
+__PEDI2_EXPORT pdJoint *pdJointPIDTrqSetIgain(pdJoint *joint, double igain);
+__PEDI2_EXPORT pdJoint *pdJointPIDTrqSetDgain(pdJoint *joint, double dgain);
 
-extern pdJointMethod pd_joint_pid_trq_met;
+extern pdJointCom pd_joint_pid_trq_com;
 
 __END_DECLS
 

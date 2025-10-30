@@ -1,11 +1,14 @@
-from matplotlib import rcParams
-rcParams['ps.usedistiller'] = 'xpdf'
-import matplotlib.pyplot as plt
+from __future__ import annotations
+
 import os
 
+import matplotlib.pyplot as plt
+from matplotlib import rcParams
 
-class FigureCreator(object):
+rcParams["ps.usedistiller"] = "xpdf"
 
+
+class FigureCreator:
     def __init__(self):
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
@@ -46,12 +49,11 @@ class FigureCreator(object):
             self.setYLimit(ylim)
 
     def makeAspectEqual(self):
-        self.ax.set_aspect('equal', 'datalim')
+        self.ax.set_aspect("equal", "datalim")
 
-    def legend(self, loc='best', frameaplha=1.0):
+    def legend(self, loc="best", frameaplha=1.0):
         leg = self.ax.legend(loc=loc, fancybox=True)
         leg.get_frame().set_alpha(frameaplha)
 
-    def save(self, filename, dirname='.'):
-        self.fig.savefig(os.path.join(dirname, filename),
-                         bbox_inches='tight', pad_inches=0.0)
+    def save(self, filename, dirname="."):
+        self.fig.savefig(os.path.join(dirname, filename), bbox_inches="tight", pad_inches=0.0)

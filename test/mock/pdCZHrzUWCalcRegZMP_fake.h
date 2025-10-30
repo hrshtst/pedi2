@@ -5,7 +5,7 @@
 
 __BEGIN_DECLS
 
-/*** code templete ***/
+/*** code template ***/
 /* static double __expected_value_FUNCNAME; */
 /* #define FUNCNAME(_t1,_t2,_t3) FUNCNAME_fake(_t1,_t2,_t3) */
 /* double FUNCNAME_fake(type1 t1, type2 t2, type3 t3) */
@@ -17,7 +17,7 @@ __BEGIN_DECLS
 
 static double __expected_value_pdCZHrzUCalcRegZMP;
 #define pdCZHrzUCalcRegZMP(u,d,v) pdCZHrzUCalcRegZMP_fake( u, d, v )
-double pdCZHrzUCalcRegZMP_fake(pdCZHrzU *u, zVec2D delta, zVec2D vel)
+double pdCZHrzUCalcRegZMP_fake(pdCZHrzU *u, zVec2D *delta, zVec2D *vel)
 {
   (void)u;
   (void)delta;
@@ -27,7 +27,7 @@ double pdCZHrzUCalcRegZMP_fake(pdCZHrzU *u, zVec2D delta, zVec2D vel)
 
 static double __expected_value_pdCZHrzWCalcRegZMP;
 #define pdCZHrzWCalcRegZMP(u,d,v) pdCZHrzWCalcRegZMP_fake( u, d, v )
-double pdCZHrzWCalcRegZMP_fake(pdCZHrzW *w, zVec2D delta, zVec2D vel)
+double pdCZHrzWCalcRegZMP_fake(pdCZHrzW *w, zVec2D *delta, zVec2D *vel)
 {
   (void)w;
   (void)delta;

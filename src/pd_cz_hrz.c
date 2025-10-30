@@ -12,10 +12,8 @@ void pdCZHrzInit(pdCZHrz *hrz, pdCZVrt *vrt)
   pdCZHrzSetRefPosUW( hrz, 0, 0 );
   pdCZHrzSetDelta( hrz, 0, 0 );
   pdCZHrzSetVelUW( hrz, 0, 0 );
-  pdCZHrzZMPX( hrz ) = 0;
-  pdCZHrzZMPY( hrz ) = 0;
-  pdCZHrzAccX( hrz ) = 0;
-  pdCZHrzAccY( hrz ) = 0;
+  zVec2DZero( pdCZHrzZMP( hrz ) );
+  zVec2DZero( pdCZHrzAcc( hrz ) );
 }
 
 void pdCZHrzDestroy(pdCZHrz *hrz)
@@ -32,77 +30,77 @@ void pdCZHrzDestroy(pdCZHrz *hrz)
   pdCZHrzSetVelUW( hrz, 0, 0 );
 }
 
-double *pdCZHrzRotUWtoXY(pdCZHrz *hrz, zVec2D vuw, zVec2D vxy)
+zVec2D *pdCZHrzRotUWtoXY(pdCZHrz *hrz, zVec2D *vuw, zVec2D *vxy)
 {
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  return zVec2DCreate( vxy, -s*vuw[pdU]-c*vuw[pdW], c*vuw[pdU]-s*vuw[pdW]);
+  return zVec2DCreate( vxy, -s*vuw->e[pdU]-c*vuw->e[pdW], c*vuw->e[pdU]-s*vuw->e[pdW]);
 }
 
-double *pdCZHrzRotXYtoUW(pdCZHrz *hrz, zVec2D vxy, zVec2D vuw)
+zVec2D *pdCZHrzRotXYtoUW(pdCZHrz *hrz, zVec2D *vxy, zVec2D *vuw)
 {
   double s, c;
 
   zSinCos( pdCZHrzTheta(hrz), &s, &c );
-  return zVec2DCreate( vuw, -s*vxy[zX]+c*vxy[zY], -c*vxy[zX]-s*vxy[zY] );
+  return zVec2DCreate( vuw, -s*vxy->e[zX]+c*vxy->e[zY], -c*vxy->e[zX]-s*vxy->e[zY] );
 }
 
-double *pdCZHrzXformUWtoXY(pdCZHrz *hrz, zVec2D uw, zVec2D xy)
+zVec2D *pdCZHrzXformUWtoXY(pdCZHrz *hrz, zVec2D *uw, zVec2D *xy)
 {
   zVec2D p;
 
-  pdCZHrzRotUWtoXY( hrz, uw, p );
-  return zVec2DAdd( p, pdCZHrzPos(hrz), xy );
+  pdCZHrzRotUWtoXY( hrz, uw, &p );
+  return zVec2DAdd( &p, pdCZHrzPos(hrz), xy );
 }
 
-double *pdCZHrzXformXYtoUW(pdCZHrz *hrz, zVec2D xy, zVec2D uw)
+zVec2D *pdCZHrzXformXYtoUW(pdCZHrz *hrz, zVec2D *xy, zVec2D *uw)
 {
   zVec2D p;
 
-  zVec2DSub( xy, pdCZHrzPos(hrz), p );
-  return pdCZHrzRotXYtoUW( hrz, p, uw );
+  zVec2DSub( xy, pdCZHrzPos(hrz), &p );
+  return pdCZHrzRotXYtoUW( hrz, &p, uw );
 }
 
-void pdCZHrzXformSRXYtoUW(pdCZHrz *hrz, zVec3DList *sr)
+void pdCZHrzXformSRXYtoUW(pdCZHrz *hrz, zLoop3D *sr)
 {
   zVec3D *p, *pp;
-  zVec3DListCell *cp;
+  zLoop3DCell *cp;
   zVec2D xy, uw;
 
-  if( !( p = zAlloc( zVec3D, zListNum( sr ) ) ) ){
+  if( !( p = zAlloc( zVec3D, zListSize( sr ) ) ) ){
     ZALLOCERROR();
     zFree( p );
     exit( EXIT_FAILURE );
   }
   pp = p;
   zListForEach( sr, cp ){
-    zVec2DCreate( xy, zVec3DElem(cp->data,zX), zVec3DElem(cp->data,zY) );
-    pdCZHrzXformXYtoUW( hrz, xy, uw );
-    zVec3DCreate( pp++, uw[pdU], uw[pdW], zVec3DElem(cp->data,zZ) );
+    zVec2DCreate( &xy, cp->data->c.x, cp->data->c.y );
+    pdCZHrzXformXYtoUW( hrz, &xy, &uw );
+    zVec3DCreate( pp++, uw.e[pdU], uw.e[pdW], cp->data->c.z );
   }
-  pdCZHrzUWSetSR( pdCZHrzUWPtr(hrz), p, zListNum(sr) );
+  pdCZHrzUWSetSR( pdCZHrzUWPtr(hrz), p, zListSize(sr) );
   zFree( p );
 }
 
-void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D uwd, zVec2D delta)
+void pdCZHrzCalcDiffToRefPos(pdCZHrz *hrz, zVec2D *uwd, zVec2D *delta)
 {
   if( zIsTiny( pdCZHrzKappa(hrz) ) ){
     zVec2DCopy( uwd, delta );
   } else {
-    zVec2DCreate( delta, asin( pdCZHrzKappa(hrz)*uwd[pdU] ) / pdCZHrzKappa(hrz),
-                  uwd[pdW] - ( 1.0 - sqrt( 1.0 - zSqr(pdCZHrzKappa(hrz)*uwd[pdU]) ) ) / pdCZHrzKappa(hrz) );
+    zVec2DCreate( delta, asin( pdCZHrzKappa(hrz)*uwd->e[pdU] ) / pdCZHrzKappa(hrz),
+                  uwd->e[pdW] - ( 1.0 - sqrt( 1.0 - zSqr(pdCZHrzKappa(hrz)*uwd->e[pdU]) ) ) / pdCZHrzKappa(hrz) );
   }
 }
 
-void pdCZHrzUpdateAcc(pdCZHrz *hrz, zVec2D xy, double theta, zVec2D vxy, zVec2D xyd, double thetad, zVec3DList *sr)
+void pdCZHrzUpdateAcc(pdCZHrz *hrz, zVec2D *xy, double theta, zVec2D *vxy, zVec2D *xyd, double thetad, zLoop3D *sr)
 {
   pdCZHrzSetPosVec( hrz, xy );
   pdCZHrzSetTheta( hrz, theta );
   pdCZHrzSetVelVec( hrz, vxy );
   pdCZHrzSetRefPosVec( hrz, xyd );
   pdCZHrzSetRefTheta( hrz, thetad );
-  if( sr && ( zListNum( sr ) > 0 ) )
+  if( sr && ( zListSize( sr ) > 0 ) )
     pdCZHrzXformSRXYtoUW( hrz, sr );
   pdCZHrzXformXYtoUW( hrz, pdCZHrzRefPos(hrz), pdCZHrzRefPosUW(hrz) );
   pdCZHrzCalcDiffToRefPos( hrz, pdCZHrzRefPosUW(hrz), pdCZHrzDelta(hrz) );

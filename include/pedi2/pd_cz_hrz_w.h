@@ -18,8 +18,8 @@ typedef struct{
 } pdCZHrzW;
 
 /* c'tor and d'tor */
-__EXPORT void pdCZHrzWInit(pdCZHrzW *w, double *kappa, double *zeta);
-__EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
+__PEDI2_EXPORT void pdCZHrzWInit(pdCZHrzW *w, double *kappa, double *zeta);
+__PEDI2_EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
 
 /* methods to get parameters */
 #define pdCZHrzWRefVel(w) (w)->_vd
@@ -49,8 +49,8 @@ __EXPORT void pdCZHrzWDestroy(pdCZHrzW *w);
 } while(0)
 
 /* calculation methods */
-__EXPORT double pdCZHrzWCalcSimZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel);
-__EXPORT double pdCZHrzWCalcRegZMP(pdCZHrzW *w, zVec2D delta, zVec2D vel);
+__PEDI2_EXPORT double pdCZHrzWCalcSimZMP(pdCZHrzW *w, zVec2D *delta, zVec2D *vel);
+__PEDI2_EXPORT double pdCZHrzWCalcRegZMP(pdCZHrzW *w, zVec2D *delta, zVec2D *vel);
 
 
 __END_DECLS

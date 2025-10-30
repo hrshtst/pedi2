@@ -20,8 +20,8 @@ typedef struct{
 } pdFootZ;
 
 /* c'tor and d'tor */
-__EXPORT void pdFootZInit(pdFootZ *fz, pdCZHrzUW *czuw);
-__EXPORT void pdFootZDestroy(pdFootZ *fz);
+__PEDI2_EXPORT void pdFootZInit(pdFootZ *fz, pdCZHrzUW *czuw);
+__PEDI2_EXPORT void pdFootZDestroy(pdFootZ *fz);
 
 /* methods to get parameters */
 #define pdFootZCZPtr(f)     (f)->_czuw
@@ -37,21 +37,21 @@ __EXPORT void pdFootZDestroy(pdFootZ *fz);
 
 /* methods to set parameters */
 #define pdFootZSetMaxHeight(f,h) ( pdFootZMaxHeight(f) = (h) )
-__EXPORT void pdFootZSetSR(pdFootZ *fz, zVec3D p[], int num);
+__PEDI2_EXPORT void pdFootZSetSR(pdFootZ *fz, zVec3D p[], int num);
 #define pdFootZIsSRSet(f) ( zListSize( pdFootZSR(f) ) ? true : false )
 
 /* calculation method */
 #define pdFootZCalcZMPPhase(f,d,v,z,pz) pdCZHrzUWCalcZMPPhase( pdFootZCZPtr(f), d, v, z, pz )
-__EXPORT int pdFootZFindIntersection(pdFootZ *f, zVec2D *zmp, zVec3D ip[]);
-__EXPORT int pdFootZFindInnerPoint(pdFootZ *f, zVec2D *zmp, zVec3D *p);
-__EXPORT double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D *delta, zVec2D *vel, zVec2D *zmp);
-__EXPORT double pdFootZCalcRefZ(pdFootZ *pf, double phase, zComplex *pz);
+__PEDI2_EXPORT int pdFootZFindIntersection(pdFootZ *f, zVec2D *zmp, zVec3D ip[]);
+__PEDI2_EXPORT int pdFootZFindInnerPoint(pdFootZ *f, zVec2D *zmp, zVec3D *p);
+__PEDI2_EXPORT double pdFootZCalcFootPhase(pdFootZ *pf, zVec2D *delta, zVec2D *vel, zVec2D *zmp);
+__PEDI2_EXPORT double pdFootZCalcRefZ(pdFootZ *pf, double phase, zComplex *pz);
 
 /* update method */
-__EXPORT void pdFootZUpdate(pdFootZ *pf, pdFootZ *kf, zVec2D *delta, zVec2D *vel, zVec2D *zmp);
+__PEDI2_EXPORT void pdFootZUpdate(pdFootZ *pf, pdFootZ *kf, zVec2D *delta, zVec2D *vel, zVec2D *zmp);
 
 /* output method */
-__EXPORT void pdFootZFWrite(FILE *fp, pdFootZ *fz);
+__PEDI2_EXPORT void pdFootZFWrite(FILE *fp, pdFootZ *fz);
 #define pdFootZWrite(f) pdFootZFWrite( stdout, f )
 
 __END_DECLS

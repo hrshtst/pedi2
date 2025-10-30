@@ -3,6 +3,7 @@
 
 #include <zm/zm_vec.h>
 #include <roki/rk_chain.h>
+#include <pedi2/pd_misc.h>
 
 __BEGIN_DECLS
 
@@ -77,13 +78,13 @@ typedef struct _pdJoint{
 #define pdJointDestroy(j)     (j)->com->_destroy( j )
 #define pdJointSetOffset(j,o) ( (j)->offset = (o) )
 
-__EXPORT void pdJointDefaultSetDis(pdJoint *joint, double dis);
-__EXPORT void pdJointDefaultSetVel(pdJoint *joint, double vel);
-__EXPORT void pdJointDefaultSetRefDis(pdJoint *joint, double refdis);
-__EXPORT void pdJointDefaultSetRefVel(pdJoint *joint, double refvel);
-__EXPORT void pdJointDefaultRefresh(pdJoint *joint, double dis);
-__EXPORT void pdJointDefaultUpdate(pdJoint *joint, double dt);
-__EXPORT void pdJointDefaultDestroy(pdJoint *joint);
+__PEDI2_EXPORT void pdJointDefaultSetDis(pdJoint *joint, double dis);
+__PEDI2_EXPORT void pdJointDefaultSetVel(pdJoint *joint, double vel);
+__PEDI2_EXPORT void pdJointDefaultSetRefDis(pdJoint *joint, double refdis);
+__PEDI2_EXPORT void pdJointDefaultSetRefVel(pdJoint *joint, double refvel);
+__PEDI2_EXPORT void pdJointDefaultRefresh(pdJoint *joint, double dis);
+__PEDI2_EXPORT void pdJointDefaultUpdate(pdJoint *joint, double dt);
+__PEDI2_EXPORT void pdJointDefaultDestroy(pdJoint *joint);
 
 #define ZTK_TAG_PEDI2_JOINT       "pedi2::joint"
 
@@ -95,8 +96,8 @@ __EXPORT void pdJointDefaultDestroy(pdJoint *joint);
 #define ZTK_KEY_PEDI2_JOINT_MIN   "min"
 #define ZTK_KEY_PEDI2_JOINT_MAX   "max"
 
-__EXPORT pdJoint *pdJointFromZTK(pdJoint *joint, ZTK *ztk);
-__EXPORT void pdJointFPrintZTK(FILE *fp, pdJoint *joint);
+__PEDI2_EXPORT pdJoint *pdJointFromZTK(pdJoint *joint, ZTK *ztk);
+__PEDI2_EXPORT void pdJointFPrintZTK(FILE *fp, pdJoint *joint);
 
 zArrayClass( pdJointArray, pdJoint );
 
@@ -108,30 +109,30 @@ zArrayClass( pdJointArray, pdJoint );
 #define pdJointArrayOffset(arr,i)      pdJointOffset( zArrayElem(arr,i) )
 #define pdJointArraySetOffset(arr,i,o) pdJointSetOffset( zArrayElem(arr,i), o )
 
-__EXPORT void pdJointArraySetDis(pdJointArray *arr, zVec q);
-__EXPORT void pdJointArraySetVel(pdJointArray *arr, zVec v);
-__EXPORT void pdJointArraySetRefDis(pdJointArray *arr, zVec qref);
-__EXPORT void pdJointArraySetRefVel(pdJointArray *arr, zVec vref);
-__EXPORT void pdJointArrayRefresh(pdJointArray *arr, zVec q);
-__EXPORT void pdJointArrayUpdate(pdJointArray *arr, double dt);
-__EXPORT void pdJointArrayDestroy(pdJointArray *arr);
+__PEDI2_EXPORT void pdJointArraySetDis(pdJointArray *arr, zVec q);
+__PEDI2_EXPORT void pdJointArraySetVel(pdJointArray *arr, zVec v);
+__PEDI2_EXPORT void pdJointArraySetRefDis(pdJointArray *arr, zVec qref);
+__PEDI2_EXPORT void pdJointArraySetRefVel(pdJointArray *arr, zVec vref);
+__PEDI2_EXPORT void pdJointArrayRefresh(pdJointArray *arr, zVec q);
+__PEDI2_EXPORT void pdJointArrayUpdate(pdJointArray *arr, double dt);
+__PEDI2_EXPORT void pdJointArrayDestroy(pdJointArray *arr);
 
-__EXPORT pdJointArray *pdJointArrayAlloc(pdJointArray *arr, int size);
-__EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
-__EXPORT bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c);
+__PEDI2_EXPORT pdJointArray *pdJointArrayAlloc(pdJointArray *arr, int size);
+__PEDI2_EXPORT pdJoint *pdJointArrayNameFind(pdJointArray *arr, const char *name);
+__PEDI2_EXPORT bool pdJointArraySetOffsetMapping(pdJointArray *arr, rkChain *c);
 
-__EXPORT pdJointArray *pdJointArrayFromZTK(pdJointArray *arr, rkChain *c, ZTK *ztk);
-__EXPORT void pdJointArrayFPrintZTK(FILE *fp, pdJointArray *arr);
+__PEDI2_EXPORT pdJointArray *pdJointArrayFromZTK(pdJointArray *arr, rkChain *c, ZTK *ztk);
+__PEDI2_EXPORT void pdJointArrayFPrintZTK(FILE *fp, pdJointArray *arr);
 
-__EXPORT pdJointArray *pdJointArrayReadZTK(pdJointArray *arr, rkChain *c, char filename[]);
-__EXPORT bool pdJointArrayWriteZTK(pdJointArray *arr, char filename[]);
+__PEDI2_EXPORT pdJointArray *pdJointArrayReadZTK(pdJointArray *arr, rkChain *c, char filename[]);
+__PEDI2_EXPORT bool pdJointArrayWriteZTK(pdJointArray *arr, char filename[]);
 
-__EXPORT zIndex pdJointArrayCreateIndex(pdJointArray *arr);
-__EXPORT void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q);
-__EXPORT void pdJointArraySetVelIndex(pdJointArray *arr, zIndex idx, zVec v);
-__EXPORT void pdJointArraySetRefDisIndex(pdJointArray *arr, zIndex idx, zVec qref);
-__EXPORT void pdJointArraySetRefVelIndex(pdJointArray *arr, zIndex idx, zVec vref);
-__EXPORT void pdJointArrayRefreshIndex(pdJointArray *arr, zIndex idx, zVec q);
+__PEDI2_EXPORT zIndex pdJointArrayCreateIndex(pdJointArray *arr);
+__PEDI2_EXPORT void pdJointArraySetDisIndex(pdJointArray *arr, zIndex idx, zVec q);
+__PEDI2_EXPORT void pdJointArraySetVelIndex(pdJointArray *arr, zIndex idx, zVec v);
+__PEDI2_EXPORT void pdJointArraySetRefDisIndex(pdJointArray *arr, zIndex idx, zVec qref);
+__PEDI2_EXPORT void pdJointArraySetRefVelIndex(pdJointArray *arr, zIndex idx, zVec vref);
+__PEDI2_EXPORT void pdJointArrayRefreshIndex(pdJointArray *arr, zIndex idx, zVec q);
 
 __END_DECLS
 

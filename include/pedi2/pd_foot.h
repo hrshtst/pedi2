@@ -39,8 +39,8 @@ typedef struct{
 } pdFoot;
 
 /* c'tor and d'tor */
-__EXPORT void pdFootInit(pdFoot *f, pdCZHrz *cz, byte dir, double dt);
-__EXPORT void pdFootDestroy(pdFoot *f);
+__PEDI2_EXPORT void pdFootInit(pdFoot *f, pdCZHrz *cz, byte dir, double dt);
+__PEDI2_EXPORT void pdFootDestroy(pdFoot *f);
 
 /* methods to get parameters */
 #define pdFootTime(f)      (f)->_sol._t
@@ -147,9 +147,9 @@ __EXPORT void pdFootDestroy(pdFoot *f);
 } while(0)
 
 /* calculation method */
-__EXPORT bool pdFootIsOn(pdFoot *f);
-__EXPORT bool pdFootIsOnNext(pdFoot *f);
-__EXPORT bool pdFootIsOnAttempt(pdFoot *f);
+__PEDI2_EXPORT bool pdFootIsOn(pdFoot *f);
+__PEDI2_EXPORT bool pdFootIsOnNext(pdFoot *f);
+__PEDI2_EXPORT bool pdFootIsOnAttempt(pdFoot *f);
 #define pdFootIsOff(f) !pdFootIsOn( f )
 #define pdFootIsOffNext(f) !pdFootIsOnNext( f )
 #define pdFootIsOffAttempt(f) !pdFootIsOnAttempt( f )
@@ -164,27 +164,27 @@ __EXPORT bool pdFootIsOnAttempt(pdFoot *f);
 #define pdFootIsEitherOnAttempt(lf,rf) ( pdFootIsOnAttempt( lf ) || pdFootIsOnAttempt( rf ) )
 #define pdFootIsEitherOffAttempt(lf,rf) ( pdFootIsOffAttempt( lf ) || pdFootIsOffAttempt( rf ) )
 
-__EXPORT pdFoot *pdFootKFPtr(pdFoot *lf, pdFoot *rf);
-__EXPORT pdFoot *pdFootFFPtr(pdFoot *lf, pdFoot *rf, double vwd);
-__EXPORT pdFoot *pdFootBFPtr(pdFoot *lf, pdFoot *rf, double vwd);
+__PEDI2_EXPORT pdFoot *pdFootKFPtr(pdFoot *lf, pdFoot *rf);
+__PEDI2_EXPORT pdFoot *pdFootFFPtr(pdFoot *lf, pdFoot *rf, double vwd);
+__PEDI2_EXPORT pdFoot *pdFootBFPtr(pdFoot *lf, pdFoot *rf, double vwd);
 
 #define pdFootRotUWtoXY(f,vuw,vxy) pdCZHrzRotUWtoXY( pdFootCZPtr(f), vuw, vxy )
 #define pdFootRotXYtoUW(f,vxy,vuw) pdCZHrzRotXYtoUW( pdFootCZPtr(f), vxy, vuw )
 #define pdFootXformUWtoXY(f,uw,xy) pdCZHrzXformUWtoXY( pdFootCZPtr(f), uw, xy )
 #define pdFootXformXYtoUW(f,xy,uw) pdCZHrzXformXYtoUW( pdFootCZPtr(f), xy, uw )
-__EXPORT void pdFootXformSRXYtoUW(pdFoot *f, zLoop3D *sr);
-__EXPORT void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp);
-__EXPORT void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa);
-__EXPORT void pdFootCalcCOMRefPos(pdFoot *lf, pdFoot *rf, zVec3D *lf_pos, zVec3D *rf_pos, zVec3D *ref_pos);
+__PEDI2_EXPORT void pdFootXformSRXYtoUW(pdFoot *f, zLoop3D *sr);
+__PEDI2_EXPORT void pdFootCalcRefPos(pdFoot *f, zVec3D *p, zVec3D *pd, zVec3D *refp);
+__PEDI2_EXPORT void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa);
+__PEDI2_EXPORT void pdFootCalcCOMRefPos(pdFoot *lf, pdFoot *rf, zVec3D *lf_pos, zVec3D *rf_pos, zVec3D *ref_pos);
 
 /* update */
-__EXPORT void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zLoop3D *sr);
-__EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zLoop3D *lfsr, zLoop3D *rfsr);
+__PEDI2_EXPORT void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zLoop3D *sr);
+__PEDI2_EXPORT void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zLoop3D *lfsr, zLoop3D *rfsr);
 
 /* output */
-__EXPORT void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);
+__PEDI2_EXPORT void pdFootFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);
 #define pdFootWrite(lf,rf) pdFootFWrite( stdout, lf, rf )
-__EXPORT void pdFootDataFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);
+__PEDI2_EXPORT void pdFootDataFWrite(FILE *fp, pdFoot *lf, pdFoot *rf);
 #define pdFootDataWrite(lf,rf) pdFootDataFWrite( stdout, lf, rf )
 
 __END_DECLS

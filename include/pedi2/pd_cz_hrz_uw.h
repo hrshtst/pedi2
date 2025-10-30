@@ -25,8 +25,8 @@ typedef struct{
 } pdCZHrzUW;
 
 /* c'tor and d'tor */
-__EXPORT void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt);
-__EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
+__PEDI2_EXPORT void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt);
+__PEDI2_EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
 
 /* methods to get parameters */
 #define pdCZHrzUPtr(h)      ( &(h)->_u )
@@ -67,7 +67,7 @@ __EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
   pdCZHrzWSetPrm( pdCZHrzWPtr(h), vwd, qw1, qw2, rho, kr, dist );\
   pdCZHrzUWSetKappa( h, kappa );\
 } while(0)
-__EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
+__PEDI2_EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
 #define pdCZHrzUWIsSRSet(h) ( zListSize( pdCZHrzUWSR(h) ) ? true : false )
 
 /* calculation methods */
@@ -79,17 +79,17 @@ __EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
   pdCZHrzUCalcRegZMP( pdCZHrzUPtr(h), d, v )
 #define pdCZHrzUWCalcRegZMPW(h,d,v) \
   pdCZHrzWCalcRegZMP( pdCZHrzWPtr(h), d, v )
-__EXPORT void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp);
+__PEDI2_EXPORT void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp);
 #define pdCZHrzUWCalcRegZMP(h,d,v,z) \
   zVec2DCreate( z, pdCZHrzUWCalcRegZMPU( h, d, v ), pdCZHrzUWCalcRegZMPW( h, d, v ) )
-__EXPORT void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D *zmp, zVec2D *acc);
-__EXPORT void pdCZHrzUWCalcZMPPhase(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp, zComplex *pz);
+__PEDI2_EXPORT void pdCZHrzUWCalcAcc(pdCZHrzUW *hrz, zVec2D *zmp, zVec2D *acc);
+__PEDI2_EXPORT void pdCZHrzUWCalcZMPPhase(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp, zComplex *pz);
 
 /* update method */
-__EXPORT void pdCZHrzUWUpdate(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel);
+__PEDI2_EXPORT void pdCZHrzUWUpdate(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel);
 
 /* for debug */
-__EXPORT void pdCZHrzUWFWrite(FILE *fp, pdCZHrzUW *hrz);
+__PEDI2_EXPORT void pdCZHrzUWFWrite(FILE *fp, pdCZHrzUW *hrz);
 #define pdCZHrzUWWrite(h) pdCZHrzUWFWrite( stdout, h )
 
 __END_DECLS

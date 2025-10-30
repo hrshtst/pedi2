@@ -18,12 +18,12 @@ typedef struct{
   bool warping;
 } pdMode;
 
-__EXPORT void pdModeInit(pdMode *mode);
-__EXPORT void pdModeDestroy(pdMode *mode);
+__PEDI2_EXPORT void pdModeInit(pdMode *mode);
+__PEDI2_EXPORT void pdModeDestroy(pdMode *mode);
 
-__EXPORT void pdModeUpdate(pdMode *mode, pdCmd *cmd, pdState *state);
+__PEDI2_EXPORT void pdModeUpdate(pdMode *mode, pdCmd *cmd, pdState *state);
 
-__EXPORT void pdModeFWrite(FILE *fp, pdMode *mode);
+__PEDI2_EXPORT void pdModeFWrite(FILE *fp, pdMode *mode);
 #define pdModeWrite(m) pdModeFWrite( stdout, m )
 
 __END_DECLS

@@ -5,7 +5,7 @@
 
 __BEGIN_DECLS
 
-__EXPORT pdSensor *pdSensorDummyCreate(pdSensor *sensor, const char linkname[], zFrame3D *linkframe);
+__PEDI2_EXPORT pdSensor *pdSensorDummyCreate(pdSensor *sensor, const char linkname[], zFrame3D *linkframe);
 
 extern pdSensorCom pd_sensor_dummy_com;
 

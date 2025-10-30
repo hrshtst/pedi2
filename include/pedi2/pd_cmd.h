@@ -2,6 +2,7 @@
 #define __PD_CMD_H__
 
 #include <zeo/zeo_vec3d.h>
+#include <pedi2/pd_misc.h>
 
 __BEGIN_DECLS
 
@@ -27,19 +28,19 @@ typedef union{
   double entry[PD_CMD_ENTRY_NUM];
 } pdCmd;
 
-__EXPORT void pdCmdInit(pdCmd *cmd);
-__EXPORT void pdCmdDefaultInit(pdCmd *cmd);
-__EXPORT void pdCmdDestroy(pdCmd *cmd);
+__PEDI2_EXPORT void pdCmdInit(pdCmd *cmd);
+__PEDI2_EXPORT void pdCmdDefaultInit(pdCmd *cmd);
+__PEDI2_EXPORT void pdCmdDestroy(pdCmd *cmd);
 
-__EXPORT bool pdCmdTryStop(pdCmd *cmd);
-__EXPORT bool pdCmdTryStep(pdCmd *cmd);
-__EXPORT bool pdCmdTryWalk(pdCmd *cmd);
-__EXPORT bool pdCmdTryWalkSideways(pdCmd *cmd);
-__EXPORT bool pdCmdTryWarp(pdCmd *cmd);
+__PEDI2_EXPORT bool pdCmdTryStop(pdCmd *cmd);
+__PEDI2_EXPORT bool pdCmdTryStep(pdCmd *cmd);
+__PEDI2_EXPORT bool pdCmdTryWalk(pdCmd *cmd);
+__PEDI2_EXPORT bool pdCmdTryWalkSideways(pdCmd *cmd);
+__PEDI2_EXPORT bool pdCmdTryWarp(pdCmd *cmd);
 
-__EXPORT void pdCmdDataFWrite(FILE *fp, pdCmd *cmd);
+__PEDI2_EXPORT void pdCmdDataFWrite(FILE *fp, pdCmd *cmd);
 #define pdCmdDataWrite(c) pdCmdDataFWrite( stdout, c )
-__EXPORT bool pdCmdDataFRead(FILE *fp, pdCmd *cmd);
+__PEDI2_EXPORT bool pdCmdDataFRead(FILE *fp, pdCmd *cmd);
 #define pdCmdDataRead(c) pdCmdDataFRead( stdin, c )
 
 __END_DECLS

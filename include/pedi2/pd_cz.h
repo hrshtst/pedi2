@@ -45,8 +45,8 @@ typedef struct{
 } pdCZ;
 
 /* c'tor and d'tor */
-__EXPORT void pdCZInit(pdCZ *cz, double dt);
-__EXPORT void pdCZDestroy(pdCZ *cz);
+__PEDI2_EXPORT void pdCZInit(pdCZ *cz, double dt);
+__PEDI2_EXPORT void pdCZDestroy(pdCZ *cz);
 
 /* methods to get parameters */
 #define pdCZTime(cz)      (cz)->_ode._t
@@ -204,19 +204,19 @@ __EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetErrCompBZ(cz,dz)   ( (cz)->_errcomp._b[2] = (dz) )
 
 /* calculation method */
-__EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw);
-__EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta);
-__EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd);
+__PEDI2_EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw);
+__PEDI2_EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta);
+__PEDI2_EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd);
 
 /* update method */
-__EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zLoop3D *sr);
-__EXPORT void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad);
-__EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
+__PEDI2_EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zLoop3D *sr);
+__PEDI2_EXPORT void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad);
+__PEDI2_EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
 
 /* output method */
-__EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);
+__PEDI2_EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);
 #define pdCZWrite(cz) pdCZFWrite( stdout, cz )
-__EXPORT void pdCZDataFWrite(FILE *fp, pdCZ *cz);
+__PEDI2_EXPORT void pdCZDataFWrite(FILE *fp, pdCZ *cz);
 #define pdCZDataWrite(cz) pdCZDataFWrite( stdout, cz )
 
 __END_DECLS

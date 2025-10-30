@@ -72,9 +72,9 @@ typedef struct _pdSensor{
 #define pdSensorProcess(s,h)     (s)->com->_process( s, h )
 #define pdSensorFrameUpdate(s,f) (s)->com->_frameupdate( s, f )
 
-__EXPORT void pdSensorDefaultDestroy(pdSensor *sensor);
-__EXPORT zVec pdSensorDefaultProcess(pdSensor *sensor, double dt);
-__EXPORT void pdSensorDefaultFrameUpdate(pdSensor *sensor, zFrame3D *frame);
+__PEDI2_EXPORT void pdSensorDefaultDestroy(pdSensor *sensor);
+__PEDI2_EXPORT zVec pdSensorDefaultProcess(pdSensor *sensor, double dt);
+__PEDI2_EXPORT void pdSensorDefaultFrameUpdate(pdSensor *sensor, zFrame3D *frame);
 
 #define ZTK_TAG_PEDI2_SENSOR          "pedi2::sensor"
 
@@ -90,23 +90,23 @@ __EXPORT void pdSensorDefaultFrameUpdate(pdSensor *sensor, zFrame3D *frame);
 #define ZTK_KEY_PEDI2_SENSOR_FILTERTY "filterty"
 #define ZTK_KEY_PEDI2_SENSOR_FILTERTZ "filtertz"
 
-__EXPORT pdSensor *pdSensorFromZTK(pdSensor *sensor, pdFilterArray *filters, ZTK *ztk);
-__EXPORT void pdSensorFPrintZTK(FILE* fp, pdSensor *sensor);
+__PEDI2_EXPORT pdSensor *pdSensorFromZTK(pdSensor *sensor, pdFilterArray *filters, ZTK *ztk);
+__PEDI2_EXPORT void pdSensorFPrintZTK(FILE* fp, pdSensor *sensor);
 
 zArrayClass( pdSensorArray, pdSensor );
 
-__EXPORT pdSensorArray *pdSensorArrayAlloc(pdSensorArray *arr, int size);
-__EXPORT void pdSensorArrayDestroy(pdSensorArray *arr);
+__PEDI2_EXPORT pdSensorArray *pdSensorArrayAlloc(pdSensorArray *arr, int size);
+__PEDI2_EXPORT void pdSensorArrayDestroy(pdSensorArray *arr);
 
-__EXPORT pdSensor *pdSensorArrayNameFind(pdSensorArray *arr, const char *name);
+__PEDI2_EXPORT pdSensor *pdSensorArrayNameFind(pdSensorArray *arr, const char *name);
 
-__EXPORT void pdSensorArrayProcess(pdSensorArray *arr, double dt);
+__PEDI2_EXPORT void pdSensorArrayProcess(pdSensorArray *arr, double dt);
 
-__EXPORT pdSensorArray *pdSensorArrayFromZTK(pdSensorArray *arr, pdFilterArray *farray, ZTK *ztk);
-__EXPORT void pdSensorArrayFPrintZTK(FILE *fp, pdSensorArray *arr);
+__PEDI2_EXPORT pdSensorArray *pdSensorArrayFromZTK(pdSensorArray *arr, pdFilterArray *farray, ZTK *ztk);
+__PEDI2_EXPORT void pdSensorArrayFPrintZTK(FILE *fp, pdSensorArray *arr);
 
-__EXPORT pdSensorArray *pdSensorArrayReadZTK(pdSensorArray *arr, pdFilterArray *farray, char filename[]);
-__EXPORT bool pdSensorArrayWriteZTK(pdSensorArray *arr, char filename[]);
+__PEDI2_EXPORT pdSensorArray *pdSensorArrayReadZTK(pdSensorArray *arr, pdFilterArray *farray, char filename[]);
+__PEDI2_EXPORT bool pdSensorArrayWriteZTK(pdSensorArray *arr, char filename[]);
 
 __END_DECLS
 

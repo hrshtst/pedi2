@@ -25,9 +25,9 @@ typedef struct{
   zVec3D ref_rf_att;
 } pdBiped;
 
-__EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt);
-__EXPORT bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state);
-__EXPORT void pdBipedDestroy(pdBiped *biped);
+__PEDI2_EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt);
+__PEDI2_EXPORT bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state);
+__PEDI2_EXPORT void pdBipedDestroy(pdBiped *biped);
 
 /* methods to get parameters */
 #define pdBipedTime(b)        (b)->_t
@@ -103,13 +103,13 @@ bool pdBipedDoesIntendToSidewalk(pdBiped *biped);
 #define pdBipedIsEitherFootOffAttempt(b) pdFootIsEitherOffAttempt( pdBipedLFPtr(b), pdBipedRFPtr(b) )
 
 /* update method */
-__EXPORT void pdBipedUpdate(pdBiped *biped, pdState *state);
-__EXPORT void pdBipedUpdateState(pdBiped *biped, pdState *state);
+__PEDI2_EXPORT void pdBipedUpdate(pdBiped *biped, pdState *state);
+__PEDI2_EXPORT void pdBipedUpdateState(pdBiped *biped, pdState *state);
 
 /* output method */
-__EXPORT void pdBipedFWrite(FILE *fp, pdBiped *biped);
+__PEDI2_EXPORT void pdBipedFWrite(FILE *fp, pdBiped *biped);
 #define pdBipedWrite(b) pdBipedFWrite( stdout, c )
-__EXPORT void pdBipedDataFWrite(FILE *fp, pdBiped *biped);
+__PEDI2_EXPORT void pdBipedDataFWrite(FILE *fp, pdBiped *biped);
 #define pdBipedDataWrite(b) pdBipedDataFWrite( stdout, c )
 
 __END_DECLS

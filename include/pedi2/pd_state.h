@@ -4,6 +4,7 @@
 #include <zeo/zeo_vec3d.h>
 #include <zeo/zeo_bv3d.h>
 #include <zeo/zeo_mat3d.h>
+#include <pedi2/pd_misc.h>
 
 __BEGIN_DECLS
 
@@ -29,11 +30,11 @@ typedef struct{
 } pdState;
 
 /* c'tor and d'tor */
-__EXPORT void pdStateInit(pdState *state);
-__EXPORT void pdStateDestroy(pdState *state);
+__PEDI2_EXPORT void pdStateInit(pdState *state);
+__PEDI2_EXPORT void pdStateDestroy(pdState *state);
 
 /* methods to get parameters */
-__EXPORT bool pdStateFootIsOn(pdState *state, zVec3D *p, zLoop3D *sr);
+__PEDI2_EXPORT bool pdStateFootIsOn(pdState *state, zVec3D *p, zLoop3D *sr);
 #define pdStateFootIsOff(s,p,sr) !pdStateFootIsOn( s, p, sr )
 #define pdStateLFIsOn(s)  pdStateFootIsOn( s, &(s)->lf_pos, &(s)->sr_lf )
 #define pdStateLFIsOff(s) pdStateFootIsOff( s, &(s)->lf_pos, &(s)->sr_lf )
@@ -42,14 +43,14 @@ __EXPORT bool pdStateFootIsOn(pdState *state, zVec3D *p, zLoop3D *sr);
 #define pdStateBothFeetOn(s) ( pdStateLFIsOn( s ) && pdStateRFIsOn( s ) )
 #define pdStateEitherFootOn(s) ( pdStateLFIsOn( s ) || pdStateRFIsOn( s ) )
 #define pdStateEitherFootOff(s) ( pdStateLFIsOff( s ) || pdStateRFIsOff( s ) )
-__EXPORT bool pdStateFFOn(pdState *state, double vwd);
+__PEDI2_EXPORT bool pdStateFFOn(pdState *state, double vwd);
 #define pdStateFFOff(s,vwd) !pdStateFFOn( s, vwd )
-__EXPORT bool pdStateBFOn(pdState *state, double vwd);
+__PEDI2_EXPORT bool pdStateBFOn(pdState *state, double vwd);
 #define pdStateBFOff(s,vwd) !pdStateBFOn( s, vwd )
-__EXPORT double pdStateFootDist(pdState *state);
+__PEDI2_EXPORT double pdStateFootDist(pdState *state);
 
 /* output method  */
-__EXPORT void pdStateSRDataFWrite(FILE *fp, pdState *state);
+__PEDI2_EXPORT void pdStateSRDataFWrite(FILE *fp, pdState *state);
 #define pdStateSRDataWrite(s) pdStateSRDataFWrite( stdout, s )
 
 __END_DECLS

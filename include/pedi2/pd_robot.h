@@ -45,14 +45,14 @@ typedef struct{
 #define PD_ROBOT_IKCELL_NAME_RH_ATT         "right_hand_att"
 
 /* c'tor and d'tor */
-__EXPORT void pdRobotInit(pdRobot *robot);
-__EXPORT void pdRobotDestroy(pdRobot *robot);
+__PEDI2_EXPORT void pdRobotInit(pdRobot *robot);
+__PEDI2_EXPORT void pdRobotDestroy(pdRobot *robot);
 
 /* model loader */
-__EXPORT bool pdRobotLoad(pdRobot *robot, const char model[]);
-__EXPORT bool pdRobotBindTorso(pdRobot *robot, const char torso[]);
-__EXPORT bool pdRobotBindFeet(pdRobot *robot, const char left_foot[], const char right_foot[]);
-__EXPORT bool pdRobotBindHands(pdRobot *robot, const char left_hand[], const char right_hand[]);
+__PEDI2_EXPORT bool pdRobotLoad(pdRobot *robot, const char model[]);
+__PEDI2_EXPORT bool pdRobotBindTorso(pdRobot *robot, const char torso[]);
+__PEDI2_EXPORT bool pdRobotBindFeet(pdRobot *robot, const char left_foot[], const char right_foot[]);
+__PEDI2_EXPORT bool pdRobotBindHands(pdRobot *robot, const char left_hand[], const char right_hand[]);
 #define pdRobotBindTorsoLimb(robot,torso,lf,rf,lh,rh) do{\
   pdRobotBindTorso( robot, torso );\
   pdRobotBindFeet(  robot, lf, rf );\
@@ -76,8 +76,8 @@ __EXPORT bool pdRobotBindHands(pdRobot *robot, const char left_hand[], const cha
 #define pdRobotSRVert(r)   ( &(r)->_sr_vert )
 
 /* methods to find cells */
-__EXPORT rkIKCell *pdRobotFindIKCellByName(pdRobot *robot, const char *name);
-__EXPORT int pdRobotFindLinkIDByIKCellName(pdRobot *robot, const char *ikcell_names[]);
+__PEDI2_EXPORT rkIKCell *pdRobotFindIKCellByName(pdRobot *robot, const char *name);
+__PEDI2_EXPORT int pdRobotFindLinkIDByIKCellName(pdRobot *robot, const char *ikcell_names[]);
 
 /* methods to get parameters */
 #define pdRobotJointSize(r)  rkChainJointSize( pdRobotChain(r) )
@@ -85,21 +85,21 @@ __EXPORT int pdRobotFindLinkIDByIKCellName(pdRobot *robot, const char *ikcell_na
 #define pdRobotLinkNum(r)    rkChainLinkNum( pdRobotChain(r) )
 
 /* methods to solve FK */
-__EXPORT void pdRobotLinkJointSetDis(pdRobot *robot, int id, double *dis);
-__EXPORT void pdRobotSetJointDis(pdRobot *robot, zIndex index, zVec dis);
+__PEDI2_EXPORT void pdRobotLinkJointSetDis(pdRobot *robot, int id, double *dis);
+__PEDI2_EXPORT void pdRobotSetJointDis(pdRobot *robot, zIndex index, zVec dis);
 #define pdRobotGetJointDisAll(r,v) zVecCopy( pdRobotJointDis(r), v )
-__EXPORT void pdRobotGetJointDiffAll(pdRobot *robot, zVec v);
-__EXPORT void pdRobotGetJointVelAll(pdRobot *robot, double dt, zVec v);
+__PEDI2_EXPORT void pdRobotGetJointDiffAll(pdRobot *robot, zVec v);
+__PEDI2_EXPORT void pdRobotGetJointVelAll(pdRobot *robot, double dt, zVec v);
 
-__EXPORT void pdRobotFK(pdRobot *robot, zVec dis);
-__EXPORT void pdRobotFKIndex(pdRobot *robot, zIndex index, zVec dis);
+__PEDI2_EXPORT void pdRobotFK(pdRobot *robot, zVec dis);
+__PEDI2_EXPORT void pdRobotFKIndex(pdRobot *robot, zIndex index, zVec dis);
 
-__EXPORT void pdRobotResetJointDis(pdRobot *robot);
+__PEDI2_EXPORT void pdRobotResetJointDis(pdRobot *robot);
 
 /* methods to solve IK */
-__EXPORT bool pdRobotSetRef(pdRobot *robot, const char *ikcell_name, double v1, double v2, double v3);
-__EXPORT bool pdRobotSetRefVec(pdRobot *robot, const char *ikcell_name, zVec3D *vec);
-__EXPORT bool pdRobotSetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3D *att);
+__PEDI2_EXPORT bool pdRobotSetRef(pdRobot *robot, const char *ikcell_name, double v1, double v2, double v3);
+__PEDI2_EXPORT bool pdRobotSetRefVec(pdRobot *robot, const char *ikcell_name, zVec3D *vec);
+__PEDI2_EXPORT bool pdRobotSetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3D *att);
 #define pdRobotSetRefCOM(r,pos)      pdRobotSetRefVec( r, PD_ROBOT_IKCELL_NAME_COM, pos )
 #define pdRobotSetRefTorsoZYX(r,zyx) pdRobotSetRefVec( r, PD_ROBOT_IKCELL_NAME_TORSO_ATT, zyx )
 #define pdRobotSetRefTorsoAtt(r,att) pdRobotSetRefAtt( r, PD_ROBOT_IKCELL_NAME_TORSO_ATT, att )
@@ -122,11 +122,11 @@ __EXPORT bool pdRobotSetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3D *
 #define pdRobotRegisterIKJoint(r,name,w)   rkChainRegisterIKJoint( pdRobotChain(r), name, w )
 #define pdRobotUnregisterIKJoint(r,name)   rkChainUnregisterIKJoint( pdRobotChain(r), name )
 
-__EXPORT void pdRobotSolveIK(pdRobot *robot, int iter);
+__PEDI2_EXPORT void pdRobotSolveIK(pdRobot *robot, int iter);
 
-__EXPORT zVec3D *pdRobotGetRefPos(pdRobot *robot, const char *ikcell_name, zVec3D *pos);
-__EXPORT zVec3D *pdRobotGetRefZYX(pdRobot *robot, const char *ikcell_name, zVec3D *zyx);
-__EXPORT zMat3D *pdRobotGetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3D *att);
+__PEDI2_EXPORT zVec3D *pdRobotGetRefPos(pdRobot *robot, const char *ikcell_name, zVec3D *pos);
+__PEDI2_EXPORT zVec3D *pdRobotGetRefZYX(pdRobot *robot, const char *ikcell_name, zVec3D *zyx);
+__PEDI2_EXPORT zMat3D *pdRobotGetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3D *att);
 #define pdRobotGetRefCOM(r,pos)      pdRobotGetRefPos( r, PD_ROBOT_IKCELL_NAME_COM, pos )
 #define pdRobotGetRefTorsoZYX(r,zyx) pdRobotGetRefZYX( r, PD_ROBOT_IKCELL_NAME_TORSO_ATT, zyx )
 #define pdRobotGetRefTorsoAtt(r,att) pdRobotGetRefAtt( r, PD_ROBOT_IKCELL_NAME_TORSO_ATT, att )
@@ -142,25 +142,25 @@ __EXPORT zMat3D *pdRobotGetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3
 #define pdRobotGetRefRHPos(r,pos)    pdRobotGetRefPos( r, PD_ROBOT_IKCELL_NAME_RH_POS, pos )
 #define pdRobotGetRefRHZYX(r,zyx)    pdRobotGetRefZYX( r, PD_ROBOT_IKCELL_NAME_RH_ATT, zyx )
 #define pdRobotGetRefRHAtt(r,att)    pdRobotGetRefAtt( r, PD_ROBOT_IKCELL_NAME_RH_ATT, att )
-__EXPORT void pdRobotCOMPos(pdRobot *robot, zVec3D *com);
-__EXPORT void pdRobotTorsoZYX(pdRobot *robot, zVec3D *zyx);
-__EXPORT void pdRobotTorsoAtt(pdRobot *robot, zMat3D *att);
-__EXPORT void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);
-__EXPORT void pdRobotFootZYX(pdRobot *robot, zVec3D *lf, zVec3D *rf);
-__EXPORT void pdRobotFootAtt(pdRobot *robot, zMat3D *lf, zMat3D *rf);
-__EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
-__EXPORT void pdRobotHandZYX(pdRobot *robot, zVec3D *lh, zVec3D *rh);
-__EXPORT void pdRobotHandAtt(pdRobot *robot, zMat3D *lh, zMat3D *rh);
+__PEDI2_EXPORT void pdRobotCOMPos(pdRobot *robot, zVec3D *com);
+__PEDI2_EXPORT void pdRobotTorsoZYX(pdRobot *robot, zVec3D *zyx);
+__PEDI2_EXPORT void pdRobotTorsoAtt(pdRobot *robot, zMat3D *att);
+__PEDI2_EXPORT void pdRobotFootPos(pdRobot *robot, zVec3D *lf, zVec3D *rf);
+__PEDI2_EXPORT void pdRobotFootZYX(pdRobot *robot, zVec3D *lf, zVec3D *rf);
+__PEDI2_EXPORT void pdRobotFootAtt(pdRobot *robot, zMat3D *lf, zMat3D *rf);
+__PEDI2_EXPORT void pdRobotHandPos(pdRobot *robot, zVec3D *lh, zVec3D *rh);
+__PEDI2_EXPORT void pdRobotHandZYX(pdRobot *robot, zVec3D *lh, zVec3D *rh);
+__PEDI2_EXPORT void pdRobotHandAtt(pdRobot *robot, zMat3D *lh, zMat3D *rh);
 
 /* methods regarding biped robot */
-__EXPORT void pdRobotBipedDefaultInit(pdRobot *robot, pdBiped *biped, pdState *state);
-__EXPORT void pdRobotBipedResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis);
-__EXPORT void pdRobotBipedSetRefVec(pdRobot *robot, pdBiped *biped);
-__EXPORT bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3D *sr);
-__EXPORT void pdRobotUpdateState(pdRobot *robot, pdState *state);
+__PEDI2_EXPORT void pdRobotBipedDefaultInit(pdRobot *robot, pdBiped *biped, pdState *state);
+__PEDI2_EXPORT void pdRobotBipedResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis);
+__PEDI2_EXPORT void pdRobotBipedSetRefVec(pdRobot *robot, pdBiped *biped);
+__PEDI2_EXPORT bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3D *sr);
+__PEDI2_EXPORT void pdRobotUpdateState(pdRobot *robot, pdState *state);
 
 /* output method */
-__EXPORT void pdRobotFPrint(FILE *fp, pdRobot *robot);
+__PEDI2_EXPORT void pdRobotFPrint(FILE *fp, pdRobot *robot);
 #define pdRobotPrint(r) pdRobotFPrint( stdout, r )
 
 __END_DECLS

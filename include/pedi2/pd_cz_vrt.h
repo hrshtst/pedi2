@@ -1,8 +1,7 @@
 #ifndef __PD_CZ_VRT_H__
 #define __PD_CZ_VRT_H__
 
-#include <roki/rk_g.h>
-#include <zm/zm.h>
+#include <pedi2/pd_misc.h>
 
 __BEGIN_DECLS
 
@@ -17,8 +16,8 @@ typedef struct{
 } pdCZVrt;
 
 /* c'tor and d'tor */
-__EXPORT void pdCZVrtInit(pdCZVrt *vrt);
-__EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
+__PEDI2_EXPORT void pdCZVrtInit(pdCZVrt *vrt);
+__PEDI2_EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 
 /* methods to get parameters */
 #define pdCZVrtRef(v)  (v)->_zd
@@ -40,18 +39,18 @@ __EXPORT void pdCZVrtDestroy(pdCZVrt *vrt);
 } while(0)
 
 /* calculation methods */
-__EXPORT double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz);
-__EXPORT double pdCZVrtCalcAcc(pdCZVrt *vrt, double fz);
-__EXPORT double pdCZVrtCalcZMP(pdCZVrt *vrt);
-__EXPORT double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz );
+__PEDI2_EXPORT double pdCZVrtCalcReactForce(pdCZVrt *vrt, double z, double vz);
+__PEDI2_EXPORT double pdCZVrtCalcAcc(pdCZVrt *vrt, double fz);
+__PEDI2_EXPORT double pdCZVrtCalcZMP(pdCZVrt *vrt);
+__PEDI2_EXPORT double pdCZVrtCalcZeta(pdCZVrt *vrt, double z, double az, double zz );
 
 /* update method */
-__EXPORT void pdCZVrtUpdateAcc(pdCZVrt *vrt, double z, double vz);
-__EXPORT void pdCZVrtUpdateZMP(pdCZVrt *vrt);
-__EXPORT void pdCZVrtUpdateZeta(pdCZVrt *vrt, double z, double az, double zz );
+__PEDI2_EXPORT void pdCZVrtUpdateAcc(pdCZVrt *vrt, double z, double vz);
+__PEDI2_EXPORT void pdCZVrtUpdateZMP(pdCZVrt *vrt);
+__PEDI2_EXPORT void pdCZVrtUpdateZeta(pdCZVrt *vrt, double z, double az, double zz );
 
 /* for debug */
-__EXPORT void pdCZVrtFWrite(FILE *fp, pdCZVrt *vrt);
+__PEDI2_EXPORT void pdCZVrtFWrite(FILE *fp, pdCZVrt *vrt);
 #define pdCZVrtWrite(v) pdCZVrtFWrite( stdout, v )
 
 __END_DECLS

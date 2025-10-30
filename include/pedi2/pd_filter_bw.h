@@ -5,7 +5,7 @@
 
 __BEGIN_DECLS
 
-__EXPORT pdFilter *pdFilterBWCreate(pdFilter *filter, double cf, uint dim);
+__PEDI2_EXPORT pdFilter *pdFilterBWCreate(pdFilter *filter, double cf, uint dim);
 
 extern pdFilterCom pd_filter_bw_com;
 

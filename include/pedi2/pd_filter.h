@@ -2,6 +2,7 @@
 #define __PD_FILTER_H__
 
 #include <dzco/dz_sys.h>
+#include <pedi2/pd_misc.h>
 
 __BEGIN_DECLS
 
@@ -41,8 +42,8 @@ typedef struct _pdFilter{
 #define pdFilterUpdate(f,h) (f)->com->_update( f, h )
 #define pdFilterClone(o,c)  (o)->com->_clone( o, c )
 
-__EXPORT void pdFilterDefaultDestroy(pdFilter *filter);
-__EXPORT void pdFilterDefaultRefresh(pdFilter *filter);
+__PEDI2_EXPORT void pdFilterDefaultDestroy(pdFilter *filter);
+__PEDI2_EXPORT void pdFilterDefaultRefresh(pdFilter *filter);
 
 #define ZTK_TAG_PEDI2_FILTER            "pedi2::filter"
 
@@ -51,26 +52,26 @@ __EXPORT void pdFilterDefaultRefresh(pdFilter *filter);
 #define ZTK_KEY_PEDI2_FILTER_CUTOFFFREQ "cf"
 #define ZTK_KEY_PEDI2_FILTER_DIM        "dim"
 
-__EXPORT pdFilter *pdFilterFromZTK(pdFilter *filter, ZTK *ztk);
-__EXPORT void pdFilterFPrintZTK(FILE *fp, pdFilter *filter);
+__PEDI2_EXPORT pdFilter *pdFilterFromZTK(pdFilter *filter, ZTK *ztk);
+__PEDI2_EXPORT void pdFilterFPrintZTK(FILE *fp, pdFilter *filter);
 
 zArrayClass( pdFilterArray, pdFilter );
 
 #define pdFilterArrayInput(arr,i)  pdFilterInput( zArrayElem(arr,i) )
 #define pdFilterArrayOutput(arr,i) pdFilterOutput( zArrayElem(arr,i) )
 
-__EXPORT pdFilterArray *pdFilterArrayAlloc(pdFilterArray *arr, int size);
-__EXPORT void pdFilterArrayDestroy(pdFilterArray *arr);
+__PEDI2_EXPORT pdFilterArray *pdFilterArrayAlloc(pdFilterArray *arr, int size);
+__PEDI2_EXPORT void pdFilterArrayDestroy(pdFilterArray *arr);
 
-__EXPORT pdFilter *pdFilterArrayNameFind(pdFilterArray *arr, const char *name);
+__PEDI2_EXPORT pdFilter *pdFilterArrayNameFind(pdFilterArray *arr, const char *name);
 
-__EXPORT void pdFilterArrayUpdate(pdFilterArray *arr, double dt);
+__PEDI2_EXPORT void pdFilterArrayUpdate(pdFilterArray *arr, double dt);
 
-__EXPORT pdFilterArray *pdFilterArrayFromZTK(pdFilterArray *arr, ZTK *ztk);
-__EXPORT void pdFilterArrayFPrintZTK(FILE *fp, pdFilterArray *arr);
+__PEDI2_EXPORT pdFilterArray *pdFilterArrayFromZTK(pdFilterArray *arr, ZTK *ztk);
+__PEDI2_EXPORT void pdFilterArrayFPrintZTK(FILE *fp, pdFilterArray *arr);
 
-__EXPORT pdFilterArray *pdFilterArrayReadZTK(pdFilterArray *arr, char filename[]);
-__EXPORT bool pdFilterArrayWriteZTK(pdFilterArray *arr, char filename[]);
+__PEDI2_EXPORT pdFilterArray *pdFilterArrayReadZTK(pdFilterArray *arr, char filename[]);
+__PEDI2_EXPORT bool pdFilterArrayWriteZTK(pdFilterArray *arr, char filename[]);
 
 __END_DECLS
 

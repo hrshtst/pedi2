@@ -119,27 +119,14 @@ TEST_F(pdRobotTest, Init)
 
 TEST_F(pdRobotTest, Destroy)
 {
-  zVec3DList *list;
   SetRandomValues();
   pdRobotDestroy( &robot );
   EXPECT_EQ( NULL, rkChainRoot( pdRobotChain( &robot ) ) );
   EXPECT_EQ( NULL, pdRobotJointDis( &robot ) );
   EXPECT_EQ( NULL, robot.disold );
-  list = pdRobotSRLFVert( &robot )->data.list;
-  EXPECT_EQ( 0, zListSize( list ) );
-  EXPECT_EQ( zListTail( list ), pdRobotSRLFVert( &robot )->pointer.cp );
-  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
-  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
-  list = pdRobotSRRFVert( &robot )->data.list;
-  EXPECT_EQ( 0, zListSize( list ) );
-  EXPECT_EQ( zListTail( list ), pdRobotSRRFVert( &robot )->pointer.cp );
-  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
-  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
-  list = pdRobotSRVert( &robot )->data.list;
-  EXPECT_EQ( 0, zListSize( list ) );
-  EXPECT_EQ( zListTail( list ), pdRobotSRVert( &robot )->pointer.cp );
-  EXPECT_EQ( zListRoot( list ), zListHead( list ) );
-  EXPECT_EQ( zListRoot( list ), zListTail( list ) );
+  EXPECT_EQ( NULL, pdRobotSRLFVert( &robot )->data.list );
+  EXPECT_EQ( NULL, pdRobotSRRFVert( &robot )->data.list );
+  EXPECT_EQ( NULL, pdRobotSRVert( &robot )->data.list );
   destroy_flag = true;
 }
 

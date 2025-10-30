@@ -5,7 +5,7 @@ void pdFootZInit(pdFootZ *f, pdCZHrzUW *czuw)
   pdFootZCZPtr( f ) = czuw;
   pdFootZSetMaxHeight( f, 0 );
   zListInit( pdFootZSR( f ) );
-  zArrayInit( pdFootZSRVert( f )->data.array );
+  pdFootZSRVert( f )->data.array = NULL;
   f->_vert_num = 0;
   pdFootZSign( f ) = 0;
   zComplexZero( pdFootZZMPPhase( f ) );
@@ -18,8 +18,8 @@ void pdFootZDestroy(pdFootZ *f)
   pdFootZCZPtr( f ) = NULL;
   pdFootZSetMaxHeight( f, 0 );
   zLoop3DDestroy( pdFootZSR( f ) );
-  if( zArrayBuf( pdFootZSRVert(f)->data.array ) )
-    zVec3DDataDestroy( pdFootZSRVert(f) );
+  if( pdFootZSRVert( f )->data.array )
+    zVec3DDataDestroy( pdFootZSRVert( f ) );
   f->_vert_num = 0;
   pdFootZSign( f ) = 0;
   zComplexZero( pdFootZZMPPhase( f ) );
@@ -32,12 +32,12 @@ void pdFootZSetSR(pdFootZ *f, zVec3D p[], int num)
   register int i;
 
   if( num == 0 || !p ){
-    if( zArrayBuf( pdFootZSRVert( f )->data.array ) )
+    if( pdFootZSRVert( f )->data.array )
       zVec3DDataDestroy( pdFootZSRVert( f ) );
     zLoop3DDestroy( pdFootZSR( f ) );
     zListInit( pdFootZSR( f ) );
   } else if( num != f->_vert_num ){
-    if( zArrayBuf( pdFootZSRVert( f )->data.array ) )
+    if( pdFootZSRVert( f )->data.array )
       zVec3DDataDestroy( pdFootZSRVert( f ) );
     zVec3DDataInitArray( pdFootZSRVert( f ), num );
   }

@@ -49,8 +49,8 @@ TEST_F(pdFootZTest, Init)
   EXPECT_EQ( &czuw, pdFootZCZPtr( &lf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &lf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
-  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&lf)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&lf)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdFootZSRVert(&lf)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdFootZSRVert(&lf)->data.array ) );
   EXPECT_EQ( 0, lf._vert_num );
   EXPECT_EQ( 0, pdFootZSign( &lf ) );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->re );
@@ -62,8 +62,8 @@ TEST_F(pdFootZTest, Init)
   EXPECT_EQ( &czuw, pdFootZCZPtr( &rf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &rf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &rf ) );
-  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&rf)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&rf)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdFootZSRVert(&rf)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdFootZSRVert(&rf)->data.array ) );
   EXPECT_EQ( 0, rf._vert_num );
   EXPECT_EQ( 0, pdFootZSign( &rf ) );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->re );
@@ -80,8 +80,8 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( NULL, pdFootZCZPtr( &lf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &lf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &lf ) );
-  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&lf)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&lf)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdFootZSRVert(&lf)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdFootZSRVert(&lf)->data.array ) );
   EXPECT_EQ( 0, lf._vert_num );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &lf )->im );
@@ -93,8 +93,8 @@ TEST_F(pdFootZTest, Destroy)
   EXPECT_EQ( NULL, pdFootZCZPtr( &rf ) );
   EXPECT_EQ( 0, pdFootZMaxHeight( &rf ) );
   EXPECT_FALSE( pdFootZIsSRSet( &rf ) );
-  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&rf)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&rf)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdFootZSRVert(&rf)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdFootZSRVert(&rf)->data.array ) );
   EXPECT_EQ( 0, rf._vert_num );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->re );
   EXPECT_EQ( 0, pdFootZZMPPhase( &rf )->im );
@@ -129,24 +129,24 @@ TEST_F(pdFootZTest, SetSR)
   zVec3DCreate( &v[1], 0, 1, 0 );
   zVec3DCreate( &v[2], 1, 1, 0 );
   pdFootZSetSR( &lf, v, 3 );
-  EXPECT_EQ( 0, zArrayElem( &pdFootZSRVert(&lf)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0, zArrayElem( &pdFootZSRVert(&lf)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0, zArrayElem( &pdFootZSRVert(&lf)->data.array, 1 )->c.x );
-  EXPECT_EQ( 1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 1 )->c.y );
-  EXPECT_EQ( 1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 2 )->c.x );
-  EXPECT_EQ( 1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( pdFootZSRVert(&lf)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0, zArrayElem( pdFootZSRVert(&lf)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( pdFootZSRVert(&lf)->data.array, 1 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( pdFootZSRVert(&lf)->data.array, 1 )->c.y );
+  EXPECT_EQ( 1, zArrayElem( pdFootZSRVert(&lf)->data.array, 2 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( pdFootZSRVert(&lf)->data.array, 2 )->c.y );
   EXPECT_EQ( 3, lf._vert_num );
 
   zVec3DCreate( &v[0], 0.1, 0.1, 0 );
   zVec3DCreate( &v[1], 0.1, 0.2, 0 );
   zVec3DCreate( &v[2], 0.2, 0.2, 0 );
   pdFootZSetSR( &lf, v, 3 );
-  EXPECT_EQ( 0.1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0.1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 1 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdFootZSRVert(&lf)->data.array, 1 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdFootZSRVert(&lf)->data.array, 2 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdFootZSRVert(&lf)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdFootZSRVert(&lf)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdFootZSRVert(&lf)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdFootZSRVert(&lf)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdFootZSRVert(&lf)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdFootZSRVert(&lf)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdFootZSRVert(&lf)->data.array, 2 )->c.y );
   EXPECT_EQ( 3, lf._vert_num );
 
   zVec3DCreate( &vv[0], 0.1, 0.1, 0 );
@@ -154,14 +154,14 @@ TEST_F(pdFootZTest, SetSR)
   zVec3DCreate( &vv[2], 0.2, 0.2, 0 );
   zVec3DCreate( &vv[3], 0.2, 0.1, 0 );
   pdFootZSetSR( &lf, vv, 4 );
-  EXPECT_EQ( 0.1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0.1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 1 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdFootZSRVert(&lf)->data.array, 1 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdFootZSRVert(&lf)->data.array, 2 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdFootZSRVert(&lf)->data.array, 2 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdFootZSRVert(&lf)->data.array, 3 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdFootZSRVert(&lf)->data.array, 3 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdFootZSRVert(&lf)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdFootZSRVert(&lf)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdFootZSRVert(&lf)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdFootZSRVert(&lf)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdFootZSRVert(&lf)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdFootZSRVert(&lf)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdFootZSRVert(&lf)->data.array, 3 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdFootZSRVert(&lf)->data.array, 3 )->c.y );
   EXPECT_EQ( 4, lf._vert_num );
 }
 
@@ -186,22 +186,22 @@ TEST_F(pdFootZTest, SetSR_chk_memory)
   zVec3DCreate( &v3[2], 1, 1, 0 );
   zVec3DCreate( &v3[3], 1, 0, 0 );
 
-  EXPECT_EQ( 0, zArraySize( &pdFootZSRVert(&lf)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdFootZSRVert(&lf)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdFootZSRVert(&lf)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdFootZSRVert(&lf)->data.array ) );
   pdFootZSetSR( &lf, v1, 3 );
-  p1 = zArrayBuf( &pdFootZSRVert(&lf)->data.array );
+  p1 = zArrayBuf( pdFootZSRVert(&lf)->data.array );
   EXPECT_TRUE( NULL != p1 );
 
   pdFootZSetSR( &lf, v2, 4 );
-  p2 = zArrayBuf( &pdFootZSRVert(&lf)->data.array );
+  p2 = zArrayBuf( pdFootZSRVert(&lf)->data.array );
   EXPECT_NE( p1, p2 );
 
   pdFootZSetSR( &lf, v3, 4 );
-  p3 = zArrayBuf( &pdFootZSRVert(&lf)->data.array );
+  p3 = zArrayBuf( pdFootZSRVert(&lf)->data.array );
   EXPECT_EQ( p2, p3 );
 
   pdFootZSetSR( &lf, v1, 3 );
-  p1 = zArrayBuf( &pdFootZSRVert(&lf)->data.array );
+  p1 = zArrayBuf( pdFootZSRVert(&lf)->data.array );
   EXPECT_NE( p3, p1 );
 }
 

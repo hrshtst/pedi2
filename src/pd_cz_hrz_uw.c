@@ -7,7 +7,7 @@ void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt)
   hrz->_vrt = vrt;
   pdCZHrzUWSetKappa( hrz, 0 );
   zListInit( pdCZHrzUWSR(hrz) );
-  zArrayInit( &pdCZHrzUWSRVert(hrz)->data.array );
+  zArrayInit( pdCZHrzUWSRVert(hrz)->data.array );
   hrz->_vert_num = 0;
   zVec2DZero( pdCZHrzUWZMP(hrz) );
   zVec2DZero( pdCZHrzUWAcc(hrz) );
@@ -20,7 +20,7 @@ void pdCZHrzUWDestroy(pdCZHrzUW *hrz)
   hrz->_vrt = NULL;
   pdCZHrzUWSetKappa( hrz, 0 );
   zLoop3DDestroy( pdCZHrzUWSR(hrz) );
-  if( zArrayBuf( &pdCZHrzUWSRVert(hrz)->data.array ) )
+  if( zArrayBuf( pdCZHrzUWSRVert(hrz)->data.array ) )
     zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
   hrz->_vert_num = 0;
   zVec2DZero( pdCZHrzUWZMP(hrz) );
@@ -32,12 +32,12 @@ void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num)
   register int i;
 
   if( num == 0 || !p ){
-    if( zArrayBuf( &pdCZHrzUWSRVert(hrz)->data.array ) )
+    if( zArrayBuf( pdCZHrzUWSRVert(hrz)->data.array ) )
       zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
     zLoop3DDestroy( pdCZHrzUWSR(hrz) );
     zListInit( pdCZHrzUWSR(hrz) );
   } else if( num != hrz->_vert_num ){
-    if( zArrayBuf( &pdCZHrzUWSRVert(hrz)->data.array ) )
+    if( zArrayBuf( pdCZHrzUWSRVert(hrz)->data.array ) )
       zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
     zVec3DDataInitArray( pdCZHrzUWSRVert(hrz), num );
   }

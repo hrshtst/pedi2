@@ -402,14 +402,14 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRXYtoUW_1)
   pdCZHrzXformSRXYtoUW( &hrz, &sr_w );
 
   sr_m_data = pdCZHrzSRVertUW( &hrz );
-  EXPECT_NEAR( sqrt(2),    zArrayElem( &sr_m_data->data.array, 0 )->c.x, 1e-12 );
-  EXPECT_NEAR( -sqrt(2),   zArrayElem( &sr_m_data->data.array, 0 )->c.y, 1e-12 );
-  EXPECT_NEAR( 0,          zArrayElem( &sr_m_data->data.array, 1 )->c.x, 1e-12 );
-  EXPECT_NEAR( -2*sqrt(2), zArrayElem( &sr_m_data->data.array, 1 )->c.y, 1e-12 );
-  EXPECT_NEAR( sqrt(2),    zArrayElem( &sr_m_data->data.array, 2 )->c.x, 1e-12 );
-  EXPECT_NEAR( -3*sqrt(2), zArrayElem( &sr_m_data->data.array, 2 )->c.y, 1e-12 );
-  EXPECT_NEAR( 2*sqrt(2),  zArrayElem( &sr_m_data->data.array, 3 )->c.x, 1e-12 );
-  EXPECT_NEAR( -2*sqrt(2), zArrayElem( &sr_m_data->data.array, 3 )->c.y, 1e-12 );
+  EXPECT_NEAR( sqrt(2),    zArrayElem( sr_m_data->data.array, 0 )->c.x, 1e-12 );
+  EXPECT_NEAR( -sqrt(2),   zArrayElem( sr_m_data->data.array, 0 )->c.y, 1e-12 );
+  EXPECT_NEAR( 0,          zArrayElem( sr_m_data->data.array, 1 )->c.x, 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), zArrayElem( sr_m_data->data.array, 1 )->c.y, 1e-12 );
+  EXPECT_NEAR( sqrt(2),    zArrayElem( sr_m_data->data.array, 2 )->c.x, 1e-12 );
+  EXPECT_NEAR( -3*sqrt(2), zArrayElem( sr_m_data->data.array, 2 )->c.y, 1e-12 );
+  EXPECT_NEAR( 2*sqrt(2),  zArrayElem( sr_m_data->data.array, 3 )->c.x, 1e-12 );
+  EXPECT_NEAR( -2*sqrt(2), zArrayElem( sr_m_data->data.array, 3 )->c.y, 1e-12 );
 }
 
 TEST_F(pdCZHrzTest, pdCZHrzXformSRXYtoUW_2)
@@ -432,12 +432,12 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRXYtoUW_2)
   pdCZHrzXformSRXYtoUW( &hrz, &sr_w );
 
   sr_m_data = pdCZHrzSRVertUW( &hrz );
-  EXPECT_NEAR( -0.5*sqrt(3)+2, zArrayElem( &sr_m_data->data.array, 0 )->c.x, 1e-12 );
-  EXPECT_NEAR( 2*sqrt(3)+0.5,  zArrayElem( &sr_m_data->data.array, 0 )->c.y, 1e-12 );
-  EXPECT_NEAR( -sqrt(3)-0.5,   zArrayElem( &sr_m_data->data.array, 1 )->c.x, 1e-12 );
-  EXPECT_NEAR( -0.5*sqrt(3)+1, zArrayElem( &sr_m_data->data.array, 1 )->c.y, 1e-12 );
-  EXPECT_NEAR( sqrt(3),        zArrayElem( &sr_m_data->data.array, 2 )->c.x, 1e-12 );
-  EXPECT_NEAR( -1,             zArrayElem( &sr_m_data->data.array, 2 )->c.y, 1e-12 );
+  EXPECT_NEAR( -0.5*sqrt(3)+2, zArrayElem( sr_m_data->data.array, 0 )->c.x, 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)+0.5,  zArrayElem( sr_m_data->data.array, 0 )->c.y, 1e-12 );
+  EXPECT_NEAR( -sqrt(3)-0.5,   zArrayElem( sr_m_data->data.array, 1 )->c.x, 1e-12 );
+  EXPECT_NEAR( -0.5*sqrt(3)+1, zArrayElem( sr_m_data->data.array, 1 )->c.y, 1e-12 );
+  EXPECT_NEAR( sqrt(3),        zArrayElem( sr_m_data->data.array, 2 )->c.x, 1e-12 );
+  EXPECT_NEAR( -1,             zArrayElem( sr_m_data->data.array, 2 )->c.y, 1e-12 );
 }
 
 TEST_F(pdCZHrzTest, CalcDiffToRefPos_1)

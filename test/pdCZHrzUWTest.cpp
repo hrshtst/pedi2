@@ -77,8 +77,8 @@ TEST_F(pdCZHrzUWTest, Init)
   EXPECT_EQ( &uw._kappa, uw._u._kappa );
   EXPECT_EQ( &uw._kappa, uw._w._kappa );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
-  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, uw._vert_num );
   EXPECT_EQ( 0, pdCZHrzUWZMPU( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWZMPW( &uw ) );
@@ -107,8 +107,8 @@ TEST_F(pdCZHrzUWTest, Destroy)
   EXPECT_EQ( NULL, uw._u._kappa );
   EXPECT_EQ( NULL, uw._w._kappa );
   EXPECT_FALSE( pdCZHrzUWIsSRSet( &uw ) );
-  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, uw._vert_num );
 }
 
@@ -118,8 +118,8 @@ TEST_F(pdCZHrzUWTest, SetSRZeroNum)
 
   pdCZHrzUWSetSR( &uw, v, 0 );
   EXPECT_EQ( 0, uw._vert_num );
-  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, zListSize( pdCZHrzUWSR(&uw) ) );
   EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellNext( zListRoot( pdCZHrzUWSR(&uw) ) ) );
   EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellPrev( zListRoot( pdCZHrzUWSR(&uw) ) ) );
@@ -134,24 +134,24 @@ TEST_F(pdCZHrzUWTest, SetSR)
   zVec3DCreate( &v[1], 0, 1, 0 );
   zVec3DCreate( &v[2], 1, 1, 0 );
   pdCZHrzUWSetSR( &uw, v, 3 );
-  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
-  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
-  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
-  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
   EXPECT_EQ( 3, uw._vert_num );
 
   zVec3DCreate( &v[0], 0.1, 0.1, 0 );
   zVec3DCreate( &v[1], 0.1, 0.2, 0 );
   zVec3DCreate( &v[2], 0.2, 0.2, 0 );
   pdCZHrzUWSetSR( &uw, v, 3 );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
   EXPECT_EQ( 3, uw._vert_num );
 
   zVec3DCreate( &vv[0], 0.1, 0.1, 0 );
@@ -159,14 +159,14 @@ TEST_F(pdCZHrzUWTest, SetSR)
   zVec3DCreate( &vv[2], 0.2, 0.2, 0 );
   zVec3DCreate( &vv[3], 0.2, 0.1, 0 );
   pdCZHrzUWSetSR( &uw, vv, 4 );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.y );
   EXPECT_EQ( 4, uw._vert_num );
 }
 
@@ -178,8 +178,8 @@ TEST_F(pdCZHrzUWTest, SetSR_2)
   // start with zero contact points
   pdCZHrzUWSetSR( &uw, NULL, 0 );
   EXPECT_EQ( 0, uw._vert_num );
-  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, zListSize( pdCZHrzUWSR(&uw) ) );
   EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellNext( zListRoot( pdCZHrzUWSR(&uw) ) ) );
   EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellPrev( zListRoot( pdCZHrzUWSR(&uw) ) ) );
@@ -190,18 +190,18 @@ TEST_F(pdCZHrzUWTest, SetSR_2)
   zVec3DCreate( &v[2], 1, 1, 0 );
   pdCZHrzUWSetSR( &uw, v, 3 );
   EXPECT_EQ( 3, uw._vert_num );
-  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
-  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
-  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
-  EXPECT_EQ( 1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
 
   // make the contact off
   pdCZHrzUWSetSR( &uw, v, 0 );
   EXPECT_EQ( 0, uw._vert_num );
-  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array ) );
   EXPECT_EQ( 0, zListSize( pdCZHrzUWSR(&uw) ) );
   EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellNext( zListRoot( pdCZHrzUWSR(&uw) ) ) );
   EXPECT_EQ( zListRoot( pdCZHrzUWSR(&uw) ), zListCellPrev( zListRoot( pdCZHrzUWSR(&uw) ) ) );
@@ -213,14 +213,14 @@ TEST_F(pdCZHrzUWTest, SetSR_2)
   zVec3DCreate( &vv[3], 0.2, 0.1, 0 );
   pdCZHrzUWSetSR( &uw, vv, 4 );
   EXPECT_EQ( 4, uw._vert_num );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
-  EXPECT_EQ( 0.2, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.x );
-  EXPECT_EQ( 0.1, zArrayElem( &pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 0 )->c.y );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 1 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.x );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 2 )->c.y );
+  EXPECT_EQ( 0.2, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.x );
+  EXPECT_EQ( 0.1, zArrayElem( pdCZHrzUWSRVert(&uw)->data.array, 3 )->c.y );
 }
 
 TEST_F(pdCZHrzUWTest, SetSR_chk_memory)
@@ -244,22 +244,22 @@ TEST_F(pdCZHrzUWTest, SetSR_chk_memory)
   zVec3DCreate( &v3[2], 1, 1, 0 );
   zVec3DCreate( &v3[3], 1, 0, 0 );
 
-  EXPECT_EQ( 0, zArraySize( &pdCZHrzUWSRVert(&uw)->data.array ) );
-  EXPECT_EQ( NULL, zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( 0, zArraySize( pdCZHrzUWSRVert(&uw)->data.array ) );
+  EXPECT_EQ( NULL, zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array ) );
   pdCZHrzUWSetSR( &uw, v1, 3 );
-  p1 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
+  p1 = zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_TRUE( NULL != p1 );
 
   pdCZHrzUWSetSR( &uw, v2, 4 );
-  p2 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
+  p2 = zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_NE( p1, p2 );
 
   pdCZHrzUWSetSR( &uw, v3, 4 );
-  p3 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
+  p3 = zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_EQ( p2, p3 );
 
   pdCZHrzUWSetSR( &uw, v1, 3 );
-  p1 = zArrayBuf( &pdCZHrzUWSRVert(&uw)->data.array );
+  p1 = zArrayBuf( pdCZHrzUWSRVert(&uw)->data.array );
   EXPECT_NE( p3, p1 );
 }
 

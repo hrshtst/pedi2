@@ -34,9 +34,9 @@ void create_foot_shape(void)
 
 void make_frame(zVec3D *p, zVec3D *a, zFrame3D *f)
 {
-  zFrame3DFromZYX( f,
-                   p->e[zX], p->e[zY], p->e[zZ],
-                   a->e[0], a->e[1], a->e[2] );
+  zFrame3DFromPosZYX( f,
+                      p->e[zX], p->e[zY], p->e[zZ],
+                      a->e[0], a->e[1], a->e[2] );
 }
 
 void find_supporting_region(zVec3D *lfp, zVec3D *lfa, zVec3D *rfp, zVec3D *rfa)

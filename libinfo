@@ -1,3 +1,3 @@
 PROJNAME=pedi2
-VERSION=1.0.0
-DEPENDENCY="zeda=1.11.14;zm=1.12.17;dzco=1.8.7;zeo=1.19.1;roki=2.12.5"
+VERSION=1.0.1
+DEPENDENCY="zeda=1.11.19;zm=1.12.17;dzco=1.8.7;zeo=1.19.12;roki=2.12.5"

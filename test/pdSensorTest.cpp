@@ -229,17 +229,18 @@ protected:
 TEST_F(pdSensor6FTTest, Create)
 {
   zFrame3D frame;
-  pdFilterArray arr;
+  pdFilterArray *arr;
 
   zFrame3DIdent( &frame );
-  pdFilterArrayAlloc( &arr, 6 );
-  pdSensor6FTCreate( &sensor, "foot", &frame, &arr );
+  arr = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( arr, 6 );
+  pdSensor6FTCreate( &sensor, "foot", &frame, arr );
   EXPECT_EQ( NULL, zNamePtr( &sensor ) );
   EXPECT_EQ( 6, pdSensorSize( &sensor ) );
   EXPECT_EQ( 6, zVecSize( pdSensorRawData( &sensor ) ) );
   EXPECT_EQ( 6, zVecSize( pdSensorData( &sensor ) ) );
   EXPECT_EQ( 6, zArraySize( pdSensorFilters( &sensor ) ) );
-  EXPECT_EQ( zArrayBuf(&arr), zArrayBuf(pdSensorFilters(&sensor)) );
+  EXPECT_EQ( zArrayBuf(arr), zArrayBuf(pdSensorFilters(&sensor)) );
   EXPECT_EQ( &pd_sensor_6ft_com, sensor.com );
   EXPECT_STREQ( "6ft", sensor.com->typestr );
   pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
@@ -307,15 +308,16 @@ TEST_F(pdSensor6FTTest, FPrintZTK)
   char buf[BUFSIZ];
   char expected[BUFSIZ];
   zFrame3D frame;
-  pdFilterArray arr;
+  pdFilterArray *arr;
   char linkname[] = "left_foot";
   char name[] = "lf_FT01";
   FILE *fp;
 
   fp = fmemopen( buf, sizeof(buf), "r+" );
   zFrame3DIdent( &frame );
-  pdFilterArrayAlloc( &arr, 6 );
-  pdSensor6FTCreate( &sensor, linkname, &frame, &arr );
+  arr = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( arr, 6 );
+  pdSensor6FTCreate( &sensor, linkname, &frame, arr );
   zNameSet( &sensor, name );
   pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(pdSensorFilters(&sensor),0) );
   pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(pdSensorFilters(&sensor),1) );
@@ -340,15 +342,16 @@ TEST_F(pdSensor6FTTest, FPrintZTK)
 TEST_F(pdSensor6FTTest, GetFT)
 {
   zFrame3D frame;
-  pdFilterArray arr;
+  pdFilterArray *arr;
   zVec v;
   zVec3D f, tau;
 
   // prepare
   v = zVecCreateList( 6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 );
   zFrame3DIdent( &frame );
-  pdFilterArrayAlloc( &arr, 6 );
-  pdSensor6FTCreate( &sensor, "foot", &frame, &arr );
+  arr = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( arr, 6 );
+  pdSensor6FTCreate( &sensor, "foot", &frame, arr );
   pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
   pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),1) );
   pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),2) );
@@ -374,7 +377,7 @@ TEST_F(pdSensor6FTTest, GetWldFT)
 {
   zFrame3D sframe;
   zFrame3D lframe;
-  pdFilterArray arr;
+  pdFilterArray *arr;
   zVec v;
   zVec3D f, tau;
 
@@ -384,8 +387,9 @@ TEST_F(pdSensor6FTTest, GetWldFT)
   // prepare
   v = zVecCreateList( 6, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0 );
   zFrame3DIdent( &sframe );
-  pdFilterArrayAlloc( &arr, 6 );
-  pdSensor6FTCreate( &sensor, "foot", &sframe, &arr );
+  arr = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( arr, 6 );
+  pdSensor6FTCreate( &sensor, "foot", &sframe, arr );
   pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),0) );
   pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),1) );
   pdFilterNoneCreate( zArrayElem(pdSensorFilters(&sensor),2) );
@@ -429,30 +433,32 @@ protected:
 
 TEST_F(pdSensorArrayTest, NameFind)
 {
-  pdFilterArray lf_filters, rf_filters;
+  pdFilterArray *lf_filters, *rf_filters;
 
-  pdFilterArrayAlloc( &lf_filters, 6 );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,0) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,1) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,2) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,3) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,4) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,5) );
+  lf_filters = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( lf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(lf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(lf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(lf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(lf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(lf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(lf_filters,5) );
 
   pdSensorArrayAlloc( &arr, 2 );
-  pdSensor6FTCreate( zArrayElem(&arr,0), "left_foot", ZFRAME3DIDENT, &lf_filters );
+  pdSensor6FTCreate( zArrayElem(&arr,0), "left_foot", ZFRAME3DIDENT, lf_filters );
   zNameSet( zArrayElem(&arr,0), "lf_FT01" );
   EXPECT_EQ( zArrayElem(&arr,0), pdSensorArrayNameFind(&arr,"lf_FT01") );
 
-  pdFilterArrayAlloc( &rf_filters, 6 );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,0) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,1) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,2) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,3) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,4) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,5) );
+  rf_filters = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( rf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(rf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(rf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(rf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(rf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(rf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(rf_filters,5) );
 
-  pdSensor6FTCreate( zArrayElem(&arr,1), "right_foot", ZFRAME3DIDENT, &rf_filters );
+  pdSensor6FTCreate( zArrayElem(&arr,1), "right_foot", ZFRAME3DIDENT, rf_filters );
   zNameSet( zArrayElem(&arr,1), "rf_FT01" );
   EXPECT_EQ( zArrayElem(&arr,1), pdSensorArrayNameFind(&arr,"rf_FT01") );
 
@@ -512,35 +518,37 @@ TEST_F(pdSensorArrayTest, FPrintZTK)
   char expected[BUFSIZ];
   FILE *fp;
   pdSensor *sensor;
-  pdFilterArray lf_filters ,rf_filters;
+  pdFilterArray *lf_filters, *rf_filters;
 
   fp = fmemopen( buf, sizeof(buf), "r+" );
   zArrayAlloc( &arr, pdSensor, 2 );
 
   // sensor 1
-  pdFilterArrayAlloc( &lf_filters, 6 );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,0) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,1) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&lf_filters,2) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,3) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,4) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&lf_filters,5) );
+  lf_filters = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( lf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(lf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(lf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(lf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(lf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(lf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(lf_filters,5) );
 
   sensor = zArrayElem( &arr, 0 );
-  pdSensor6FTCreate( sensor, "left_foot", ZFRAME3DIDENT, &lf_filters );
+  pdSensor6FTCreate( sensor, "left_foot", ZFRAME3DIDENT, lf_filters );
   zNameSet( sensor, "lf_FT01" );
 
   // sensor 2
-  pdFilterArrayAlloc( &rf_filters, 6 );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,0) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,1) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,2) );
-  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(&rf_filters,3) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,4) );
-  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(&rf_filters,5) );
+  rf_filters = zAlloc( pdFilterArray, 1 );
+  pdFilterArrayAlloc( rf_filters, 6 );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(rf_filters,0) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(rf_filters,1) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(rf_filters,2) );
+  pdFilterClone( zArrayElem(&filterarray,0), zArrayElem(rf_filters,3) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(rf_filters,4) );
+  pdFilterClone( zArrayElem(&filterarray,1), zArrayElem(rf_filters,5) );
 
   sensor = zArrayElem( &arr, 1 );
-  pdSensor6FTCreate( zArrayElem(&arr,1), "right_foot", ZFRAME3DIDENT, &rf_filters  );
+  pdSensor6FTCreate( zArrayElem(&arr,1), "right_foot", ZFRAME3DIDENT, rf_filters  );
   zNameSet( zArrayElem(&arr,1), "rf_FT01" );
 
   sprintf( expected,

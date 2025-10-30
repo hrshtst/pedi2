@@ -287,6 +287,17 @@ class pdFilterArrayTest : public testing::Test {
   RandomInitializer ri;
 };
 
+TEST_F(pdFilterArrayTest, Destroy)
+{
+  zArrayAlloc( &arr, pdFilter, 2 );
+  pdFilterNoneCreate( zArrayElem(&arr,0) );
+  pdFilterBWCreate( zArrayElem(&arr,1), BWF_CF, BWF_DIM );
+  pdFilterArrayDestroy( &arr );
+  fprintf( stderr, "arr: %p\n", &arr );
+  fprintf( stderr, "arr.buf: %p\n", arr.buf );
+  EXPECT_EQ( NULL, zArrayBuf( &arr ) );
+}
+
 TEST_F(pdFilterArrayTest, NameFind)
 {
   zArrayAlloc( &arr, pdFilter, 2 );

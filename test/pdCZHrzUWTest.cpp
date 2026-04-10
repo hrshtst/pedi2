@@ -24,12 +24,13 @@ class pdCZHrzUWTest : public testing::Test {
     pdCZHrzUWSetKr( &uw, 9 );
     pdCZHrzUWSetDist( &uw, 10 );
     pdCZHrzUWSetKappa( &uw, 11 );
-    uw._vert_num = 12;
+    pdCZHrzUWSetLambda( &uw, 12 );
+    uw._vert_num = 13;
     uw._vrt = NULL;
-    pdCZHrzUWZMPU( &uw ) = 13;
-    pdCZHrzUWZMPW( &uw ) = 14;
-    pdCZHrzUWAccU( &uw ) = 15;
-    pdCZHrzUWAccW( &uw ) = 16;
+    pdCZHrzUWZMPU( &uw ) = 14;
+    pdCZHrzUWZMPW( &uw ) = 15;
+    pdCZHrzUWAccU( &uw ) = 16;
+    pdCZHrzUWAccW( &uw ) = 17;
   };
 
   void SetDefaultPrmVelocityFollow() {
@@ -44,11 +45,13 @@ class pdCZHrzUWTest : public testing::Test {
     pdCZHrzUWSetKr( &uw, 1.0 );
     pdCZHrzUWSetDist( &uw, 0.1 );
     pdCZHrzUWSetKappa( &uw, 0.0 );
+    pdCZHrzUWSetLambda( &uw, 0.0 );
   };
 
   void SetDefaultPrmVelocityFollowCurve() {
     SetDefaultPrmVelocityFollow();
     pdCZHrzUWSetKappa( &uw, 2.0 );
+    pdCZHrzUWSetLambda( &uw, 0.0 );
   };
 
   zVec3DList sr;
@@ -71,6 +74,7 @@ TEST_F(pdCZHrzUWTest, Init)
   EXPECT_EQ( 0, pdCZHrzUWKr( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWDist( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWKappa( &uw ) );
+  EXPECT_EQ( 0, pdCZHrzUWLambda( &uw ) );
   EXPECT_EQ( &vrt, uw._vrt );
   EXPECT_EQ( &vrt.zeta, uw._u._zeta );
   EXPECT_EQ( &vrt.zeta, uw._w._zeta );
@@ -100,6 +104,7 @@ TEST_F(pdCZHrzUWTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzUWKr( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWDist( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWKappa( &uw ) );
+  EXPECT_EQ( 0, pdCZHrzUWLambda( &uw ) );
   EXPECT_EQ( NULL, uw._vrt );
   EXPECT_EQ( NULL, uw._u._zeta );
   EXPECT_EQ( NULL, uw._w._zeta );
@@ -295,7 +300,7 @@ TEST_F(pdCZHrzUWTest, CheckSimZMPAllStateZero)
   zVec2D delta, vel, zmp;
 
   pdCZVrtSetRef( &vrt, 0.26 );
-  pdCZHrzUWSetPrm( &uw, 0.25, 1.0, 0, 0, 1.0, 1.5, 1.0, 1.0, 0.1, 0 );
+  pdCZHrzUWSetPrm( &uw, 0.25, 1.0, 0, 0, 1.0, 1.5, 1.0, 1.0, 0.1, 0, 0 );
   pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
   zVec2DCreate( &delta, 0, 0 ); zVec2DCreate( &vel, 0, 0 );
   pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
@@ -392,7 +397,7 @@ TEST_F(pdCZHrzUWTest, CalcRegZMP)
   zVec2D delta, vel, regzmp;
 
   pdCZVrtZeta( &vrt ) = 1;
-  pdCZHrzUWSetPrm( &uw, 0.2, 1, 1, 0.2, 1, 1, 1, 1, 1, 1 );
+  pdCZHrzUWSetPrm( &uw, 0.2, 1, 1, 0.2, 1, 1, 1, 1, 1, 1, 1 );
   zVec2DCreate( &delta, 0.2, -0.2 ); zVec2DCreate( &vel, 0.2, -0.2 );
   pdCZHrzUWCalcRegZMP( &uw, &delta, &vel, &regzmp );
   EXPECT_NEAR( 0.14,  regzmp.e[pdU], 1e-12 );

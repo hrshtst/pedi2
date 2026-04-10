@@ -6,6 +6,7 @@ void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt)
   pdCZHrzWInit( &hrz->_w, &pdCZHrzUWKappa(hrz), &pdCZVrtZeta(vrt) );
   hrz->_vrt = vrt;
   pdCZHrzUWSetKappa( hrz, 0 );
+  pdCZHrzUWSetLambda( hrz, 0 );
   zListInit( pdCZHrzUWSR(hrz) );
   pdCZHrzUWSRVert(hrz)->data.array = NULL;
   hrz->_vert_num = 0;
@@ -19,6 +20,7 @@ void pdCZHrzUWDestroy(pdCZHrzUW *hrz)
   pdCZHrzWDestroy( &hrz->_w );
   hrz->_vrt = NULL;
   pdCZHrzUWSetKappa( hrz, 0 );
+  pdCZHrzUWSetLambda( hrz, 0 );
   zLoop3DDestroy( pdCZHrzUWSR(hrz) );
   if( pdCZHrzUWSRVert(hrz)->data.array )
     zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
@@ -102,6 +104,7 @@ void pdCZHrzUWFWrite(FILE *fp, pdCZHrzUW *hrz)
   fprintf( fp, "rho:%f, kr:%f, dist:%f\n",
            pdCZHrzUWRho(hrz), pdCZHrzUWKr(hrz), pdCZHrzUWDist(hrz) );
   fprintf( fp, "kappa:%f\n", pdCZHrzUWKappa(hrz) );
+  fprintf( fp, "lambda:%f\n", pdCZHrzUWLambda(hrz) );
   fprintf( fp, "refuz:%f, refwz:%f\n", pdCZHrzUWZMPU(hrz), pdCZHrzUWZMPW(hrz) );
   fprintf( fp, "refddu:%f, refddw:%f\n", pdCZHrzUWAccU(hrz), pdCZHrzUWAccW(hrz) );
 }

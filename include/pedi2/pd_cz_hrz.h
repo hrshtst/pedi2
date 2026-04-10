@@ -49,6 +49,7 @@ __PEDI2_EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzKr(h)       pdCZHrzUWKr( pdCZHrzUWPtr(h) )
 #define pdCZHrzDist(h)     pdCZHrzUWDist( pdCZHrzUWPtr(h) )
 #define pdCZHrzKappa(h)    pdCZHrzUWKappa( pdCZHrzUWPtr(h) )
+#define pdCZHrzLambda(h)   pdCZHrzUWLambda( pdCZHrzUWPtr(h) )
 #define pdCZHrzSRUW(h)     pdCZHrzUWSR( pdCZHrzUWPtr(h) )
 #define pdCZHrzSRVertUW(h) pdCZHrzUWSRVert( pdCZHrzUWPtr(h) )
 #define pdCZHrzZMPUW(h)    pdCZHrzUWZMP( pdCZHrzUWPtr(h) )
@@ -99,9 +100,11 @@ __PEDI2_EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzSetKr(h,k)           pdCZHrzUWSetKr( pdCZHrzUWPtr(h), k )
 #define pdCZHrzSetDist(h,d)         pdCZHrzUWSetDist( pdCZHrzUWPtr(h), d )
 #define pdCZHrzSetKappa(h,k)        pdCZHrzUWSetKappa( pdCZHrzUWPtr(h), k )
-#define pdCZHrzSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa) \
+#define pdCZHrzSetLambda(h,l)       pdCZHrzUWSetLambda( pdCZHrzUWPtr(h), l )
+#define pdCZHrzSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa,lambda)  \
   pdCZHrzUWSetPrm( pdCZHrzUWPtr(h), vud, qu1, qu2, \
-                                    vwd, qw1, qw2, rho, kr, dist, kappa )
+                                    vwd, qw1, qw2, \
+                                    rho, kr, dist, kappa, lambda )
 #define pdCZHrzSetSR(h,sr)          ( pdCZHrzSR(h) = (sr) )
 #define pdCZHrzSetRefPosUW(h,ud,wd) zVec2DCreate( pdCZHrzRefPosUW(h), ud, wd )
 #define pdCZHrzSetRefPosUWVec(h,pd) zVec2DCopy( pd, pdCZHrzRefPosUW(h) )

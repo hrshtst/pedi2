@@ -30,6 +30,7 @@ __PEDI2_EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 #define pdFootUWRefPosU(f) pdFootUWRefPos(f)->e[pdU]
 #define pdFootUWRefPosW(f) pdFootUWRefPos(f)->e[pdW]
 #define pdFootUWKappa(f)   pdCZHrzUWKappa( pdFootUWCZPtr(f) )
+#define pdFootUWLambda(f)  pdCZHrzUWLambda( pdFootUWCZPtr(f) )
 #define pdFootUWDist(f)    pdCZHrzUWDist( pdFootUWCZPtr(f) )
 
 /* calculation method */

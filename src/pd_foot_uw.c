@@ -89,8 +89,10 @@ void pdFootUWFWrite(FILE *fp, pdFootUW *f)
 {
   /* for debug */
   fprintf( fp, "--\n" );
-  fprintf( fp, "sign:%g, kappa:%g, dist:%g, phi:%g\n",
-           pdFootUWSign(f), pdFootUWKappa(f), pdFootUWDist(f), pdFootUWPhi(f) );
+  fprintf( fp, "sign:%g, kappa:%g, lambda:%g\n",
+           pdFootUWSign(f), pdFootUWKappa(f), pdFootUWLambda(f) );
+  fprintf( fp, "dist:%g, phi:%g\n",
+           pdFootUWDist(f), pdFootUWPhi(f) );
   fprintf( fp, "reguz:%g, regwz:%g\n", pdFootUWRegZMPU(f), pdFootUWRegZMPW(f) );
   fprintf( fp, "refud:%g, refwd:%g\n", pdFootUWRefPosU(f), pdFootUWRefPosW(f) );
 }

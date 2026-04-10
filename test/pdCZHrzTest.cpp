@@ -32,17 +32,18 @@ protected:
     pdCZHrzSetKr( &hrz, 17 );
     pdCZHrzSetDist( &hrz, 18 );
     pdCZHrzSetKappa( &hrz, 19 );
+    pdCZHrzSetLambda( &hrz, 20 );
     pdCZHrzSetSR( &hrz, &sr );
-    pdCZHrzSetRefPosU( &hrz, 20 );
-    pdCZHrzSetRefPosW( &hrz, 21 );
-    pdCZHrzSetDeltaU( &hrz, 22 );
-    pdCZHrzSetDeltaW( &hrz, 23 );
-    pdCZHrzSetVelU( &hrz, 24 );
-    pdCZHrzSetVelW( &hrz, 25 );
-    pdCZHrzZMPX( &hrz ) = 26;
-    pdCZHrzZMPY( &hrz ) = 27;
-    pdCZHrzAccX( &hrz ) = 28;
-    pdCZHrzAccY( &hrz ) = 29;
+    pdCZHrzSetRefPosU( &hrz, 21 );
+    pdCZHrzSetRefPosW( &hrz, 22 );
+    pdCZHrzSetDeltaU( &hrz, 23 );
+    pdCZHrzSetDeltaW( &hrz, 24 );
+    pdCZHrzSetVelU( &hrz, 25 );
+    pdCZHrzSetVelW( &hrz, 26 );
+    pdCZHrzZMPX( &hrz ) = 27;
+    pdCZHrzZMPY( &hrz ) = 28;
+    pdCZHrzAccX( &hrz ) = 29;
+    pdCZHrzAccY( &hrz ) = 30;
   };
 
   zLoop3D sr;
@@ -65,6 +66,7 @@ TEST_F(pdCZHrzTest, Init)
   EXPECT_EQ( 0, pdCZHrzKr( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzDist( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzKappa( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzLambda( &hrz ) );
   EXPECT_EQ( NULL, pdCZHrzSR( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosY( &hrz ) );
@@ -101,6 +103,7 @@ TEST_F(pdCZHrzTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzKr( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzDist( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzKappa( &hrz ) );
+  EXPECT_EQ( 0, pdCZHrzLambda( &hrz ) );
   EXPECT_EQ( NULL, pdCZHrzSR( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosX( &hrz ) );
   EXPECT_EQ( 0, pdCZHrzRefPosY( &hrz ) );

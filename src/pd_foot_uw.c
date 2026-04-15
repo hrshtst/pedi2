@@ -78,7 +78,7 @@ void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos)
   ref_pos->e[pdW] = 0.5 * ( lf_pos->e[pdW] + rf_pos->e[pdW] );
 }
 
-void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel)
+void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel, double refdist)
 {
   pdFootUWCalcRegZMP( kf, delta, vel, pdFootUWRegZMP( kf ) );
   pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, vel, pdFootUWRegZMP( kf ) );

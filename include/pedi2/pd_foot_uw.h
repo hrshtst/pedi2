@@ -42,7 +42,7 @@ __PEDI2_EXPORT void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *vel
 __PEDI2_EXPORT void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos);
 
 /* update method */
-__PEDI2_EXPORT void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel);
+__PEDI2_EXPORT void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel, double refdist);
 
 /* output method */
 __PEDI2_EXPORT void pdFootUWFWrite(FILE *fp, pdFootUW *fuw);

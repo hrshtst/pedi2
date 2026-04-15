@@ -210,7 +210,8 @@ void _pdBipedUpdateFoot(pdBiped *biped, pdState *state)
                 &state->lf_att,
                 &state->rf_att,
                 &state->sr_lf,
-                &state->sr_rf );
+                &state->sr_rf,
+                pdBipedRefDist(biped) );
 }
 
 void _pdBipedUpdateRef(pdBiped *biped, pdState *state)
@@ -365,6 +366,7 @@ void pdBipedUpdate(pdBiped *biped, pdState *state)
 {
   _pdBipedUpdateCommand( biped );
   _pdBipedUpdateCZ( biped, state );
+  /* TODO: Update ref_dist here */
   _pdBipedUpdateFoot( biped, state );
   _pdBipedUpdateRef( biped, state );
   pdModeUpdate( &biped->mode, biped->cmd, state );

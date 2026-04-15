@@ -167,7 +167,7 @@ void pdFootCalcRefAtt(pdFoot *f, zVec3D *pd, zVec3D *refa)
   zVec3DCreate( refa, ( theta + zPI_2 ) + phi, 0, 0 );
 }
 
-void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zLoop3D *pfsr)
+void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zLoop3D *pfsr, double refdist)
 {
   zVec2D xy;
   zVec2D zmpxy, zmpuw;
@@ -177,7 +177,7 @@ void _pdFootDesPosUpdate(pdFoot *kf, pdFoot *pf, zVec2D *delta, zVec2D *vel, zVe
   pdFootXformXYtoUW( pf, &zmpxy, &zmpuw );
   pdFootXformSRXYtoUW( pf, pfsr );
   /* update desired position */
-  pdFootUWUpdate( pdFootUWPtr( kf ), delta, vel );
+  pdFootUWUpdate( pdFootUWPtr( kf ), delta, vel, refdist );
   pdFootZUpdate( pdFootZPtr( pf ), pdFootZPtr( kf ), delta, vel, &zmpuw );
   /* moving frame -> world frame */
   pdFootXformUWtoXY( kf, pdFootUWRefPos( pdFootUWPtr( kf ) ), &xy );
@@ -262,12 +262,12 @@ void pdFootUpdateState(pdFoot *f, zVec3D *pos, zVec3D *att, zLoop3D *sr)
   }
 }
 
-void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zLoop3D *lfsr, zLoop3D *rfsr)
+void pdFootUpdate(pdFoot *lf, pdFoot *rf, zVec2D *delta, zVec2D *vel, zVec3D *zmp, zVec3D *lfp, zVec3D *rfp, zVec3D *lfa, zVec3D *rfa, zLoop3D *lfsr, zLoop3D *rfsr, double refdist)
 {
   pdFootUpdateState( lf, lfp, lfa, lfsr );
   pdFootUpdateState( rf, rfp, rfa, rfsr );
-  _pdFootDesPosUpdate( lf, rf, delta, vel, zmp, rfsr );
-  _pdFootDesPosUpdate( rf, lf, delta, vel, zmp, lfsr );
+  _pdFootDesPosUpdate( lf, rf, delta, vel, zmp, rfsr, refdist );
+  _pdFootDesPosUpdate( rf, lf, delta, vel, zmp, lfsr, refdist );
   _pdFootRefPosUpdate( lf, lfp, lfa, lfsr );
   _pdFootRefPosUpdate( rf, rfp, rfa, rfsr );
   pdFootIncrTime( lf );

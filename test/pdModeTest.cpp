@@ -21,6 +21,7 @@ class pdModeTest : public testing::Test {
     ri.SetRandBool( mode.stepping );
     ri.SetRandBool( mode.walking );
     ri.SetRandBool( mode.sideways );
+    ri.SetRandBool( mode.crabbing );
     ri.SetRandBool( mode.following );
     ri.SetRandBool( mode.braking );
     ri.SetRandBool( mode.rotating );
@@ -86,6 +87,7 @@ TEST_F(pdModeTest, Init)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   EXPECT_FALSE( mode.rotating );
@@ -101,6 +103,7 @@ TEST_F(pdModeTest, Destroy)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   EXPECT_FALSE( mode.rotating );
@@ -276,6 +279,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // attempt to walk, but not initiate yet
@@ -286,6 +290,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // initiate walking
@@ -296,6 +301,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_TRUE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_TRUE( mode.braking );
   // still walking
@@ -306,6 +312,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_TRUE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // still walking
@@ -316,6 +323,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_TRUE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_TRUE( mode.following );
   EXPECT_FALSE( mode.braking );
   SupportOnBothFeet();
@@ -328,6 +336,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_TRUE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_TRUE( mode.braking );
   // attempt to stop, but still continue
@@ -338,6 +347,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_TRUE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_TRUE( mode.braking );
   // stop stepping
@@ -348,6 +358,7 @@ TEST_F(pdModeTest, Update_sideways)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
 }
@@ -361,6 +372,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // attempt to walk, but not initiate yet
@@ -372,6 +384,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // initiate walking
@@ -383,6 +396,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // still walking
@@ -394,6 +408,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // attempt to walk diagonally
@@ -405,6 +420,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_TRUE( mode.braking );
   SupportOnBothFeet();
@@ -418,6 +434,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // still walking
@@ -429,6 +446,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_TRUE( mode.following );
   EXPECT_FALSE( mode.braking );
   // attempt to walk longitudinally again
@@ -440,6 +458,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_TRUE( mode.following );
   EXPECT_FALSE( mode.braking );
   // still walking
@@ -451,6 +470,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // attempt to stop
@@ -462,6 +482,7 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_TRUE( mode.stepping );
   EXPECT_TRUE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
   // stop stepping
@@ -473,6 +494,158 @@ TEST_F(pdModeTest, Update_diagonal)
   EXPECT_FALSE( mode.stepping );
   EXPECT_FALSE( mode.walking );
   EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_FALSE( mode.braking );
+}
+
+TEST_F(pdModeTest, Update_crabbing)
+{
+  pdCmdDefaultInit( &cmd );
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_FALSE( mode.braking );
+  // attempt to walk, but not initiate yet
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_FALSE( mode.braking );
+  // initiate walking, braking
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnLeftFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_TRUE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_TRUE( mode.braking );
+  // still walking, on feet
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_TRUE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_FALSE( mode.braking );
+  // still walking, following
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnRightFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_TRUE( mode.crabbing );
+  EXPECT_TRUE( mode.following );
+  EXPECT_FALSE( mode.braking );
+  // still walking, diagonal, braking
+  cmd.vud = 0.1;
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnLeftFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_TRUE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_TRUE( mode.braking );
+  // still walking, diagonal, on feet
+  cmd.vud = 0.1;
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_TRUE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_FALSE( mode.braking );
+  // still walking, diagonal, following
+  cmd.vud = 0.1;
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnRightFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_TRUE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
+  EXPECT_TRUE( mode.following );
+  EXPECT_FALSE( mode.braking );
+  // still walking, back to crab walk
+  cmd.vud = 0.0;
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_FALSE( mode.braking );
+  // still walking, back to crab walk
+  cmd.vud = 0.0;
+  cmd.vwd = 0.1;
+  cmd.lambda = 0.01;
+  SupportOnLeftFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_TRUE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_TRUE( mode.braking );
+  // attempt to stop, but still continue
+  cmd.vwd = 0.0;
+  cmd.lambda = 0.01;
+  SupportOnLeftFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_TRUE( mode.sideways );
+  EXPECT_TRUE( mode.crabbing );
+  EXPECT_FALSE( mode.following );
+  EXPECT_TRUE( mode.braking );
+  // stop stepping
+  cmd.vwd = 0.0;
+  cmd.lambda = 0.01;
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+  EXPECT_FALSE( mode.walking );
+  EXPECT_FALSE( mode.sideways );
+  EXPECT_FALSE( mode.crabbing );
   EXPECT_FALSE( mode.following );
   EXPECT_FALSE( mode.braking );
 }

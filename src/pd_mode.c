@@ -7,6 +7,7 @@ void pdModeInit(pdMode *mode)
   mode->stepping  = false;
   mode->walking   = false;
   mode->sideways  = false;
+  mode->crabbing  = false;
   mode->following = false;
   mode->braking   = false;
   mode->rotating  = false;
@@ -34,6 +35,8 @@ void pdModeUpdate(pdMode *mode, pdCmd *cmd, pdState *state)
       mode->walking = false;
     if( !pdCmdTryWalkSideways( cmd ) )
       mode->sideways = false;
+    if( !pdCmdTryCrabWalk( cmd ) )
+      mode->crabbing = false;
     mode->following = false;
     mode->braking   = false;
   }
@@ -45,6 +48,9 @@ void pdModeUpdate(pdMode *mode, pdCmd *cmd, pdState *state)
       mode->walking = true;
     if( pdCmdTryWalkSideways( cmd ) ){
       mode->sideways = true;
+      mode->crabbing = false;
+      if( pdCmdTryCrabWalk( cmd ) )
+        mode->crabbing = true;
       mode->following = false;
       mode->braking   = false;
       if( pdStateBFOff( state, cmd->vwd ) )
@@ -69,6 +75,7 @@ void pdModeFWrite(FILE *fp, pdMode *mode)
   pdModeFWriteElem( fp, mode, stepping );
   pdModeFWriteElem( fp, mode, walking );
   pdModeFWriteElem( fp, mode, sideways );
+  pdModeFWriteElem( fp, mode, crabbing );
   pdModeFWriteElem( fp, mode, following );
   pdModeFWriteElem( fp, mode, braking );
   pdModeFWriteElem( fp, mode, rotating );

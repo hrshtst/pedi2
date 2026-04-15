@@ -12,6 +12,7 @@ typedef struct{
   bool stepping;
   bool walking;
   bool sideways;
+  bool crabbing;
   bool following;
   bool braking;
   bool rotating;

@@ -24,6 +24,7 @@ void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt)
   zVec3DZero( pdBipedRefLFAtt( biped ) );
   zVec3DZero( pdBipedRefRFPos( biped ) );
   zVec3DZero( pdBipedRefRFAtt( biped ) );
+  pdBipedRefDist( biped ) = 0.0;
 }
 
 bool _pdBipedIsStateValid(pdBiped *biped, pdState *state)

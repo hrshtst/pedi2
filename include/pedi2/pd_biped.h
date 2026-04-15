@@ -23,6 +23,7 @@ typedef struct{
   zVec3D ref_lf_att;
   zVec3D ref_rf_pos;
   zVec3D ref_rf_att;
+  double ref_dist;
 } pdBiped;
 
 __PEDI2_EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt);
@@ -65,6 +66,7 @@ __PEDI2_EXPORT void pdBipedDestroy(pdBiped *biped);
 #define pdBipedRefRFAttX(b)    pdBipedRefRFAtt(b)->c.x
 #define pdBipedRefRFAttY(b)    pdBipedRefRFAtt(b)->c.y
 #define pdBipedRefRFAttZ(b)    pdBipedRefRFAtt(b)->c.z
+#define pdBipedRefDist(b)      ( (b)->ref_dist )
 
 /* methods to set parameters */
 #define pdBipedSetTime(b,t) do{ \

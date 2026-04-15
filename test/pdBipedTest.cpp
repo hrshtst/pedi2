@@ -24,6 +24,7 @@ class pdBipedTest : public testing::Test {
     ri.SetRandVec3D( biped.ref_lf_att );
     ri.SetRandVec3D( biped.ref_rf_pos );
     ri.SetRandVec3D( biped.ref_rf_att );
+    ri.SetRandScalar( biped.ref_dist );
     ri.SetRandVec3D( pdBipedCZPtr(&biped)->refvel );
     ri.SetRandVec3D( pdBipedCZPtr(&biped)->refacc );
     ri.SetRandVec3D( pdBipedCZPtr(&biped)->refzmp );
@@ -86,6 +87,7 @@ TEST_F(pdBipedTest, Init)
   EXPECT_EQ( 0, pdBipedRefRFAttX( &biped ) );
   EXPECT_EQ( 0, pdBipedRefRFAttY( &biped ) );
   EXPECT_EQ( 0, pdBipedRefRFAttZ( &biped ) );
+  EXPECT_EQ( 0, pdBipedRefDist( &biped ) );
 }
 
 TEST_F(pdBipedTest, Destroy)

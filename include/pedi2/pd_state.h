@@ -23,6 +23,7 @@ typedef struct{
   zVec3D zmp;       /* actual ZMP position */
   zVec3D deszmp;    /* desired ZMP position */
   double fz;
+  double dist;
   zVec3D ef;        /* external force */
   zLoop3D sr_lf;
   zLoop3D sr_rf;

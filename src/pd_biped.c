@@ -238,7 +238,7 @@ static double _pdBipedCalcDesFootDistBrake(pdBiped *biped, pdState *state);
 static double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped, pdState *state);
 double _pdBipedCalcDesFootDistFollow(pdBiped *biped, pdState *state)
 {
-  double q1, q2, zeta, phase;
+  double q1, q2, zeta, phase, lambda, arc;
 
   q1 = pdCZQ1W( pdBipedCZPtr(biped) );
   q2 = pdCZQ2W( pdBipedCZPtr(biped) );
@@ -247,7 +247,12 @@ double _pdBipedCalcDesFootDistFollow(pdBiped *biped, pdState *state)
     phase = pdFootPhase( pdBipedKFPtr( biped ) );
   else
     phase = 0;
-  return biped->cmd->dist + zPIx2 * phase * fabs(pdCZRefVelW(pdBipedCZPtr(biped))) / ( zeta * sqrt( q1 * q2 ) );
+  lambda = pdCZLambda( pdBipedCZPtr(biped) );
+  arc = zPI * phase * fabs(pdCZRefVelW(pdBipedCZPtr(biped))) / ( zeta * sqrt( q1 * q2 ) );
+  if( zIsTiny(lambda) )
+    return 2.0 * arc + biped->cmd->dist;
+  else
+    return 2.0 * sin( lambda * arc ) / lambda + biped->cmd->dist * cos( lambda * arc );
 }
 
 double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped, pdState *state)
@@ -436,6 +441,9 @@ void pdBipedFWrite(FILE *fp, pdBiped *biped)
   fprintf( fp, "lf sign:%g, kappa:%g, dist:%g, phi:%g\n",
            pdFootUWSign(pdFootUWPtr(lf)), pdFootUWKappa(pdFootUWPtr(lf)),
            pdFootUWDist(pdFootUWPtr(lf)), pdFootUWPhi(pdFootUWPtr(lf)) );
+  fprintf( fp, "lf sign:%g, lambda:%g, dist:%g\n",
+           pdFootUWSign(pdFootUWPtr(lf)), pdFootUWLambda(pdFootUWPtr(lf)),
+           pdFootUWDist(pdFootUWPtr(lf)) );
   fprintf( fp, "lf reguz:%g, regwz:%g\n",
            pdFootUWRegZMPU(pdFootUWPtr(lf)), pdFootUWRegZMPW(pdFootUWPtr(lf)) );
   fprintf( fp, "lf refud:%g, refwd:%g\n",
@@ -469,6 +477,9 @@ void pdBipedFWrite(FILE *fp, pdBiped *biped)
   fprintf( fp, "rf sign:%g, kappa:%g, dist:%g, phi:%g\n",
            pdFootUWSign(pdFootUWPtr(rf)), pdFootUWKappa(pdFootUWPtr(rf)),
            pdFootUWDist(pdFootUWPtr(rf)), pdFootUWPhi(pdFootUWPtr(rf)) );
+  fprintf( fp, "rf sign:%g, lambda:%g, dist:%g\n",
+           pdFootUWSign(pdFootUWPtr(rf)), pdFootUWLambda(pdFootUWPtr(rf)),
+           pdFootUWDist(pdFootUWPtr(rf)) );
   fprintf( fp, "rf reguz:%g, regwz:%g\n", pdFootUWRegZMPU(pdFootUWPtr(rf)),
            pdFootUWRegZMPW(pdFootUWPtr(rf)) );
   fprintf( fp, "rf refud:%g, refwd:%g\n",

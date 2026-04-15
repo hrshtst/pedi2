@@ -6,13 +6,14 @@
 
 __BEGIN_DECLS
 
-#define PD_CMD_ENTRY_NUM 39
+#define PD_CMD_ENTRY_NUM 40
 typedef union{
   struct{
     double qu1, qu2;
     double qw1, qw2;
     double qz1, qz2;
     double kappa, rho, kr;
+    double lambda;
     double xd, yd, zd;
     double xdd, ydd, zdd;       /* user-commanded desired position (this should be removed) */
     double thetad;

@@ -45,6 +45,7 @@ TEST_F(pdCmdTest, Init)
   EXPECT_EQ( 0, cmd.qz1 );
   EXPECT_EQ( 0, cmd.qz2 );
   EXPECT_EQ( 0, cmd.kappa );
+  EXPECT_EQ( 0, cmd.lambda );
   EXPECT_EQ( 0, cmd.rho );
   EXPECT_EQ( 0, cmd.kr );
   EXPECT_EQ( 0, cmd.xd );
@@ -90,6 +91,7 @@ TEST_F(pdCmdTest, Destroy)
   EXPECT_EQ( 0, cmd.qz1 );
   EXPECT_EQ( 0, cmd.qz2 );
   EXPECT_EQ( 0, cmd.kappa );
+  EXPECT_EQ( 0, cmd.lambda );
   EXPECT_EQ( 0, cmd.rho );
   EXPECT_EQ( 0, cmd.kr );
   EXPECT_EQ( 0, cmd.xd );

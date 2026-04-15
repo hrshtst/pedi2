@@ -29,6 +29,7 @@ class pdBipedTest : public testing::Test {
     ri.SetRandVec3D( pdBipedCZPtr(&biped)->refacc );
     ri.SetRandVec3D( pdBipedCZPtr(&biped)->refzmp );
     ri.SetRandScalar( pdCZVrtRF( &biped.cz._vrt ) );
+    ri.SetRandScalar( pdCZDist( &biped.cz ) );
   };
 
   void SupportOnBothFeet() {
@@ -309,4 +310,5 @@ TEST_F(pdBipedTest, UpdateState)
   EXPECT_EQ( pdCZRefZMPY(cz), s->zmp.c.y );
   EXPECT_EQ( pdCZRefZMPZ(cz), s->zmp.c.z );
   EXPECT_EQ( pdCZVrtRF(&cz->_vrt), s->fz );
+  EXPECT_EQ( pdBipedRefDist(&biped), s->dist );
 }

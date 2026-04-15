@@ -37,6 +37,7 @@ __PEDI2_EXPORT bool pdCmdTryStop(pdCmd *cmd);
 __PEDI2_EXPORT bool pdCmdTryStep(pdCmd *cmd);
 __PEDI2_EXPORT bool pdCmdTryWalk(pdCmd *cmd);
 __PEDI2_EXPORT bool pdCmdTryWalkSideways(pdCmd *cmd);
+__PEDI2_EXPORT bool pdCmdTryCrabWalk(pdCmd *cmd);
 __PEDI2_EXPORT bool pdCmdTryWarp(pdCmd *cmd);
 
 __PEDI2_EXPORT void pdCmdDataFWrite(FILE *fp, pdCmd *cmd);

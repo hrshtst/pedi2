@@ -55,6 +55,11 @@ bool pdCmdTryWalkSideways(pdCmd *cmd)
   return !zIsTiny( cmd->vwd );
 }
 
+bool pdCmdTryCrabWalk(pdCmd *cmd)
+{
+  return !( zIsTiny( cmd->vwd ) || zIsTiny( cmd->lambda ) || pdCmdTryWalk( cmd ) );
+}
+
 #define PD_CMD_WARP_DIST 0.1
 bool pdCmdTryWarp(pdCmd *cmd)
 {

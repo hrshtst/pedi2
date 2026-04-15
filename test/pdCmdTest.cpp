@@ -171,6 +171,42 @@ TEST_F(pdCmdTest, TryWalkSideways)
   EXPECT_TRUE( pdCmdTryWalkSideways( &cmd ) );
 }
 
+TEST_F(pdCmdTest, TryWalkCrabWalk)
+{
+  Stop();
+  EXPECT_FALSE( pdCmdTryWalk( &cmd ) );
+  EXPECT_FALSE( pdCmdTryWalkSideways( &cmd ) );
+  EXPECT_FALSE( pdCmdTryCrabWalk( &cmd ) );
+
+  cmd.vud = 0;
+  cmd.vwd = 1;
+  cmd.lambda = 0;
+  EXPECT_FALSE( pdCmdTryWalk( &cmd ) );
+  EXPECT_TRUE( pdCmdTryWalkSideways( &cmd ) );
+  EXPECT_FALSE( pdCmdTryCrabWalk( &cmd ) );
+
+  cmd.vud = 0;
+  cmd.vwd = 1;
+  cmd.lambda = 0.1;
+  EXPECT_FALSE( pdCmdTryWalk( &cmd ) );
+  EXPECT_TRUE( pdCmdTryWalkSideways( &cmd ) );
+  EXPECT_TRUE( pdCmdTryCrabWalk( &cmd ) );
+
+  cmd.vud = 1;
+  cmd.vwd = 1;
+  cmd.lambda = 0.1;
+  EXPECT_TRUE( pdCmdTryWalk( &cmd ) );
+  EXPECT_TRUE( pdCmdTryWalkSideways( &cmd ) );
+  EXPECT_FALSE( pdCmdTryCrabWalk( &cmd ) );
+
+  cmd.vud = 0;
+  cmd.vwd = 0;
+  cmd.lambda = 0.1;
+  EXPECT_FALSE( pdCmdTryWalk( &cmd ) );
+  EXPECT_FALSE( pdCmdTryWalkSideways( &cmd ) );
+  EXPECT_FALSE( pdCmdTryCrabWalk( &cmd ) );
+}
+
 TEST_F(pdCmdTest, TryWarp)
 {
   Stop();

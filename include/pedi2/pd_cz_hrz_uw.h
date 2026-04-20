@@ -16,6 +16,7 @@ typedef struct{
   pdCZHrzW _w;         /* desired ZMP calculator for radial direction */
   double _kappa;       /* curvature of the referential orbit */
   double _lambda;      /* curvature of the referential lateral orbit */
+  double _dist;        /* canonical distance between feet */
   pdCZVrt *_vrt;       /* controller for vertical motion */
   zLoop3D _sr;         /* supporting region */
   zVec3DData _sr_vert; /* vertices of supporting region */
@@ -30,46 +31,49 @@ __PEDI2_EXPORT void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt);
 __PEDI2_EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
 
 /* methods to get parameters */
-#define pdCZHrzUPtr(h)      ( &(h)->_u )
-#define pdCZHrzWPtr(h)      ( &(h)->_w )
-#define pdCZHrzUWRefVelU(h) pdCZHrzURefVel( pdCZHrzUPtr(h) )
-#define pdCZHrzUWQ1U(h)     pdCZHrzUQ1( pdCZHrzUPtr(h) )
-#define pdCZHrzUWQ2U(h)     pdCZHrzUQ2( pdCZHrzUPtr(h) )
-#define pdCZHrzUWRefVelW(h) pdCZHrzWRefVel( pdCZHrzWPtr(h) )
-#define pdCZHrzUWQ1W(h)     pdCZHrzWQ1( pdCZHrzWPtr(h) )
-#define pdCZHrzUWQ2W(h)     pdCZHrzWQ2( pdCZHrzWPtr(h) )
-#define pdCZHrzUWRho(h)     pdCZHrzWRho( pdCZHrzWPtr(h) )
-#define pdCZHrzUWKr(h)      pdCZHrzWKr( pdCZHrzWPtr(h) )
-#define pdCZHrzUWDist(h)    pdCZHrzWDist( pdCZHrzWPtr(h) )
-#define pdCZHrzUWKappa(h)   (h)->_kappa
-#define pdCZHrzUWLambda(h)  (h)->_lambda
-#define pdCZHrzUWZeta(h)    pdCZVrtZeta( (h)->_vrt )
-#define pdCZHrzUWSR(h)      ( &(h)->_sr )
-#define pdCZHrzUWSRVert(h)  ( &(h)->_sr_vert )
-#define pdCZHrzUWZMP(h)     ( &(h)->zmp )
-#define pdCZHrzUWZMPU(h)    ( pdCZHrzUWZMP(h)->e[pdU] )
-#define pdCZHrzUWZMPW(h)    ( pdCZHrzUWZMP(h)->e[pdW] )
-#define pdCZHrzUWAcc(h)     ( &(h)->acc )
-#define pdCZHrzUWAccU(h)    ( pdCZHrzUWAcc(h)->e[pdU] )
-#define pdCZHrzUWAccW(h)    ( pdCZHrzUWAcc(h)->e[pdW] )
+#define pdCZHrzUPtr(h)        ( &(h)->_u )
+#define pdCZHrzWPtr(h)        ( &(h)->_w )
+#define pdCZHrzUWRefVelU(h)   pdCZHrzURefVel( pdCZHrzUPtr(h) )
+#define pdCZHrzUWQ1U(h)       pdCZHrzUQ1( pdCZHrzUPtr(h) )
+#define pdCZHrzUWQ2U(h)       pdCZHrzUQ2( pdCZHrzUPtr(h) )
+#define pdCZHrzUWRefVelW(h)   pdCZHrzWRefVel( pdCZHrzWPtr(h) )
+#define pdCZHrzUWQ1W(h)       pdCZHrzWQ1( pdCZHrzWPtr(h) )
+#define pdCZHrzUWQ2W(h)       pdCZHrzWQ2( pdCZHrzWPtr(h) )
+#define pdCZHrzUWRho(h)       pdCZHrzWRho( pdCZHrzWPtr(h) )
+#define pdCZHrzUWKr(h)        pdCZHrzWKr( pdCZHrzWPtr(h) )
+#define pdCZHrzUWDist(h)      pdCZHrzWDist( pdCZHrzWPtr(h) )
+#define pdCZHrzUWKappa(h)     (h)->_kappa
+#define pdCZHrzUWLambda(h)    (h)->_lambda
+#define pdCZHrzUWCanonDist(h) (h)->_dist
+#define pdCZHrzUWZeta(h)      pdCZVrtZeta( (h)->_vrt )
+#define pdCZHrzUWSR(h)        ( &(h)->_sr )
+#define pdCZHrzUWSRVert(h)    ( &(h)->_sr_vert )
+#define pdCZHrzUWZMP(h)       ( &(h)->zmp )
+#define pdCZHrzUWZMPU(h)      ( pdCZHrzUWZMP(h)->e[pdU] )
+#define pdCZHrzUWZMPW(h)      ( pdCZHrzUWZMP(h)->e[pdW] )
+#define pdCZHrzUWAcc(h)       ( &(h)->acc )
+#define pdCZHrzUWAccU(h)      ( pdCZHrzUWAcc(h)->e[pdU] )
+#define pdCZHrzUWAccW(h)      ( pdCZHrzUWAcc(h)->e[pdW] )
 
 /* methods to set parameters */
-#define pdCZHrzUWSetRefVelU(h,vd) pdCZHrzUSetRefVel( pdCZHrzUPtr(h), vd )
-#define pdCZHrzUWSetQ1U(h,q1)     pdCZHrzUSetQ1( pdCZHrzUPtr(h), q1 )
-#define pdCZHrzUWSetQ2U(h,q2)     pdCZHrzUSetQ2( pdCZHrzUPtr(h), q2 )
-#define pdCZHrzUWSetRefVelW(h,vd) pdCZHrzWSetRefVel( pdCZHrzWPtr(h), vd )
-#define pdCZHrzUWSetQ1W(h,q1)     pdCZHrzWSetQ1( pdCZHrzWPtr(h), q1 )
-#define pdCZHrzUWSetQ2W(h,q2)     pdCZHrzWSetQ2( pdCZHrzWPtr(h), q2 )
-#define pdCZHrzUWSetRho(h,r)      pdCZHrzWSetRho( pdCZHrzWPtr(h), r )
-#define pdCZHrzUWSetKr(h,k)       pdCZHrzWSetKr( pdCZHrzWPtr(h), k )
-#define pdCZHrzUWSetDist(h,d)     pdCZHrzWSetDist( pdCZHrzWPtr(h), d )
-#define pdCZHrzUWSetKappa(h,k)    ( pdCZHrzUWKappa(h) = (k) )
-#define pdCZHrzUWSetLambda(h,l)   ( pdCZHrzUWLambda(h) = (l) )
-#define pdCZHrzUWSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa,lambda) do{ \
+#define pdCZHrzUWSetRefVelU(h,vd)  pdCZHrzUSetRefVel( pdCZHrzUPtr(h), vd )
+#define pdCZHrzUWSetQ1U(h,q1)      pdCZHrzUSetQ1( pdCZHrzUPtr(h), q1 )
+#define pdCZHrzUWSetQ2U(h,q2)      pdCZHrzUSetQ2( pdCZHrzUPtr(h), q2 )
+#define pdCZHrzUWSetRefVelW(h,vd)  pdCZHrzWSetRefVel( pdCZHrzWPtr(h), vd )
+#define pdCZHrzUWSetQ1W(h,q1)      pdCZHrzWSetQ1( pdCZHrzWPtr(h), q1 )
+#define pdCZHrzUWSetQ2W(h,q2)      pdCZHrzWSetQ2( pdCZHrzWPtr(h), q2 )
+#define pdCZHrzUWSetRho(h,r)       pdCZHrzWSetRho( pdCZHrzWPtr(h), r )
+#define pdCZHrzUWSetKr(h,k)        pdCZHrzWSetKr( pdCZHrzWPtr(h), k )
+#define pdCZHrzUWSetDist(h,d)      pdCZHrzWSetDist( pdCZHrzWPtr(h), d )
+#define pdCZHrzUWSetKappa(h,k)     ( pdCZHrzUWKappa(h) = (k) )
+#define pdCZHrzUWSetLambda(h,l)    ( pdCZHrzUWLambda(h) = (l) )
+#define pdCZHrzUWSetCanonDist(h,d) ( pdCZHrzUWCanonDist(h) = (d) )
+#define pdCZHrzUWSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa,lambda,dist0) do{ \
   pdCZHrzUSetPrm( pdCZHrzUPtr(h), vud, qu1, qu2 );\
   pdCZHrzWSetPrm( pdCZHrzWPtr(h), vwd, qw1, qw2, rho, kr, dist );\
   pdCZHrzUWSetKappa( h, kappa );\
   pdCZHrzUWSetLambda( h, lambda );\
+  pdCZHrzUWSetCanonDist( h, dist0 );\
 } while(0)
 __PEDI2_EXPORT void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num);
 #define pdCZHrzUWIsSRSet(h) ( zListSize( pdCZHrzUWSR(h) ) ? true : false )

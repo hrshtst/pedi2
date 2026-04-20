@@ -22,30 +22,18 @@ void pdFootUWDestroy(pdFootUW *fuw)
   pdFootUWRefPosW( fuw ) = 0;
 }
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter" /* unused parameter ‘vel’ [-Wunused-parameter] */
-#elif defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#endif
-double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp)
+double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, double refdist)
 {
   return atan2( pdFootUWKappa(fuw)*regzmp->e[pdU],
                 1.0+pdFootUWKappa(fuw)*(delta->e[pdW]-regzmp->e[pdW]));
 }
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#elif defined(__clang__)
-#pragma clang diagnostic pop
-#endif
 
-void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp, zVec2D *refpos)
+void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, zVec2D *refpos, double refdist)
 {
   double phi;
   double ud, wd;
 
-  phi = pdFootUWCalcPhi( fuw, delta, vel, regzmp );
+  phi = pdFootUWCalcPhi( fuw, delta, regzmp, refdist );
   if( zIsTiny( pdFootUWKappa(fuw) ) ){
     ud = regzmp->e[pdU];
     wd = delta->e[pdW];
@@ -58,13 +46,13 @@ void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *r
   zVec2DCreate( refpos, ud, wd );
 }
 
-void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp, zVec2D *refpos)
+void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, zVec2D *refpos, double refdist)
 {
   double phi;
   double dr;
   zVec2D e;
 
-  phi = pdFootUWCalcPhi( fuw, delta, vel, regzmp );
+  phi = pdFootUWCalcPhi( fuw, delta, regzmp, refdist );
   dr = regzmp->e[pdU]*tan(0.5*phi) + delta->e[pdW] - regzmp->e[pdW] + 0.5 * pdFootUWSign( fuw ) * pdFootUWDist( fuw );
   zVec2DCreate( &e, -sin( phi ), cos( phi ) );
   if( pdFootUWSign( fuw ) * dr < 0 )
@@ -81,8 +69,8 @@ void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos)
 void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel, double refdist)
 {
   pdFootUWCalcRegZMP( kf, delta, vel, pdFootUWRegZMP( kf ) );
-  pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, vel, pdFootUWRegZMP( kf ) );
-  pdFootUWCalcRefPos( kf, delta, vel, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ) );
+  pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, pdFootUWRegZMP( kf ), refdist );
+  pdFootUWCalcRefPos( kf, delta, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ), refdist );
 }
 
 void pdFootUWFWrite(FILE *fp, pdFootUW *f)

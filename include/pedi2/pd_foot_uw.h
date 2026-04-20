@@ -37,8 +37,8 @@ __PEDI2_EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 #define pdFootUWCalcRegZMP(f,d,v,z) pdCZHrzUWCalcRegZMP( pdFootUWCZPtr(f), d, v, z )
 #define pdFootUWCalcRegZMPU(f,d,v)  pdCZHrzUWCalcRegZMPU( pdFootUWCZPtr(f), d, v )
 #define pdFootUWCalcRegZMPW(f,d,v)  pdCZHrzUWCalcRegZMPW( pdFootUWCZPtr(f), d, v )
-__PEDI2_EXPORT double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp);
-__PEDI2_EXPORT void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp, zVec2D *refpos);
+__PEDI2_EXPORT double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, double refdist);
+__PEDI2_EXPORT void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, zVec2D *refpos, double refdist);
 __PEDI2_EXPORT void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos);
 
 /* update method */

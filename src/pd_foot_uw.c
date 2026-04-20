@@ -28,7 +28,7 @@ double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, double refd
                 1.0+pdFootUWKappa(fuw)*(delta->e[pdW]-regzmp->e[pdW]));
 }
 
-void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, zVec2D *refpos, double refdist)
+void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, double refdist, zVec2D *refpos)
 {
   double phi;
   double ud, wd;
@@ -46,7 +46,7 @@ void pdFootUWCalcRefPos_old(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, zVec2D
   zVec2DCreate( refpos, ud, wd );
 }
 
-void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, zVec2D *refpos, double refdist)
+void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp, double refdist, zVec2D *refpos)
 {
   double phi;
   double dr;
@@ -70,7 +70,7 @@ void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel, double refdist)
 {
   pdFootUWCalcRegZMP( kf, delta, vel, pdFootUWRegZMP( kf ) );
   pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, pdFootUWRegZMP( kf ), refdist );
-  pdFootUWCalcRefPos( kf, delta, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ), refdist );
+  pdFootUWCalcRefPos( kf, delta, pdFootUWRegZMP( kf ), refdist, pdFootUWRefPos( kf ) );
 }
 
 void pdFootUWFWrite(FILE *fp, pdFootUW *f)

@@ -97,6 +97,14 @@ double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta)
   return delta_w;
 }
 
+double _pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta)
+{
+  double delta_w;
+
+  delta_w = refuw->e[pdU] * tan( 0.5 * delta_theta ) + pdCZDeltaW( cz ) - refuw->e[pdW];
+  return delta_w;
+}
+
 void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd)
 {
   double refdw;

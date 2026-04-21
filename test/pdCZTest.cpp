@@ -540,9 +540,9 @@ TEST_F(pdCZTest, CalcDeltaThetaLambda_LambdaIsNotZero)
 
   pdCZSetKappa( &cz, 0 );
   pdCZSetLambda( &cz, 0.3 );
-  pdCZSetCanonDist( &cz, 1.0 );
-  pdCZSetDist( &cz, sqrt(5) );
-  refdist = 3;
+  pdCZSetCanonDist( &cz, 2 );
+  pdCZSetDist( &cz, 2*sqrt(5) );
+  refdist = 2*3;
 
   zVec2DCreate( &delta, 0, 2*sqrt(3) );
   zVec2DCreate( &regzmp, 2, 1 );
@@ -612,6 +612,42 @@ TEST_F(pdCZTest, CalcNextUW_KappaIsNotZero)
   pdCZCalcNextUW( &cz, &refuw,  &nextuwd );
   EXPECT_NEAR( 0.5, nextuwd.e[pdU], 1e-12 );
   EXPECT_NEAR( 1.5*sqrt(3)+1, nextuwd.e[pdW], 1e-12 );
+}
+
+TEST_F(pdCZTest, CalcNextUWLambda_LambdaIsZero)
+{
+  zVec2D delta, nextuwd;
+  double refdist;
+
+  pdCZSetKappa( &cz, 0 );
+  pdCZSetLambda( &cz, 0 );
+  pdCZSetCanonDist( &cz, 2 );
+  pdCZSetDist( &cz, 4 );
+  zVec2DCreate( &delta, 1, 1 );
+  pdCZSetDeltaVec( &cz, &delta );
+
+  refdist = 5;
+  pdCZCalcNextUWLambda( &cz, pdCZDist(&cz), refdist, &nextuwd );
+  EXPECT_NEAR( 1, nextuwd.e[pdU], 1e-12 );
+  EXPECT_NEAR( 1.5, nextuwd.e[pdW], 1e-12 );
+}
+
+TEST_F(pdCZTest, CalcNextUWLambda_LambdaIsNotZero)
+{
+  zVec2D delta, nextuwd;
+  double refdist;
+
+  pdCZSetKappa( &cz, 0 );
+  pdCZSetLambda( &cz, 1 );
+  pdCZSetCanonDist( &cz, 2 );
+  pdCZSetDist( &cz, 2.0*sqrt(1.5) );
+  zVec2DCreate( &delta, 0.25, 0.25 );
+  pdCZSetDeltaVec( &cz, &delta );
+
+  refdist = 2.0*sqrt(2);
+  pdCZCalcNextUWLambda( &cz, pdCZDist(&cz), refdist, &nextuwd );
+  EXPECT_NEAR( 0.25-0.5*sqrt(2), nextuwd.e[pdU], 1e-12 );
+  EXPECT_NEAR( 0.25, nextuwd.e[pdW], 1e-12 );
 }
 
 

@@ -81,55 +81,57 @@ void pdCZDestroy(pdCZ *c)
   pdCZSetErrCompBZ( c, 0 );
 }
 
-static double _pdCZCalcHypotenuseA(double dist, double lambda);
-static double _pdCZCalcHypotenuseR(double dist, double dist0, double lambda);
-static void _pdCZCalcPsiSC(double dist, double dist0, double lambda, double *s, double *c);
-static double _pdCZCalcSinPhiOverLambda(double dist, double refdist, double dist0, double lambda);
-static double _pdCZCalcCosPhi(double dist, double refdist, double dist0, double lambda);
+static double _pdCZCalcHypotenuseA(double d, double lambda);
+static double _pdCZCalcHypotenuseR(double d, double d0, double lambda);
+static void _pdCZCalcPsiSC(double d, double d0, double lambda, double *s, double *c);
+static double _pdCZCalcSinPhiOverLambda(double d, double nextd, double d0, double lambda);
+static double _pdCZCalcCosPhi(double d, double nextd, double d0, double lambda);
 
-double _pdCZCalcHypotenuseA(double dist, double lambda)
+double _pdCZCalcHypotenuseA(double d, double lambda)
 {
-  return 1.0 + lambda * lambda * dist * dist;
+  return 1.0 + lambda * lambda * d * d;
 }
 
-double _pdCZCalcHypotenuseR(double dist, double dist0, double lambda)
+double _pdCZCalcHypotenuseR(double d, double d0, double lambda)
 {
-  double A, A0;
+  double A, A0, r;
 
-  A = _pdCZCalcHypotenuseA(dist, lambda);
-  A0 = _pdCZCalcHypotenuseA(dist0, lambda);
-  if( A - A0 > 1.0 ){
-    ZRUNWARN( "referential distance cannot exceed square root of (d0^2 + 1/lambda^2)" );
+  A = _pdCZCalcHypotenuseA(d, lambda);
+  A0 = _pdCZCalcHypotenuseA(d0, lambda);
+  r = A0 - A + 1.0;
+  if( r < 0.0 ){
+    if( !zIsTiny( r*r ) )
+      ZRUNWARN( "referential distance cannot exceed square root of (d0^2 + 1/lambda^2)" );
     return 0.0;
   }
-  return sqrt( A0 - A + 1.0 );
+  return sqrt( r );
 }
 
-void _pdCZCalcPsiSC(double dist, double dist0, double lambda, double *s, double *c)
+void _pdCZCalcPsiSC(double d, double d0, double lambda, double *s, double *c)
 {
   double R;
 
-  R = _pdCZCalcHypotenuseR(dist, dist0, lambda);
-  *s = lambda * ( dist - dist0 * R );
-  *c = ( lambda * lambda * dist * dist0 + R );
+  R = _pdCZCalcHypotenuseR(d, d0, lambda);
+  *s = lambda * ( d - d0 * R );
+  *c = ( lambda * lambda * d * d0 + R );
 }
 
-double _pdCZCalcSinPhiOverLambda(double dist, double refdist, double dist0, double lambda)
+double _pdCZCalcSinPhiOverLambda(double d, double nextd, double d0, double lambda)
 {
   double R, nextR;
 
-  R = _pdCZCalcHypotenuseR(dist, dist0, lambda);
-  nextR = _pdCZCalcHypotenuseR(refdist, dist0, lambda);
-  return ( refdist * R - dist * nextR );
+  R = _pdCZCalcHypotenuseR(d, d0, lambda);
+  nextR = _pdCZCalcHypotenuseR(nextd, d0, lambda);
+  return ( nextd * R - d * nextR );
 }
 
-double _pdCZCalcCosPhi(double dist, double refdist, double dist0, double lambda)
+double _pdCZCalcCosPhi(double d, double nextd, double d0, double lambda)
 {
   double R, nextR;
 
-  R = _pdCZCalcHypotenuseR(dist, dist0, lambda);
-  nextR = _pdCZCalcHypotenuseR(refdist, dist0, lambda);
-  return ( R * nextR + lambda * lambda * dist * refdist );
+  R = _pdCZCalcHypotenuseR(d, d0, lambda);
+  nextR = _pdCZCalcHypotenuseR(nextd, d0, lambda);
+  return ( R * nextR + lambda * lambda * d * nextd );
 }
 
 double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw)
@@ -140,8 +142,8 @@ double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw)
 
 double pdCZCalcDeltaThetaLambda(pdCZ *cz, double dist, double refdist)
 {
-  return atan2( pdCZLambda(cz) * _pdCZCalcSinPhiOverLambda(dist, refdist, pdCZCanonDist(cz), pdCZLambda(cz)),
-                _pdCZCalcCosPhi(dist, refdist, pdCZCanonDist(cz), pdCZLambda(cz)) );
+  return atan2( pdCZLambda(cz) * _pdCZCalcSinPhiOverLambda(0.5*dist, 0.5*refdist, 0.5*pdCZCanonDist(cz), pdCZLambda(cz)),
+                _pdCZCalcCosPhi(0.5*dist, 0.5*refdist, 0.5*pdCZCanonDist(cz), pdCZLambda(cz)) );
 }
 
 double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta)
@@ -171,6 +173,25 @@ void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd)
   refdw = pdCZCalcDeltaW( cz, refuw, delta_theta );
   zVec2DCreate( nextuwd, refuw->e[pdU] - refdw * sin(delta_theta),
                          refuw->e[pdW] + refdw * cos(delta_theta) );
+}
+
+void pdCZCalcNextUWLambda(pdCZ *cz, double dist, double refdist, zVec2D *nextuwd)
+{
+  double d0, d, nextd;
+  double A0;
+  double sin_psi, cos_psi;
+  double sin_phi_over_lambda;
+  double lambda_d0;
+
+  d0 = 0.5 * pdCZCanonDist(cz);
+  d = 0.5 * dist;
+  nextd = 0.5 * refdist;
+  A0 = _pdCZCalcHypotenuseA( d0, pdCZLambda(cz) );
+  _pdCZCalcPsiSC( nextd, d0, pdCZLambda(cz), &sin_psi, &cos_psi );
+  sin_phi_over_lambda = _pdCZCalcSinPhiOverLambda( d, nextd, d0, pdCZLambda(cz) );
+  lambda_d0 = pdCZLambda(cz) * d0;
+  zVec2DCreate( nextuwd, pdCZDeltaU(cz) - ( sin_psi+lambda_d0*cos_psi)*sin_phi_over_lambda/(A0*A0),
+                         pdCZDeltaW(cz) - (-cos_psi+lambda_d0*sin_psi)*sin_phi_over_lambda/(A0*A0) );
 }
 
 void _pdCZUpdateState(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zLoop3D *sr)

@@ -164,7 +164,7 @@ double _pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta)
   return delta_w;
 }
 
-void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd)
+void pdCZCalcNextUW_old(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd)
 {
   double refdw;
   double delta_theta;
@@ -173,6 +173,23 @@ void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd)
   refdw = pdCZCalcDeltaW( cz, refuw, delta_theta );
   zVec2DCreate( nextuwd, refuw->e[pdU] - refdw * sin(delta_theta),
                          refuw->e[pdW] + refdw * cos(delta_theta) );
+}
+
+void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *lfuw, zVec2D *rfuw, zVec2D *nextuwd)
+{
+  double delta_theta, delta_thetalf, delta_thetarf;
+  double delta_w, delta_wlf, delta_wrf, next_delta_w;
+
+  /* calculate desired COM position */
+  delta_theta = pdCZCalcDeltaTheta( cz, refuw );
+  delta_thetalf = pdCZCalcDeltaTheta( cz, lfuw );
+  delta_thetarf = pdCZCalcDeltaTheta( cz, rfuw );
+  delta_w = pdCZCalcDeltaW( cz, refuw, delta_theta );
+  delta_wlf = pdCZCalcDeltaW( cz, lfuw, delta_thetalf );
+  delta_wrf = pdCZCalcDeltaW( cz, rfuw, delta_thetarf );
+  next_delta_w = delta_w - 0.5 * ( delta_wlf + delta_wrf );
+  zVec2DCreate( nextuwd, refuw->e[pdU] - next_delta_w * sin(delta_theta),
+                         refuw->e[pdW] + next_delta_w * cos(delta_theta) );
 }
 
 void pdCZCalcNextUWLambda(pdCZ *cz, double dist, double refdist, zVec2D *nextuwd)
@@ -319,20 +336,20 @@ void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad)
   zVec2DCreate( &refxy, pdCZRefCOMX(cz), pdCZRefCOMY(cz) );
   pdCZHrzXformXYtoUW( pdCZHrzPtr(cz), &refxy, &refuw );
   delta_theta = pdCZCalcDeltaTheta( cz, &refuw );
-  pdCZCalcNextUW( cz, &refuw, &nextuwd );
+  pdCZCalcNextUW_old( cz, &refuw, &nextuwd );
   pdCZHrzXformUWtoXY( pdCZHrzPtr(cz), &nextuwd, &nextxyd );
   zVec3DCreate( comd, nextxyd.c.x, nextxyd.c.y, comd->c.z );
   *thetad = pdCZTheta(cz) + delta_theta;
 }
 
-void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad)
+void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, double refdist, zVec3D *comd, double *thetad)
 {
   zVec2D refxy, refuw;
   zVec2D lfxy, lfuw;
   zVec2D rfxy, rfuw;
   zVec2D nextxyd, nextuwd;
-  double delta_thetalf, delta_thetarf, delta_theta;
-  double delta_wlf, delta_wrf, delta_w, next_delta_w;
+  double delta_theta;
+  double dist;
 
   /* world frame -> moving frame */
   zVec2DCreate( &refxy, pdCZRefCOMX(cz), pdCZRefCOMY(cz) );
@@ -342,15 +359,14 @@ void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, dou
   zVec2DCreate( &rfxy, rfpos->c.x, rfpos->c.y );
   pdCZHrzXformXYtoUW( pdCZHrzPtr(cz), &rfxy, &rfuw );
   /* calculate desired COM position */
-  delta_theta = pdCZCalcDeltaTheta( cz, &refuw );
-  delta_thetalf = pdCZCalcDeltaTheta( cz, &lfuw );
-  delta_thetarf = pdCZCalcDeltaTheta( cz, &rfuw );
-  delta_w = pdCZCalcDeltaW( cz, &refuw, delta_theta );
-  delta_wlf = pdCZCalcDeltaW( cz, &lfuw, delta_thetalf );
-  delta_wrf = pdCZCalcDeltaW( cz, &rfuw, delta_thetarf );
-  next_delta_w = delta_w - 0.5 * ( delta_wlf + delta_wrf );
-  zVec2DCreate( &nextuwd, refuw.e[pdU] - next_delta_w * sin(delta_theta),
-                          refuw.e[pdW] + next_delta_w * cos(delta_theta) );
+  if( zIsTiny( pdCZLambda(cz) ) ){
+    delta_theta = pdCZCalcDeltaTheta( cz, &refuw );
+    pdCZCalcNextUW( cz, &refuw, &lfuw, &rfuw, &nextuwd );
+  } else {
+    dist = zVec2DDist( &lfuw, &rfuw );
+    delta_theta = pdCZCalcDeltaThetaLambda( cz, dist, refdist );
+    pdCZCalcNextUWLambda( cz, dist, refdist, &nextuwd );
+  }
   /* moving frame -> world frame */
   pdCZHrzXformUWtoXY( pdCZHrzPtr(cz), &nextuwd, &nextxyd );
   zVec3DCreate( comd, nextxyd.c.x, nextxyd.c.y, comd->c.z );

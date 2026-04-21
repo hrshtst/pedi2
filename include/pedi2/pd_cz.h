@@ -211,13 +211,14 @@ __PEDI2_EXPORT void pdCZDestroy(pdCZ *cz);
 __PEDI2_EXPORT double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw);
 __PEDI2_EXPORT double pdCZCalcDeltaThetaLambda(pdCZ *cz, double dist, double refdist);
 __PEDI2_EXPORT double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta);
-__PEDI2_EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd);
+__PEDI2_EXPORT void pdCZCalcNextUW_old(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd);
+__PEDI2_EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *lfuw, zVec2D *rfuw, zVec2D *nextuwd);
 __PEDI2_EXPORT void pdCZCalcNextUWLambda(pdCZ *cz, double dist, double refdist, zVec2D *nextuwd);
 
 /* update method */
 __PEDI2_EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zLoop3D *sr);
 __PEDI2_EXPORT void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad);
-__PEDI2_EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
+__PEDI2_EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, double refdist, zVec3D *comd, double *thetad);
 
 /* output method */
 __PEDI2_EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);

@@ -588,7 +588,7 @@ TEST_F(pdCZTest, CalcDeltaW_KappaIsNotZero)
   EXPECT_NEAR( expected, delta_w, 1e-12 );
 }
 
-TEST_F(pdCZTest, CalcNextUW_KappaIsZero)
+TEST_F(pdCZTest, CalcNextUW_old_KappaIsZero)
 {
   zVec2D refuw, nextuwd;
 
@@ -596,12 +596,12 @@ TEST_F(pdCZTest, CalcNextUW_KappaIsZero)
   pdCZSetDeltaW( &cz, 2*sqrt(3) );
   zVec2DCreate( &refuw, 2, 1 );
   zVec2DZero( &nextuwd );
-  pdCZCalcNextUW( &cz, &refuw, &nextuwd );
+  pdCZCalcNextUW_old( &cz, &refuw, &nextuwd );
   EXPECT_NEAR( 2.0, nextuwd.e[pdU], 1e-12 );
   EXPECT_NEAR( 2*sqrt(3), nextuwd.e[pdW], 1e-12 );
 }
 
-TEST_F(pdCZTest, CalcNextUW_KappaIsNotZero)
+TEST_F(pdCZTest, CalcNextUW_old_KappaIsNotZero)
 {
   zVec2D refuw, nextuwd;
 
@@ -609,7 +609,7 @@ TEST_F(pdCZTest, CalcNextUW_KappaIsNotZero)
   pdCZSetDeltaW( &cz, 2*sqrt(3) );
   zVec2DCreate( &refuw, 2, 1 );
   zVec2DZero( &nextuwd );
-  pdCZCalcNextUW( &cz, &refuw,  &nextuwd );
+  pdCZCalcNextUW_old( &cz, &refuw,  &nextuwd );
   EXPECT_NEAR( 0.5, nextuwd.e[pdU], 1e-12 );
   EXPECT_NEAR( 1.5*sqrt(3)+1, nextuwd.e[pdW], 1e-12 );
 }

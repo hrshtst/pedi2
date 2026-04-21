@@ -81,10 +81,67 @@ void pdCZDestroy(pdCZ *c)
   pdCZSetErrCompBZ( c, 0 );
 }
 
+static double _pdCZCalcHypotenuseA(double dist, double lambda);
+static double _pdCZCalcHypotenuseR(double dist, double dist0, double lambda);
+static void _pdCZCalcPsiSC(double dist, double dist0, double lambda, double *s, double *c);
+static double _pdCZCalcSinPhiOverLambda(double dist, double refdist, double dist0, double lambda);
+static double _pdCZCalcCosPhi(double dist, double refdist, double dist0, double lambda);
+
+double _pdCZCalcHypotenuseA(double dist, double lambda)
+{
+  return 1.0 + lambda * lambda * dist * dist;
+}
+
+double _pdCZCalcHypotenuseR(double dist, double dist0, double lambda)
+{
+  double A, A0;
+
+  A = _pdCZCalcHypotenuseA(dist, lambda);
+  A0 = _pdCZCalcHypotenuseA(dist0, lambda);
+  if( A - A0 > 1.0 ){
+    ZRUNWARN( "referential distance cannot exceed square root of (d0^2 + 1/lambda^2)" );
+    return 0.0;
+  }
+  return sqrt( A0 - A + 1.0 );
+}
+
+void _pdCZCalcPsiSC(double dist, double dist0, double lambda, double *s, double *c)
+{
+  double R;
+
+  R = _pdCZCalcHypotenuseR(dist, dist0, lambda);
+  *s = lambda * ( dist - dist0 * R );
+  *c = ( lambda * lambda * dist * dist0 + R );
+}
+
+double _pdCZCalcSinPhiOverLambda(double dist, double refdist, double dist0, double lambda)
+{
+  double R, nextR;
+
+  R = _pdCZCalcHypotenuseR(dist, dist0, lambda);
+  nextR = _pdCZCalcHypotenuseR(refdist, dist0, lambda);
+  return ( refdist * R - dist * nextR );
+}
+
+double _pdCZCalcCosPhi(double dist, double refdist, double dist0, double lambda)
+{
+  double R, nextR;
+
+  R = _pdCZCalcHypotenuseR(dist, dist0, lambda);
+  nextR = _pdCZCalcHypotenuseR(refdist, dist0, lambda);
+  return ( R * nextR + lambda * lambda * dist * refdist );
+}
+
 double pdCZCalcDeltaTheta(pdCZ *cz, zVec2D *refuw)
 {
   return atan2( pdCZKappa(cz)*refuw->e[pdU],
                 1.0+pdCZKappa(cz)*(pdCZDeltaW(cz)-refuw->e[pdW]) );
+}
+
+double pdCZCalcDeltaThetaLambda(pdCZ *cz, double dist, double refdist)
+{
+  return atan2( pdCZLambda(cz) * _pdCZCalcSinPhiOverLambda(dist, refdist, pdCZCanonDist(cz), pdCZLambda(cz)),
+                _pdCZCalcCosPhi(dist, refdist, pdCZCanonDist(cz), pdCZLambda(cz)) );
 }
 
 double pdCZCalcDeltaW(pdCZ *cz, zVec2D *refuw, double delta_theta)

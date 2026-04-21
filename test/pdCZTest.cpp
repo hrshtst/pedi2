@@ -516,6 +516,40 @@ TEST_F(pdCZTest, CalcDeltaTheta_KappaIsNotZero)
   EXPECT_NEAR( zPI/6.0, pdCZCalcDeltaTheta( &cz, &refuw ), 1e-12 );
 }
 
+TEST_F(pdCZTest, CalcDeltaThetaLambda_LambdaIsZero)
+{
+  zVec2D delta, regzmp;
+  double refdist;
+
+  pdCZSetKappa( &cz, 0 );
+  pdCZSetLambda( &cz, 0 );
+  pdCZSetCanonDist( &cz, 1 );
+  pdCZSetDist( &cz, sqrt(191) );
+
+  zVec2DCreate( &delta, 0, 2*sqrt(3) );
+  zVec2DCreate( &regzmp, 2, 1 );
+  refdist = sqrt(197);
+  EXPECT_NEAR( 0, pdCZCalcDeltaThetaLambda( &cz, pdCZDist(&cz), refdist ), 1e-12 );
+}
+
+TEST_F(pdCZTest, CalcDeltaThetaLambda_LambdaIsNotZero)
+{
+  zVec2D delta, regzmp;
+  double refdist;
+  double expected;
+
+  pdCZSetKappa( &cz, 0 );
+  pdCZSetLambda( &cz, 0.3 );
+  pdCZSetCanonDist( &cz, 1.0 );
+  pdCZSetDist( &cz, sqrt(5) );
+  refdist = 3;
+
+  zVec2DCreate( &delta, 0, 2*sqrt(3) );
+  zVec2DCreate( &regzmp, 2, 1 );
+  expected = atan2(72.0-6.0*sqrt(35), 16.0*sqrt(7)+27.0*sqrt(5));
+  EXPECT_NEAR( expected, pdCZCalcDeltaThetaLambda( &cz, pdCZDist(&cz), refdist ), 1e-12 );
+}
+
 static double pdCZCalcDeltaW_expected(pdCZ *cz, zVec2D *refuw, double delta_theta)
 {
   double delta_w;

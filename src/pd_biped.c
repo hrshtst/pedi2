@@ -313,7 +313,7 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
   zVec3D pd;
   double s, c, dx, dy;
 
-  pdCZSetRho( pdBipedCZPtr(biped), biped->cmd->rho );
+  pdCZSetRho( pdBipedCZPtr( biped ), biped->cmd->rho );
   pdCZSetQ2U( pdBipedCZPtr( biped ), biped->cmd->qu2 );
   pdCZSetRefVelU( pdBipedCZPtr( biped ), biped->cmd->vud );
   pdCZSetRefVelW( pdBipedCZPtr( biped ), biped->cmd->vwd );
@@ -329,14 +329,15 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
   } else if( biped->mode.stepping ){
     pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
   }
+  if( !biped->mode.crabbing )
+    pdCZSetLambda( pdBipedCZPtr( biped ), 0.0 );
 
-  if( biped->mode.sideways ){
-    _pdBipedUpdateRefDist( biped, state );
-    pdCZSetDist( pdBipedCZPtr( biped ), pdBipedRefDist( biped ) );
-  }
-  pdCZAutoUpdateRef( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
+  if( biped->mode.sideways ) _pdBipedUpdateRefDist( biped, state );
+  pdCZAutoUpdateRef( pdBipedCZPtr( biped ), &state->lf_pos, &state->rf_pos, pdBipedRefDist( biped ),
+                     &pd, &biped->cmd->thetad );
   biped->cmd->xd = pd.e[zX];
   biped->cmd->yd = pd.e[zY];
+  if( biped->mode.sideways ) pdCZSetDist( pdBipedCZPtr( biped ), pdBipedRefDist( biped ) );
 
   if( biped->mode.warping ){
     dx = 0.1 * ( biped->cmd->xdd - biped->cmd->xd );
@@ -366,7 +367,6 @@ void pdBipedUpdate(pdBiped *biped, pdState *state)
 {
   _pdBipedUpdateCommand( biped );
   _pdBipedUpdateCZ( biped, state );
-  /* TODO: Update ref_dist here */
   _pdBipedUpdateFoot( biped, state );
   _pdBipedUpdateRef( biped, state );
   pdModeUpdate( &biped->mode, biped->cmd, state );

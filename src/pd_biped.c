@@ -258,7 +258,7 @@ double _pdBipedCalcDesFootDistFollow(pdBiped *biped, pdState *state)
 
 double _pdBipedCalcDesFootDistFollowToBrake(pdBiped *biped, pdState *state)
 {
-  return pdStateFootDist( state );
+  return pdStateFootHorizDist( state );
 }
 
 double _pdBipedCalcDesFootDistBrake(pdBiped *biped, pdState *state)
@@ -269,13 +269,13 @@ double _pdBipedCalcDesFootDistBrake(pdBiped *biped, pdState *state)
     phase = pdFootPhase( pdBipedKFPtr( biped ) );
   else
     phase = 0;
-  foot_dist = pdStateFootDist( state );
+  foot_dist = pdStateFootHorizDist( state );
   return foot_dist + phase * ( biped->cmd->dist - foot_dist );
 }
 
 double _pdBipedCalcDesFootDistBrakeToFollow(pdBiped *biped, pdState *state)
 {
-  return pdStateFootDist( state );
+  return pdStateFootHorizDist( state );
 }
 
 void _pdBipedUpdateRefDist(pdBiped *biped, pdState *state)

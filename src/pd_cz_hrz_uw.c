@@ -7,6 +7,7 @@ void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt)
   hrz->_vrt = vrt;
   pdCZHrzUWSetKappa( hrz, 0 );
   pdCZHrzUWSetLambda( hrz, 0 );
+  pdCZHrzUWSetCanonDist( hrz, 0 );
   zListInit( pdCZHrzUWSR(hrz) );
   pdCZHrzUWSRVert(hrz)->data.array = NULL;
   hrz->_vert_num = 0;
@@ -21,6 +22,7 @@ void pdCZHrzUWDestroy(pdCZHrzUW *hrz)
   hrz->_vrt = NULL;
   pdCZHrzUWSetKappa( hrz, 0 );
   pdCZHrzUWSetLambda( hrz, 0 );
+  pdCZHrzUWSetCanonDist( hrz, 0 );
   zLoop3DDestroy( pdCZHrzUWSR(hrz) );
   if( pdCZHrzUWSRVert(hrz)->data.array )
     zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );

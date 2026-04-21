@@ -25,7 +25,7 @@ class pdCZHrzUWTest : public testing::Test {
     pdCZHrzUWSetDist( &uw, 10 );
     pdCZHrzUWSetKappa( &uw, 11 );
     pdCZHrzUWSetLambda( &uw, 12 );
-    pdCZHrzUWSetLambda( &uw, 13 );
+    pdCZHrzUWSetCanonDist( &uw, 13 );
     uw._vert_num = 14;
     uw._vrt = NULL;
     pdCZHrzUWZMPU( &uw ) = 15;

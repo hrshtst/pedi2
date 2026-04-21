@@ -105,6 +105,15 @@ TEST_F(pdFootUWTest, ReferLambda)
   EXPECT_EQ( 0.2, pdFootUWLambda( &lf ) );
 }
 
+TEST_F(pdFootUWTest, ReferCanonDist)
+{
+  EXPECT_EQ( 0, pdFootUWCanonDist( &lf ) );
+  pdCZHrzUWSetCanonDist( &czuw, 1 );
+  EXPECT_EQ( 1, pdFootUWCanonDist( &lf ) );
+  pdCZHrzUWSetCanonDist( &czuw, 0.2 );
+  EXPECT_EQ( 0.2, pdFootUWCanonDist( &lf ) );
+}
+
 TEST_F(pdFootUWTest, ReferDist)
 {
   EXPECT_EQ( 0, pdFootUWDist( &lf ) );

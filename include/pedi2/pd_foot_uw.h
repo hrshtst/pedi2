@@ -20,18 +20,19 @@ __PEDI2_EXPORT void pdFootUWInit(pdFootUW *fuw, pdCZHrzUW *czuw);
 __PEDI2_EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 
 /* methods to get parameters */
-#define pdFootUWCZPtr(f)   (f)->_czuw
-#define pdFootUWSign(f)    (f)->_sign
-#define pdFootUWPhi(f)     (f)->phi
-#define pdFootUWRegZMP(f)  ( &(f)->regzmp )
-#define pdFootUWRegZMPU(f) pdFootUWRegZMP(f)->e[pdU]
-#define pdFootUWRegZMPW(f) pdFootUWRegZMP(f)->e[pdW]
-#define pdFootUWRefPos(f)  ( &(f)->refpos )
-#define pdFootUWRefPosU(f) pdFootUWRefPos(f)->e[pdU]
-#define pdFootUWRefPosW(f) pdFootUWRefPos(f)->e[pdW]
-#define pdFootUWKappa(f)   pdCZHrzUWKappa( pdFootUWCZPtr(f) )
-#define pdFootUWLambda(f)  pdCZHrzUWLambda( pdFootUWCZPtr(f) )
-#define pdFootUWDist(f)    pdCZHrzUWDist( pdFootUWCZPtr(f) )
+#define pdFootUWCZPtr(f)      (f)->_czuw
+#define pdFootUWSign(f)       (f)->_sign
+#define pdFootUWPhi(f)        (f)->phi
+#define pdFootUWRegZMP(f)     ( &(f)->regzmp )
+#define pdFootUWRegZMPU(f)    pdFootUWRegZMP(f)->e[pdU]
+#define pdFootUWRegZMPW(f)    pdFootUWRegZMP(f)->e[pdW]
+#define pdFootUWRefPos(f)     ( &(f)->refpos )
+#define pdFootUWRefPosU(f)    pdFootUWRefPos(f)->e[pdU]
+#define pdFootUWRefPosW(f)    pdFootUWRefPos(f)->e[pdW]
+#define pdFootUWKappa(f)      pdCZHrzUWKappa( pdFootUWCZPtr(f) )
+#define pdFootUWLambda(f)     pdCZHrzUWLambda( pdFootUWCZPtr(f) )
+#define pdFootUWCanonDist(f)  pdCZHrzUWCanonDist( pdFootUWCZPtr(f) )
+#define pdFootUWDist(f)       pdCZHrzUWDist( pdFootUWCZPtr(f) )
 
 /* calculation method */
 #define pdFootUWCalcRegZMP(f,d,v,z) pdCZHrzUWCalcRegZMP( pdFootUWCZPtr(f), d, v, z )

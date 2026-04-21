@@ -136,46 +136,68 @@ TEST_F(pdFootUWTest, CalcRegZMP)
 TEST_F(pdFootUWTest, CalcPhi_KappaIsZero)
 {
   zVec2D delta, regzmp;
-  double refdist;
 
   pdCZHrzUWSetKappa( &czuw, 0 );
 
   zVec2DCreate( &delta, 0, 2*sqrt(3) );
   zVec2DCreate( &regzmp, 2, 1 );
-  refdist = 1;
-  EXPECT_NEAR( 0, pdFootUWCalcPhi( &lf, &delta, &regzmp, refdist ), 1e-12 );
+  EXPECT_NEAR( 0, pdFootUWCalcPhi( &lf, &delta, &regzmp ), 1e-12 );
 }
 
 TEST_F(pdFootUWTest, CalcPhi_KappaIsNotZero)
 {
   zVec2D delta, regzmp;
-  double refdist;
 
   pdCZHrzUWSetKappa( &czuw, 1 );
 
   zVec2DCreate( &delta, 0, 2*sqrt(3) );
   zVec2DCreate( &regzmp, 2, 1 );
-  refdist = 1;
-  EXPECT_NEAR( zPI/6.0, pdFootUWCalcPhi( &lf, &delta, &regzmp, refdist ), 1e-12 );
+  EXPECT_NEAR( zPI/6.0, pdFootUWCalcPhi( &lf, &delta, &regzmp ), 1e-12 );
+}
+
+TEST_F(pdFootUWTest, CalcPhiLambda_LambdaIsZero)
+{
+  double refdist;
+
+  pdCZHrzUWSetKappa( &czuw, 0 );
+  pdCZHrzUWSetLambda( &czuw, 0 );
+  pdCZHrzUWSetCanonDist( &czuw, 1 );
+  pdCZHrzUWSetDist( &czuw, sqrt(191) );
+
+  refdist = sqrt(197);
+  EXPECT_NEAR( 0, pdFootUWCalcPhiLambda( &lf, pdCZHrzUWDist(&czuw), refdist ), 1e-12 );
+}
+
+TEST_F(pdFootUWTest, CalcPhiLambda_LambdaIsNotZero)
+{
+  double refdist;
+  double expected;
+
+  pdCZHrzUWSetKappa( &czuw, 0 );
+  pdCZHrzUWSetLambda( &czuw, 0.3 );
+  pdCZHrzUWSetCanonDist( &czuw, 2.0 );
+  pdCZHrzUWSetDist( &czuw, 2*sqrt(5) );
+  refdist = 2*3;
+
+  expected = atan2(72.0-6.0*sqrt(35), 16.0*sqrt(7)+27.0*sqrt(5));
+  EXPECT_NEAR( expected, pdFootUWCalcPhiLambda( &lf, pdCZHrzUWDist(&czuw), refdist ), 1e-12 );
 }
 
 TEST_F(pdFootUWTest, CalcRefPos_KappaIsZero)
 {
   zVec2D delta, regzmp, refpos;
-  double refdist;
 
   pdCZHrzUWSetKappa( &czuw, 0 );
   pdCZHrzUWSetDist( &czuw, 1 );
 
   zVec2DCreate( &delta, 0, 2*sqrt(3) );
   zVec2DCreate( &regzmp, 2, 1 );
-  refdist= 1;
   // left foot
-  pdFootUWCalcRefPos( &lf, &delta, &regzmp, refdist, &refpos );
+  pdFootUWCalcRefPos( &lf, &delta, &regzmp, &refpos );
   EXPECT_NEAR( 2.0,       refpos.e[pdU], 1e-12 );
   EXPECT_NEAR( 2*sqrt(3)+0.5, refpos.e[pdW], 1e-12 );
   // right foot
-  pdFootUWCalcRefPos( &rf, &delta, &regzmp, refdist, &refpos );
+  pdFootUWCalcRefPos( &rf, &delta, &regzmp, &refpos );
   EXPECT_NEAR( 2.0, refpos.e[pdU], 1e-12 );
   EXPECT_NEAR( 1.0, refpos.e[pdW], 1e-12 );
 }
@@ -183,7 +205,6 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsZero)
 TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
 {
   zVec2D delta, vel, regzmp, refpos;
-  double refdist;
 
   pdCZHrzUWSetKappa( &czuw, 1 );
   pdCZHrzUWSetDist( &czuw, 1 );
@@ -191,13 +212,12 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
   zVec2DCreate( &delta, 0, 2*sqrt(3) );
   zVec2DCreate( &vel, 0, 0 );
   zVec2DCreate( &regzmp, 2, 1 );
-  refdist = 1;
   // left foot
-  pdFootUWCalcRefPos( &lf, &delta, &regzmp, refdist, &refpos );
+  pdFootUWCalcRefPos( &lf, &delta, &regzmp, &refpos );
   EXPECT_NEAR( 0.25,           refpos.e[pdU], 1e-12 );
   EXPECT_NEAR( 1+1.75*sqrt(3), refpos.e[pdW], 1e-12 );
   // right foot
-  pdFootUWCalcRefPos( &rf, &delta, &regzmp, refdist, &refpos );
+  pdFootUWCalcRefPos( &rf, &delta, &regzmp, &refpos );
   EXPECT_NEAR( 2.0, refpos.e[pdU], 1e-12 );
   EXPECT_NEAR( 1.0, refpos.e[pdW], 1e-12 );
 }
@@ -205,21 +225,19 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
 TEST_F(pdFootUWTest, Update)
 {
   zVec2D delta, vel;
-  double refdist;
 
   pdCZHrzUWSetKappa( &czuw, 1 );
   pdCZHrzUWSetDist( &czuw, 1 );
   zVec2DCreate( &delta, 0, 2*sqrt(3) );
   zVec2DCreate( &vel, 0, 0 );
-  refdist = 1;
   MOCK_EXPECT_RETURN( pdCZHrzUCalcRegZMP, 2 );
   MOCK_EXPECT_RETURN( pdCZHrzWCalcRegZMP, 1 );
   // left foot
-  pdFootUWUpdate( &lf, &delta, &vel, refdist );
+  pdFootUWUpdate( &lf, &delta, &vel );
   EXPECT_NEAR( 0.25,           pdFootUWRefPosU(&lf), 1e-12 );
   EXPECT_NEAR( 1+1.75*sqrt(3), pdFootUWRefPosW(&lf), 1e-12 );
   // right foot
-  pdFootUWUpdate( &rf, &delta, &vel, refdist );
+  pdFootUWUpdate( &rf, &delta, &vel );
   EXPECT_NEAR( 2.0, pdFootUWRefPosU(&rf), 1e-12 );
   EXPECT_NEAR( 1.0, pdFootUWRefPosW(&rf), 1e-12 );
 }

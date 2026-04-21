@@ -210,8 +210,7 @@ void _pdBipedUpdateFoot(pdBiped *biped, pdState *state)
                 &state->lf_att,
                 &state->rf_att,
                 &state->sr_lf,
-                &state->sr_rf,
-                pdBipedRefDist(biped) );
+                &state->sr_rf );
 }
 
 void _pdBipedUpdateRef(pdBiped *biped, pdState *state)

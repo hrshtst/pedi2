@@ -41,10 +41,11 @@ __PEDI2_EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 __PEDI2_EXPORT double pdFootUWCalcPhi(pdFootUW *fuw, zVec2D *delta, zVec2D *regzmp);
 __PEDI2_EXPORT double pdFootUWCalcPhiLambda(pdFootUW *fuw, double dist, double refdist);
 __PEDI2_EXPORT void pdFootUWCalcRefPos(pdFootUW *kf, zVec2D *delta, zVec2D *regzmp, zVec2D *ref_kf_pos);
+__PEDI2_EXPORT void pdFootUWCalcRefPosLambda(pdFootUW *kf, zVec2D *delta, zVec2D *regzmp, double refdist, zVec2D *pf_pos, zVec2D *ref_kf_pos);
 __PEDI2_EXPORT void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos);
 
 /* update method */
-__PEDI2_EXPORT void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel);
+__PEDI2_EXPORT void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel, double refdist, zVec2D *pf_pos);
 
 /* output method */
 __PEDI2_EXPORT void pdFootUWFWrite(FILE *fp, pdFootUW *fuw);

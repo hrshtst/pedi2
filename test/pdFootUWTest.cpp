@@ -225,6 +225,8 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
 TEST_F(pdFootUWTest, Update)
 {
   zVec2D delta, vel;
+  zVec2D pf_pos;
+  double refdist;
 
   pdCZHrzUWSetKappa( &czuw, 1 );
   pdCZHrzUWSetDist( &czuw, 1 );
@@ -232,12 +234,14 @@ TEST_F(pdFootUWTest, Update)
   zVec2DCreate( &vel, 0, 0 );
   MOCK_EXPECT_RETURN( pdCZHrzUCalcRegZMP, 2 );
   MOCK_EXPECT_RETURN( pdCZHrzWCalcRegZMP, 1 );
+  zVec2DCreate( &pf_pos, 0, -1 );
+  refdist = 2;
   // left foot
-  pdFootUWUpdate( &lf, &delta, &vel );
+  pdFootUWUpdate( &lf, &delta, &vel, refdist, &pf_pos );
   EXPECT_NEAR( 0.25,           pdFootUWRefPosU(&lf), 1e-12 );
   EXPECT_NEAR( 1+1.75*sqrt(3), pdFootUWRefPosW(&lf), 1e-12 );
   // right foot
-  pdFootUWUpdate( &rf, &delta, &vel );
+  pdFootUWUpdate( &rf, &delta, &vel, refdist, &pf_pos );
   EXPECT_NEAR( 2.0, pdFootUWRefPosU(&rf), 1e-12 );
   EXPECT_NEAR( 1.0, pdFootUWRefPosW(&rf), 1e-12 );
 }

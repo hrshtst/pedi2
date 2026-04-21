@@ -124,6 +124,61 @@ void pdFootUWCalcRefPos(pdFootUW *kf, zVec2D *delta, zVec2D *regzmp, zVec2D *ref
     dr = 0;
   zVec2DCat( regzmp, dr, &e, ref_kf_pos );
 }
+
+void _pdFootUWCalcNextUWLambda(pdFootUW *fuw, zVec2D *delta, double dist, double refdist, zVec2D *nextuwd)
+{
+  double d0, d, nextd;
+  double A0;
+  double sin_psi, cos_psi;
+  double sin_phi_over_lambda;
+  double lambda_d0;
+
+  d0 = 0.5 * pdFootUWCanonDist(fuw);
+  d = 0.5 * dist;
+  nextd = 0.5 * refdist;
+  A0 = _pdFootUWCalcHypotenuseA( d0, pdFootUWLambda(fuw) );
+  _pdFootUWCalcPsiSC( nextd, d0, pdFootUWLambda(fuw), &sin_psi, &cos_psi );
+  sin_phi_over_lambda = _pdFootUWCalcSinPhiOverLambda( d, nextd, d0, pdFootUWLambda(fuw) );
+  lambda_d0 = pdFootUWLambda(fuw) * d0;
+  zVec2DCreate( nextuwd, delta->e[pdU] - ( sin_psi+lambda_d0*cos_psi)*sin_phi_over_lambda/(A0*A0),
+                         delta->e[pdW] - (-cos_psi+lambda_d0*sin_psi)*sin_phi_over_lambda/(A0*A0) );
+}
+
+void pdFootUWCalcRefPosLambda(pdFootUW *kf, zVec2D *delta, zVec2D *regzmp, double refdist, zVec2D *pf_pos, zVec2D *ref_kf_pos)
+{
+  double stabilizable_refdist;
+  zVec2D pk, next_uwd, next_pk, ps;
+  double pk_norm, next_pk_norm, ps_norm;
+  double cos_phi, cos_phi1, cos_phi2;
+  zVec2D e, stabilizable_next_pk;
+
+  /* Calculate three vectors based on the pivot foot for comparison */
+  _pdFootUWCalcNextUWLambda( kf, delta, pdFootUWDist( kf ), refdist, &next_uwd );
+  zVec2DSub( delta, pf_pos, &pk );          /* current kick foot position */
+  zVec2DSub( &next_uwd, pf_pos, &next_pk ); /* desired kick foot position */
+  zVec2DSub( regzmp, pf_pos, &ps );         /* strong-stabilizable point */
+
+  /* calculate stabilizable referential distance between feet */
+  pk_norm = zVec2DNorm( &pk );
+  next_pk_norm = zVec2DNorm( &next_pk );
+  ps_norm = zVec2DNorm( &ps );
+  stabilizable_refdist = zMax( 2.0 * zMax( pk_norm, next_pk_norm ), ps_norm );
+
+  /* calculate stabilizable differential angle of kick foot */
+  cos_phi = zVec2DInnerProd( &pk, &next_pk ) / ( pk_norm * next_pk_norm );
+  cos_phi1 = zVec2DInnerProd( &ps, &pk ) / ( ps_norm * pk_norm );
+  cos_phi2 = zVec2DInnerProd( &ps, &next_pk ) / ( ps_norm * next_pk_norm );
+  if( cos_phi <= cos_phi1 && cos_phi <= cos_phi2 ){
+    /* desired kick foot position can be stabilizable */
+    zVec2DNormalize( &next_pk, &e );
+  } else {
+    /* strong-stabilizable point should be used for kick foot position */
+    zVec2DNormalize( &ps, &e );
+  }
+  zVec2DMul( &e, stabilizable_refdist, &stabilizable_next_pk );
+
+  /* calculate kick foot position with respect to moving frame */
+  zVec2DAdd( pf_pos, &stabilizable_next_pk, ref_kf_pos );
 }
 
 void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos)
@@ -132,11 +187,16 @@ void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos)
   ref_pos->e[pdW] = 0.5 * ( lf_pos->e[pdW] + rf_pos->e[pdW] );
 }
 
-void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel)
+void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel, double refdist, zVec2D *pf_pos)
 {
   pdFootUWCalcRegZMP( kf, delta, vel, pdFootUWRegZMP( kf ) );
-  pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, pdFootUWRegZMP( kf ) );
-  pdFootUWCalcRefPos( kf, delta, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ) );
+  if( zIsTiny( pdFootUWLambda(kf) ) ){
+    pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, pdFootUWRegZMP( kf ) );
+    pdFootUWCalcRefPos( kf, delta, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ) );
+  } else {
+    pdFootUWPhi( kf ) = pdFootUWCalcPhiLambda( kf, pdFootUWDist(kf), refdist );
+    pdFootUWCalcRefPosLambda( kf, delta, pdFootUWRegZMP( kf ), refdist, pf_pos, pdFootUWRefPos( kf ) );
+  }
 }
 
 void pdFootUWFWrite(FILE *fp, pdFootUW *f)

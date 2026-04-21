@@ -5,6 +5,9 @@ class pdStateTest : public testing::Test {
  protected:
   virtual void SetUp() {
     pdStateInit( &state );
+    state.lf_pos.c.x = state.rf_pos.c.x = 0.0;
+    state.lf_pos.c.y = 0.05;
+    state.rf_pos.c.y = -0.05;
   };
   virtual void TearDown() {
     pdStateDestroy( &state );
@@ -59,6 +62,7 @@ class pdStateTest : public testing::Test {
 
 TEST_F(pdStateTest, Init)
 {
+  pdStateInit( &state );
   EXPECT_TRUE( zVec3DIsTiny( &state.com_pos ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.com_vel ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.com_acc ) );
@@ -88,6 +92,7 @@ TEST_F(pdStateTest, Init)
 
 TEST_F(pdStateTest, Destroy)
 {
+  pdStateDestroy( &state );
   EXPECT_TRUE( zVec3DIsTiny( &state.com_pos ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.com_vel ) );
   EXPECT_TRUE( zVec3DIsTiny( &state.com_acc ) );
@@ -200,4 +205,28 @@ TEST_F(pdStateTest, BFOn)
   EXPECT_TRUE( pdStateBFOff( &state, 0.1 ) );
   EXPECT_TRUE( pdStateBFOn( &state, -0.1 ) );
   EXPECT_FALSE( pdStateBFOff( &state, -0.1 ) );
+}
+
+TEST_F(pdStateTest, FootDist)
+{
+  SupportOnBothFeet();
+  EXPECT_DOUBLE_EQ( 0.1, pdStateFootDist( &state ) );
+
+  SupportOnLeftFoot();
+  EXPECT_LT( 0.1, pdStateFootDist( &state ) );
+
+  SupportOnRightFoot();
+  EXPECT_LT( 0.1, pdStateFootDist( &state ) );
+}
+
+TEST_F(pdStateTest, FootHorizDist)
+{
+  SupportOnBothFeet();
+  EXPECT_DOUBLE_EQ( 0.1, pdStateFootHorizDist( &state ) );
+
+  SupportOnLeftFoot();
+  EXPECT_DOUBLE_EQ( 0.1, pdStateFootHorizDist( &state ) );
+
+  SupportOnRightFoot();
+  EXPECT_DOUBLE_EQ( 0.1, pdStateFootHorizDist( &state ) );
 }

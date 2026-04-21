@@ -49,6 +49,7 @@ __PEDI2_EXPORT bool pdStateFFOn(pdState *state, double vwd);
 __PEDI2_EXPORT bool pdStateBFOn(pdState *state, double vwd);
 #define pdStateBFOff(s,vwd) !pdStateBFOn( s, vwd )
 __PEDI2_EXPORT double pdStateFootDist(pdState *state);
+__PEDI2_EXPORT double pdStateFootHorizDist(pdState *state);
 
 /* output method  */
 __PEDI2_EXPORT void pdStateSRDataFWrite(FILE *fp, pdState *state);

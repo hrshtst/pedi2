@@ -67,6 +67,15 @@ double pdStateFootDist(pdState *state)
   return zVec3DDist( &state->lf_pos, &state->rf_pos );
 }
 
+double pdStateFootHorizDist(pdState *state)
+{
+  zVec3D lf_pos_proj, rf_pos_proj;
+
+  zVec3DCreate( &lf_pos_proj, state->lf_pos.c.x, state->lf_pos.c.y, 0.0 );
+  zVec3DCreate( &rf_pos_proj, state->rf_pos.c.x, state->rf_pos.c.y, 0.0 );
+  return zVec3DDist( &lf_pos_proj, &rf_pos_proj );
+}
+
 static void _pdStateSRDataFWrite(FILE *fp, zLoop3D *sr);
 void _pdStateSRDataFWrite(FILE *fp, zLoop3D *sr)
 {

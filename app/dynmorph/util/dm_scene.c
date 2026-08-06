@@ -46,7 +46,10 @@ void dmSceneResize(dmScene *scene, int x, int y, int w, int h)
   XResizeWindow( zxdisplay, scene->canvas, scene->reg.width, scene->reg.height );
   rkglCameraSetViewport( &scene->cam, 0, 0, scene->reg.width, scene->reg.height );
   wy = wx / rkglCameraViewportAspectRatio(&scene->cam);
-  rkglCameraSetFrustum( &scene->cam, -wx, wx, -wy, wy, 1, 20 );
+  rkglCameraSetViewvolumeXY( &scene->cam, -wx, wx, -wy, wy );
+  rkglCameraSetViewvolumeZ( &scene->cam, 1, 20 );
+  rkglCameraSetFrustum( &scene->cam );
+  rkglCameraPutViewvolume( &scene->cam );
 }
 
 void dmSceneDraw(dmScene *scene, zVec dis, zVec3D *force)

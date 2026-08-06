@@ -299,7 +299,10 @@ void joystickCtrlReshape(void)
   rkglCameraSetViewport( &cam, 0, 0, reg.width, reg.height );
   wx = 0.1;
   wy = wx / rkglCameraViewportAspectRatio( &cam );
-  rkglCameraSetFrustum( &cam, -wx, wx, -wy, wy, 1, 20 );
+  rkglCameraSetViewvolumeXY( &cam, -wx, wx, -wy, wy );
+  rkglCameraSetViewvolumeZ( &cam, 1, 20 );
+  rkglCameraSetFrustum( &cam );
+  rkglCameraPutViewvolume( &cam );
 }
 
 void joystickCtrlDraw(void)

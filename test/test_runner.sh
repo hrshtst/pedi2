@@ -25,3 +25,7 @@ if [ $SUM_RET -gt 0 ]; then
     printf "\033[31m   * %s\n" "$@"
     printf "\033[31m==============================\n"
 fi
+
+# propagate failure to the caller (e.g. make test in CI)
+[ $SUM_RET -gt 0 ] && exit 1
+exit 0

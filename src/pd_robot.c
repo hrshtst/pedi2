@@ -90,7 +90,7 @@ static bool _pdRobotBindLink(pdRobot *robot, const char *linkname, const char *c
 static bool _pdRobotAllocSR(pdRobot *robot){
   rkLink *foot;
   zShape3D s;
-  zShapeListCell *sp;
+  zShape3DListCell *sp;
   int n_vert_lf, n_vert_rf;
 
   /* create a set of vertices of feet */
@@ -475,7 +475,7 @@ bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3
   int i;
   rkLink *foot;
   zShape3D s;
-  zShapeListCell *sp;
+  zShape3DListCell *sp;
   zVec3D v;
   bool result;
 

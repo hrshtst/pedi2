@@ -6,7 +6,7 @@ SRCDIR=$(ROOTDIR)/src
 LIBDIR=$(ROOTDIR)/lib
 INCLUDE=-I$(INCDIR) -I$(PREFIX)/include
 LIBRARY=-L$(LIBDIR)/lib -L$(PREFIX)/lib
-LINK = `roki-config -l` `dzco-config -l`
+LINK = `roki-config -l` `dzco-config -l` `roki-config -lcpp` `dzco-config -lcpp`
 
 TESTDIR=.
 MOCKDIR=$(TESTDIR)/mocks

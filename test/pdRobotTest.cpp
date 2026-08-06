@@ -11,15 +11,6 @@ const double DT = 0.01;
 #define GTEST_TOL 1e-12
 #define GTEST_TOL_LOOSE 1e-03
 
-// These definitions should be removed by using CPP version library
-const zVec3D zVec3D::zvec3Dzero = { { 0, 0, 0 } };
-const zMat3D zMat3D::zmat3Dzero  = { { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } };
-const zMat3D zMat3D::zmat3Dident = { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } };
-const zFrame3D zFrame3D::zframe3Dident = {
-  { { 0, 0, 0 } },
-  { { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } } }
-};
-
 class pdRobotTest : public testing::Test {
  protected:
   virtual void SetUp() {

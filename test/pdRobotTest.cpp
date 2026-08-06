@@ -408,9 +408,9 @@ TEST_F(pdRobotTest, BindFeet_AllocSR)
   pdRobotLoad( &robot, model );
   ASSERT_TRUE( pdRobotIKSolver( &robot ) );
   pdRobotBindFeet( &robot, "left_foot", "right_foot" );
-  EXPECT_EQ( 8, zArraySize( pdRobotSRLFVert(&robot)->data.array ) );
-  EXPECT_EQ( 8, zArraySize( pdRobotSRRFVert(&robot)->data.array ) );
-  EXPECT_EQ( 16, zArraySize( pdRobotSRVert(&robot)->data.array ) );
+  EXPECT_EQ( 8, zVec3DDataCapacity( pdRobotSRLFVert(&robot) ) );
+  EXPECT_EQ( 8, zVec3DDataCapacity( pdRobotSRRFVert(&robot) ) );
+  EXPECT_EQ( 16, zVec3DDataCapacity( pdRobotSRVert(&robot) ) );
 }
 
 TEST_F(pdRobotTest, BindHands)

@@ -81,7 +81,7 @@ int main(void)
   /* init of ODE solver */
   zODE2Assign( &ode, Regular, NULL, NULL, NULL, NULL );
   zODE2AssignRegular( &ode, RK4 );
-  zODE2Init( &ode, 2, 0, ddp );
+  zODE2Create( &ode, 2, 0, ddp );
   /* init of state vector */
   p  = zVecCreateList( 2, xy.c.x, xy.c.y );
   dp = zVecCreateList( 2, vxy.c.x, vxy.c.y );

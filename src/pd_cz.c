@@ -28,7 +28,7 @@ void pdCZInit(pdCZ *c, double dt)
   c->_ode.vel = zVecCreateList( 3, pdCZVelX(c), pdCZVelY(c), pdCZVelZ(c) );
   zODE2Assign( &c->_ode.solver, Regular, NULL, NULL, NULL, NULL );
   zODE2AssignRegular( &c->_ode.solver, RK4 );
-  zODE2Init( &c->_ode.solver, 3, 0, _pdCZUpdate );
+  zODE2Create( &c->_ode.solver, 3, 0, _pdCZUpdate );
   pdCZSetErrCompKX( c, 0 );
   pdCZSetErrCompKY( c, 0 );
   pdCZSetErrCompKZ( c, 0 );

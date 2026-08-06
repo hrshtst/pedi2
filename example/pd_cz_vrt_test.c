@@ -36,7 +36,7 @@ int main(void)
   /* init of ODE solver */
   zODE2Assign( &ode, Regular, NULL, NULL, NULL, NULL );
   zODE2AssignRegular( &ode, RK4 );
-  zODE2Init( &ode, 1, 0, ddp );
+  zODE2Create( &ode, 1, 0, ddp );
   /* init of state vector */
   x = zVecCreateList( 1, 0.35 );
   dx = zVecAlloc( 1 );

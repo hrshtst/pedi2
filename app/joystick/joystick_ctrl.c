@@ -160,7 +160,7 @@ int joystickCtrlLoadEnv(void)
 {
   rkglChainAttr attr;
   rkChain chain_env;
-  zMShape3D ms_env;
+  zMultiShape3D ms_env;
   int entry = -1;
 
   rkglChainAttrInit( &attr );
@@ -171,9 +171,9 @@ int joystickCtrlLoadEnv(void)
     rkglChainDraw( &g_env );
     glEndList();
     rkChainDestroy( &chain_env );
-  } else if( zMShape3DReadZTK( &ms_env, opt[OPT_ENVFILE].arg ) ){
-    entry = rkglEntryMShape( &ms_env, attr.disptype, &light );
-    zMShape3DDestroy( &ms_env );
+  } else if( zMultiShape3DReadZTK( &ms_env, opt[OPT_ENVFILE].arg ) ){
+    entry = rkglEntryMultiShape( &ms_env, attr.disptype, &light );
+    zMultiShape3DDestroy( &ms_env );
   } else{
     ZOPENERROR( opt[OPT_ENVFILE].arg );
     exit( 1 );

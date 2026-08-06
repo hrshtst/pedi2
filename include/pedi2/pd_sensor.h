@@ -93,7 +93,7 @@ __PEDI2_EXPORT void pdSensorDefaultFrameUpdate(pdSensor *sensor, zFrame3D *frame
 __PEDI2_EXPORT pdSensor *pdSensorFromZTK(pdSensor *sensor, pdFilterArray *filters, ZTK *ztk);
 __PEDI2_EXPORT void pdSensorFPrintZTK(FILE* fp, pdSensor *sensor);
 
-zArrayClass( pdSensorArray, pdSensor );
+ZEDA_DEF_ARRAY_CLASS( pdSensorArray, pdSensor );
 
 __PEDI2_EXPORT pdSensorArray *pdSensorArrayAlloc(pdSensorArray *arr, int size);
 __PEDI2_EXPORT void pdSensorArrayDestroy(pdSensorArray *arr);

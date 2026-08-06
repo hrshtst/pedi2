@@ -6,7 +6,7 @@
 
 __BEGIN_DECLS
 
-zListClass( pdSensorList, pdSensorListCell, pdSensor* );
+ZEDA_DEF_LIST_CLASS( pdSensorList, pdSensorListCell, pdSensor* );
 
 typedef struct{
   pdFilterArray _farray;

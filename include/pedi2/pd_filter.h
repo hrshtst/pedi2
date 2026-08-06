@@ -55,7 +55,7 @@ __PEDI2_EXPORT void pdFilterDefaultRefresh(pdFilter *filter);
 __PEDI2_EXPORT pdFilter *pdFilterFromZTK(pdFilter *filter, ZTK *ztk);
 __PEDI2_EXPORT void pdFilterFPrintZTK(FILE *fp, pdFilter *filter);
 
-zArrayClass( pdFilterArray, pdFilter );
+ZEDA_DEF_ARRAY_CLASS( pdFilterArray, pdFilter );
 
 #define pdFilterArrayInput(arr,i)  pdFilterInput( zArrayElem(arr,i) )
 #define pdFilterArrayOutput(arr,i) pdFilterOutput( zArrayElem(arr,i) )

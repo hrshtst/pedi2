@@ -99,7 +99,7 @@ __PEDI2_EXPORT void pdJointDefaultDestroy(pdJoint *joint);
 __PEDI2_EXPORT pdJoint *pdJointFromZTK(pdJoint *joint, ZTK *ztk);
 __PEDI2_EXPORT void pdJointFPrintZTK(FILE *fp, pdJoint *joint);
 
-zArrayClass( pdJointArray, pdJoint );
+ZEDA_DEF_ARRAY_CLASS( pdJointArray, pdJoint );
 
 #define pdJointArrayDis(arr,i)         pdJointDis( zArrayElem(arr,i) )
 #define pdJointArrayVel(arr,i)         pdJointVel( zArrayElem(arr,i) )

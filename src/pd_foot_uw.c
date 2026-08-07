@@ -9,6 +9,8 @@ void pdFootUWInit(pdFootUW *fuw, pdCZHrzUW *czuw)
   pdFootUWRefPosU( fuw ) = 0;
   pdFootUWRefPosW( fuw ) = 0;
   pdFootUWSign( fuw ) = 0;
+  pdFootUWLandingFn( fuw ) = NULL;
+  pdFootUWLandingUtil( fuw ) = NULL;
 }
 
 void pdFootUWDestroy(pdFootUW *fuw)
@@ -20,6 +22,8 @@ void pdFootUWDestroy(pdFootUW *fuw)
   pdFootUWRegZMPW( fuw ) = 0;
   pdFootUWRefPosU( fuw ) = 0;
   pdFootUWRefPosW( fuw ) = 0;
+  pdFootUWLandingFn( fuw ) = NULL;
+  pdFootUWLandingUtil( fuw ) = NULL;
 }
 
 #if defined(__GNUC__) && !defined(__clang__)
@@ -70,6 +74,8 @@ void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzm
   if( pdFootUWSign( fuw ) * dr < 0 )
     dr = 0;
   zVec2DCat( regzmp, dr, &e, refpos );
+  if( pdFootUWLandingFn( fuw ) )
+    pdFootUWLandingFn( fuw )( fuw, delta, vel, regzmp, refpos, pdFootUWLandingUtil( fuw ) );
 }
 
 void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos)

@@ -228,13 +228,16 @@ static void _pdFootUWTestShiftOverride(pdFootUW *fuw, zVec2D *delta, zVec2D *vel
   refpos->e[pdW] += 1.0;
 }
 
-static void _pdFootUWTestCapturePointOverride(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp, zVec2D *refpos, void *util)
+static void _pdFootUWTestGuardedCapturePointOverride(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp, zVec2D *refpos, void *util)
 {
-  (void)delta; (void)regzmp; (void)util;
-  zVec2DCreate( refpos, vel->e[pdU] / pdFootUWZeta( fuw ), vel->e[pdW] / pdFootUWZeta( fuw ) );
+  zVec2D cp;
+
+  (void)regzmp; (void)util;
+  zVec2DCreate( &cp, vel->e[pdU] / pdFootUWZeta( fuw ), vel->e[pdW] / pdFootUWZeta( fuw ) );
+  pdFootUWCalcRefPos( fuw, delta, vel, &cp, refpos );
 }
 
-TEST_F(pdFootUWTest, CalcRefPos_Override)
+TEST_F(pdFootUWTest, CalcRefPos_IgnoresOverride)
 {
   zVec2D delta, vel, regzmp, refpos, target;
 
@@ -245,54 +248,12 @@ TEST_F(pdFootUWTest, CalcRefPos_Override)
   zVec2DCreate( &regzmp, 2, 1 );
   zVec2DCreate( &target, -0.3, 0.7 );
 
+  // CalcRefPos itself stays override-free so that overrides can reuse it
   pdFootUWLandingFn( &lf ) = _pdFootUWTestFixedOverride;
   pdFootUWLandingUtil( &lf ) = &target;
   pdFootUWCalcRefPos( &lf, &delta, &vel, &regzmp, &refpos );
-  EXPECT_NEAR( -0.3, refpos.e[pdU], 1e-12 );
-  EXPECT_NEAR( 0.7, refpos.e[pdW], 1e-12 );
-
-  pdFootUWLandingFn( &rf ) = _pdFootUWTestFixedOverride;
-  pdFootUWLandingUtil( &rf ) = &target;
-  pdFootUWCalcRefPos( &rf, &delta, &vel, &regzmp, &refpos );
-  EXPECT_NEAR( -0.3, refpos.e[pdU], 1e-12 );
-  EXPECT_NEAR( 0.7, refpos.e[pdW], 1e-12 );
-  // the regulated ZMP argument is not modified by the override path
-  EXPECT_NEAR( 2.0, regzmp.e[pdU], 1e-12 );
-  EXPECT_NEAR( 1.0, regzmp.e[pdW], 1e-12 );
-}
-
-TEST_F(pdFootUWTest, CalcRefPos_OverrideReceivesDefault)
-{
-  zVec2D delta, vel, regzmp, refpos;
-
-  pdCZHrzUWSetKappa( &czuw, 0 );
-  pdCZHrzUWSetDist( &czuw, 1 );
-  zVec2DCreate( &delta, 0, 2*sqrt(3) );
-  zVec2DCreate( &vel, 0, 0 );
-  zVec2DCreate( &regzmp, 2, 1 );
-
-  // the override runs after the default rule and sees its result
-  pdFootUWLandingFn( &lf ) = _pdFootUWTestShiftOverride;
-  pdFootUWCalcRefPos( &lf, &delta, &vel, &regzmp, &refpos );
-  EXPECT_NEAR( 2.0, refpos.e[pdU], 1e-12 );
-  EXPECT_NEAR( 2*sqrt(3)+0.5+1.0, refpos.e[pdW], 1e-12 );
-}
-
-TEST_F(pdFootUWTest, CalcRefPos_CapturePointOverride)
-{
-  zVec2D delta, vel, regzmp, refpos;
-
-  pdCZVrtZeta( &vrt ) = 6.0;
-  pdCZHrzUWSetKappa( &czuw, 0 );
-  pdCZHrzUWSetDist( &czuw, 1 );
-  zVec2DCreate( &delta, 0, 0 );
-  zVec2DCreate( &vel, 0.6, 1.2 );
-  zVec2DCreate( &regzmp, 2, 1 );
-
-  pdFootUWLandingFn( &lf ) = _pdFootUWTestCapturePointOverride;
-  pdFootUWCalcRefPos( &lf, &delta, &vel, &regzmp, &refpos );
-  EXPECT_NEAR( 0.1, refpos.e[pdU], 1e-12 );
-  EXPECT_NEAR( 0.2, refpos.e[pdW], 1e-12 );
+  EXPECT_NEAR( 2.0,           refpos.e[pdU], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)+0.5, refpos.e[pdW], 1e-12 );
 }
 
 TEST_F(pdFootUWTest, Update_Override)
@@ -314,4 +275,50 @@ TEST_F(pdFootUWTest, Update_Override)
   EXPECT_NEAR( -0.3, pdFootUWRefPosU( &lf ), 1e-12 );
   EXPECT_NEAR( 0.7, pdFootUWRefPosW( &lf ), 1e-12 );
   EXPECT_NEAR( 0.0, pdFootUWPhi( &lf ), 1e-12 );
+  // the regulated ZMP is still published unchanged
+  EXPECT_NEAR( 2.0, pdFootUWRegZMPU( &lf ), 1e-12 );
+  EXPECT_NEAR( 1.0, pdFootUWRegZMPW( &lf ), 1e-12 );
+}
+
+TEST_F(pdFootUWTest, Update_OverrideReceivesDefault)
+{
+  zVec2D delta, vel;
+
+  MOCK_EXPECT_RETURN( pdCZHrzUCalcRegZMP, 2.0 );
+  MOCK_EXPECT_RETURN( pdCZHrzWCalcRegZMP, 1.0 );
+  pdCZHrzUWSetKappa( &czuw, 0 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  zVec2DCreate( &delta, 0, 2*sqrt(3) );
+  zVec2DCreate( &vel, 0, 0 );
+
+  // the override runs after the default rule and sees its result
+  pdFootUWLandingFn( &lf ) = _pdFootUWTestShiftOverride;
+  pdFootUWUpdate( &lf, &delta, &vel );
+  EXPECT_NEAR( 2.0, pdFootUWRefPosU( &lf ), 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)+0.5+1.0, pdFootUWRefPosW( &lf ), 1e-12 );
+}
+
+TEST_F(pdFootUWTest, Update_GuardedCapturePointOverride)
+{
+  zVec2D delta, vel;
+
+  MOCK_EXPECT_RETURN( pdCZHrzUCalcRegZMP, 2.0 );
+  MOCK_EXPECT_RETURN( pdCZHrzWCalcRegZMP, 1.0 );
+  pdCZVrtZeta( &vrt ) = 6.0;
+  pdCZHrzUWSetKappa( &czuw, 0 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  zVec2DCreate( &delta, 0, 0 );
+
+  pdFootUWLandingFn( &lf ) = _pdFootUWTestGuardedCapturePointOverride;
+  // capture point outboard of the nominal station: land on the capture point
+  zVec2DCreate( &vel, 0, 6.0 );
+  pdFootUWUpdate( &lf, &delta, &vel );
+  EXPECT_NEAR( 0.0, pdFootUWRefPosU( &lf ), 1e-12 );
+  EXPECT_NEAR( 1.0, pdFootUWRefPosW( &lf ), 1e-12 );
+  // capture point inboard of the nominal station: the guard keeps the
+  // foot at the station (delta_w + dist/2), so the feet never cross
+  zVec2DCreate( &vel, 0, 1.2 );
+  pdFootUWUpdate( &lf, &delta, &vel );
+  EXPECT_NEAR( 0.0, pdFootUWRefPosU( &lf ), 1e-12 );
+  EXPECT_NEAR( 0.5, pdFootUWRefPosW( &lf ), 1e-12 );
 }

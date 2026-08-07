@@ -74,8 +74,6 @@ void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzm
   if( pdFootUWSign( fuw ) * dr < 0 )
     dr = 0;
   zVec2DCat( regzmp, dr, &e, refpos );
-  if( pdFootUWLandingFn( fuw ) )
-    pdFootUWLandingFn( fuw )( fuw, delta, vel, regzmp, refpos, pdFootUWLandingUtil( fuw ) );
 }
 
 void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos)
@@ -89,6 +87,8 @@ void pdFootUWUpdate(pdFootUW *kf, zVec2D *delta, zVec2D *vel)
   pdFootUWCalcRegZMP( kf, delta, vel, pdFootUWRegZMP( kf ) );
   pdFootUWPhi( kf ) = pdFootUWCalcPhi( kf, delta, vel, pdFootUWRegZMP( kf ) );
   pdFootUWCalcRefPos( kf, delta, vel, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ) );
+  if( pdFootUWLandingFn( kf ) )
+    pdFootUWLandingFn( kf )( kf, delta, vel, pdFootUWRegZMP( kf ), pdFootUWRefPos( kf ), pdFootUWLandingUtil( kf ) );
 }
 
 void pdFootUWFWrite(FILE *fp, pdFootUW *f)

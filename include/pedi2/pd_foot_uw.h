@@ -7,9 +7,14 @@ __BEGIN_DECLS
 
 typedef struct _pdFootUW pdFootUW;
 
-/* landing-target override: called at the end of pdFootUWCalcRefPos with
- * the default target already stored in refpos; it may replace or modify
- * the target, which is expressed in the COM-centered UW frame */
+/* landing-target override: called at the end of pdFootUWUpdate with the
+ * default target already stored in refpos; it may replace or modify the
+ * target, which is expressed in the COM-centered UW frame.  Since the
+ * override runs outside of pdFootUWCalcRefPos, it is free to call that
+ * function with its own anchor point in place of the regulated ZMP to
+ * reuse the default placement rule, including the guard that keeps the
+ * foot outboard of its nominal station (half the canonical foot
+ * distance beside the desired COM) so that the feet never cross */
 typedef void (*pdFootUWLandingOverride)(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzmp, zVec2D *refpos, void *util);
 
 struct _pdFootUW{

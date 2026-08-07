@@ -16,6 +16,7 @@ typedef struct{
   bool braking;
   bool rotating;
   bool warping;
+  bool balancing; /* holding an intentional single-support stance */
 } pdMode;
 
 __PEDI2_EXPORT void pdModeInit(pdMode *mode);

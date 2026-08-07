@@ -27,6 +27,7 @@ typedef struct{
 
 __PEDI2_EXPORT void pdBipedInit(pdBiped *biped, pdCmd *cmd, double dt);
 __PEDI2_EXPORT bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state);
+__PEDI2_EXPORT bool pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, double lift_height);
 __PEDI2_EXPORT void pdBipedDestroy(pdBiped *biped);
 
 /* methods to get parameters */

@@ -2160,3 +2160,64 @@ TEST_F(pdRobotTest, Print)
     "       Enabled?: false\n";
   EXPECT_EQ( expected, msg );
 }
+
+TEST_F(pdRobotTest, BipedSingleSupportInit)
+{
+  char model[] = "model/mighty.ztk";
+  zVec vel;
+
+  pdCmdDefaultInit( &cmd );
+  cmd.zd = 0.26;
+  cmd.dist = 0.084;
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  pdRobotBipedSingleSupportInit( &robot, &biped, &state, PD_FOOT_RIGHT, 0.02 );
+
+  EXPECT_NEAR( 0.0, state.rf_pos.c.z, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.02, state.lf_pos.c.z, GTEST_TOL_LOOSE );
+  // the COM settles above the stance-foot center
+  EXPECT_NEAR( state.rf_pos.c.x, state.com_pos.c.x, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( state.rf_pos.c.y, state.com_pos.c.y, GTEST_TOL_LOOSE );
+  // the support region reduces to the stance-foot hull
+  EXPECT_EQ( 0, zListSize( &state.sr_lf ) );
+  EXPECT_GT( zListSize( &state.sr_rf ), 0 );
+  EXPECT_EQ( zListSize( &state.sr_rf ), zListSize( &state.sr ) );
+  EXPECT_TRUE( biped.mode.balancing );
+  // zero joint velocity after initialization
+  vel = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
+  }
+  zVecFree( vel );
+}
+
+TEST_F(pdRobotTest, BipedResetPoseSingleSupport)
+{
+  char model[] = "model/mighty.ztk";
+  zVec dis;
+
+  pdCmdDefaultInit( &cmd );
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  zVecSetElem( dis, 0, -0.6 );
+  zVecSetElem( dis, 1, -0.8 );
+  pdRobotBipedResetPoseSingleSupport( &robot, &biped, &state, dis, PD_FOOT_RIGHT, 0.02 );
+
+  EXPECT_DOUBLE_EQ( 0.0, state.rf_pos.c.z );
+  EXPECT_DOUBLE_EQ( 0.02, state.lf_pos.c.z );
+  // the desired ZMP starts at the stance-foot center on the ground
+  EXPECT_DOUBLE_EQ( state.rf_pos.c.x, state.deszmp.c.x );
+  EXPECT_DOUBLE_EQ( state.rf_pos.c.y, state.deszmp.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, state.deszmp.c.z );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DNorm( &state.com_vel ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DNorm( &state.com_acc ) );
+  EXPECT_TRUE( biped.mode.balancing );
+  zVecFree( dis );
+}

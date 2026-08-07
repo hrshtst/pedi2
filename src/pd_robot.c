@@ -459,6 +459,45 @@ void pdRobotBipedResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec 
   pdModeInit( &biped->mode );
 }
 
+void pdRobotBipedSingleSupportInit(pdRobot *robot, pdBiped *biped, pdState *state, byte stance, double lift_height)
+{
+  pdRobotUpdateState( robot, state );
+  pdBipedSingleSupportPoseInit( biped, state, stance, lift_height );
+  pdRobotBipedSetRefVec( robot, biped );
+  pdRobotSolveIK( robot, 0 );
+  pdRobotGetJointDisAll( robot, robot->disold );
+  pdRobotUpdateState( robot, state );
+}
+
+void pdRobotBipedResetPoseSingleSupport(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis, byte stance, double lift_height)
+{
+  zVec3D *stance_pos, *swing_pos;
+  double offset;
+
+  pdRobotFK( robot, dis );
+  pdRobotUpdateState( robot, state );
+  zVec3DZero( &state->com_vel );
+  zVec3DZero( &state->com_acc );
+  if( stance == PD_FOOT_LEFT ){
+    stance_pos = &state->lf_pos;
+    swing_pos  = &state->rf_pos;
+  } else {
+    stance_pos = &state->rf_pos;
+    swing_pos  = &state->lf_pos;
+  }
+  stance_pos->c.z = 0;
+  swing_pos->c.z = lift_height;
+  zVec3DCopy( stance_pos, &state->deszmp );
+  state->deszmp.c.z = 0;
+  zVec3DCopy( &state->deszmp, &state->zmp );
+  offset = zPI_2;
+  pdBipedCmd(biped)->thetad = state->torso_att.e[0] - offset;
+  /* initialize the mode before the pose so that the balancing flag set
+   * by the pose initializer survives */
+  pdModeInit( &biped->mode );
+  pdBipedSingleSupportPoseInit( biped, state, stance, lift_height );
+}
+
 void pdRobotBipedSetRefVec(pdRobot *robot, pdBiped *biped)
 {
   pdRobotSetRefCOM( robot, pdBipedRefCOMPos(biped) );

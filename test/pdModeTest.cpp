@@ -25,6 +25,7 @@ class pdModeTest : public testing::Test {
     ri.SetRandBool( mode.braking );
     ri.SetRandBool( mode.rotating );
     ri.SetRandBool( mode.warping );
+    ri.SetRandBool( mode.balancing );
   };
 
   void LFOn() {
@@ -90,6 +91,7 @@ TEST_F(pdModeTest, Init)
   EXPECT_FALSE( mode.braking );
   EXPECT_FALSE( mode.rotating );
   EXPECT_FALSE( mode.warping );
+  EXPECT_FALSE( mode.balancing );
 }
 
 TEST_F(pdModeTest, Destroy)
@@ -105,6 +107,7 @@ TEST_F(pdModeTest, Destroy)
   EXPECT_FALSE( mode.braking );
   EXPECT_FALSE( mode.rotating );
   EXPECT_FALSE( mode.warping );
+  EXPECT_FALSE( mode.balancing );
 }
 
 TEST_F(pdModeTest, Update_trymove)
@@ -491,4 +494,53 @@ TEST_F(pdModeTest, Update_warp)
   cmd.xdd = 0.0;
   pdModeUpdate( &mode, &cmd, &state );
   EXPECT_FALSE( mode.warping );
+}
+
+TEST_F(pdModeTest, Update_balancing_hold)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  SupportOnRightFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_TRUE( mode.balancing );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+  // the hold persists over repeated updates
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_TRUE( mode.balancing );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+}
+
+TEST_F(pdModeTest, Update_balancing_release_by_step)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  SupportOnRightFoot();
+  cmd.rho = 1;
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.balancing );
+  EXPECT_FALSE( mode.standing );
+  EXPECT_TRUE( mode.stepping );
+}
+
+TEST_F(pdModeTest, Update_balancing_release_by_touchdown)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.balancing );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+}
+
+TEST_F(pdModeTest, Update_balancing_release_by_warp)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  SupportOnRightFoot();
+  cmd.xdd = 1.0;
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.balancing );
 }

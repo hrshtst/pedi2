@@ -2,6 +2,7 @@
 
 static bool _pdBipedIsStateValid(pdBiped *biped, pdState *state);
 static void _pdBipedPoseInit(pdBiped *biped, pdState *state);
+static void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, double lift_height);
 static void _pdBipedUpdateCommand(pdBiped *biped);
 static void _pdBipedUpdateCZ(pdBiped *biped, pdState *state);
 static void _pdBipedUpdateFoot(pdBiped *biped, pdState *state);
@@ -109,6 +110,133 @@ bool pdBipedDefaultPoseInit(pdBiped *biped, pdState *state)
   return true;
 }
 
+/* minimum lift height of the swing foot for the single-support stance;
+ * must exceed the desired-foot-on tolerance (PD_DES_FOOT_TOL in
+ * pd_foot.c) so that the raised foot is recognized as off the ground */
+#define PD_BIPED_SS_MIN_LIFT_HEIGHT (3e-03)
+
+void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, double lift_height)
+{
+  zVec3D v;
+  zVec3D *stance_pos, *stance_att, *swing_att;
+  zVec3D *ref_stance_pos, *ref_stance_att, *ref_swing_pos, *ref_swing_att;
+  pdFoot *stance_foot, *swing_foot;
+  double foot_dist, com_height;
+  double s, c, x, y, theta;
+  double swing_x, swing_y;
+  double offset;
+
+  offset = zPI_2;
+  if( biped->cmd->dist > 0 )
+    foot_dist = biped->cmd->dist;
+  else {
+    foot_dist = zVec3DDist( &state->lf_pos, &state->rf_pos );
+    biped->cmd->dist = foot_dist;
+  }
+  if( stance == PD_FOOT_LEFT ){
+    stance_pos = &state->lf_pos;
+    stance_att = &state->lf_att;
+    swing_att  = &state->rf_att;
+    stance_foot = pdBipedLFPtr( biped );
+    swing_foot  = pdBipedRFPtr( biped );
+    ref_stance_pos = pdBipedRefLFPos( biped );
+    ref_stance_att = pdBipedRefLFAtt( biped );
+    ref_swing_pos  = pdBipedRefRFPos( biped );
+    ref_swing_att  = pdBipedRefRFAtt( biped );
+  } else {
+    stance_pos = &state->rf_pos;
+    stance_att = &state->rf_att;
+    swing_att  = &state->lf_att;
+    stance_foot = pdBipedRFPtr( biped );
+    swing_foot  = pdBipedLFPtr( biped );
+    ref_stance_pos = pdBipedRefRFPos( biped );
+    ref_stance_att = pdBipedRefRFAtt( biped );
+    ref_swing_pos  = pdBipedRefLFPos( biped );
+    ref_swing_att  = pdBipedRefLFAtt( biped );
+  }
+  if( biped->cmd->zd > 0 )
+    com_height = biped->cmd->zd;
+  else {
+    com_height = state->com_pos.c.z - stance_pos->c.z;
+    com_height = 0.95 * com_height;
+    biped->cmd->zd = com_height;
+  }
+  pdCZSetDist( pdBipedCZPtr(biped), foot_dist );
+  theta = biped->cmd->thetad;
+  zSinCos( theta, &s, &c );
+  x = stance_pos->c.x;
+  y = stance_pos->c.y;
+  biped->cmd->xd = x;
+  biped->cmd->yd = y;
+  biped->cmd->xdd = biped->cmd->xd;
+  biped->cmd->ydd = biped->cmd->yd;
+  biped->cmd->zdd = biped->cmd->zd;
+  /* the swing foot hovers above its nominal offset, following the
+   * convention rf = lf + dist*(c,s) of _pdBipedPoseInit */
+  if( stance == PD_FOOT_LEFT ){
+    swing_x = x + foot_dist * c;
+    swing_y = y + foot_dist * s;
+  } else {
+    swing_x = x - foot_dist * c;
+    swing_y = y - foot_dist * s;
+  }
+
+  zVec3DCreate( &v, x, y, com_height );
+  zVec3DCopy( &v, pdBipedRefCOMPos( biped ) );
+  zVec3DCopy( &v, pdCZRefCOM( pdBipedCZPtr( biped ) ) );
+
+  zVec3DCopy( &state->torso_att, &v );
+  v.c.x = theta + offset;
+  zVec3DCopy( &v, pdBipedRefTorsoAtt( biped ) );
+
+  zVec3DCreate( &v, x, y, 0 );
+  zVec3DCopy( &v, ref_stance_pos );
+  zVec3DCopy( &v, pdFootRefPos( stance_foot ) );
+  zVec3DCopy( &v, pdFootDesPos( stance_foot ) );
+  zVec3DCopy( &v, pdFootPivotPos( stance_foot ) );
+
+  zVec3DCopy( stance_att, &v );
+  v.c.x = theta + offset;
+  zVec3DCopy( &v, ref_stance_att );
+  zVec3DCopy( &v, pdFootRefAtt( stance_foot ) );
+  zVec3DCopy( &v, pdFootDesAtt( stance_foot ) );
+  zVec3DCopy( &v, pdFootPivotAtt( stance_foot ) );
+
+  zVec3DCreate( &v, swing_x, swing_y, lift_height );
+  zVec3DCopy( &v, ref_swing_pos );
+  zVec3DCopy( &v, pdFootRefPos( swing_foot ) );
+  zVec3DCopy( &v, pdFootDesPos( swing_foot ) );
+  v.c.z = 0;
+  zVec3DCopy( &v, pdFootPivotPos( swing_foot ) );
+
+  zVec3DCopy( swing_att, &v );
+  v.c.x = theta + offset;
+  zVec3DCopy( &v, ref_swing_att );
+  zVec3DCopy( &v, pdFootRefAtt( swing_foot ) );
+  zVec3DCopy( &v, pdFootDesAtt( swing_foot ) );
+  zVec3DCopy( &v, pdFootPivotAtt( swing_foot ) );
+
+  biped->mode.balancing = true;
+}
+
+bool pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, double lift_height)
+{
+  if( stance != PD_FOOT_LEFT && stance != PD_FOOT_RIGHT ){
+    ZRUNERROR( "invalid stance foot identifier" );
+    return false;
+  }
+  if( lift_height <= PD_BIPED_SS_MIN_LIFT_HEIGHT ){
+    ZRUNERROR( "lift height of the swing foot is too small" );
+    return false;
+  }
+  if( !_pdBipedIsStateValid( biped, state ) )
+    return false;
+  _pdBipedSingleSupportPoseInit( biped, state, stance, lift_height );
+  pdFootSetTrOldVec( pdBipedLFPtr(biped), pdBipedRefLFPos( biped ) );
+  pdFootSetTrOldVec( pdBipedRFPtr(biped), pdBipedRefRFPos( biped ) );
+  return true;
+}
+
 void pdBipedDestroy(pdBiped *biped)
 {
   biped->cmd = NULL;
@@ -200,6 +328,15 @@ void _pdBipedUpdateCZ(pdBiped *biped, pdState *state)
 
 void _pdBipedUpdateFoot(pdBiped *biped, pdState *state)
 {
+  if( biped->mode.balancing ){
+    /* hold the des/ref foot poses seeded by the single-support pose
+     * initializer; only track the actual state */
+    pdFootUpdateState( pdBipedLFPtr(biped), &state->lf_pos, &state->lf_att, &state->sr_lf );
+    pdFootUpdateState( pdBipedRFPtr(biped), &state->rf_pos, &state->rf_att, &state->sr_rf );
+    pdFootIncrTime( pdBipedLFPtr(biped) );
+    pdFootIncrTime( pdBipedRFPtr(biped) );
+    return;
+  }
   pdFootUpdate( pdBipedLFPtr(biped), pdBipedRFPtr(biped),
                 pdCZDelta( pdBipedCZPtr(biped) ),
                 pdCZVelUW( pdBipedCZPtr(biped) ),
@@ -305,9 +442,11 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
       ref_dist = _pdBipedCalcDesFootDistBrakeToFollow( biped, state );
     pdCZSetDist( pdBipedCZPtr( biped ), ref_dist );
   }
-  pdCZAutoUpdateRef( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
-  biped->cmd->xd = pd.e[zX];
-  biped->cmd->yd = pd.e[zY];
+  if( !biped->mode.balancing ){
+    pdCZAutoUpdateRef( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
+    biped->cmd->xd = pd.e[zX];
+    biped->cmd->yd = pd.e[zY];
+  }
 
   if( biped->mode.warping ){
     dx = 0.1 * ( biped->cmd->xdd - biped->cmd->xd );

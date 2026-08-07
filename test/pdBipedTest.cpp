@@ -9,12 +9,14 @@ const double TIME_STEP = 0.01;
 class pdBipedTest : public testing::Test {
  protected:
   virtual void SetUp() {
+    pdStateInit( &state );
     pdBipedInit( &biped, &cmd, TIME_STEP );
     destroy_flag = false;
   };
   virtual void TearDown() {
     if( !destroy_flag )
       pdBipedDestroy( &biped );
+    pdStateDestroy( &state );
   };
 
   void SetRandomValues() {

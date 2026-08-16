@@ -60,11 +60,11 @@ static void *_pdFilterBWDimFromZTK(void *val, int i, void *arg, ZTK *ztk){
   return val;
 }
 
-static bool _pdFilterBWCFFPrintZTK(FILE *fp, int i, void *prp){
+static bool _pdFilterBWCFFPrintZTK(FILE *fp, int i, const void *prp){
   fprintf( fp, "%.10g\n", ((_pdBW*)((pdFilter*)prp)->prp)->cf );
   return true;
 }
-static bool _pdFilterBWDimFPrintZTK(FILE *fp, int i, void *prp){
+static bool _pdFilterBWDimFPrintZTK(FILE *fp, int i, const void *prp){
   fprintf( fp, "%d\n", ((_pdBW*)((pdFilter*)prp)->prp)->dim );
   return true;
 }

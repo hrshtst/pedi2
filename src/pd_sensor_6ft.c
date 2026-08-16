@@ -99,36 +99,36 @@ static void *_pdSensor6FTFilterTzFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return obj;
 }
 
-static bool _pdSensor6FTLinkFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTLinkFPrintZTK(FILE *fp, int i, const void *obj){
   if( pdSensorLinkName((pdSensor*)obj)[0] == '\0' ) return false;
   fprintf( fp, "%s\n", pdSensorLinkName((pdSensor*)obj) );
   return true;
 }
-static bool _pdSensor6FTFrameFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTFrameFPrintZTK(FILE *fp, int i, const void *obj){
   zFrame3DFPrint( fp, pdSensorLinkFrame((pdSensor*)obj) );
   return true;
 }
-static bool _pdSensor6FTFilterFxFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTFilterFxFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName( pdSensorFilterElem((pdSensor*)obj, 0)) );
   return true;
 }
-static bool _pdSensor6FTFilterFyFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTFilterFyFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName( pdSensorFilterElem((pdSensor*)obj, 1)) );
   return true;
 }
-static bool _pdSensor6FTFilterFzFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTFilterFzFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName( pdSensorFilterElem((pdSensor*)obj, 2)) );
   return true;
 }
-static bool _pdSensor6FTFilterTxFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTFilterTxFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName( pdSensorFilterElem((pdSensor*)obj, 3)) );
   return true;
 }
-static bool _pdSensor6FTFilterTyFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTFilterTyFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName( pdSensorFilterElem((pdSensor*)obj, 4)) );
   return true;
 }
-static bool _pdSensor6FTFilterTzFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensor6FTFilterTzFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName( pdSensorFilterElem((pdSensor*)obj, 5)) );
   return true;
 }

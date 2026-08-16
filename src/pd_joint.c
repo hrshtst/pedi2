@@ -83,11 +83,11 @@ static void *_pdJointTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return _pdJointAssignByStr( (pdJoint*)obj, ZTKVal(ztk) ) ? obj : NULL;
 }
 
-static bool _pdJointNameFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdJointNameFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName((pdJoint*)obj) );
   return true;
 }
-static bool _pdJointTypeFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdJointTypeFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", ((pdJoint*)obj)->com ? ((pdJoint*)obj)->com->typestr : "unknown" );
   return true;
 }

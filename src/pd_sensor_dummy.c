@@ -32,12 +32,12 @@ static void *_pdSensorDummyFrameFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return obj;
 }
 
-static bool _pdSensorDummyLinkFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensorDummyLinkFPrintZTK(FILE *fp, int i, const void *obj){
   if( pdSensorLinkName((pdSensor*)obj)[0] == '\0' ) return false;
   fprintf( fp, "%s\n", pdSensorLinkName((pdSensor*)obj) );
   return true;
 }
-static bool _pdSensorDummyFrameFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensorDummyFrameFPrintZTK(FILE *fp, int i, const void *obj){
   zFrame3DFPrint( fp, pdSensorLinkFrame((pdSensor*)obj) );
   return true;
 }

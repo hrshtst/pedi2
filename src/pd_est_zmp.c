@@ -190,7 +190,7 @@ static void *_pdEstZmpRightFootFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return obj;
 }
 
-static bool _pdEstZmpTypeFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdEstZmpTypeFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", "zmp" );
   return true;
 }
@@ -205,7 +205,7 @@ static void *_pdEstZmpFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return _ZTKEvalKey( (pdEstZmp*)obj, arg, ztk, __ztk_prp_pdestzmp ) ? obj : NULL;
 }
 
-static bool _pdEstZmpFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdEstZmpFPrintZTK(FILE *fp, int i, const void *obj){
   pdSensorList *list;
   pdSensorListCell *cp;
 

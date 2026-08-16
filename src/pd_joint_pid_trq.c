@@ -47,26 +47,26 @@ static void *_pdJointPIDTrqMaxFromZTK(void *val, int i, void *arg, ZTK *ztk){
   return val;
 }
 
-static bool _pdJointPIDTrqPGainFPrintZTK(FILE *fp, int i, void *prp){
+static bool _pdJointPIDTrqPGainFPrintZTK(FILE *fp, int i, const void *prp){
   fprintf( fp, "%.10g\n", ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->pgain );
   return true;
 }
-static bool _pdJointPIDTrqIGainFPrintZTK(FILE *fp, int i, void *prp){
+static bool _pdJointPIDTrqIGainFPrintZTK(FILE *fp, int i, const void *prp){
   fprintf( fp, "%.10g\n", ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->igain );
   return true;
 }
-static bool _pdJointPIDTrqDGainFPrintZTK(FILE *fp, int i, void *prp){
+static bool _pdJointPIDTrqDGainFPrintZTK(FILE *fp, int i, const void *prp){
   fprintf( fp, "%.10g\n", ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->dgain );
   return true;
 }
-static bool _pdJointPIDTrqMinFPrintZTK(FILE *fp, int i, void *prp){
+static bool _pdJointPIDTrqMinFPrintZTK(FILE *fp, int i, const void *prp){
   double trqmin;
   trqmin = ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->trqmin;
   if( zIsInf( -trqmin ) ) return false;
   fprintf( fp, "%.10g\n", trqmin );
   return true;
 }
-static bool _pdJointPIDTrqMaxFPrintZTK(FILE *fp, int i, void *prp){
+static bool _pdJointPIDTrqMaxFPrintZTK(FILE *fp, int i, const void *prp){
   double trqmax;
   trqmax = ((_pdJointPIDTrqPrp*)((pdJoint*)prp)->prp)->trqmax;
   if( zIsInf( trqmax ) ) return false;

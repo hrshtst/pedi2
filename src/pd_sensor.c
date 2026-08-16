@@ -49,11 +49,11 @@ static void *_pdSensorTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return _pdSensorAssignByStr( (pdSensor*)obj, ZTKVal(ztk) ) ? obj : NULL;
 }
 
-static bool _pdSensorNameFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensorNameFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName((pdSensor*)obj) );
   return true;
 }
-static bool _pdSensorTypeFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdSensorTypeFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", ((pdSensor*)obj)->com ? ((pdSensor*)obj)->com->typestr : "unknown" );
   return true;
 }

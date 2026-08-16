@@ -31,11 +31,11 @@ static void *_pdFilterTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return _pdFilterAssignByStr( (pdFilter*)obj, ZTKVal(ztk) ) ? obj : NULL;
 }
 
-static bool _pdFilterNameFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdFilterNameFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", zName((pdFilter*)obj) );
   return true;
 }
-static bool _pdFilterTypeFPrintZTK(FILE *fp, int i, void *obj){
+static bool _pdFilterTypeFPrintZTK(FILE *fp, int i, const void *obj){
   fprintf( fp, "%s\n", ((pdFilter*)obj)->com ? ((pdFilter*)obj)->com->typestr : "unknown" );
   return true;
 }

@@ -187,7 +187,7 @@ pdSensor *pdSensor6FTCreate(pdSensor *sensor, const char linkname[], zFrame3D *l
   zStrCopy( pdSensorLinkName(sensor), linkname, BUFSIZ );
   zFrame3DCopy( linkframe, pdSensorLinkFrame(sensor) );
   if( zArraySize(farray) == PD_SENSOR_6FT_SIZE ){
-    zArrayAssign( pdSensorFilters(sensor), zArrayBuf(farray), zArraySize(farray) );
+    zArrayAssign( pdSensorFilters(sensor), zArraySize(farray), zArrayBuf(farray) );
   } else {
     ZRUNERROR( "unmatched filter array size (%d) with sensor size (%d)", zArraySize(farray), PD_SENSOR_6FT_SIZE );
     return NULL;

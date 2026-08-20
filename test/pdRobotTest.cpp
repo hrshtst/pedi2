@@ -26,16 +26,14 @@ class pdRobotTest : public testing::Test {
     rkChainReadZTK( pdRobotChain( &robot ), "model/dummy.ztk" );
   };
 
-  void LoadAndSolveIK() {
+  void LoadAndSolveIKWithLeftFoot(zVec3D *lf_pos, zVec3D *lf_att) {
     char model[] = "model/mighty.ztk";
-    zVec3D com_pos, lf_pos, rf_pos, lh_pos, rh_pos;
-    zVec3D torso_att, lf_att, rf_att, lh_att, rh_att;
+    zVec3D com_pos, rf_pos, lh_pos, rh_pos;
+    zVec3D torso_att, rf_att, lh_att, rh_att;
 
     pdRobotLoad( &robot, model );
     zVec3DCreate( &com_pos,   0.0, 0.0,    0.26  );
     zVec3DCreate( &torso_att, 0.0, 0.0,    0.0   );
-    zVec3DCreate( &lf_pos,    0.0, 0.042,  0.0   );
-    zVec3DCreate( &lf_att,    0.0, 0.0,    0.0   );
     zVec3DCreate( &rf_pos,    0.0, -0.042, 0.0   );
     zVec3DCreate( &rf_att,    0.0, 0.0,    0.0   );
     zVec3DCreate( &lh_pos,    0.0, 0.13,   0.25  );
@@ -44,8 +42,8 @@ class pdRobotTest : public testing::Test {
     zVec3DCreate( &rh_att,   -1.3, -0.005, 0.373 );
     pdRobotSetRefCOM( &robot, &com_pos );
     pdRobotSetRefTorsoZYX( &robot, &torso_att );
-    pdRobotSetRefLFPos( &robot, &lf_pos );
-    pdRobotSetRefLFZYX( &robot, &lf_att );
+    pdRobotSetRefLFPos( &robot, lf_pos );
+    pdRobotSetRefLFZYX( &robot, lf_att );
     pdRobotSetRefRFPos( &robot, &rf_pos );
     pdRobotSetRefRFZYX( &robot, &rf_att );
     pdRobotSetRefLHPos( &robot, &lh_pos );
@@ -53,6 +51,14 @@ class pdRobotTest : public testing::Test {
     pdRobotSetRefLHZYX( &robot, &lh_att );
     pdRobotSetRefRHZYX( &robot, &rh_att );
     pdRobotSolveIK( &robot, 100 );
+  };
+
+  void LoadAndSolveIK() {
+    zVec3D lf_pos, lf_att;
+
+    zVec3DCreate( &lf_pos, 0.0, 0.042, 0.0 );
+    zVec3DCreate( &lf_att, 0.0, 0.0,   0.0 );
+    LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
   };
 
   void SetRandomState() {
@@ -130,6 +136,73 @@ TEST_F(pdRobotTest, Load)
   EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
   EXPECT_EQ( pdRobotJointSize( &robot ), zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_EQ( pdRobotJointSize( &robot ), zVecSize( robot.disold ) );
+}
+
+/* Support-region tests: the left sole is posed through the IK to
+ * produce planar, edge, corner, and airborne contact, while the right
+ * sole stays flat on the ground.  The sole footprint spans +-0.036 m
+ * laterally and -0.0426..+0.0564 m longitudinally around the foot
+ * origin with a 0.0092 m thickness, and a vertex counts as grounded
+ * below 1 mm, so a 0.1 rad roll (corner lift 3.6 mm) leaves only the
+ * outer sole edge grounded, and an additional 0.1 rad pitch with the
+ * origin raised to 6 mm leaves only the single lowest corner. */
+
+TEST_F(pdRobotTest, SupportRegionFlatFeet)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate( &lf_att, 0.0, 0.0,   0.0 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_EQ( 4, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_GE( zListSize( &state.sr ), 4 );
+}
+
+TEST_F(pdRobotTest, SupportRegionEdgeContact)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate( &lf_att, 0.0, 0.0,   0.1 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  /* the rolled sole degenerates to its outer edge without emptying
+     the flat foot's region or the union */
+  EXPECT_EQ( 2, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_GE( zListSize( &state.sr ), 3 );
+}
+
+TEST_F(pdRobotTest, SupportRegionCornerContact)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.006 );
+  zVec3DCreate( &lf_att, 0.0, 0.1,   0.1 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_EQ( 1, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_GE( zListSize( &state.sr ), 3 );
+}
+
+TEST_F(pdRobotTest, SupportRegionLiftedFoot)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.02 );
+  zVec3DCreate( &lf_att, 0.0, 0.0,   0.0 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_EQ( 0, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr ) );
 }
 
 TEST_F(pdRobotTest, SetFootIKPriority)

@@ -543,7 +543,49 @@ void pdRobotBipedSetRefVec(pdRobot *robot, pdBiped *biped)
   pdRobotSetRefRFZYX( robot, pdBipedRefRFAtt(biped) );
 }
 
-#define PD_ROBOT_TOL (1.0e-4)
+/* height tolerance for a foot-shape vertex to count as grounded: a
+ * loose 1 mm, so that the small attitude residuals the IK solver
+ * leaves on a loaded sole (a fraction of a degree lifts the corners
+ * by a few tenths of a millimeter) do not flicker the contact */
+#define PD_ROBOT_TOL (1.0e-3)
+
+/* tolerance to classify a grounded vertex set as degenerate (all
+ * vertices on a line or a point), which the convex-hull routine
+ * rejects: edge and corner contacts are represented by the degenerate
+ * loop of their extreme vertices instead */
+#define PD_ROBOT_SR_DEGENERACY_TOL (1.0e-6)
+
+/* build the support loop of a grounded vertex set: a convex hull for
+ * a planar-spread set, and the degenerate loop of the extreme
+ * vertices for edge or corner contact */
+static bool _pdRobotSupportLoop(zVec3DData *vert, zLoop3D *loop)
+{
+  zVec3D *v, *pa, *pb, dir, rel, deviation;
+  double d, dmax;
+
+  if( zVec3DDataSize( vert ) == 0 ) return true;
+  /* the two mutually farthest vertices, in two sweeps */
+  zVec3DDataRewind( vert );
+  pa = pb = zVec3DDataFetch( vert );
+  for( dmax=0, zVec3DDataRewind( vert ); ( v = zVec3DDataFetch( vert ) ); )
+    if( ( d = zVec3DDist( v, pa ) ) > dmax ){ dmax = d; pb = v; }
+  for( dmax=0, pa=pb, zVec3DDataRewind( vert ); ( v = zVec3DDataFetch( vert ) ); )
+    if( ( d = zVec3DDist( v, pb ) ) > dmax ){ dmax = d; pa = v; }
+  if( dmax < PD_ROBOT_SR_DEGENERACY_TOL ) /* corner contact */
+    return zLoop3DAdd( loop, pa ) != NULL;
+  /* largest deviation of the set from the line through the extremes */
+  zVec3DSub( pb, pa, &dir );
+  zVec3DDivDRC( &dir, dmax );
+  for( dmax=0, zVec3DDataRewind( vert ); ( v = zVec3DDataFetch( vert ) ); ){
+    zVec3DSub( v, pa, &rel );
+    zVec3DOuterProd( &rel, &dir, &deviation );
+    if( ( d = zVec3DNorm( &deviation ) ) > dmax ) dmax = d;
+  }
+  if( dmax > PD_ROBOT_SR_DEGENERACY_TOL )
+    return zVec3DDataConvexHull2D( vert, loop ) != NULL;
+  /* edge contact */
+  return zLoop3DAdd( loop, pa ) && zLoop3DAdd( loop, pb );
+}
 bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3D *sr)
 {
   int i;
@@ -617,20 +659,16 @@ bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3
       if( !result ) return false;
     }
   }
-  /* supporting region */
+  /* supporting region: the loops are built independently, so that a
+   * failure on one foot does not discard the regions of the other
+   * foot and of the union */
   zLoop3DDestroy( sr_lf ); zListInit( sr_lf );
   zLoop3DDestroy( sr_rf ); zListInit( sr_rf );
   zLoop3DDestroy( sr ); zListInit( sr );
-  if( zVec3DDataSize( &robot->_sr_lf_vert ) > 0 ){
-    if( !zVec3DDataConvexHull2D( &robot->_sr_lf_vert, sr_lf ) ) return false;
-  }
-  if( zVec3DDataSize( &robot->_sr_rf_vert ) > 0 ){
-    if( !zVec3DDataConvexHull2D( &robot->_sr_rf_vert, sr_rf ) ) return false;
-  }
-  if( zVec3DDataSize( &robot->_sr_vert ) > 0 ){
-    if( !zVec3DDataConvexHull2D( &robot->_sr_vert, sr ) ) return false;
-  }
-  return true;
+  result = _pdRobotSupportLoop( &robot->_sr_lf_vert, sr_lf );
+  result = _pdRobotSupportLoop( &robot->_sr_rf_vert, sr_rf ) && result;
+  result = _pdRobotSupportLoop( &robot->_sr_vert, sr ) && result;
+  return result;
 }
 
 void pdRobotUpdateState(pdRobot *robot, pdState *state)

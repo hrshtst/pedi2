@@ -373,6 +373,41 @@ zMat3D *pdRobotGetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3D *att){
   return att;
 }
 
+static bool _pdRobotSetIKCellPriority(pdRobot *robot, const char *name, int priority)
+{
+  rkIKCell *cell;
+
+  if( !( cell = pdRobotFindIKCellByName( robot, name ) ) ) return false;
+  if( rkIKCellPriority( cell ) == priority ) return true;
+  return rkChainSetIKCellPriority( pdRobotChain( robot ), cell, priority );
+}
+
+bool pdRobotSetFootIKPriority(pdRobot *robot, byte foot, int pos_priority, int att_priority)
+{
+  if( foot == PD_FOOT_LEFT ){
+    return _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_LF_POS, pos_priority ) &&
+           _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_LF_ATT, att_priority );
+  }
+  return _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_RF_POS, pos_priority ) &&
+         _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_RF_ATT, att_priority );
+}
+
+static bool _pdRobotPrioritizeFoot(pdRobot *robot, byte foot, bool on)
+{
+  return pdRobotSetFootIKPriority( robot, foot,
+    on ? PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS : PD_ROBOT_PRIORITY_FOOT_SWING_POS,
+    on ? PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT : PD_ROBOT_PRIORITY_FOOT_SWING_ATT );
+}
+
+bool pdRobotPrioritizeSupportFeet(pdRobot *robot, pdState *state)
+{
+  bool result_lf, result_rf;
+
+  result_lf = _pdRobotPrioritizeFoot( robot, PD_FOOT_LEFT, pdStateLFIsOn( state ) );
+  result_rf = _pdRobotPrioritizeFoot( robot, PD_FOOT_RIGHT, pdStateRFIsOn( state ) );
+  return result_lf && result_rf;
+}
+
 void pdRobotSolveIK(pdRobot *robot, int iter)
 {
   pdRobotGetJointDisAll( robot, robot->disold );

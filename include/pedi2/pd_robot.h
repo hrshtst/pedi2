@@ -33,6 +33,15 @@ typedef struct{
 #define PD_ROBOT_DEFAULT_PRIORITY_RH_POS    1
 #define PD_ROBOT_DEFAULT_PRIORITY_RH_ATT    0
 
+/* priorities for the prioritized support-foot IK: the constraint cells
+ * of a supporting foot outrank those of a swinging foot (and every
+ * other constraint), so that the IK solver sacrifices the swing-foot
+ * targets rather than the stance contact when it cannot satisfy both */
+#define PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS  7
+#define PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT  6
+#define PD_ROBOT_PRIORITY_FOOT_SWING_POS    PD_ROBOT_DEFAULT_PRIORITY_LF_POS
+#define PD_ROBOT_PRIORITY_FOOT_SWING_ATT    PD_ROBOT_DEFAULT_PRIORITY_LF_ATT
+
 #define PD_ROBOT_IKCELL_NAME_COM            "com"
 #define PD_ROBOT_IKCELL_NAME_TORSO_ATT      "torso_att"
 #define PD_ROBOT_IKCELL_NAME_LF_POS         "left_foot_pos"
@@ -121,6 +130,14 @@ __PEDI2_EXPORT bool pdRobotSetRefAtt(pdRobot *robot, const char *ikcell_name, zM
 #define pdRobotUnregisterIKJointID(r,i)    rkChainUnregisterIKJointID( pdRobotChain(r), i )
 #define pdRobotRegisterIKJoint(r,name,w)   rkChainRegisterIKJoint( pdRobotChain(r), name, w )
 #define pdRobotUnregisterIKJoint(r,name)   rkChainUnregisterIKJoint( pdRobotChain(r), name )
+
+/* prioritized support-foot IK: reassign the IK priorities of the foot
+ * constraint cells, e.g. to make a supporting foot outrank a swinging
+ * one.  pdRobotPrioritizeSupportFeet() applies the support/swing
+ * priorities above according to the contact states of the feet; call
+ * it before pdRobotSolveIK() in the control cycle. */
+__PEDI2_EXPORT bool pdRobotSetFootIKPriority(pdRobot *robot, byte foot, int pos_priority, int att_priority);
+__PEDI2_EXPORT bool pdRobotPrioritizeSupportFeet(pdRobot *robot, pdState *state);
 
 __PEDI2_EXPORT void pdRobotSolveIK(pdRobot *robot, int iter);
 

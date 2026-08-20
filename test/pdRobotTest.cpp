@@ -132,6 +132,47 @@ TEST_F(pdRobotTest, Load)
   EXPECT_EQ( pdRobotJointSize( &robot ), zVecSize( robot.disold ) );
 }
 
+TEST_F(pdRobotTest, SetFootIKPriority)
+{
+  char model[] = "model/mighty.ztk";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_TRUE( pdRobotSetFootIKPriority( &robot, PD_FOOT_LEFT, 9, 8 ) );
+  EXPECT_EQ( 9, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+  EXPECT_EQ( 8, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  EXPECT_TRUE( pdRobotSetFootIKPriority( &robot, PD_FOOT_RIGHT, 7, 6 ) );
+  EXPECT_EQ( 7, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+  EXPECT_EQ( 6, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+}
+
+TEST_F(pdRobotTest, PrioritizeSupportFeet)
+{
+  char model[] = "model/mighty.ztk";
+  zLoop3DCell cell[2];
+  zLoop3DCell *cp;
+
+  pdRobotLoad( &robot, model );
+  pdStateInit( &state );
+  /* right foot on the ground, left foot swinging */
+  zStackPush( &state.sr_rf, &cell[0] );
+  state.lf_pos.c.z = 0.02;
+  EXPECT_TRUE( pdRobotPrioritizeSupportFeet( &robot, &state ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SWING_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SWING_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  /* both feet on the ground */
+  zStackPush( &state.sr_lf, &cell[1] );
+  state.lf_pos.c.z = 0.0;
+  EXPECT_TRUE( pdRobotPrioritizeSupportFeet( &robot, &state ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+  zStackPop( &state.sr_lf, &cp );
+  zStackPop( &state.sr_rf, &cp );
+}
+
 TEST_F(pdRobotTest, JointDis)
 {
   char model[] = "model/mighty.ztk";

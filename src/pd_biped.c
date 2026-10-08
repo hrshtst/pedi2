@@ -3,6 +3,8 @@
 static bool _pdBipedIsStateValid(pdBiped *biped, pdState *state);
 static void _pdBipedPoseInit(pdBiped *biped, pdState *state);
 static void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, double lift_height);
+static void _pdBipedSeedFootPose(pdFoot *foot, zVec3D *pos, zVec3D *att);
+static void _pdBipedDoubleSupportPoseInit(pdBiped *biped, pdState *state);
 static void _pdBipedUpdateCommand(pdBiped *biped);
 static void _pdBipedUpdateCZ(pdBiped *biped, pdState *state);
 static void _pdBipedUpdateFoot(pdBiped *biped, pdState *state);
@@ -219,6 +221,45 @@ void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, 
   biped->mode.balancing = true;
 }
 
+/* seed the reference, desired, and pivot poses of a foot structure
+ * with a reference pose on the ground; the foot update, which would
+ * otherwise produce them, is skipped while balancing */
+void _pdBipedSeedFootPose(pdFoot *foot, zVec3D *pos, zVec3D *att)
+{
+  zVec3D v;
+
+  zVec3DCopy( pos, pdFootRefPos( foot ) );
+  zVec3DCopy( pos, pdFootDesPos( foot ) );
+  zVec3DCopy( pos, &v );
+  v.c.z = 0;
+  zVec3DCopy( &v, pdFootPivotPos( foot ) );
+  zVec3DCopy( att, pdFootRefAtt( foot ) );
+  zVec3DCopy( att, pdFootDesAtt( foot ) );
+  zVec3DCopy( att, pdFootPivotAtt( foot ) );
+}
+
+void _pdBipedDoubleSupportPoseInit(pdBiped *biped, pdState *state)
+{
+  /* the default pose places the COM reference at the current COM and
+   * the feet symmetrically about it, so the reference stays at the
+   * midpoint of the feet throughout the hold */
+  _pdBipedPoseInit( biped, state );
+  _pdBipedSeedFootPose( pdBipedLFPtr(biped), pdBipedRefLFPos(biped), pdBipedRefLFAtt(biped) );
+  _pdBipedSeedFootPose( pdBipedRFPtr(biped), pdBipedRefRFPos(biped), pdBipedRefRFAtt(biped) );
+  biped->mode.balancing = true;
+  biped->mode.balancing_both_feet = true;
+}
+
+bool pdBipedDoubleSupportPoseInit(pdBiped *biped, pdState *state)
+{
+  if( !_pdBipedIsStateValid( biped, state ) )
+    return false;
+  _pdBipedDoubleSupportPoseInit( biped, state );
+  pdFootSetTrOldVec( pdBipedLFPtr(biped), pdBipedRefLFPos( biped ) );
+  pdFootSetTrOldVec( pdBipedRFPtr(biped), pdBipedRefRFPos( biped ) );
+  return true;
+}
+
 bool pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, double lift_height)
 {
   if( stance != PD_FOOT_LEFT && stance != PD_FOOT_RIGHT ){
@@ -329,8 +370,8 @@ void _pdBipedUpdateCZ(pdBiped *biped, pdState *state)
 void _pdBipedUpdateFoot(pdBiped *biped, pdState *state)
 {
   if( biped->mode.balancing ){
-    /* hold the des/ref foot poses seeded by the single-support pose
-     * initializer; only track the actual state */
+    /* hold the des/ref foot poses seeded by the single- or
+     * double-support pose initializer; only track the actual state */
     pdFootUpdateState( pdBipedLFPtr(biped), &state->lf_pos, &state->lf_att, &state->sr_lf );
     pdFootUpdateState( pdBipedRFPtr(biped), &state->rf_pos, &state->rf_att, &state->sr_rf );
     pdFootIncrTime( pdBipedLFPtr(biped) );

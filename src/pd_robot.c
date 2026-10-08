@@ -504,6 +504,20 @@ void pdRobotBipedSingleSupportInit(pdRobot *robot, pdBiped *biped, pdState *stat
   pdRobotUpdateState( robot, state );
 }
 
+/* initialize a double-support stance held by the balancing mode: the
+ * COM reference stays at the midpoint of the feet in both horizontal
+ * axes and the robot never steps until commanded (call it after
+ * pdRobotBipedResetPose, which resets the mode) */
+void pdRobotBipedDoubleSupportInit(pdRobot *robot, pdBiped *biped, pdState *state)
+{
+  pdRobotUpdateState( robot, state );
+  pdBipedDoubleSupportPoseInit( biped, state );
+  pdRobotBipedSetRefVec( robot, biped );
+  pdRobotSolveIK( robot, 0 );
+  pdRobotGetJointDisAll( robot, robot->disold );
+  pdRobotUpdateState( robot, state );
+}
+
 void pdRobotBipedResetPoseSingleSupport(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis, byte stance, double lift_height)
 {
   zVec3D *stance_pos, *swing_pos;

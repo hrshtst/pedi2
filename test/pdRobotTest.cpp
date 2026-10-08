@@ -2308,6 +2308,49 @@ TEST_F(pdRobotTest, BipedSingleSupportInit)
   zVecFree( vel );
 }
 
+TEST_F(pdRobotTest, BipedDoubleSupportInit)
+{
+  char model[] = "model/mighty.ztk";
+  zVec dis, vel;
+  double mx, my;
+
+  pdCmdDefaultInit( &cmd );
+  cmd.zd = 0.26;
+  cmd.dist = 0.084;
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotBipedResetPose( &robot, &biped, &state, dis );
+  pdRobotBipedDoubleSupportInit( &robot, &biped, &state );
+
+  EXPECT_NEAR( 0.0, state.lf_pos.c.z, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, state.rf_pos.c.z, GTEST_TOL_LOOSE );
+  // the COM and its reference settle above the midpoint of the feet
+  mx = 0.5 * ( state.lf_pos.c.x + state.rf_pos.c.x );
+  my = 0.5 * ( state.lf_pos.c.y + state.rf_pos.c.y );
+  EXPECT_NEAR( mx, state.com_pos.c.x, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( my, state.com_pos.c.y, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( mx, cmd.xd, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( my, cmd.yd, GTEST_TOL_LOOSE );
+  // both soles support
+  EXPECT_GT( zListSize( &state.sr_lf ), 0 );
+  EXPECT_GT( zListSize( &state.sr_rf ), 0 );
+  EXPECT_GT( zListSize( &state.sr ), 0 );
+  EXPECT_TRUE( biped.mode.balancing );
+  EXPECT_TRUE( biped.mode.balancing_both_feet );
+  // zero joint velocity after initialization
+  vel = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
+  }
+  zVecFree( vel );
+  zVecFree( dis );
+}
+
 TEST_F(pdRobotTest, BipedResetPoseSingleSupport)
 {
   char model[] = "model/mighty.ztk";

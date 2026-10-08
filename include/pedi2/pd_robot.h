@@ -173,6 +173,7 @@ __PEDI2_EXPORT void pdRobotHandAtt(pdRobot *robot, zMat3D *lh, zMat3D *rh);
 __PEDI2_EXPORT void pdRobotBipedDefaultInit(pdRobot *robot, pdBiped *biped, pdState *state);
 __PEDI2_EXPORT void pdRobotBipedResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis);
 __PEDI2_EXPORT void pdRobotBipedSingleSupportInit(pdRobot *robot, pdBiped *biped, pdState *state, byte stance, double lift_height);
+__PEDI2_EXPORT void pdRobotBipedDoubleSupportInit(pdRobot *robot, pdBiped *biped, pdState *state);
 __PEDI2_EXPORT void pdRobotBipedResetPoseSingleSupport(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis, byte stance, double lift_height);
 __PEDI2_EXPORT void pdRobotBipedSetRefVec(pdRobot *robot, pdBiped *biped);
 __PEDI2_EXPORT bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3D *sr);

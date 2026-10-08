@@ -437,3 +437,94 @@ TEST_F(pdBipedTest, Update_BalancingReleaseResumesStepping)
   EXPECT_TRUE( biped.mode.stepping );
   EXPECT_DOUBLE_EQ( 1.0, pdCZRho( pdBipedCZPtr( &biped ) ) );
 }
+
+TEST_F(pdBipedTest, DoubleSupportPoseInit)
+{
+  pdStateInit( &state );
+  zVec3DCreate( &state.lf_pos, 0,  0.1, 0 );
+  zVec3DCreate( &state.rf_pos, 0, -0.1, 0 );
+  zVec3DCreate( &state.com_pos, 0.01, 0, 0.1 );
+  pdCmdDefaultInit( biped.cmd );
+  EXPECT_TRUE( pdBipedDoubleSupportPoseInit( &biped, &state ) );
+
+  EXPECT_DOUBLE_EQ( 0.2, biped.cmd->dist );
+  EXPECT_DOUBLE_EQ( 0.95*0.1, biped.cmd->zd );
+  // the desired COM at the current COM, the feet symmetric about it
+  EXPECT_DOUBLE_EQ( 0.01, biped.cmd->xd );
+  EXPECT_DOUBLE_EQ( 0, biped.cmd->yd );
+  EXPECT_DOUBLE_EQ( 0.01, pdBipedRefLFPosX( &biped ) );
+  EXPECT_DOUBLE_EQ( 0.1, pdBipedRefLFPosY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefLFPosZ( &biped ) );
+  EXPECT_DOUBLE_EQ( 0.01, pdBipedRefRFPosX( &biped ) );
+  EXPECT_DOUBLE_EQ( -0.1, pdBipedRefRFPosY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefRFPosZ( &biped ) );
+  // foot structures seeded at the reference poses on the ground
+  EXPECT_DOUBLE_EQ( 0.01, pdFootRefPosX( pdBipedLFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootRefPosY( pdBipedLFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0, pdFootRefPosZ( pdBipedLFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0.1, pdFootDesPosY( pdBipedLFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0, pdFootPivotPosZ( pdBipedLFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0.01, pdFootRefPosX( pdBipedRFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( -0.1, pdFootRefPosY( pdBipedRFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0, pdFootRefPosZ( pdBipedRFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( -0.1, pdFootDesPosY( pdBipedRFPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0, pdFootPivotPosZ( pdBipedRFPtr( &biped ) ) );
+
+  EXPECT_TRUE( biped.mode.balancing );
+  EXPECT_TRUE( biped.mode.balancing_both_feet );
+}
+
+TEST_F(pdBipedTest, Update_DoubleSupportBalancingHoldsReference)
+{
+  zVec3D vert[8];
+  zLoop3DCell cell[12];
+  int i;
+
+  pdStateInit( &state );
+  zVec3DCreate( &state.lf_pos, 0,  0.1, 0 );
+  zVec3DCreate( &state.rf_pos, 0, -0.1, 0 );
+  zVec3DCreate( &state.com_pos, 0, 0, 0.1 );
+  pdCmdDefaultInit( biped.cmd );
+  ASSERT_TRUE( pdBipedDoubleSupportPoseInit( &biped, &state ) );
+  // square soles under both feet; their union spans the outer corners
+  zVec3DCreate( &vert[0], -0.05,  0.05, 0 );
+  zVec3DCreate( &vert[1],  0.05,  0.05, 0 );
+  zVec3DCreate( &vert[2],  0.05,  0.15, 0 );
+  zVec3DCreate( &vert[3], -0.05,  0.15, 0 );
+  zVec3DCreate( &vert[4], -0.05, -0.15, 0 );
+  zVec3DCreate( &vert[5],  0.05, -0.15, 0 );
+  zVec3DCreate( &vert[6],  0.05, -0.05, 0 );
+  zVec3DCreate( &vert[7], -0.05, -0.05, 0 );
+  for( i=0; i<4; i++ ){
+    cell[i].data = &vert[i];
+    zStackPush( &state.sr_lf, &cell[i] );
+    cell[i+4].data = &vert[i+4];
+    zStackPush( &state.sr_rf, &cell[i+4] );
+  }
+  cell[8].data = &vert[4];
+  cell[9].data = &vert[5];
+  cell[10].data = &vert[2];
+  cell[11].data = &vert[3];
+  for( i=8; i<12; i++ )
+    zStackPush( &state.sr, &cell[i] );
+  // a diagonal push on the reference COM
+  zVec3DCreate( &state.ef, 3.0, 4.0, 0 );
+  for( i=0; i<10; i++ )
+    pdBipedUpdate( &biped, &state );
+  EXPECT_TRUE( biped.mode.balancing );
+  EXPECT_TRUE( biped.mode.balancing_both_feet );
+  EXPECT_TRUE( biped.mode.standing );
+  EXPECT_FALSE( biped.mode.stepping );
+  // the push reaches the regulator ...
+  EXPECT_GT( pdCZRefVel( pdBipedCZPtr( &biped ) )->c.x, 0 );
+  EXPECT_GT( pdCZRefVel( pdBipedCZPtr( &biped ) )->c.y, 0 );
+  // ... while the desired COM stays at the midpoint of the feet in
+  // both axes, and the feet stay put
+  EXPECT_DOUBLE_EQ( 0, biped.cmd->xd );
+  EXPECT_DOUBLE_EQ( 0, biped.cmd->yd );
+  EXPECT_DOUBLE_EQ( 0, pdCZRho( pdBipedCZPtr( &biped ) ) );
+  EXPECT_DOUBLE_EQ( 0.1, pdBipedRefLFPosY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefLFPosZ( &biped ) );
+  EXPECT_DOUBLE_EQ( -0.1, pdBipedRefRFPosY( &biped ) );
+  EXPECT_DOUBLE_EQ( 0, pdBipedRefRFPosZ( &biped ) );
+}

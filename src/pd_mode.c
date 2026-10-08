@@ -12,6 +12,7 @@ void pdModeInit(pdMode *mode)
   mode->rotating  = false;
   mode->warping   = false;
   mode->balancing = false;
+  mode->balancing_both_feet = false;
 }
 
 void pdModeDestroy(pdMode *mode)
@@ -21,9 +22,14 @@ void pdModeDestroy(pdMode *mode)
 
 void pdModeUpdate(pdMode *mode, pdCmd *cmd, pdState *state)
 {
+  /* a step or warp command releases any balancing hold, and the
+   * touchdown of the raised foot releases a single-support one */
   if( mode->balancing &&
-      ( pdCmdTryStep( cmd ) || pdCmdTryWarp( cmd ) || pdStateBothFeetOn( state ) ) )
+      ( pdCmdTryStep( cmd ) || pdCmdTryWarp( cmd ) ||
+        ( pdStateBothFeetOn( state ) && !mode->balancing_both_feet ) ) ){
     mode->balancing = false;
+    mode->balancing_both_feet = false;
+  }
 
   if( !pdCmdTryStop( cmd ) )
     mode->trymove = true;
@@ -79,5 +85,6 @@ void pdModeFWrite(FILE *fp, pdMode *mode)
   pdModeFWriteElem( fp, mode, rotating );
   pdModeFWriteElem( fp, mode, warping );
   pdModeFWriteElem( fp, mode, balancing );
+  pdModeFWriteElem( fp, mode, balancing_both_feet );
   fprintf( fp, "\n" );
 }

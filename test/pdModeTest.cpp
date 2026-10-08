@@ -26,6 +26,7 @@ class pdModeTest : public testing::Test {
     ri.SetRandBool( mode.rotating );
     ri.SetRandBool( mode.warping );
     ri.SetRandBool( mode.balancing );
+    ri.SetRandBool( mode.balancing_both_feet );
   };
 
   void LFOn() {
@@ -92,6 +93,7 @@ TEST_F(pdModeTest, Init)
   EXPECT_FALSE( mode.rotating );
   EXPECT_FALSE( mode.warping );
   EXPECT_FALSE( mode.balancing );
+  EXPECT_FALSE( mode.balancing_both_feet );
 }
 
 TEST_F(pdModeTest, Destroy)
@@ -108,6 +110,7 @@ TEST_F(pdModeTest, Destroy)
   EXPECT_FALSE( mode.rotating );
   EXPECT_FALSE( mode.warping );
   EXPECT_FALSE( mode.balancing );
+  EXPECT_FALSE( mode.balancing_both_feet );
 }
 
 TEST_F(pdModeTest, Update_trymove)
@@ -543,4 +546,59 @@ TEST_F(pdModeTest, Update_balancing_release_by_warp)
   cmd.xdd = 1.0;
   pdModeUpdate( &mode, &cmd, &state );
   EXPECT_FALSE( mode.balancing );
+}
+
+TEST_F(pdModeTest, Update_balancing_both_feet_hold)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  mode.balancing_both_feet = true;
+  SupportOnBothFeet();
+  pdModeUpdate( &mode, &cmd, &state );
+  // unlike a single-support hold, both feet on the ground keep it
+  EXPECT_TRUE( mode.balancing );
+  EXPECT_TRUE( mode.balancing_both_feet );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_TRUE( mode.balancing );
+  EXPECT_TRUE( mode.balancing_both_feet );
+}
+
+TEST_F(pdModeTest, Update_balancing_both_feet_no_stepping_on_lift)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  mode.balancing_both_feet = true;
+  SupportOnRightFoot();
+  pdModeUpdate( &mode, &cmd, &state );
+  // a foot leaving the ground does not latch stepping during the hold
+  EXPECT_TRUE( mode.balancing );
+  EXPECT_TRUE( mode.standing );
+  EXPECT_FALSE( mode.stepping );
+}
+
+TEST_F(pdModeTest, Update_balancing_both_feet_release_by_step)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  mode.balancing_both_feet = true;
+  SupportOnBothFeet();
+  cmd.rho = 1;
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.balancing );
+  EXPECT_FALSE( mode.balancing_both_feet );
+  EXPECT_TRUE( mode.trymove );
+}
+
+TEST_F(pdModeTest, Update_balancing_both_feet_release_by_warp)
+{
+  pdCmdDefaultInit( &cmd );
+  mode.balancing = true;
+  mode.balancing_both_feet = true;
+  SupportOnBothFeet();
+  cmd.xdd = 1.0;
+  pdModeUpdate( &mode, &cmd, &state );
+  EXPECT_FALSE( mode.balancing );
+  EXPECT_FALSE( mode.balancing_both_feet );
 }

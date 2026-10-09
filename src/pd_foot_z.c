@@ -86,12 +86,34 @@ int pdFootZFindIntersection(pdFootZ *f, zVec2D *zmp, zVec3D ip[])
   return n;
 }
 
+/* a ZMP within this distance of the front or rear end of the
+ * supporting region (along the U axis) is regarded as lying on it:
+ * the search line is moved this far inside, so that it never runs
+ * along a toe or heel edge perpendicular to it, whose intersection
+ * would otherwise jump along the edge, or vanish, with round-off of
+ * the order of 1e-12 m */
+#define PD_FOOT_Z_EDGE_TOL 1.0e-9
+
 int pdFootZFindInnerPoint(pdFootZ *f, zVec2D *zmp, zVec3D *p)
 {
   zVec3D ip[2];
+  zVec2D z;
+  zLoop3DCell *vc;
+  double umin = HUGE_VAL, umax = -HUGE_VAL;
   int n_ip;
 
-  n_ip = pdFootZFindIntersection( f, zmp, ip );
+  zListForEach( pdFootZSR( f ), vc ){
+    if( vc->data->e[pdU] < umin ) umin = vc->data->e[pdU];
+    if( vc->data->e[pdU] > umax ) umax = vc->data->e[pdU];
+  }
+  zVec2DCopy( zmp, &z );
+  if( umax - umin > 2 * PD_FOOT_Z_EDGE_TOL ){
+    if( fabs( z.e[pdU] - umax ) < PD_FOOT_Z_EDGE_TOL )
+      z.e[pdU] = umax - PD_FOOT_Z_EDGE_TOL;
+    else if( fabs( z.e[pdU] - umin ) < PD_FOOT_Z_EDGE_TOL )
+      z.e[pdU] = umin + PD_FOOT_Z_EDGE_TOL;
+  }
+  n_ip = pdFootZFindIntersection( f, &z, ip );
   if( n_ip == 0 ) return 0;
   if( n_ip == 1 )
     zVec3DCopy( &ip[0], p );

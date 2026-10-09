@@ -353,10 +353,10 @@ TEST_F(pdFootZTest, FindInnerPoint_LeftFoot)
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
 
-  // share an edge
+  // share an edge (the search line moves inside by PD_FOOT_Z_EDGE_TOL)
   zVec2DCreate( &zmp, 0.04, 0.07 );
   EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
-  EXPECT_NEAR( 0.04, p.c.x, 1e-12 );
+  EXPECT_NEAR( 0.04, p.c.x, 2e-9 );
   EXPECT_NEAR( 0.1,  p.c.y, 1e-12 );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
 
@@ -394,11 +394,11 @@ TEST_F(pdFootZTest, FindInnerPoint_LeftFoot2)
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
 
-  // one intersection
+  // one intersection (the search line moves inside by PD_FOOT_Z_EDGE_TOL)
   zVec2DCreate( &zmp, 0.04, 0.04 );
   EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
-  EXPECT_NEAR( 0.04, p.c.x, 1e-12 );
-  EXPECT_NEAR( 0.08, p.c.y, 1e-12 );
+  EXPECT_NEAR( 0.04, p.c.x, 2e-9 );
+  EXPECT_NEAR( 0.08, p.c.y, 2e-9 );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
 
   // two intersections
@@ -442,11 +442,11 @@ TEST_F(pdFootZTest, FindInnerPoint_RightFoot)
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
 
-  // share an edge
+  // share an edge (the search line moves inside by PD_FOOT_Z_EDGE_TOL)
   zVec2DCreate( &zmp, 0.04, 0.07 );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
   EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
-  EXPECT_NEAR( 0.04, p.c.x, 1e-12 );
+  EXPECT_NEAR( 0.04, p.c.x, 2e-9 );
   EXPECT_NEAR( -0.1, p.c.y, 1e-12 );
 
   // two intersections
@@ -483,12 +483,12 @@ TEST_F(pdFootZTest, FindInnerPoint_RightFoot2)
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
 
-  // one intersection
+  // one intersection (the search line moves inside by PD_FOOT_Z_EDGE_TOL)
   zVec2DCreate( &zmp, 0.04, 0.04 );
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
   EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
-  EXPECT_NEAR( 0.04,  p.c.x, 1e-12 );
-  EXPECT_NEAR( -0.08, p.c.y, 1e-12 );
+  EXPECT_NEAR( 0.04,  p.c.x, 2e-9 );
+  EXPECT_NEAR( -0.08, p.c.y, 2e-9 );
 
   // two intersections
   zVec2DCreate( &zmp, 0.02, 0.04 );
@@ -510,6 +510,62 @@ TEST_F(pdFootZTest, FindInnerPoint_RightFoot2)
   EXPECT_EQ( 1, pdFootZFindInnerPoint( &rf, &zmp, &p ) );
   EXPECT_NEAR( 0.0,   p.c.x, 1e-12 );
   EXPECT_NEAR( -0.04, p.c.y, 1e-12 );
+}
+
+TEST_F(pdFootZTest, FindInnerPoint_ToeEdgeRoundOff)
+{
+  zVec3D v[4], p;
+  zVec2D zmp;
+  double du[] = { -5e-12, -0.5e-13, 0.5e-13, 5e-12 };
+  int i;
+
+  // a left foot whose toe vertices differ in U by round-off, as the
+  // soles of a foot that is not exactly aligned with the moving frame
+  zVec3DCreate( &v[0],  0.04,         0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04,         0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04,         0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04 + 1e-13, 0.15, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+
+  // a ZMP on the toe edge, inside or outside by round-off, always
+  // finds the inner toe corner
+  for( i=0; i<4; i++ ){
+    zVec2DCreate( &zmp, 0.04 + du[i], 0.12 );
+    EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
+    EXPECT_NEAR( 0.04, p.c.x, 2e-9 );
+    EXPECT_NEAR( 0.1,  p.c.y, 1e-6 );
+  }
+  // a ZMP clearly beyond the toe does not lie on the region
+  zVec2DCreate( &zmp, 0.04 + 1e-6, 0.12 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
+}
+
+TEST_F(pdFootZTest, CalcFootPhase_ToeEdgeRoundOff)
+{
+  zVec3D v[4];
+  zVec2D delta, vel, zmp;
+  double du[] = { -5e-12, -0.5e-13, 0.5e-13, 5e-12 };
+  int i;
+
+  // the left foot of CalcFootPhase_SingleSupportLeft, toe vertices
+  // differing in U by round-off
+  zVec3DCreate( &v[0],  0.04,         0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04,         0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04,         0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04 + 1e-13, 0.15, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+  pdCZVrtZeta( &vrt ) = 2;
+  pdCZHrzUWSetQ1W( &czuw, 1 );
+  pdCZHrzUWSetQ2W( &czuw, 1 );
+
+  // the ZMP at the most leftward point of the swing, pinned on the
+  // toe edge: the phase is the one in the middle of the sole
+  zVec2DCreate( &delta, 0, -0.02 );
+  zVec2DCreate( &vel,   0, 0.0 );
+  for( i=0; i<4; i++ ){
+    zVec2DCreate( &zmp, 0.04 + du[i], 0.125 );
+    EXPECT_NEAR( 0.5, pdFootZCalcFootPhase( &lf, &delta, &vel, &zmp ), 1e-6 );
+  }
 }
 
 TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)

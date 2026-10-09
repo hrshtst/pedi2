@@ -15,6 +15,7 @@ typedef struct{
   pdCZHrzU _u;         /* desired ZMP calculator for tangential direction */
   pdCZHrzW _w;         /* desired ZMP calculator for radial direction */
   double _kappa;       /* curvature of the referential orbit */
+  double _sole_cu;     /* offset of the sole center from the foot frame along the foot's forward axis */
   pdCZVrt *_vrt;       /* controller for vertical motion */
   zLoop3D _sr;         /* supporting region */
   zVec3DData _sr_vert; /* vertices of supporting region */
@@ -41,6 +42,7 @@ __PEDI2_EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
 #define pdCZHrzUWKr(h)      pdCZHrzWKr( pdCZHrzWPtr(h) )
 #define pdCZHrzUWDist(h)    pdCZHrzWDist( pdCZHrzWPtr(h) )
 #define pdCZHrzUWKappa(h)   (h)->_kappa
+#define pdCZHrzUWSoleCU(h)  (h)->_sole_cu
 #define pdCZHrzUWZeta(h)    pdCZVrtZeta( (h)->_vrt )
 #define pdCZHrzUWSR(h)      ( &(h)->_sr )
 #define pdCZHrzUWSRVert(h)  ( &(h)->_sr_vert )
@@ -62,6 +64,7 @@ __PEDI2_EXPORT void pdCZHrzUWDestroy(pdCZHrzUW *hrz);
 #define pdCZHrzUWSetKr(h,k)       pdCZHrzWSetKr( pdCZHrzWPtr(h), k )
 #define pdCZHrzUWSetDist(h,d)     pdCZHrzWSetDist( pdCZHrzWPtr(h), d )
 #define pdCZHrzUWSetKappa(h,k)    ( pdCZHrzUWKappa(h) = (k) )
+#define pdCZHrzUWSetSoleCU(h,c)   ( pdCZHrzUWSoleCU(h) = (c) )
 #define pdCZHrzUWSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa) do{\
   pdCZHrzUSetPrm( pdCZHrzUPtr(h), vud, qu1, qu2 );\
   pdCZHrzWSetPrm( pdCZHrzWPtr(h), vwd, qw1, qw2, rho, kr, dist );\

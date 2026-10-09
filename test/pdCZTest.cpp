@@ -529,6 +529,51 @@ TEST_F(pdCZTest, CalcNextUW_KappaIsZero)
   EXPECT_NEAR( 2*sqrt(3), nextuwd.e[pdW], 1e-12 );
 }
 
+class pdCZAutoUpdateRefTest : public pdCZTest {
+ protected:
+  // the COM-centered frame of a robot heading along the world x axis
+  // (theta = -pi/2, U = x, W = y), at rest at (0.03, 0.01), with the
+  // left foot 0.1 m ahead of the right one
+  void SetStaggeredStance() {
+    pdCZSetKappa( &cz, 0 );
+    pdCZSetTheta( &cz, -zPI_2 );
+    pdCZHrzTheta( pdCZHrzPtr( &cz ) ) = -zPI_2;
+    zVec2DCreate( pdCZHrzPos( pdCZHrzPtr( &cz ) ), 0.03, 0.01 );
+    pdCZRefCOMX( &cz ) = 0.03;
+    pdCZRefCOMY( &cz ) = 0.01;
+    zVec3DCreate( &lf, 0.1,  0.05, 0 );
+    zVec3DCreate( &rf, 0.0, -0.05, 0 );
+    zVec3DCreate( &comd, 0, 0, 0.26 );
+  }
+  zVec3D lf, rf, comd;
+  double thetad;
+};
+
+TEST_F(pdCZAutoUpdateRefTest, FollowsCOMLongitudinally)
+{
+  SetStaggeredStance();
+  pdCZSetSoleCU( &cz, 0.01 );
+  pdCZAutoUpdateRef( &cz, &lf, &rf, &comd, &thetad );
+  // lateral: the midpoint of the feet; longitudinal: the reference COM
+  EXPECT_NEAR( 0.03, comd.c.x, 1e-12 );
+  EXPECT_NEAR( 0.0,  comd.c.y, 1e-12 );
+  EXPECT_NEAR( 0.26, comd.c.z, 1e-12 );
+  EXPECT_NEAR( -zPI_2, thetad, 1e-12 );
+}
+
+TEST_F(pdCZAutoUpdateRefTest, MidFeet)
+{
+  SetStaggeredStance();
+  pdCZSetSoleCU( &cz, 0.01 );
+  pdCZAutoUpdateRefMidFeet( &cz, &lf, &rf, &comd, &thetad );
+  // both axes: the midpoint of the sole centers, 0.01 m ahead of the
+  // foot frames
+  EXPECT_NEAR( 0.06, comd.c.x, 1e-12 );
+  EXPECT_NEAR( 0.0,  comd.c.y, 1e-12 );
+  EXPECT_NEAR( 0.26, comd.c.z, 1e-12 );
+  EXPECT_NEAR( -zPI_2, thetad, 1e-12 );
+}
+
 TEST_F(pdCZTest, CalcNextUW_KappaIsNotZero)
 {
   zVec2D refuw, nextuwd;

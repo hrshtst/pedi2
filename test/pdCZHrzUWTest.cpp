@@ -24,6 +24,7 @@ class pdCZHrzUWTest : public testing::Test {
     pdCZHrzUWSetKr( &uw, 9 );
     pdCZHrzUWSetDist( &uw, 10 );
     pdCZHrzUWSetKappa( &uw, 11 );
+    pdCZHrzUWSetSoleCU( &uw, 17 );
     uw._vert_num = 12;
     uw._vrt = NULL;
     pdCZHrzUWZMPU( &uw ) = 13;
@@ -71,6 +72,7 @@ TEST_F(pdCZHrzUWTest, Init)
   EXPECT_EQ( 0, pdCZHrzUWKr( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWDist( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWKappa( &uw ) );
+  EXPECT_EQ( 0, pdCZHrzUWSoleCU( &uw ) );
   EXPECT_EQ( &vrt, uw._vrt );
   EXPECT_EQ( &vrt.zeta, uw._u._zeta );
   EXPECT_EQ( &vrt.zeta, uw._w._zeta );
@@ -100,6 +102,7 @@ TEST_F(pdCZHrzUWTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzUWKr( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWDist( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWKappa( &uw ) );
+  EXPECT_EQ( 0, pdCZHrzUWSoleCU( &uw ) );
   EXPECT_EQ( NULL, uw._vrt );
   EXPECT_EQ( NULL, uw._u._zeta );
   EXPECT_EQ( NULL, uw._w._zeta );

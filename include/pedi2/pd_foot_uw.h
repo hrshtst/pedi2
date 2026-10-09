@@ -49,6 +49,7 @@ __PEDI2_EXPORT void pdFootUWDestroy(pdFootUW *fuw);
 #define pdFootUWKappa(f)   pdCZHrzUWKappa( pdFootUWCZPtr(f) )
 #define pdFootUWDist(f)    pdCZHrzUWDist( pdFootUWCZPtr(f) )
 #define pdFootUWZeta(f)    pdCZHrzUWZeta( pdFootUWCZPtr(f) )
+#define pdFootUWSoleCU(f)  pdCZHrzUWSoleCU( pdFootUWCZPtr(f) )
 
 /* calculation method */
 #define pdFootUWCalcRegZMP(f,d,v,z) pdCZHrzUWCalcRegZMP( pdFootUWCZPtr(f), d, v, z )

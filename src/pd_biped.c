@@ -49,7 +49,7 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
 {
   zVec3D v;
   double foot_dist, com_height;
-  double s, c, d, x, y, theta;
+  double s, c, d, u, x, y, theta;
   double offset;
 
   offset = zPI_2;
@@ -67,11 +67,15 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
     biped->cmd->zd = com_height;
   }
   pdCZSetDist( pdBipedCZPtr(biped), foot_dist );
+  pdCZSetSoleCU( pdBipedCZPtr(biped), biped->cmd->sole_cu );
   theta = biped->cmd->thetad;
   zSinCos( theta, &s, &c );
   d = 0.5 * foot_dist;
   x = state->com_pos.c.x;
   y = state->com_pos.c.y;
+  /* the heading (forward) direction is (-s,c); the feet are placed so
+   * that the midpoint of their sole centers lies under the COM */
+  u = biped->cmd->sole_cu;
   biped->cmd->xd = x;
   biped->cmd->yd = y;
   biped->cmd->xdd = biped->cmd->xd;
@@ -87,14 +91,14 @@ void _pdBipedPoseInit(pdBiped *biped, pdState *state)
   v.c.x = theta + offset;
   zVec3DCopy( &v, pdBipedRefTorsoAtt( biped ) );
 
-  zVec3DCreate( &v, x-d*c, y-d*s, 0 );
+  zVec3DCreate( &v, x-d*c+u*s, y-d*s-u*c, 0 );
   zVec3DCopy( &v, pdBipedRefLFPos( biped ) );
 
   zVec3DCopy( &state->lf_att, &v );
   v.c.x = theta + offset;
   zVec3DCopy( &v, pdBipedRefLFAtt( biped ) );
 
-  zVec3DCreate( &v, x+d*c, y+d*s, 0 );
+  zVec3DCreate( &v, x+d*c+u*s, y+d*s-u*c, 0 );
   zVec3DCopy( &v, pdBipedRefRFPos( biped ) );
 
   zVec3DCopy( &state->rf_att, &v );
@@ -124,7 +128,7 @@ void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, 
   zVec3D *ref_stance_pos, *ref_stance_att, *ref_swing_pos, *ref_swing_att;
   pdFoot *stance_foot, *swing_foot;
   double foot_dist, com_height;
-  double s, c, x, y, theta;
+  double s, c, x, y, fx, fy, theta;
   double swing_x, swing_y;
   double offset;
 
@@ -164,10 +168,15 @@ void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, 
     biped->cmd->zd = com_height;
   }
   pdCZSetDist( pdBipedCZPtr(biped), foot_dist );
+  pdCZSetSoleCU( pdBipedCZPtr(biped), biped->cmd->sole_cu );
   theta = biped->cmd->thetad;
   zSinCos( theta, &s, &c );
-  x = stance_pos->c.x;
-  y = stance_pos->c.y;
+  fx = stance_pos->c.x;
+  fy = stance_pos->c.y;
+  /* the desired COM above the stance sole center, the sole-center
+   * offset ahead of the foot frame along the heading (-s,c) */
+  x = fx - biped->cmd->sole_cu * s;
+  y = fy + biped->cmd->sole_cu * c;
   biped->cmd->xd = x;
   biped->cmd->yd = y;
   biped->cmd->xdd = biped->cmd->xd;
@@ -176,11 +185,11 @@ void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, 
   /* the swing foot hovers above its nominal offset, following the
    * convention rf = lf + dist*(c,s) of _pdBipedPoseInit */
   if( stance == PD_FOOT_LEFT ){
-    swing_x = x + foot_dist * c;
-    swing_y = y + foot_dist * s;
+    swing_x = fx + foot_dist * c;
+    swing_y = fy + foot_dist * s;
   } else {
-    swing_x = x - foot_dist * c;
-    swing_y = y - foot_dist * s;
+    swing_x = fx - foot_dist * c;
+    swing_y = fy - foot_dist * s;
   }
 
   zVec3DCreate( &v, x, y, com_height );
@@ -191,7 +200,7 @@ void _pdBipedSingleSupportPoseInit(pdBiped *biped, pdState *state, byte stance, 
   v.c.x = theta + offset;
   zVec3DCopy( &v, pdBipedRefTorsoAtt( biped ) );
 
-  zVec3DCreate( &v, x, y, 0 );
+  zVec3DCreate( &v, fx, fy, 0 );
   zVec3DCopy( &v, ref_stance_pos );
   zVec3DCopy( &v, pdFootRefPos( stance_foot ) );
   zVec3DCopy( &v, pdFootDesPos( stance_foot ) );
@@ -460,6 +469,7 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
   pdCZSetRefVelU( pdBipedCZPtr( biped ), biped->cmd->vud );
   pdCZSetRefVelW( pdBipedCZPtr( biped ), biped->cmd->vwd );
   pdCZSetDist( pdBipedCZPtr( biped ), biped->cmd->dist );
+  pdCZSetSoleCU( pdBipedCZPtr( biped ), biped->cmd->sole_cu );
   if( biped->mode.trymove ){
     pdCZSetRho( pdBipedCZPtr(biped), 1.0 );
     if( !biped->mode.stepping ) {
@@ -484,7 +494,10 @@ void _pdBipedModifyCommand(pdBiped *biped, pdState *state)
     pdCZSetDist( pdBipedCZPtr( biped ), ref_dist );
   }
   if( !biped->mode.balancing ){
-    pdCZAutoUpdateRef( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
+    if( !zIsTiny( biped->cmd->midref ) )
+      pdCZAutoUpdateRefMidFeet( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
+    else
+      pdCZAutoUpdateRef( pdBipedCZPtr(biped), &state->lf_pos, &state->rf_pos, &pd, &biped->cmd->thetad );
     biped->cmd->xd = pd.e[zX];
     biped->cmd->yd = pd.e[zY];
   }

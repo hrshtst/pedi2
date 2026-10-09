@@ -94,6 +94,7 @@ __PEDI2_EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZKr(cz)        pdCZHrzKr( pdCZHrzPtr(cz) )
 #define pdCZDist(cz)      pdCZHrzDist( pdCZHrzPtr(cz) )
 #define pdCZKappa(cz)     pdCZHrzKappa( pdCZHrzPtr(cz) )
+#define pdCZSoleCU(cz)    pdCZHrzSoleCU( pdCZHrzPtr(cz) )
 #define pdCZRefPosUW(cz)  pdCZHrzRefPosUW( pdCZHrzPtr(cz) )
 #define pdCZRefPosU(cz)   pdCZHrzRefPosU( pdCZHrzPtr(cz) )
 #define pdCZRefPosW(cz)   pdCZHrzRefPosW( pdCZHrzPtr(cz) )
@@ -184,6 +185,7 @@ __PEDI2_EXPORT void pdCZDestroy(pdCZ *cz);
 #define pdCZSetKr(cz,k)            pdCZHrzSetKr( pdCZHrzPtr(cz), k )
 #define pdCZSetDist(cz,d)          pdCZHrzSetDist( pdCZHrzPtr(cz), d )
 #define pdCZSetKappa(cz,k)         pdCZHrzSetKappa( pdCZHrzPtr(cz), k )
+#define pdCZSetSoleCU(cz,c)        pdCZHrzSetSoleCU( pdCZHrzPtr(cz), c )
 #define pdCZSetRefPosUW(cz,ud,wd) pdCZHrzSetRefPosUW( pdCZHrzPtr(cz), ud, wd )
 #define pdCZSetRefPosUWVec(cz,pd) pdCZHrzSetRefPosUWVec( pdCZHrzPtr(cz), pd )
 #define pdCZSetRefPosU(cz,ud)     pdCZHrzSetRefPosU( pdCZHrzPtr(cz), ud )
@@ -212,6 +214,12 @@ __PEDI2_EXPORT void pdCZCalcNextUW(pdCZ *cz, zVec2D *refuw, zVec2D *nextuwd);
 __PEDI2_EXPORT void pdCZUpdate(pdCZ *cz, zVec3D *com, zVec3D *vel, zVec3D *acc, zVec3D *zmp, double fz, zVec3D *ef, double theta, zLoop3D *sr);
 __PEDI2_EXPORT void pdCZAutoUpdateRef_old(pdCZ *cz, zVec3D *comd, double *thetad);
 __PEDI2_EXPORT void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
+/* the standing-mode counterpart of pdCZAutoUpdateRef: the reference is
+ * regulated to the midpoint of the sole centers (the foot frames
+ * shifted by the sole-center offset along the heading) along the
+ * longitudinal axis as well, instead of following the COM; the feet
+ * are assumed to be aligned with the heading (zero curvature) */
+__PEDI2_EXPORT void pdCZAutoUpdateRefMidFeet(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad);
 
 /* output method */
 __PEDI2_EXPORT void pdCZFWrite(FILE *fp, pdCZ *cz);

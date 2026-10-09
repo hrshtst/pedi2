@@ -74,6 +74,12 @@ void pdFootUWCalcRefPos(pdFootUW *fuw, zVec2D *delta, zVec2D *vel, zVec2D *regzm
   if( pdFootUWSign( fuw ) * dr < 0 )
     dr = 0;
   zVec2DCat( regzmp, dr, &e, refpos );
+  /* the target is the sole center: the foot frame lands behind it by
+   * the sole-center offset along the foot's forward axis */
+  if( !zIsTiny( pdFootUWSoleCU( fuw ) ) ){
+    refpos->e[pdU] -= pdFootUWSoleCU( fuw ) * cos( phi );
+    refpos->e[pdW] -= pdFootUWSoleCU( fuw ) * sin( phi );
+  }
 }
 
 void pdFootUWCalcCOMRefPos(zVec2D *lf_pos, zVec2D *rf_pos, zVec2D *ref_pos)

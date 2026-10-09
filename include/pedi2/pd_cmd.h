@@ -6,7 +6,7 @@
 
 __BEGIN_DECLS
 
-#define PD_CMD_ENTRY_NUM 39
+#define PD_CMD_ENTRY_NUM 41
 typedef union{
   struct{
     double qu1, qu2;
@@ -24,6 +24,14 @@ typedef union{
     double rfkx, rfky, rfkz;
     double rfcx, rfcy, rfcz;
     double lfh, rfh;
+    /* standing mode: a nonzero midref regulates the COM reference to
+     * the midpoint of the sole centers along both horizontal axes
+     * (the default reference update follows the COM longitudinally,
+     * as walking needs); sole_cu is the offset of the sole center from
+     * the foot frame along the foot's forward axis, which also places
+     * the initial stance and the default foot landing at the sole
+     * centers (zero: the foot frames) */
+    double midref, sole_cu;
   };
   double entry[PD_CMD_ENTRY_NUM];
 } pdCmd;

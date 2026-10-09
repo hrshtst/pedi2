@@ -196,6 +196,26 @@ TEST_F(pdFootUWTest, CalcRefPos_KappaIsNotZero)
   EXPECT_NEAR( 1.0, refpos.e[pdW], 1e-12 );
 }
 
+TEST_F(pdFootUWTest, CalcRefPos_SoleCenter)
+{
+  zVec2D delta, vel, regzmp, refpos;
+
+  pdCZHrzUWSetKappa( &czuw, 0 );
+  pdCZHrzUWSetDist( &czuw, 1 );
+  pdCZHrzUWSetSoleCU( &czuw, 0.1 );
+
+  zVec2DCreate( &delta, 0, 2*sqrt(3) );
+  zVec2DCreate( &vel, 0, 0 );
+  zVec2DCreate( &regzmp, 2, 1 );
+  // the sole center lands on the target, the foot frame behind it
+  pdFootUWCalcRefPos( &lf, &delta, &vel, &regzmp, &refpos );
+  EXPECT_NEAR( 1.9,           refpos.e[pdU], 1e-12 );
+  EXPECT_NEAR( 2*sqrt(3)+0.5, refpos.e[pdW], 1e-12 );
+  pdFootUWCalcRefPos( &rf, &delta, &vel, &regzmp, &refpos );
+  EXPECT_NEAR( 1.9, refpos.e[pdU], 1e-12 );
+  EXPECT_NEAR( 1.0, refpos.e[pdW], 1e-12 );
+}
+
 TEST_F(pdFootUWTest, Update)
 {
   zVec2D delta, vel;

@@ -271,6 +271,26 @@ void pdCZAutoUpdateRef(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, dou
   *thetad = pdCZTheta(cz) + delta_theta;
 }
 
+void pdCZAutoUpdateRefMidFeet(pdCZ *cz, zVec3D *lfpos, zVec3D *rfpos, zVec3D *comd, double *thetad)
+{
+  zVec2D lfxy, lfuw;
+  zVec2D rfxy, rfuw;
+  zVec2D nextxyd, nextuwd;
+
+  /* the lateral reference and the heading as in pdCZAutoUpdateRef */
+  pdCZAutoUpdateRef( cz, lfpos, rfpos, comd, thetad );
+  zVec2DCreate( &nextxyd, comd->c.x, comd->c.y );
+  pdCZHrzXformXYtoUW( pdCZHrzPtr(cz), &nextxyd, &nextuwd );
+  /* the longitudinal reference at the midpoint of the sole centers */
+  zVec2DCreate( &lfxy, lfpos->c.x, lfpos->c.y );
+  pdCZHrzXformXYtoUW( pdCZHrzPtr(cz), &lfxy, &lfuw );
+  zVec2DCreate( &rfxy, rfpos->c.x, rfpos->c.y );
+  pdCZHrzXformXYtoUW( pdCZHrzPtr(cz), &rfxy, &rfuw );
+  nextuwd.e[pdU] = 0.5 * ( lfuw.e[pdU] + rfuw.e[pdU] ) + pdCZSoleCU(cz);
+  pdCZHrzXformUWtoXY( pdCZHrzPtr(cz), &nextuwd, &nextxyd );
+  zVec3DCreate( comd, nextxyd.c.x, nextxyd.c.y, comd->c.z );
+}
+
 void pdCZFWrite(FILE *fp, pdCZ *cz)
 {
   /* for debug */

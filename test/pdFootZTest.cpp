@@ -36,6 +36,16 @@ class pdFootZTest : public testing::Test {
     rf._vert_num = 50;
   }
 
+  // whether a loop has a vertex at (u,w)
+  bool LoopHasVert(zLoop3D *loop, double u, double w) {
+    zLoop3DCell *cp;
+
+    zListForEach( loop, cp )
+      if( zIsTiny( cp->data->e[pdU] - u ) && zIsTiny( cp->data->e[pdW] - w ) )
+        return true;
+    return false;
+  }
+
   // zVec3DList lsr, rsr;
   pdCZVrt vrt;
   pdCZHrzUW czuw;
@@ -231,6 +241,33 @@ TEST_F(pdFootZTest, SetSR_None)
   pdFootZSetSR( &lf, v, 3 );
   EXPECT_TRUE( pdFootZIsSRSet( &lf ) );
   EXPECT_EQ( 3, lf._vert_num );
+}
+
+TEST_F(pdFootZTest, SetSR_Degenerate)
+{
+  zVec3D v[3];
+
+  // edge contact: collinear vertices give the loop of the two extremes
+  zVec3DCreate( &v[0], -0.04, 0.1, 0 );
+  zVec3DCreate( &v[1],  0.0,  0.1, 0 );
+  zVec3DCreate( &v[2],  0.04, 0.1, 0 );
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_TRUE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( 2, zListSize( pdFootZSR(&lf) ) );
+  EXPECT_TRUE( LoopHasVert( pdFootZSR(&lf), -0.04, 0.1 ) );
+  EXPECT_TRUE( LoopHasVert( pdFootZSR(&lf),  0.04, 0.1 ) );
+  // the loop is rebuilt, not appended to
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_EQ( 2, zListSize( pdFootZSR(&lf) ) );
+  // corner contact: a single vertex
+  pdFootZSetSR( &lf, &v[2], 1 );
+  EXPECT_TRUE( pdFootZIsSRSet( &lf ) );
+  EXPECT_EQ( 1, zListSize( pdFootZSR(&lf) ) );
+  EXPECT_TRUE( LoopHasVert( pdFootZSR(&lf), 0.04, 0.1 ) );
+  // a planar set again
+  zVec3DCreate( &v[1], 0.0, 0.15, 0 );
+  pdFootZSetSR( &lf, v, 3 );
+  EXPECT_EQ( 3, zListSize( pdFootZSR(&lf) ) );
 }
 
 TEST_F(pdFootZTest, FindIntersection)
@@ -540,6 +577,42 @@ TEST_F(pdFootZTest, FindInnerPoint_ToeEdgeRoundOff)
   EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
 }
 
+TEST_F(pdFootZTest, FindInnerPoint_EdgeAndCorner)
+{
+  zVec3D v[2], p;
+  zVec2D zmp;
+
+  // the left foot riding its inner side edge, along the U axis
+  zVec3DCreate( &v[0], -0.04, 0.1, 0.0 );
+  zVec3DCreate( &v[1],  0.04, 0.1, 0.0 );
+  pdFootZSetSR( &lf, v, 2 );
+  zVec2DCreate( &zmp, 0.01, 0.1 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
+  EXPECT_NEAR( 0.01, p.c.x, 1e-12 );
+  EXPECT_NEAR( 0.1,  p.c.y, 1e-12 );
+  zVec2DCreate( &zmp, 0.05, 0.1 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
+
+  // the left foot riding its toe edge, across the U axis: the inner
+  // toe corner, as on the flat sole
+  zVec3DCreate( &v[0], 0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[1], 0.04, 0.15, 0.0 );
+  pdFootZSetSR( &lf, v, 2 );
+  zVec2DCreate( &zmp, 0.04, 0.12 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
+  EXPECT_NEAR( 0.04, p.c.x, 1e-12 );
+  EXPECT_NEAR( 0.1,  p.c.y, 1e-12 );
+
+  // the left foot standing on its inner toe corner
+  pdFootZSetSR( &lf, v, 1 );
+  zVec2DCreate( &zmp, 0.04, 0.1 );
+  EXPECT_EQ( 1, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
+  EXPECT_NEAR( 0.04, p.c.x, 1e-12 );
+  EXPECT_NEAR( 0.1,  p.c.y, 1e-12 );
+  zVec2DCreate( &zmp, 0.03, 0.1 );
+  EXPECT_EQ( 0, pdFootZFindInnerPoint( &lf, &zmp, &p ) );
+}
+
 TEST_F(pdFootZTest, CalcFootPhase_ToeEdgeRoundOff)
 {
   zVec3D v[4];
@@ -615,6 +688,38 @@ TEST_F(pdFootZTest, CalcFootPhase_SingleSupportLeft)
   zVec2DCreate( &zmp,   0, 0.07 );
   EXPECT_NEAR( 1, pdFootZCalcFootPhase( &lf, &delta, &vel, &zmp ), 1e-12 );
   EXPECT_NEAR( 0, pdFootZCalcFootPhase( &rf, &delta, &vel, &zmp ), 1e-12 );
+}
+
+TEST_F(pdFootZTest, CalcFootPhase_EdgeAndCorner)
+{
+  zVec3D v[4];
+  zVec2D delta, vel, zmp;
+  double phase;
+
+  // the left foot of CalcFootPhase_SingleSupportLeft, with the ZMP
+  // back on its inner edge
+  zVec3DCreate( &v[0],  0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[1], -0.04, 0.1,  0.0 );
+  zVec3DCreate( &v[2], -0.04, 0.15, 0.0 );
+  zVec3DCreate( &v[3],  0.04, 0.15, 0.0 );
+  pdFootZSetSR( &lf, v, 4 );
+  pdCZVrtZeta( &vrt ) = 2;
+  pdCZHrzUWSetQ1W( &czuw, 1 );
+  pdCZHrzUWSetQ2W( &czuw, 1 );
+  zVec2DCreate( &delta, 0, 0.02 );
+  zVec2DCreate( &vel,   0, -0.1 );
+  zVec2DCreate( &zmp,   0.04, 0.1 );
+  phase = pdFootZCalcFootPhase( &lf, &delta, &vel, &zmp );
+  EXPECT_NEAR( 1, phase, 1e-12 );
+
+  // riding the inner edge or the inner toe corner alone gives the
+  // same phase as the flat sole
+  pdFootZSetSR( &lf, v, 2 );
+  ASSERT_EQ( 2, zListSize( pdFootZSR(&lf) ) );
+  EXPECT_NEAR( phase, pdFootZCalcFootPhase( &lf, &delta, &vel, &zmp ), 1e-12 );
+  pdFootZSetSR( &lf, v, 1 );
+  ASSERT_EQ( 1, zListSize( pdFootZSR(&lf) ) );
+  EXPECT_NEAR( phase, pdFootZCalcFootPhase( &lf, &delta, &vel, &zmp ), 1e-12 );
 }
 
 TEST_F(pdFootZTest, CalcFootPhase_OrthogonalSRRight)

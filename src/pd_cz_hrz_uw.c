@@ -47,7 +47,10 @@ void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num)
     zVec3DDataRewind( pdCZHrzUWSRVert(hrz) );
     for( i=0; i<num; i++ )
       zVec3DDataAdd( pdCZHrzUWSRVert(hrz), &p[i] );
-    zVec3DDataConvexHull2D( pdCZHrzUWSRVert(hrz), pdCZHrzUWSR(hrz) );
+    /* rebuilt from scratch; edge and corner contacts give degenerate
+     * loops, which the convex-hull routine would reject */
+    zLoop3DDestroy( pdCZHrzUWSR(hrz) );
+    pdSupportLoop( pdCZHrzUWSRVert(hrz), pdCZHrzUWSR(hrz) );
   }
   hrz->_vert_num = num;
 }

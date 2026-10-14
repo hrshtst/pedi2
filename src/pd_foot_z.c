@@ -45,7 +45,10 @@ void pdFootZSetSR(pdFootZ *f, zVec3D p[], int num)
     zVec3DDataRewind( pdFootZSRVert( f ) );
     for( i=0; i<num; i++ )
       zVec3DDataAdd( pdFootZSRVert( f ), &p[i] );
-    zVec3DDataConvexHull2D( pdFootZSRVert( f ), pdFootZSR( f ) );
+    /* rebuilt from scratch; edge and corner contacts give degenerate
+     * loops, which the convex-hull routine would reject */
+    zLoop3DDestroy( pdFootZSR( f ) );
+    pdSupportLoop( pdFootZSRVert( f ), pdFootZSR( f ) );
   }
   f->_vert_num = num;
 }

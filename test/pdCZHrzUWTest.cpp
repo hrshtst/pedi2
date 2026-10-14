@@ -24,6 +24,7 @@ class pdCZHrzUWTest : public testing::Test {
     pdCZHrzUWSetKr( &uw, 9 );
     pdCZHrzUWSetDist( &uw, 10 );
     pdCZHrzUWSetKappa( &uw, 11 );
+    pdCZHrzUWSetSoleCU( &uw, 17 );
     uw._vert_num = 12;
     uw._vrt = NULL;
     pdCZHrzUWZMPU( &uw ) = 13;
@@ -51,6 +52,16 @@ class pdCZHrzUWTest : public testing::Test {
     pdCZHrzUWSetKappa( &uw, 2.0 );
   };
 
+  // whether a loop has a vertex at (u,w)
+  bool LoopHasVert(zLoop3D *loop, double u, double w) {
+    zLoop3DCell *cp;
+
+    zListForEach( loop, cp )
+      if( zIsTiny( cp->data->e[pdU] - u ) && zIsTiny( cp->data->e[pdW] - w ) )
+        return true;
+    return false;
+  };
+
   zVec3DList sr;
   pdCZVrt vrt;
   pdCZHrzUW uw;
@@ -71,6 +82,7 @@ TEST_F(pdCZHrzUWTest, Init)
   EXPECT_EQ( 0, pdCZHrzUWKr( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWDist( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWKappa( &uw ) );
+  EXPECT_EQ( 0, pdCZHrzUWSoleCU( &uw ) );
   EXPECT_EQ( &vrt, uw._vrt );
   EXPECT_EQ( &vrt.zeta, uw._u._zeta );
   EXPECT_EQ( &vrt.zeta, uw._w._zeta );
@@ -100,6 +112,7 @@ TEST_F(pdCZHrzUWTest, Destroy)
   EXPECT_EQ( 0, pdCZHrzUWKr( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWDist( &uw ) );
   EXPECT_EQ( 0, pdCZHrzUWKappa( &uw ) );
+  EXPECT_EQ( 0, pdCZHrzUWSoleCU( &uw ) );
   EXPECT_EQ( NULL, uw._vrt );
   EXPECT_EQ( NULL, uw._u._zeta );
   EXPECT_EQ( NULL, uw._w._zeta );
@@ -290,6 +303,37 @@ TEST_F(pdCZHrzUWTest, SetSR_None)
   EXPECT_EQ( 3, uw._vert_num );
 }
 
+TEST_F(pdCZHrzUWTest, SetSR_Degenerate)
+{
+  zVec3D v[3];
+
+  // edge contact: collinear vertices give the loop of the two extremes
+  zVec3DCreate( &v[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &v[1], 0.2, 0.1, 0 );
+  zVec3DCreate( &v[2], 0.3, 0.1, 0 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_TRUE( pdCZHrzUWIsSRSet( &uw ) );
+  EXPECT_EQ( 2, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.1, 0.1 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.3, 0.1 ) );
+  // the loop is rebuilt, not appended to
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_EQ( 2, zListSize( pdCZHrzUWSR(&uw) ) );
+  pdCZHrzUWSetSR( &uw, v, 2 );
+  EXPECT_EQ( 2, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.1, 0.1 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.2, 0.1 ) );
+  // corner contact: a single vertex
+  pdCZHrzUWSetSR( &uw, v, 1 );
+  EXPECT_TRUE( pdCZHrzUWIsSRSet( &uw ) );
+  EXPECT_EQ( 1, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.1, 0.1 ) );
+  // a planar set again
+  zVec3DCreate( &v[2], 0.3, 0.2, 0 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_EQ( 3, zListSize( pdCZHrzUWSR(&uw) ) );
+}
+
 TEST_F(pdCZHrzUWTest, CheckSimZMPAllStateZero)
 {
   zVec2D delta, vel, zmp;
@@ -385,6 +429,38 @@ TEST_F(pdCZHrzUWTest, SaturationOfZMP)
   pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
   EXPECT_DOUBLE_EQ( 0.2, zmp.e[pdU] );
   EXPECT_DOUBLE_EQ( 0.3, zmp.e[pdW] );
+}
+
+TEST_F(pdCZHrzUWTest, SaturationOfZMPOnEdgeAndCorner)
+{
+  zVec3D v[3];
+  zVec2D delta, vel, zmp_free, zmp;
+
+  SetDefaultPrmVelocityFollow();
+  pdCZVrtUpdateZeta( &vrt, 0.26, 0, 0 );
+  zVec2DCreate( &delta, 0, 0 ); zVec2DCreate( &vel, 1, 1 );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp_free );
+
+  // edge contact along the U axis, off the ZMP without saturation:
+  // the ZMP is projected onto the edge
+  zVec3DCreate( &v[0], -0.2, -0.1, 0 );
+  zVec3DCreate( &v[1],  0.0, -0.1, 0 );
+  zVec3DCreate( &v[2],  0.2, -0.1, 0 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  ASSERT_EQ( 2, zListSize( pdCZHrzUWSR(&uw) ) );
+  ASSERT_LT( -0.2, zmp_free.e[pdU] );
+  ASSERT_GT(  0.2, zmp_free.e[pdU] );
+  ASSERT_LT( -0.1 + 1e-3, zmp_free.e[pdW] );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  EXPECT_NEAR( zmp_free.e[pdU], zmp.e[pdU], 1e-12 );
+  EXPECT_NEAR( -0.1, zmp.e[pdW], 1e-12 );
+
+  // corner contact: the ZMP is pinned on the corner
+  pdCZHrzUWSetSR( &uw, &v[2], 1 );
+  ASSERT_EQ( 1, zListSize( pdCZHrzUWSR(&uw) ) );
+  pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
+  EXPECT_DOUBLE_EQ( 0.2, zmp.e[pdU] );
+  EXPECT_DOUBLE_EQ( -0.1, zmp.e[pdW] );
 }
 
 TEST_F(pdCZHrzUWTest, CalcRegZMP)

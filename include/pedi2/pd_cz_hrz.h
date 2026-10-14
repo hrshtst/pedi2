@@ -49,6 +49,7 @@ __PEDI2_EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzKr(h)       pdCZHrzUWKr( pdCZHrzUWPtr(h) )
 #define pdCZHrzDist(h)     pdCZHrzUWDist( pdCZHrzUWPtr(h) )
 #define pdCZHrzKappa(h)    pdCZHrzUWKappa( pdCZHrzUWPtr(h) )
+#define pdCZHrzSoleCU(h)   pdCZHrzUWSoleCU( pdCZHrzUWPtr(h) )
 #define pdCZHrzSRUW(h)     pdCZHrzUWSR( pdCZHrzUWPtr(h) )
 #define pdCZHrzSRVertUW(h) pdCZHrzUWSRVert( pdCZHrzUWPtr(h) )
 #define pdCZHrzZMPUW(h)    pdCZHrzUWZMP( pdCZHrzUWPtr(h) )
@@ -99,6 +100,7 @@ __PEDI2_EXPORT void pdCZHrzDestroy(pdCZHrz *hrz);
 #define pdCZHrzSetKr(h,k)           pdCZHrzUWSetKr( pdCZHrzUWPtr(h), k )
 #define pdCZHrzSetDist(h,d)         pdCZHrzUWSetDist( pdCZHrzUWPtr(h), d )
 #define pdCZHrzSetKappa(h,k)        pdCZHrzUWSetKappa( pdCZHrzUWPtr(h), k )
+#define pdCZHrzSetSoleCU(h,c)       pdCZHrzUWSetSoleCU( pdCZHrzUWPtr(h), c )
 #define pdCZHrzSetPrm(h,vud,qu1,qu2,vwd,qw1,qw2,rho,kr,dist,kappa) \
   pdCZHrzUWSetPrm( pdCZHrzUWPtr(h), vud, qu1, qu2, \
                                     vwd, qw1, qw2, rho, kr, dist, kappa )

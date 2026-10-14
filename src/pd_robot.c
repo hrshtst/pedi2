@@ -373,6 +373,41 @@ zMat3D *pdRobotGetRefAtt(pdRobot *robot, const char *ikcell_name, zMat3D *att){
   return att;
 }
 
+static bool _pdRobotSetIKCellPriority(pdRobot *robot, const char *name, int priority)
+{
+  rkIKCell *cell;
+
+  if( !( cell = pdRobotFindIKCellByName( robot, name ) ) ) return false;
+  if( rkIKCellPriority( cell ) == priority ) return true;
+  return rkChainSetIKCellPriority( pdRobotChain( robot ), cell, priority );
+}
+
+bool pdRobotSetFootIKPriority(pdRobot *robot, byte foot, int pos_priority, int att_priority)
+{
+  if( foot == PD_FOOT_LEFT ){
+    return _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_LF_POS, pos_priority ) &&
+           _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_LF_ATT, att_priority );
+  }
+  return _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_RF_POS, pos_priority ) &&
+         _pdRobotSetIKCellPriority( robot, PD_ROBOT_IKCELL_NAME_RF_ATT, att_priority );
+}
+
+static bool _pdRobotPrioritizeFoot(pdRobot *robot, byte foot, bool on)
+{
+  return pdRobotSetFootIKPriority( robot, foot,
+    on ? PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS : PD_ROBOT_PRIORITY_FOOT_SWING_POS,
+    on ? PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT : PD_ROBOT_PRIORITY_FOOT_SWING_ATT );
+}
+
+bool pdRobotPrioritizeSupportFeet(pdRobot *robot, pdState *state)
+{
+  bool result_lf, result_rf;
+
+  result_lf = _pdRobotPrioritizeFoot( robot, PD_FOOT_LEFT, pdStateLFIsOn( state ) );
+  result_rf = _pdRobotPrioritizeFoot( robot, PD_FOOT_RIGHT, pdStateRFIsOn( state ) );
+  return result_lf && result_rf;
+}
+
 void pdRobotSolveIK(pdRobot *robot, int iter)
 {
   pdRobotGetJointDisAll( robot, robot->disold );
@@ -459,6 +494,59 @@ void pdRobotBipedResetPose(pdRobot *robot, pdBiped *biped, pdState *state, zVec 
   pdModeInit( &biped->mode );
 }
 
+void pdRobotBipedSingleSupportInit(pdRobot *robot, pdBiped *biped, pdState *state, byte stance, double lift_height)
+{
+  pdRobotUpdateState( robot, state );
+  pdBipedSingleSupportPoseInit( biped, state, stance, lift_height );
+  pdRobotBipedSetRefVec( robot, biped );
+  pdRobotSolveIK( robot, 0 );
+  pdRobotGetJointDisAll( robot, robot->disold );
+  pdRobotUpdateState( robot, state );
+}
+
+/* initialize a double-support stance held by the balancing mode: the
+ * COM reference stays at the midpoint of the feet in both horizontal
+ * axes and the robot never steps until commanded (call it after
+ * pdRobotBipedResetPose, which resets the mode) */
+void pdRobotBipedDoubleSupportInit(pdRobot *robot, pdBiped *biped, pdState *state)
+{
+  pdRobotUpdateState( robot, state );
+  pdBipedDoubleSupportPoseInit( biped, state );
+  pdRobotBipedSetRefVec( robot, biped );
+  pdRobotSolveIK( robot, 0 );
+  pdRobotGetJointDisAll( robot, robot->disold );
+  pdRobotUpdateState( robot, state );
+}
+
+void pdRobotBipedResetPoseSingleSupport(pdRobot *robot, pdBiped *biped, pdState *state, zVec dis, byte stance, double lift_height)
+{
+  zVec3D *stance_pos, *swing_pos;
+  double offset;
+
+  pdRobotFK( robot, dis );
+  pdRobotUpdateState( robot, state );
+  zVec3DZero( &state->com_vel );
+  zVec3DZero( &state->com_acc );
+  if( stance == PD_FOOT_LEFT ){
+    stance_pos = &state->lf_pos;
+    swing_pos  = &state->rf_pos;
+  } else {
+    stance_pos = &state->rf_pos;
+    swing_pos  = &state->lf_pos;
+  }
+  stance_pos->c.z = 0;
+  swing_pos->c.z = lift_height;
+  zVec3DCopy( stance_pos, &state->deszmp );
+  state->deszmp.c.z = 0;
+  zVec3DCopy( &state->deszmp, &state->zmp );
+  offset = zPI_2;
+  pdBipedCmd(biped)->thetad = state->torso_att.e[0] - offset;
+  /* initialize the mode before the pose so that the balancing flag set
+   * by the pose initializer survives */
+  pdModeInit( &biped->mode );
+  pdBipedSingleSupportPoseInit( biped, state, stance, lift_height );
+}
+
 void pdRobotBipedSetRefVec(pdRobot *robot, pdBiped *biped)
 {
   pdRobotSetRefCOM( robot, pdBipedRefCOMPos(biped) );
@@ -469,7 +557,12 @@ void pdRobotBipedSetRefVec(pdRobot *robot, pdBiped *biped)
   pdRobotSetRefRFZYX( robot, pdBipedRefRFAtt(biped) );
 }
 
-#define PD_ROBOT_TOL (1.0e-4)
+/* height tolerance for a foot-shape vertex to count as grounded: a
+ * loose 1 mm, so that the small attitude residuals the IK solver
+ * leaves on a loaded sole (a fraction of a degree lifts the corners
+ * by a few tenths of a millimeter) do not flicker the contact */
+#define PD_ROBOT_TOL (1.0e-3)
+
 bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3D *sr)
 {
   int i;
@@ -543,20 +636,16 @@ bool pdRobotSupportRegion(pdRobot *robot, zLoop3D *sr_lf, zLoop3D *sr_rf, zLoop3
       if( !result ) return false;
     }
   }
-  /* supporting region */
+  /* supporting region: the loops are built independently, so that a
+   * failure on one foot does not discard the regions of the other
+   * foot and of the union */
   zLoop3DDestroy( sr_lf ); zListInit( sr_lf );
   zLoop3DDestroy( sr_rf ); zListInit( sr_rf );
   zLoop3DDestroy( sr ); zListInit( sr );
-  if( zVec3DDataSize( &robot->_sr_lf_vert ) > 0 ){
-    if( !zVec3DDataConvexHull2D( &robot->_sr_lf_vert, sr_lf ) ) return false;
-  }
-  if( zVec3DDataSize( &robot->_sr_rf_vert ) > 0 ){
-    if( !zVec3DDataConvexHull2D( &robot->_sr_rf_vert, sr_rf ) ) return false;
-  }
-  if( zVec3DDataSize( &robot->_sr_vert ) > 0 ){
-    if( !zVec3DDataConvexHull2D( &robot->_sr_vert, sr ) ) return false;
-  }
-  return true;
+  result = pdSupportLoop( &robot->_sr_lf_vert, sr_lf ) != NULL;
+  result = pdSupportLoop( &robot->_sr_rf_vert, sr_rf ) && result;
+  result = pdSupportLoop( &robot->_sr_vert, sr ) && result;
+  return result;
 }
 
 void pdRobotUpdateState(pdRobot *robot, pdState *state)

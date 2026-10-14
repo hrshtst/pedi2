@@ -6,6 +6,7 @@ void pdCZHrzUWInit(pdCZHrzUW *hrz, pdCZVrt *vrt)
   pdCZHrzWInit( &hrz->_w, &pdCZHrzUWKappa(hrz), &pdCZVrtZeta(vrt) );
   hrz->_vrt = vrt;
   pdCZHrzUWSetKappa( hrz, 0 );
+  pdCZHrzUWSetSoleCU( hrz, 0 );
   zListInit( pdCZHrzUWSR(hrz) );
   pdCZHrzUWSRVert(hrz)->data.array = NULL;
   hrz->_vert_num = 0;
@@ -19,6 +20,7 @@ void pdCZHrzUWDestroy(pdCZHrzUW *hrz)
   pdCZHrzWDestroy( &hrz->_w );
   hrz->_vrt = NULL;
   pdCZHrzUWSetKappa( hrz, 0 );
+  pdCZHrzUWSetSoleCU( hrz, 0 );
   zLoop3DDestroy( pdCZHrzUWSR(hrz) );
   if( pdCZHrzUWSRVert(hrz)->data.array )
     zVec3DDataDestroy( pdCZHrzUWSRVert(hrz) );
@@ -45,7 +47,10 @@ void pdCZHrzUWSetSR(pdCZHrzUW *hrz, zVec3D p[], int num)
     zVec3DDataRewind( pdCZHrzUWSRVert(hrz) );
     for( i=0; i<num; i++ )
       zVec3DDataAdd( pdCZHrzUWSRVert(hrz), &p[i] );
-    zVec3DDataConvexHull2D( pdCZHrzUWSRVert(hrz), pdCZHrzUWSR(hrz) );
+    /* rebuilt from scratch; edge and corner contacts give degenerate
+     * loops, which the convex-hull routine would reject */
+    zLoop3DDestroy( pdCZHrzUWSR(hrz) );
+    pdSupportLoop( pdCZHrzUWSRVert(hrz), pdCZHrzUWSR(hrz) );
   }
   hrz->_vert_num = num;
 }

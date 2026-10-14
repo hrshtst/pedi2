@@ -16,6 +16,8 @@ typedef struct{
   bool braking;
   bool rotating;
   bool warping;
+  bool balancing; /* holding an intentional stance */
+  bool balancing_both_feet; /* the held stance is on both feet, which a touchdown does not release */
 } pdMode;
 
 __PEDI2_EXPORT void pdModeInit(pdMode *mode);

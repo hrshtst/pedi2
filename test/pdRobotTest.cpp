@@ -26,16 +26,14 @@ class pdRobotTest : public testing::Test {
     rkChainReadZTK( pdRobotChain( &robot ), "model/dummy.ztk" );
   };
 
-  void LoadAndSolveIK() {
+  void LoadAndSolveIKWithLeftFoot(zVec3D *lf_pos, zVec3D *lf_att) {
     char model[] = "model/mighty.ztk";
-    zVec3D com_pos, lf_pos, rf_pos, lh_pos, rh_pos;
-    zVec3D torso_att, lf_att, rf_att, lh_att, rh_att;
+    zVec3D com_pos, rf_pos, lh_pos, rh_pos;
+    zVec3D torso_att, rf_att, lh_att, rh_att;
 
     pdRobotLoad( &robot, model );
     zVec3DCreate( &com_pos,   0.0, 0.0,    0.26  );
     zVec3DCreate( &torso_att, 0.0, 0.0,    0.0   );
-    zVec3DCreate( &lf_pos,    0.0, 0.042,  0.0   );
-    zVec3DCreate( &lf_att,    0.0, 0.0,    0.0   );
     zVec3DCreate( &rf_pos,    0.0, -0.042, 0.0   );
     zVec3DCreate( &rf_att,    0.0, 0.0,    0.0   );
     zVec3DCreate( &lh_pos,    0.0, 0.13,   0.25  );
@@ -44,8 +42,8 @@ class pdRobotTest : public testing::Test {
     zVec3DCreate( &rh_att,   -1.3, -0.005, 0.373 );
     pdRobotSetRefCOM( &robot, &com_pos );
     pdRobotSetRefTorsoZYX( &robot, &torso_att );
-    pdRobotSetRefLFPos( &robot, &lf_pos );
-    pdRobotSetRefLFZYX( &robot, &lf_att );
+    pdRobotSetRefLFPos( &robot, lf_pos );
+    pdRobotSetRefLFZYX( &robot, lf_att );
     pdRobotSetRefRFPos( &robot, &rf_pos );
     pdRobotSetRefRFZYX( &robot, &rf_att );
     pdRobotSetRefLHPos( &robot, &lh_pos );
@@ -53,6 +51,14 @@ class pdRobotTest : public testing::Test {
     pdRobotSetRefLHZYX( &robot, &lh_att );
     pdRobotSetRefRHZYX( &robot, &rh_att );
     pdRobotSolveIK( &robot, 100 );
+  };
+
+  void LoadAndSolveIK() {
+    zVec3D lf_pos, lf_att;
+
+    zVec3DCreate( &lf_pos, 0.0, 0.042, 0.0 );
+    zVec3DCreate( &lf_att, 0.0, 0.0,   0.0 );
+    LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
   };
 
   void SetRandomState() {
@@ -130,6 +136,114 @@ TEST_F(pdRobotTest, Load)
   EXPECT_EQ( 26, pdRobotJointSize( &robot ) );
   EXPECT_EQ( pdRobotJointSize( &robot ), zVecSize( pdRobotJointDis( &robot ) ) );
   EXPECT_EQ( pdRobotJointSize( &robot ), zVecSize( robot.disold ) );
+}
+
+/* Support-region tests: the left sole is posed through the IK to
+ * produce planar, edge, corner, and airborne contact, while the right
+ * sole stays flat on the ground.  The sole footprint spans +-0.036 m
+ * laterally and -0.0426..+0.0564 m longitudinally around the foot
+ * origin with a 0.0092 m thickness, and a vertex counts as grounded
+ * below 1 mm, so a 0.1 rad roll (corner lift 3.6 mm) leaves only the
+ * outer sole edge grounded, and an additional 0.1 rad pitch with the
+ * origin raised to 6 mm leaves only the single lowest corner. */
+
+TEST_F(pdRobotTest, SupportRegionFlatFeet)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate( &lf_att, 0.0, 0.0,   0.0 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_EQ( 4, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_GE( zListSize( &state.sr ), 4 );
+}
+
+TEST_F(pdRobotTest, SupportRegionEdgeContact)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.0 );
+  zVec3DCreate( &lf_att, 0.0, 0.0,   0.1 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  /* the rolled sole degenerates to its outer edge without emptying
+     the flat foot's region or the union */
+  EXPECT_EQ( 2, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_GE( zListSize( &state.sr ), 3 );
+}
+
+TEST_F(pdRobotTest, SupportRegionCornerContact)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.006 );
+  zVec3DCreate( &lf_att, 0.0, 0.1,   0.1 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_EQ( 1, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_GE( zListSize( &state.sr ), 3 );
+}
+
+TEST_F(pdRobotTest, SupportRegionLiftedFoot)
+{
+  zVec3D lf_pos, lf_att;
+
+  pdStateInit( &state );
+  zVec3DCreate( &lf_pos, 0.0, 0.042, 0.02 );
+  zVec3DCreate( &lf_att, 0.0, 0.0,   0.0 );
+  LoadAndSolveIKWithLeftFoot( &lf_pos, &lf_att );
+  pdRobotUpdateState( &robot, &state );
+  EXPECT_EQ( 0, zListSize( &state.sr_lf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr_rf ) );
+  EXPECT_EQ( 4, zListSize( &state.sr ) );
+}
+
+TEST_F(pdRobotTest, SetFootIKPriority)
+{
+  char model[] = "model/mighty.ztk";
+
+  pdRobotLoad( &robot, model );
+  EXPECT_TRUE( pdRobotSetFootIKPriority( &robot, PD_FOOT_LEFT, 9, 8 ) );
+  EXPECT_EQ( 9, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+  EXPECT_EQ( 8, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  EXPECT_TRUE( pdRobotSetFootIKPriority( &robot, PD_FOOT_RIGHT, 7, 6 ) );
+  EXPECT_EQ( 7, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+  EXPECT_EQ( 6, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+}
+
+TEST_F(pdRobotTest, PrioritizeSupportFeet)
+{
+  char model[] = "model/mighty.ztk";
+  zLoop3DCell cell[2];
+  zLoop3DCell *cp;
+
+  pdRobotLoad( &robot, model );
+  pdStateInit( &state );
+  /* right foot on the ground, left foot swinging */
+  zStackPush( &state.sr_rf, &cell[0] );
+  state.lf_pos.c.z = 0.02;
+  EXPECT_TRUE( pdRobotPrioritizeSupportFeet( &robot, &state ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SWING_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SWING_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  /* both feet on the ground */
+  zStackPush( &state.sr_lf, &cell[1] );
+  state.lf_pos.c.z = 0.0;
+  EXPECT_TRUE( pdRobotPrioritizeSupportFeet( &robot, &state ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_LF_ATT ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_POS, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_POS ) ) );
+  EXPECT_EQ( PD_ROBOT_PRIORITY_FOOT_SUPPORT_ATT, rkIKCellPriority( pdRobotFindIKCellByName( &robot, PD_ROBOT_IKCELL_NAME_RF_ATT ) ) );
+  zStackPop( &state.sr_lf, &cp );
+  zStackPop( &state.sr_rf, &cp );
 }
 
 TEST_F(pdRobotTest, JointDis)
@@ -2159,4 +2273,108 @@ TEST_F(pdRobotTest, Print)
     "      Cell Mode: 0x07\n" \
     "       Enabled?: false\n";
   EXPECT_EQ( expected, msg );
+}
+
+TEST_F(pdRobotTest, BipedSingleSupportInit)
+{
+  char model[] = "model/mighty.ztk";
+  zVec vel;
+
+  pdCmdDefaultInit( &cmd );
+  cmd.zd = 0.26;
+  cmd.dist = 0.084;
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  pdRobotBipedSingleSupportInit( &robot, &biped, &state, PD_FOOT_RIGHT, 0.02 );
+
+  EXPECT_NEAR( 0.0, state.rf_pos.c.z, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.02, state.lf_pos.c.z, GTEST_TOL_LOOSE );
+  // the COM settles above the stance-foot center
+  EXPECT_NEAR( state.rf_pos.c.x, state.com_pos.c.x, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( state.rf_pos.c.y, state.com_pos.c.y, GTEST_TOL_LOOSE );
+  // the support region reduces to the stance-foot hull
+  EXPECT_EQ( 0, zListSize( &state.sr_lf ) );
+  EXPECT_GT( zListSize( &state.sr_rf ), 0 );
+  EXPECT_EQ( zListSize( &state.sr_rf ), zListSize( &state.sr ) );
+  EXPECT_TRUE( biped.mode.balancing );
+  // zero joint velocity after initialization
+  vel = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
+  }
+  zVecFree( vel );
+}
+
+TEST_F(pdRobotTest, BipedDoubleSupportInit)
+{
+  char model[] = "model/mighty.ztk";
+  zVec dis, vel;
+  double mx, my;
+
+  pdCmdDefaultInit( &cmd );
+  cmd.zd = 0.26;
+  cmd.dist = 0.084;
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  pdRobotBipedResetPose( &robot, &biped, &state, dis );
+  pdRobotBipedDoubleSupportInit( &robot, &biped, &state );
+
+  EXPECT_NEAR( 0.0, state.lf_pos.c.z, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( 0.0, state.rf_pos.c.z, GTEST_TOL_LOOSE );
+  // the COM and its reference settle above the midpoint of the feet
+  mx = 0.5 * ( state.lf_pos.c.x + state.rf_pos.c.x );
+  my = 0.5 * ( state.lf_pos.c.y + state.rf_pos.c.y );
+  EXPECT_NEAR( mx, state.com_pos.c.x, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( my, state.com_pos.c.y, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( mx, cmd.xd, GTEST_TOL_LOOSE );
+  EXPECT_NEAR( my, cmd.yd, GTEST_TOL_LOOSE );
+  // both soles support
+  EXPECT_GT( zListSize( &state.sr_lf ), 0 );
+  EXPECT_GT( zListSize( &state.sr_rf ), 0 );
+  EXPECT_GT( zListSize( &state.sr ), 0 );
+  EXPECT_TRUE( biped.mode.balancing );
+  EXPECT_TRUE( biped.mode.balancing_both_feet );
+  // zero joint velocity after initialization
+  vel = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointVelAll( &robot, DT, vel );
+  for(int i=0; i<26; i++){
+    ASSERT_DOUBLE_EQ( 0.0, zVecElem(vel,i) );
+  }
+  zVecFree( vel );
+  zVecFree( dis );
+}
+
+TEST_F(pdRobotTest, BipedResetPoseSingleSupport)
+{
+  char model[] = "model/mighty.ztk";
+  zVec dis;
+
+  pdCmdDefaultInit( &cmd );
+  pdStateInit( &state );
+  pdBipedInit( &biped, &cmd, DT );
+  pdRobotInit( &robot );
+  pdRobotLoad( &robot, model );
+  dis = zVecAlloc( pdRobotJointSize( &robot ) );
+  pdRobotGetJointDisAll( &robot, dis );
+  zVecSetElem( dis, 0, -0.6 );
+  zVecSetElem( dis, 1, -0.8 );
+  pdRobotBipedResetPoseSingleSupport( &robot, &biped, &state, dis, PD_FOOT_RIGHT, 0.02 );
+
+  EXPECT_DOUBLE_EQ( 0.0, state.rf_pos.c.z );
+  EXPECT_DOUBLE_EQ( 0.02, state.lf_pos.c.z );
+  // the desired ZMP starts at the stance-foot center on the ground
+  EXPECT_DOUBLE_EQ( state.rf_pos.c.x, state.deszmp.c.x );
+  EXPECT_DOUBLE_EQ( state.rf_pos.c.y, state.deszmp.c.y );
+  EXPECT_DOUBLE_EQ( 0.0, state.deszmp.c.z );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DNorm( &state.com_vel ) );
+  EXPECT_DOUBLE_EQ( 0.0, zVec3DNorm( &state.com_acc ) );
+  EXPECT_TRUE( biped.mode.balancing );
+  zVecFree( dis );
 }

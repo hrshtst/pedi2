@@ -64,7 +64,7 @@ void pdCZHrzUWCalcZMP(pdCZHrzUW *hrz, zVec2D *delta, zVec2D *vel, zVec2D *zmp)
                 pdCZHrzUWCalcSimZMPW( hrz, delta, vel ),
                 pdCZVrtCalcZMP( hrz->_vrt ) );
   if( pdCZHrzUWIsSRSet( hrz ) ){
-    zConvexHull2DClosest( pdCZHrzUWSR(hrz), &p, &cp );
+    pdSupportLoopClosest( pdCZHrzUWSR(hrz), &p, &cp );
     zVec2DCreate( zmp, cp.c.x, cp.c.y );
   } else {
     zVec2DCreate( zmp, p.c.x, p.c.y );

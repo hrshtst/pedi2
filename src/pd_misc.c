@@ -35,3 +35,54 @@ zLoop3D *pdSupportLoop(zVec3DData *vert, zLoop3D *loop)
   zLoop3DDestroy( loop );
   return NULL;
 }
+
+/* the cyclic successor of a cell of a loop */
+static zLoop3DCell *_pdSupportLoopNext(zLoop3D *loop, zLoop3DCell *cell)
+{
+  return zListCellNext( cell ) == zListRoot( loop ) ?
+    zListTail( loop ) : zListCellNext( cell );
+}
+
+/* closest point of a support region to a point in the x-y plane; the
+ * orientation of the loop is the sign of its area, and every edge is
+ * visited */
+double pdSupportLoopClosest(zLoop3D *loop, zVec3D *p, zVec3D *cp)
+{
+  zLoop3DCell *c, *cn;
+  double area = 0, ex, ey, len2, t, qx, qy, d, dmin = HUGE_VAL;
+  bool inside;
+
+  zVec3DCopy( p, cp );
+  if( zListSize( loop ) == 0 ) return 0;
+  /* twice the signed area */
+  zListForEach( loop, c ){
+    cn = _pdSupportLoopNext( loop, c );
+    area += c->data->c.x * cn->data->c.y - cn->data->c.x * c->data->c.y;
+  }
+  inside = zListSize( loop ) >= 3 && area != 0;
+  zListForEach( loop, c ){
+    cn = _pdSupportLoopNext( loop, c );
+    ex = cn->data->c.x - c->data->c.x;
+    ey = cn->data->c.y - c->data->c.y;
+    /* p is outside of the edge */
+    if( ( area > 0 ? 1 : -1 ) *
+        ( ex * ( p->c.y - c->data->c.y ) - ey * ( p->c.x - c->data->c.x ) ) < 0 )
+      inside = false;
+    /* the closest point on the edge */
+    len2 = ex * ex + ey * ey;
+    t = len2 > 0 ?
+      ( ( p->c.x - c->data->c.x ) * ex + ( p->c.y - c->data->c.y ) * ey ) / len2 : 0;
+    t = zLimit( t, 0, 1 );
+    qx = c->data->c.x + t * ex;
+    qy = c->data->c.y + t * ey;
+    if( ( d = sqrt( zSqr( p->c.x - qx ) + zSqr( p->c.y - qy ) ) ) < dmin ){
+      dmin = d;
+      zVec3DCreate( cp, qx, qy, p->c.z );
+    }
+  }
+  if( inside ){
+    zVec3DCopy( p, cp );
+    return 0;
+  }
+  return dmin;
+}

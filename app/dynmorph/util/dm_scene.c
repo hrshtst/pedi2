@@ -1,4 +1,5 @@
 #include "dm_scene.h"
+#include <pedi2/pd_misc.h>
 
 /* scene stuff */
 static rkChain dm_robot;
@@ -154,9 +155,9 @@ static void _dmSupportRegion(void)
   zLoop3DDestroy( &dm_sr_lf ); zListInit( &dm_sr_lf );
   zLoop3DDestroy( &dm_sr_rf ); zListInit( &dm_sr_rf );
   zLoop3DDestroy( &dm_sr ); zListInit( &dm_sr );
-  if( zVec3DDataSize( &sr_lf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_lf_vert, &dm_sr_lf );
-  if( zVec3DDataSize( &sr_rf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_rf_vert, &dm_sr_rf );
-  if( zVec3DDataSize( &sr_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_vert, &dm_sr );
+  if( zVec3DDataSize( &sr_lf_vert ) > 0 ) pdSupportLoop( &sr_lf_vert, &dm_sr_lf );
+  if( zVec3DDataSize( &sr_rf_vert ) > 0 ) pdSupportLoop( &sr_rf_vert, &dm_sr_rf );
+  if( zVec3DDataSize( &sr_vert ) > 0 ) pdSupportLoop( &sr_vert, &dm_sr );
   zVec3DDataDestroy( &sr_lf_vert );
   zVec3DDataDestroy( &sr_rf_vert );
   zVec3DDataDestroy( &sr_vert );

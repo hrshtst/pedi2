@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include <pedi2/pd_cz_hrz_uw.h>
+#include <pedi2/pd_misc.h>
 
 class pdCZHrzUWTest : public testing::Test {
  protected:
@@ -334,6 +335,47 @@ TEST_F(pdCZHrzUWTest, SetSR_Degenerate)
   EXPECT_EQ( 3, zListSize( pdCZHrzUWSR(&uw) ) );
 }
 
+// the loop is the convex hull in the x-y plane, counterclockwise and
+// without vertices on its edges, and its vertices keep their heights
+TEST_F(pdCZHrzUWTest, SetSR_HullInPlane)
+{
+  zVec3D v[8];
+  zLoop3DCell *cp, *cn;
+  double area = 0;
+
+  // two soles side by side, the left one 1 mm higher
+  zVec3DCreate( &v[0], -0.2, -0.1, 0 );
+  zVec3DCreate( &v[1],  0.2, -0.1, 0 );
+  zVec3DCreate( &v[2],  0.2, -0.3, 0 );
+  zVec3DCreate( &v[3], -0.2, -0.3, 0 );
+  zVec3DCreate( &v[4], -0.2,  0.1, 0.001 );
+  zVec3DCreate( &v[5], -0.2,  0.3, 0.001 );
+  zVec3DCreate( &v[6],  0.2,  0.3, 0.001 );
+  zVec3DCreate( &v[7],  0.2,  0.1, 0.001 );
+  pdCZHrzUWSetSR( &uw, v, 8 );
+  ASSERT_EQ( 4, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw),  0.2, -0.3 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw),  0.2,  0.3 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), -0.2,  0.3 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), -0.2, -0.3 ) );
+  zListForEach( pdCZHrzUWSR(&uw), cp ){
+    EXPECT_DOUBLE_EQ( cp->data->c.y > 0 ? 0.001 : 0, cp->data->c.z );
+    cn = zListCellNext( cp ) == zListRoot( pdCZHrzUWSR(&uw) ) ?
+      zListTail( pdCZHrzUWSR(&uw) ) : zListCellNext( cp );
+    area += cp->data->c.x * cn->data->c.y - cn->data->c.x * cp->data->c.y;
+  }
+  EXPECT_NEAR( 2 * 0.4 * 0.6, area, 1e-12 );
+
+  // a set on a line in the x-y plane but spread in height: edge contact
+  zVec3DCreate( &v[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &v[1], 0.2, 0.1, 0.0005 );
+  zVec3DCreate( &v[2], 0.3, 0.1, 0 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_EQ( 2, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.1, 0.1 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.3, 0.1 ) );
+}
+
 TEST_F(pdCZHrzUWTest, CheckSimZMPAllStateZero)
 {
   zVec2D delta, vel, zmp;
@@ -461,6 +503,107 @@ TEST_F(pdCZHrzUWTest, SaturationOfZMPOnEdgeAndCorner)
   pdCZHrzUWCalcZMP( &uw, &delta, &vel, &zmp );
   EXPECT_DOUBLE_EQ( 0.2, zmp.e[pdU] );
   EXPECT_DOUBLE_EQ( -0.1, zmp.e[pdW] );
+}
+
+// a loop of the vertices v[start], v[start+dir], v[start+2*dir], ...
+static void MakeLoop(zLoop3D *loop, zVec3D v[], int n, int start, int dir)
+{
+  zListInit( loop );
+  for( int i=0; i<n; i++ )
+    zLoop3DAdd( loop, &v[( start + dir * i + n * n ) % n] );
+}
+
+// the closest point of a support region to p, at the height of p
+static void ExpectClosest(zLoop3D *loop, double px, double py, double ex, double ey)
+{
+  zVec3D p, cp;
+  double d;
+
+  zVec3DCreate( &p, px, py, 0.26 );
+  d = pdSupportLoopClosest( loop, &p, &cp );
+  EXPECT_NEAR( ex, cp.c.x, 1e-12 ) << "p = (" << px << ", " << py << ")";
+  EXPECT_NEAR( ey, cp.c.y, 1e-12 ) << "p = (" << px << ", " << py << ")";
+  EXPECT_DOUBLE_EQ( 0.26, cp.c.z );
+  EXPECT_NEAR( sqrt( zSqr( px - ex ) + zSqr( py - ey ) ), d, 1e-12 );
+}
+
+// two soles side by side, one corner of each on the outer sides between
+// the corners of the region, with the left sole raised by h: the loop
+// may start anywhere, run either way, and the heights do not matter
+TEST(pdSupportLoopTest, ClosestOnTwoSoles)
+{
+  const double xy[6][2] = {
+    {  0.0495,  0.0799 }, {  0.0495, -0.0100 }, {  0.0495, -0.0820 },
+    { -0.0495, -0.0820 }, { -0.0495,  0.0079 }, { -0.0495,  0.0799 } };
+  const bool left[6] = { true, false, false, false, true, true };
+  const double heights[3] = { 0, 0.0006, 0.03 };
+  zVec3D v[6];
+  zLoop3D loop;
+
+  for( double h : heights ){
+    for( int i=0; i<6; i++ )
+      zVec3DCreate( &v[i], xy[i][0], xy[i][1], left[i] ? h : 0 );
+    for( int start=0; start<6; start++ )
+      for( int dir=-1; dir<=1; dir+=2 ){
+        SCOPED_TRACE( testing::Message() << "h = " << h << ", start = " << start << ", dir = " << dir );
+        MakeLoop( &loop, v, 6, start, dir );
+        ExpectClosest( &loop, 0, -0.0022, 0, -0.0022 ); /* inside */
+        ExpectClosest( &loop, -0.0495, 0.03, -0.0495, 0.03 ); /* on a side */
+        ExpectClosest( &loop, 0.08, 0, 0.0495, 0 );
+        ExpectClosest( &loop, 0.08, 0.1, 0.0495, 0.0799 );
+        ExpectClosest( &loop, -0.0495, -0.2, -0.0495, -0.0820 );
+        zLoop3DDestroy( &loop );
+      }
+  }
+}
+
+// a point outside of two edges on either side of the first vertex
+TEST(pdSupportLoopTest, ClosestOnHexagon)
+{
+  zVec3D v[6];
+  zLoop3D loop;
+
+  for( int i=0; i<6; i++ )
+    zVec3DCreate( &v[i], cos( zPI/3*i ), sin( zPI/3*i ), 0 );
+  for( int start=0; start<6; start++ )
+    for( int dir=-1; dir<=1; dir+=2 ){
+      SCOPED_TRACE( testing::Message() << "start = " << start << ", dir = " << dir );
+      MakeLoop( &loop, v, 6, start, dir );
+      ExpectClosest( &loop, 0.1, -3, 0.1, -sqrt( 3 ) / 2 );
+      zLoop3DDestroy( &loop );
+    }
+}
+
+// corner and edge contact, collinear vertices and no contact
+TEST(pdSupportLoopTest, ClosestOnDegenerateLoops)
+{
+  zVec3D v[3], p, cp;
+  zLoop3D loop;
+
+  zVec3DCreate( &v[0], 0.1, 0.2, 0.001 );
+  MakeLoop( &loop, v, 1, 0, 1 );
+  ExpectClosest( &loop, 0.3, 0.4, 0.1, 0.2 );
+  ExpectClosest( &loop, 0.1, 0.2, 0.1, 0.2 );
+  zLoop3DDestroy( &loop );
+
+  zVec3DCreate( &v[0], 0, 0, 0 );
+  zVec3DCreate( &v[1], 0.2, 0, 0.001 );
+  MakeLoop( &loop, v, 2, 0, 1 );
+  ExpectClosest( &loop, 0.1, 0.05, 0.1, 0 );
+  ExpectClosest( &loop, 0.3, 0.1, 0.2, 0 );
+  ExpectClosest( &loop, 0.1, 0, 0.1, 0 );
+  zLoop3DDestroy( &loop );
+
+  zVec3DCreate( &v[2], 0.1, 0, 0 );
+  MakeLoop( &loop, v, 3, 0, 1 );
+  ExpectClosest( &loop, 0.1, 0.05, 0.1, 0 );
+  ExpectClosest( &loop, -0.1, 0, 0, 0 );
+  zLoop3DDestroy( &loop );
+
+  zListInit( &loop );
+  zVec3DCreate( &p, 0.1, 0.2, 0.26 );
+  EXPECT_EQ( 0, pdSupportLoopClosest( &loop, &p, &cp ) );
+  EXPECT_TRUE( zVec3DEqual( &p, &cp ) );
 }
 
 TEST_F(pdCZHrzUWTest, CalcRegZMP)

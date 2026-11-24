@@ -71,9 +71,9 @@ void find_supporting_region(zVec3D *lfp, zVec3D *lfa, zVec3D *rfp, zVec3D *rfa)
   zLoop3DDestroy( &sr_lf );
   zLoop3DDestroy( &sr_rf );
   zLoop3DDestroy( &sr );
-  if( zVec3DDataSize( &sr_lf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_lf_vert, &sr_lf );
-  if( zVec3DDataSize( &sr_rf_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_rf_vert, &sr_rf );
-  if( zVec3DDataSize( &sr_vert ) > 0 ) zVec3DDataConvexHull2D( &sr_vert, &sr );
+  if( zVec3DDataSize( &sr_lf_vert ) > 0 ) pdSupportLoop( &sr_lf_vert, &sr_lf );
+  if( zVec3DDataSize( &sr_rf_vert ) > 0 ) pdSupportLoop( &sr_rf_vert, &sr_rf );
+  if( zVec3DDataSize( &sr_vert ) > 0 ) pdSupportLoop( &sr_vert, &sr );
 }
 
 void write_sr(zLoop3D *_sr)

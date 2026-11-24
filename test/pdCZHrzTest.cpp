@@ -394,7 +394,7 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRXYtoUW_1)
   zVec3DCreate( &sr_w_vert[2], 2, 4, 0 );
   zVec3DCreate( &sr_w_vert[3], 2, 2, 0 );
   zVec3DDataAssignArrayDirect( &sr_w_data, sr_w_vert, 4 );
-  zVec3DDataConvexHull2D( &sr_w_data, &sr_w );
+  pdSupportLoop( &sr_w_data, &sr_w );
   pdCZHrzSetPos( &hrz, 0, 0 );
   pdCZHrzSetTheta( &hrz, zPI/4 );
 
@@ -424,7 +424,7 @@ TEST_F(pdCZHrzTest, pdCZHrzXformSRXYtoUW_2)
   zVec3DCreate( &sr_w_vert[1], 4, 5, 0 );
   zVec3DCreate( &sr_w_vert[2], 5, 1, 0 );
   zVec3DDataAssignArrayDirect( &sr_w_data, sr_w_vert, 3 );
-  zVec3DDataConvexHull2D( &sr_w_data, &sr_w );
+  pdSupportLoop( &sr_w_data, &sr_w );
   pdCZHrzSetPos( &hrz, 4, 3 );
   pdCZHrzSetTheta( &hrz, zPI/6 );
 

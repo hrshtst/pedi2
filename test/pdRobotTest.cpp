@@ -11,6 +11,45 @@ const double DT = 0.01;
 #define GTEST_TOL 1e-12
 #define GTEST_TOL_LOOSE 1e-03
 
+// the grounded corners of the soles of mighty.ztk with the feet at
+// (0, +-0.042, 0) and no rotation
+static const double kSoleLF[4][3] = {
+  {  0.0564,  0.078, 0.0 }, {  0.0564,  0.006, 0.0 },
+  { -0.0426,  0.006, 0.0 }, { -0.0426,  0.078, 0.0 } };
+static const double kSoleRF[4][3] = {
+  {  0.0564, -0.078, 0.0 }, {  0.0564, -0.006, 0.0 },
+  { -0.0426, -0.006, 0.0 }, { -0.0426, -0.078, 0.0 } };
+
+// expect a support loop to consist of the n vertices v, each once, and
+// to be convex in the x-y plane; the start and the direction of the
+// loop are left to the convex-hull routine
+static void ExpectLoop(zLoop3D *loop, const double v[][3], int n)
+{
+  zLoop3DCell *cp, *cn, *cnn;
+  double turn;
+  int count, sign = 0;
+
+  ASSERT_EQ( n, zListSize( loop ) );
+  for( int i=0; i<n; i++ ){
+    count = 0;
+    zListForEach( loop, cp )
+      if( fabs( cp->data->e[0] - v[i][0] ) < GTEST_TOL_LOOSE &&
+          fabs( cp->data->e[1] - v[i][1] ) < GTEST_TOL_LOOSE &&
+          fabs( cp->data->e[2] - v[i][2] ) < GTEST_TOL_LOOSE ) count++;
+    EXPECT_EQ( 1, count ) << "vertex (" << v[i][0] << ", " << v[i][1]
+                          << ", " << v[i][2] << ")";
+  }
+  zListForEach( loop, cp ){
+    cn = zListCellNext( cp ) == zListRoot( loop ) ? zListTail( loop ) : zListCellNext( cp );
+    cnn = zListCellNext( cn ) == zListRoot( loop ) ? zListTail( loop ) : zListCellNext( cn );
+    turn = ( cn->data->e[0] - cp->data->e[0] ) * ( cnn->data->e[1] - cn->data->e[1] )
+         - ( cn->data->e[1] - cp->data->e[1] ) * ( cnn->data->e[0] - cn->data->e[0] );
+    ASSERT_GT( fabs( turn ), GTEST_TOL_LOOSE * GTEST_TOL_LOOSE ) << "collinear vertices";
+    if( sign == 0 ) sign = turn > 0 ? 1 : -1;
+    EXPECT_GT( sign * turn, 0 ) << "the loop is not convex";
+  }
+}
+
 class pdRobotTest : public testing::Test {
  protected:
   virtual void SetUp() {
@@ -1711,42 +1750,10 @@ TEST_F(pdRobotTest, SupportRegion_Double)
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
   // Left foot
-  ASSERT_EQ( 4, zListSize( &sr_lf ));
-  cp = zListTail( &sr_lf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_lf, kSoleLF, 4 );
 
   // Right foot
-  ASSERT_EQ( 4, zListSize( &sr_rf ));
-  cp = zListTail( &sr_rf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_rf, kSoleRF, 4 );
 
   // Support region
   zVec3D p[4];
@@ -1773,7 +1780,6 @@ TEST_F(pdRobotTest, SupportRegion_Single_Left)
   zVec3D com_pos, lf_pos, rf_pos;
   zVec3D torso_att, lf_att, rf_att;
   zLoop3D sr_lf, sr_rf, sr;
-  zLoop3DCell *cp;
 
   pdRobotLoad( &robot, model );
   zVec3DCreate(   &com_pos, 0.0, 0.0, 0.26 );
@@ -1793,45 +1799,13 @@ TEST_F(pdRobotTest, SupportRegion_Single_Left)
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
 
   // Left foot
-  ASSERT_EQ( 4, zListSize( &sr_lf ));
-  cp = zListTail( &sr_lf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_lf, kSoleLF, 4 );
 
   // Right foot
   ASSERT_EQ( 0, zListSize( &sr_rf ) );
 
   // Support region
-  ASSERT_EQ( 4, zListSize( &sr ));
-  cp = zListTail( &sr );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr, kSoleLF, 4 );
 }
 
 TEST_F(pdRobotTest, SupportRegion_Single_Right)
@@ -1840,7 +1814,6 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   zVec3D com_pos, lf_pos, rf_pos;
   zVec3D torso_att, lf_att, rf_att;
   zLoop3D sr_lf, sr_rf, sr;
-  zLoop3DCell *cp;
 
   pdRobotLoad( &robot, model );
   zVec3DCreate(   &com_pos, 0.0, 0.0, 0.26 );
@@ -1863,42 +1836,10 @@ TEST_F(pdRobotTest, SupportRegion_Single_Right)
   ASSERT_EQ( 0, zListSize( &sr_lf ));
 
   // Right foot
-  ASSERT_EQ( 4, zListSize( &sr_rf ));
-  cp = zListTail( &sr_rf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_rf, kSoleRF, 4 );
 
   // Support region
-  ASSERT_EQ( 4, zListSize( &sr ));
-  cp = zListTail( &sr_rf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr, kSoleRF, 4 );
 }
 
 TEST_F(pdRobotTest, SupportRegion_SingleToDouble)
@@ -1929,43 +1870,11 @@ TEST_F(pdRobotTest, SupportRegion_SingleToDouble)
   pdRobotSolveIK( &robot, 0 );
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
   // Left foot
-  ASSERT_EQ( 4, zListSize( &sr_lf ));
-  cp = zListTail( &sr_lf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_lf, kSoleLF, 4 );
   // Right foot
   ASSERT_EQ( 0, zListSize( &sr_rf ));
   // Support region
-  ASSERT_EQ( 4, zListSize( &sr ));
-  cp = zListTail( &sr );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr, kSoleLF, 4 );
 
   // Double support phase (1st)
   zVec3DCreate( &lf_pos, 0.0,  0.042, 0.0 );
@@ -1979,41 +1888,9 @@ TEST_F(pdRobotTest, SupportRegion_SingleToDouble)
   pdRobotSolveIK( &robot, 0 );
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
   // Left foot
-  ASSERT_EQ( 4, zListSize( &sr_lf ));
-  cp = zListTail( &sr_lf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_lf, kSoleLF, 4 );
   // Right foot
-  ASSERT_EQ( 4, zListSize( &sr_rf ));
-  cp = zListTail( &sr_rf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_rf, kSoleRF, 4 );
   // Support region
   zVec3D p[4];
   zVec3DCreate( &p[0],  0.0564,  0.078, 0.0 );
@@ -2046,41 +1923,9 @@ TEST_F(pdRobotTest, SupportRegion_SingleToDouble)
   // Left foot
   ASSERT_EQ( 0, zListSize( &sr_lf ));
   // Right foot
-  ASSERT_EQ( 4, zListSize( &sr_rf ));
-  cp = zListTail( &sr_rf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_rf, kSoleRF, 4 );
   // Support region
-  ASSERT_EQ( 4, zListSize( &sr ));
-  cp = zListTail( &sr_rf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr, kSoleRF, 4 );
 
   // Double support phase (2nd)
   zVec3DCreate( &lf_pos, 0.0,  0.042, 0.0 );
@@ -2094,41 +1939,9 @@ TEST_F(pdRobotTest, SupportRegion_SingleToDouble)
   pdRobotSolveIK( &robot, 0 );
   pdRobotSupportRegion( &robot, &sr_lf, &sr_rf, &sr );
   // Left foot
-  ASSERT_EQ( 4, zListSize( &sr_lf ));
-  cp = zListTail( &sr_lf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_lf, kSoleLF, 4 );
   // Right foot
-  ASSERT_EQ( 4, zListSize( &sr_rf ));
-  cp = zListTail( &sr_rf );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( 0.0564, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.006, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
-  cp = zListCellNext( cp );
-  EXPECT_NEAR( -0.0426, cp->data->e[0], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( -0.078, cp->data->e[1], GTEST_TOL_LOOSE );
-  EXPECT_NEAR( 0.0, cp->data->e[2], GTEST_TOL_LOOSE );
+  ExpectLoop( &sr_rf, kSoleRF, 4 );
   // Support region
   zVec3DCreate( &p[0],  0.0564,  0.078, 0.0 );
   zVec3DCreate( &p[1],  0.0564, -0.078, 0.0 );

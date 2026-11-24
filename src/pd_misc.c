@@ -4,6 +4,52 @@
  * line or a point), which the convex-hull routine rejects */
 #define PD_SUPPORT_LOOP_DEGENERACY_TOL (1.0e-6)
 
+/* convex hull of a vertex set in the x-y plane, whose vertices are
+ * mapped back to the vertices of the set; the null pointer for a set on
+ * a line in the x-y plane, leaving loop empty */
+static zLoop3D *_pdSupportLoopHull(zVec3DData *vert, zLoop3D *loop)
+{
+  zVec2DData data;
+  zVec2D *proj, *hv;
+  zVec3D **src, *v;
+  zPG2D ch;
+  zLoop3D *ret = NULL;
+  int n, i, j;
+
+  n = zVec3DDataSize( vert );
+  proj = zAlloc( zVec2D, n );
+  src = zAlloc( zVec3D*, n );
+  if( !proj || !src ){
+    ZALLOCERROR();
+    goto TERMINATE;
+  }
+  if( !zVec2DDataInitArray( &data, n ) ) goto TERMINATE;
+  zVec3DDataRewind( vert );
+  for( i=0; ( v = zVec3DDataFetch( vert ) ); i++ ){
+    src[i] = v;
+    zVec2DCreate( &proj[i], v->c.x, v->c.y );
+    zVec2DDataAdd( &data, &proj[i] );
+  }
+  if( zVec2DDataConvexHull( &data, &ch ) ){
+    for( i=0; i<zPG2DVertNum(&ch); i++ ){
+      hv = zPG2DVert(&ch,i);
+      for( j=0; j<n; j++ )
+        if( proj[j].c.x == hv->c.x && proj[j].c.y == hv->c.y ) break;
+      if( j == n || !zLoop3DAdd( loop, src[j] ) ){
+        zLoop3DDestroy( loop );
+        break;
+      }
+    }
+    if( i == zPG2DVertNum(&ch) ) ret = loop;
+    zPG2DDestroy( &ch );
+  }
+  zVec2DDataDestroy( &data );
+ TERMINATE:
+  zFree( proj );
+  zFree( src );
+  return ret;
+}
+
 zLoop3D *pdSupportLoop(zVec3DData *vert, zLoop3D *loop)
 {
   zVec3D *v, *pa, *pb, dir, rel, deviation;
@@ -28,9 +74,10 @@ zLoop3D *pdSupportLoop(zVec3DData *vert, zLoop3D *loop)
     zVec3DOuterProd( &rel, &dir, &deviation );
     if( ( d = zVec3DNorm( &deviation ) ) > dmax ) dmax = d;
   }
-  if( dmax > PD_SUPPORT_LOOP_DEGENERACY_TOL )
-    return zVec3DDataConvexHull2D( vert, loop );
-  /* edge contact */
+  if( dmax > PD_SUPPORT_LOOP_DEGENERACY_TOL &&
+      _pdSupportLoopHull( vert, loop ) ) return loop;
+  /* edge contact, also of a set on a line in the x-y plane but spread
+   * in height */
   if( zLoop3DAdd( loop, pa ) && zLoop3DAdd( loop, pb ) ) return loop;
   zLoop3DDestroy( loop );
   return NULL;

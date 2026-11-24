@@ -335,6 +335,47 @@ TEST_F(pdCZHrzUWTest, SetSR_Degenerate)
   EXPECT_EQ( 3, zListSize( pdCZHrzUWSR(&uw) ) );
 }
 
+// the loop is the convex hull in the x-y plane, counterclockwise and
+// without vertices on its edges, and its vertices keep their heights
+TEST_F(pdCZHrzUWTest, SetSR_HullInPlane)
+{
+  zVec3D v[8];
+  zLoop3DCell *cp, *cn;
+  double area = 0;
+
+  // two soles side by side, the left one 1 mm higher
+  zVec3DCreate( &v[0], -0.2, -0.1, 0 );
+  zVec3DCreate( &v[1],  0.2, -0.1, 0 );
+  zVec3DCreate( &v[2],  0.2, -0.3, 0 );
+  zVec3DCreate( &v[3], -0.2, -0.3, 0 );
+  zVec3DCreate( &v[4], -0.2,  0.1, 0.001 );
+  zVec3DCreate( &v[5], -0.2,  0.3, 0.001 );
+  zVec3DCreate( &v[6],  0.2,  0.3, 0.001 );
+  zVec3DCreate( &v[7],  0.2,  0.1, 0.001 );
+  pdCZHrzUWSetSR( &uw, v, 8 );
+  ASSERT_EQ( 4, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw),  0.2, -0.3 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw),  0.2,  0.3 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), -0.2,  0.3 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), -0.2, -0.3 ) );
+  zListForEach( pdCZHrzUWSR(&uw), cp ){
+    EXPECT_DOUBLE_EQ( cp->data->c.y > 0 ? 0.001 : 0, cp->data->c.z );
+    cn = zListCellNext( cp ) == zListRoot( pdCZHrzUWSR(&uw) ) ?
+      zListTail( pdCZHrzUWSR(&uw) ) : zListCellNext( cp );
+    area += cp->data->c.x * cn->data->c.y - cn->data->c.x * cp->data->c.y;
+  }
+  EXPECT_NEAR( 2 * 0.4 * 0.6, area, 1e-12 );
+
+  // a set on a line in the x-y plane but spread in height: edge contact
+  zVec3DCreate( &v[0], 0.1, 0.1, 0 );
+  zVec3DCreate( &v[1], 0.2, 0.1, 0.0005 );
+  zVec3DCreate( &v[2], 0.3, 0.1, 0 );
+  pdCZHrzUWSetSR( &uw, v, 3 );
+  EXPECT_EQ( 2, zListSize( pdCZHrzUWSR(&uw) ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.1, 0.1 ) );
+  EXPECT_TRUE( LoopHasVert( pdCZHrzUWSR(&uw), 0.3, 0.1 ) );
+}
+
 TEST_F(pdCZHrzUWTest, CheckSimZMPAllStateZero)
 {
   zVec2D delta, vel, zmp;
